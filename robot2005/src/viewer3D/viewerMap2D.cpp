@@ -66,6 +66,7 @@ void Viewer3DCL::drawRobots2D()
     for(unsigned int i=0; i<VIEWER_MAX_ROBOT_NBR; i++) {
         drawRobot2D(i, false);
         if (enableEstimatedDisplay_) drawRobot2D(i, true);
+        drawEstimatedBridges2D((int)i);
     }
 }
 // ---------------------------------------------------------------
@@ -347,6 +348,74 @@ void Viewer3DCL::drawSquatchBall2D(SquatchBall* ball)
     
     gluDeleteQuadric(quad);
 }
+// ---------------------------------------------------------------
+// Viewer3DCL::drawEstimatedBridges2D
+// ---------------------------------------------------------------
+// Dessine un pont virtuel estime par le robot
+// ---------------------------------------------------------------
+void Viewer3DCL::drawEstimatedBridges2D(int robotId)
+{
+    robotData_[robotId].color.setGL(0.2);
+    BridgePosition bridge = robotData_[robotId].estimatedBridge;
+    Millimeter y=0;
+    switch(bridge) {
+    case BRIDGE_POS_BORDURE: 
+        y = TERRAIN_BORDURE_PONT_LARGEUR+TERRAIN_PONT_LARGEUR/2.;
+        drawEstimatedBridges2D(y);  
+        drawEstimatedBridges2D(TERRAIN_Y-y);  
+        break;
+    case BRIDGE_POS_MIDDLE_BORDURE:
+        y = (TERRAIN_BORDURE_PONT_LARGEUR+TERRAIN_PONT_LARGEUR/2.)
+            +TERRAIN_CASE_LARGEUR*0.5;
+        drawEstimatedBridges2D(y);  
+        drawEstimatedBridges2D(TERRAIN_Y-y);  
+        break;
+    case BRIDGE_POS_MIDDLE_CENTER:
+        y = (TERRAIN_BORDURE_PONT_LARGEUR+TERRAIN_PONT_LARGEUR/2.)
+            +TERRAIN_CASE_LARGEUR;
+        drawEstimatedBridges2D(y);  
+        drawEstimatedBridges2D(TERRAIN_Y-y);  
+        break;
+    case BRIDGE_POS_CENTER:
+        y = (TERRAIN_BORDURE_PONT_LARGEUR+TERRAIN_PONT_LARGEUR/2.)
+            +TERRAIN_CASE_LARGEUR*1.5;
+        drawEstimatedBridges2D(y);  
+        drawEstimatedBridges2D(TERRAIN_Y-y);  
+        break;
+    case BRIDGE_POS_UNKNOWN:
+    default:
+        break;
+    }
+}
+
+// ---------------------------------------------------------------
+// Viewer3DCL::drawEstimatedBridges2D
+// ---------------------------------------------------------------
+// Dessine un pont virtuel estime par le robot
+// ---------------------------------------------------------------
+void Viewer3DCL::drawEstimatedBridges2D(Millimeter y)
+{
+    Millimeter largeur=TERRAIN_PONT_LARGEUR;
+    
+    glPushMatrix ();
+    glTranslatef(MARGIN+(5*TERRAIN_CASE_LARGEUR+TERRAIN_BORDURE_LARGEUR)*SCALE, 
+                 MARGIN+(TERRAIN_Y-(y+largeur/2+TERRAIN_BORDURE_PONT_LARGEUR))*SCALE,
+                 0); 
+    
+    glColor3f(COLOR_YELLOW_GRID_2);
+    glBegin(GL_QUADS);
+      glVertex2d(0, 
+                 TERRAIN_BORDURE_PONT_LARGEUR*SCALE);	
+      glVertex2d(0, 
+                 (largeur+TERRAIN_BORDURE_PONT_LARGEUR)*SCALE);
+      glVertex2d(TERRAIN_PONT_LONGUEUR*SCALE, 
+                 (largeur+TERRAIN_BORDURE_PONT_LARGEUR)*SCALE);	
+      glVertex2d(TERRAIN_PONT_LONGUEUR*SCALE, 
+                 (TERRAIN_BORDURE_PONT_LARGEUR)*SCALE); 
+    glEnd();
+    glPopMatrix();
+}
+
 // ---------------------------------------------------------------
 // Viewer3DCL::drawBridges2D
 // ---------------------------------------------------------------

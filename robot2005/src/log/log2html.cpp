@@ -17,6 +17,7 @@
 #include "log.h"
 #include "classConfig.h"
 #include "robotFile.h"
+#include "soundList.h"
 
 static const int LOG_LINK_NBR = 5;
 static int  linkNbr_=0;
@@ -35,6 +36,7 @@ static const char* COLOR_FUNCTION = "CC00FF";
 static const char* COLOR_INFO     = "55AAFF";
 static const char* COLOR_START    = "FFFF00";
 static const char* COLOR_HLI      = "CCFFFF";
+static const char* COLOR_LCD      = "CCFFCC";
 static const char* COLOR_PERIODIC = "FF00FF";
 
 // ---------------------------------------------------------------------------
@@ -90,8 +92,6 @@ void initFilter()
     filter_[LOG_TYPE_SOUND]     = true;
     filter_[LOG_TYPE_POSITION]  = true;
     filter_[LOG_TYPE_MOTOR]     = true;
-    filter_[LOG_TYPE_SKITTLE_SIMU] = true;
-    filter_[LOG_TYPE_CAMERA_SIMU]  = true;
     filter_[LOG_TYPE_PING]      = true;
 
     filterEnvDetector=true;
@@ -228,6 +228,25 @@ void packetToHtml(FILE* htmlFile,
                  0, 
                  "_");
         break;
+    case LOG_TYPE_ROBOT_MODEL:
+        {
+            char txt[30];
+            LogPacketEnumValue* model= (LogPacketEnumValue*)data;
+            if (model->value == 0) {
+                strcpy(txt, "<br><b>Robot Attack<b><br><br>");
+            } else {
+                strcpy(txt, "<br><b>Robot Defence<b><br><br>");
+            }
+            htmlLine(htmlFile,
+                 packetHeader.timeStamp-packetTime,
+                 packetHeader.timeStamp-packetTimeFromStartMatch,
+                 COLOR_START, // type color
+                 "START",
+                 "_",
+                 0, 
+                 txt);
+        }
+        break; 
     case LOG_TYPE_SIMU:
         htmlLine(htmlFile,
                  packetHeader.timeStamp-packetTime,
@@ -393,7 +412,9 @@ void packetToHtml(FILE* htmlFile,
         {
             char txt[255];
             LogPacketEnumValue* sound= (LogPacketEnumValue*)data;
-            sprintf(txt, "Sound: %d", sound->value);
+            sprintf(txt, "Sound: %d, %s", 
+                    sound->value, 
+                    soundList[sound->value].filename);
             // need #include sound.h
 	    // if (sound-> value>= SOUND_NBR) return;
 	    // sprintf(txt, "Sound: %s", soundList[sound->value].filename);
@@ -442,7 +463,7 @@ void packetToHtml(FILE* htmlFile,
                      packetHeader.timeStamp-packetTimeFromStartMatch,
                      COLOR_HLI, // type color
                      "OBSTACLE",
-                     "hli.cpp",
+                     "-",
                      0, 
                      txt);
         }
@@ -458,7 +479,7 @@ void packetToHtml(FILE* htmlFile,
                      packetHeader.timeStamp-packetTimeFromStartMatch,
                      COLOR_HLI, // type color
                      "SKITTLE",
-                     "hli.cpp",
+                     "-",
                      0, 
                      txt);
         }
@@ -475,7 +496,7 @@ void packetToHtml(FILE* htmlFile,
                      packetHeader.timeStamp-packetTimeFromStartMatch,
                      COLOR_HLI, // type color
                      "SUPPORT",
-                     "hli.cpp",
+                     "-",
                      0, 
                      txt);
         }
@@ -492,47 +513,64 @@ void packetToHtml(FILE* htmlFile,
                      packetHeader.timeStamp-packetTimeFromStartMatch,
                      COLOR_HLI, // type color
                      "SUPPORT",
-                     "hli.cpp",
+                     "-",
                      0, 
                      txt);
         }
         break; 
-    case LOG_TYPE_GONIO:
+    case LOG_TYPE_TRAJECTORY:
         {
             char txt[255];
-            LogPacketGonio* gonio= ((LogPacketGonio*)data);
-            sprintf(txt, "Balise %d (%s) detected: dir=%d", 
-		    gonio->baliseId,
-		    "Update log2html.cpp to get the name", // need #include gonio.h
-		    // gonioBalises_[gonio->baliseId].name, 
-		    (int)gonio->pos.t);
+            LogPacketTrajectory* traj= ((LogPacketTrajectory*)data);
+            for(int w=0;w<traj->nbrPt;w++) {
+                sprintf(txt, "pt[%d]=(%d %d)", w,
+                        (int)traj->ptx[w], (int)traj->pty[w]);
+                htmlLine(htmlFile,
+                         packetHeader.timeStamp-packetTime,
+                         packetHeader.timeStamp-packetTimeFromStartMatch,
+                         COLOR_HLI, // type color
+                         "HLI",
+                         "_",
+                         0, 
+                         txt);
+            }
+        }
+    case LOG_TYPE_JACKIN:
+        {
+            LogPacketBoolean* jackin= ((LogPacketBoolean*)data);
             htmlLine(htmlFile,
                      packetHeader.timeStamp-packetTime,
                      packetHeader.timeStamp-packetTimeFromStartMatch,
                      COLOR_HLI, // type color
-                     "GONIO",
-                     "gonio_05.cpp",
+                     "HLI",
+                     "_",
                      0, 
-                     txt);
+                     (jackin->value) ? "START JACK INSERTED": "START JACK EJECTED" );
         }
-        break;
-   case LOG_TYPE_TRAJECTORY:
-   {
-       char txt[255];
-       LogPacketTrajectory* traj= ((LogPacketTrajectory*)data);
-       for(int w=0;w<traj->nbrPt;w++) {
-	   sprintf(txt, "pt[%d]=(%d %d)", w,
-		   (int)traj->ptx[w], (int)traj->pty[w]);
-	   htmlLine(htmlFile,
-		    packetHeader.timeStamp-packetTime,
-		    packetHeader.timeStamp-packetTimeFromStartMatch,
-		    COLOR_HLI, // type color
-		    "HLI",
-		    "_",
-		    0, 
-		    txt);
-       }
-    }
+     case LOG_TYPE_EMERGENCY_STOP:
+        {
+            LogPacketBoolean* esp= ((LogPacketBoolean*)data);
+            htmlLine(htmlFile,
+                     packetHeader.timeStamp-packetTime,
+                     packetHeader.timeStamp-packetTimeFromStartMatch,
+                     COLOR_HLI, // type color
+                     "HLI",
+                     "_",
+                     0, 
+                     (esp->value) ? "EMERGENCY STOP PRESSED": "EMERGENCY STOP RELEASED" );
+        }
+    case LOG_TYPE_LCD:
+        {
+            LogPacketLcd* lcd= ((LogPacketLcd*)data);
+            htmlLine(htmlFile,
+                     packetHeader.timeStamp-packetTime,
+                     packetHeader.timeStamp-packetTimeFromStartMatch,
+                     COLOR_LCD, // type color
+                     "LCD",
+                     "_",
+                     0, 
+                     lcd->txt);
+        }
     default:
         break;		
     }

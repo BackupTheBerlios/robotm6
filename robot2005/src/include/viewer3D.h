@@ -109,6 +109,76 @@ typedef enum ViewerControlButtonId{
 } ViewerControlButtonId;
 static const int CTRL_BTN_NBR_PER_ROBOT=5;
 
+typedef enum TextureId{
+  TEX_LOGO=0, 
+  TEX_LOGO_ISIA,
+  TEX_LOGO_ESSI, 
+  TEX_LOGO_ESINSA, 
+  TEX_ROBOT_SIDE_LEFT,
+  TEX_ROBOT_SIDE_RIGHT,
+  TEX_ROBOT_FRONT, 
+  TEX_ROBOT_BACK, 
+  TEX_ROBOT_TOP, 
+
+  TEX_ATTACK_SIDE_R1,
+  TEX_ATTACK_SIDE_R2,
+  TEX_ATTACK_SIDE_L1,
+  TEX_ATTACK_SIDE_L2,
+  TEX_ATTACK_SIDE_F,
+  TEX_ATTACK_SIDE_R,
+  TEX_ATTACK_TOP,
+
+  TEX_DEFENCE_SIDE_R,
+  TEX_DEFENCE_SIDE_L,
+  TEX_DEFENCE_SIDE_F,
+  TEX_DEFENCE_SIDE_RR,
+  TEX_DEFENCE_TOP,
+
+  TEX_SALLE_SIDE1,
+  TEX_SALLE_SIDE2,
+  TEX_SALLE_SIDE3,
+  TEX_SALLE_SIDE4,
+  TEX_SALLE_PLAFOND,
+
+  TEX_LCD,
+  TEX_BTN_0,
+  TXT_BTN_1,
+  TXT_JACKIN,
+  TXT_JACKOUT,
+  TEX_AU_IN,
+  TEX_AU_OUT,
+  TEX_TEAM_RED,
+  TEX_TEAM_GREEN,
+
+  TEX_BRIDGE0,
+  TEX_BRIDGE1,
+  TEX_SUPPORT0,
+  TEX_SUPPORT1,
+
+  TEX_BTN_PREV_0,
+  TEX_BTN_PREV_1,
+  TEX_BTN_PLAY_0,
+  TEX_BTN_PLAY_1,
+  TEX_BTN_STEP_FORWARD_0,
+  TEX_BTN_STEP_FORWARD_1,
+  TEX_BTN_STEP_BACKWARD_0,
+  TEX_BTN_STEP_BACKWARD_1,
+  TEX_BTN_PAUSE_0,
+  TEX_BTN_PAUSE_1,
+  TEX_BTN_NEXT_0,
+  TEX_BTN_NEXT_1,
+  TEX_BTN_FASTER_0,
+  TEX_BTN_FASTER_1,
+  TEX_BTN_SLOWER_0,
+  TEX_BTN_SLOWER_1,
+  TEX_BTN_REC_START_0,
+  TEX_BTN_REC_START_1,
+  TEX_BTN_REC_STOP_0,
+  TEX_BTN_REC_STOP_1,
+
+  TEX_NBR
+} TextureId;
+
 typedef void (*clickBtnCB)(ViewerControlButtonId id);
 
 typedef struct ViewerMovieDataST {
@@ -131,6 +201,8 @@ struct ViewerRobotData {
     Trajectory       targetTrajectory;
     Trajectory       currentTrajectory;
     ListOfObstacles  obstacles_[OBSTACLE_TYPE_NBR];
+    BridgePosition   estimatedBridge;
+    Point            estimatedSupport[2];
     bool             exist;
     bool             brick;
     int              dead;
@@ -138,7 +210,8 @@ struct ViewerRobotData {
 
     ViewerRobotData() :
 	id(-1), name(""), lcd("Booting..."), model(ROBOT_MODEL_ATTACK), 
-        color(1,0,0,1), pos(-100,0,0), estimatedPos(-100,0,0), exist(false), 
+        color(1,0,0,1), pos(-100,0,0), estimatedPos(-100,0,0), 
+        estimatedBridge(BRIDGE_POS_UNKNOWN), exist(false), 
         brick(false), dead(0), teamColor(TEAM_RED) {}
     void set(int Id, std::string Name, RobotModel Model, bool isBrick, int isDead) {
         id    = Id;
@@ -193,6 +266,13 @@ struct ViewerRobotData {
     void setObstacles(ListOfObstacles const& obstacles, 
                       ObstacleType           type) {
         obstacles_[type] = obstacles;
+    }
+    void setEstimatedBridge(BridgePosition bridge) {
+        estimatedBridge = bridge;
+    }
+    void setEstimatedSupport(Point pt1, Point pt2) {
+        estimatedSupport[0] = pt1;
+        estimatedSupport[1] = pt2;
     }
     void reset() {
         currentTrajectory.clear();
@@ -264,12 +344,24 @@ class Viewer3DCL: public RobotBase
         void setBridgePosition(BridgePosition pos);
         /** @brief Defini la position des plateaux fixes supportant les 
             quilles */
+	void setEstimatedBridgePosition(int robotId, 
+                                        BridgePosition pos);
+        /** @brief Defini la position des plateaux fixes supportant les 
+            quilles */
 	void setSupportPosition(Point const& pt1, 
                                 Point const& pt2);
+	void setEstimatedSupportPosition(int robotId, 
+                                         Point const& pt1, 
+                                         Point const& pt2);
 	/** @brief enregistre des callbacks sur les boutons du player */
 	void registerBtnCallback(ViewerControlButtonId btnId,
 				 clickBtnCB clickCB,
 				 clickBtnCB unclickCB=NULL);
+        void setBtnTexture(ViewerControlButtonId btnId, 
+                           TextureId tunclick, 
+                           TextureId tclick);
+        void setBtnEnable(ViewerControlButtonId btnId, 
+                           bool enable);
 	/** @brief Pour mettre a jour l'etat des boutons (pour que le
 	    simulateur puisse changer les etats de AU et jackin. Les callbacks
 	    ne sont pas appeles quand on change l'etat d'un bouton avec cette
@@ -326,7 +418,12 @@ class Viewer3DCL: public RobotBase
 	    correspondant a une fenetre */
 	void movieStart(const char* filename, 
                         ViewerScreenEN screen);
+        /** @brief Arrete l'enregistrement d'une serie d'images */
 	void movieStop(ViewerScreenEN screen);
+        /** @brief Renvoie le nom de la derniere image enregistree*/
+        int  getMovieBaseName(ViewerScreenEN screen, 
+                              char*filename,
+                              bool incCounter=true);
 	
 	// ---------------------------------------------------------------
         // Callbacks des boutons du menu
@@ -447,6 +544,10 @@ class Viewer3DCL: public RobotBase
 	void drawTrajectory2D(Trajectory * t, bool target);
         /** @brief Dessine la legende */
 	void drawLegend2D();
+        /** @brief Dessine un pont virtuel dont la position est estimee par un robot */
+        void drawEstimatedBridges2D(int robotId);
+        /** @brief Dessine un pont virtuel dont la position est estimee par un robot */
+        void drawEstimatedBridges2D(Millimeter y);
 
 	friend void menuRobotMap2D(int value);
 	friend void menuRobotMap3D(int value);
@@ -473,10 +574,7 @@ class Viewer3DCL: public RobotBase
         // ---------------------------------------------------------------
         /** @brief Sauvegarde une image faisant partie d'un film */
 	void movieScreenShot(ViewerScreenEN screen);
-	/** @brief Arrete l'enregistrement d'une serie d'images */
-	int  getMovieBaseName(ViewerScreenEN screen, 
-                              char*filename,
-                              bool incCounter=true);
+	
         /** @brief Sauvegarde une fenetre dans un fichier image bmp */
 	void screenShot(const char* filename);
 

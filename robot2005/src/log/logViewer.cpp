@@ -5,15 +5,18 @@
  *
  * Outil d'affichage d'un log utilisant le viewer3D
  */
-#if 0
 
 #define SOUND_INFO
+#define LOG_CLASSID CLASS_DEFAULT
 #include "log.h"
 #include "viewer3D.h"
 #include "robotFile.h"
 #include "robotTimer.h"
+#include "sound.h"
+#include "soundPlayer.h"
 
 #include <map>
+#include <string>
 
 static const ViewerScreenEN LOGVIEWER_RECORD_SCREEN = VIEWER_SCREEN_MAP;
 
@@ -25,31 +28,41 @@ typedef long LogTime; // millisecond
 typedef multimap<LogTime, LogPacketMessage>    LogVMessage;
 typedef multimap<LogTime, LogPacketPosition>   LogVPosition;
 typedef multimap<LogTime, LogPacketMotorInfo>  LogVMotor;
-typedef multimap<LogTime, LogPacketEnumValue>      LogVSound;
-typedef multimap<LogTime, LogPacketCamera>     LogVCamera;
+typedef multimap<LogTime, LogPacketEnumValue>  LogVSound;
 typedef multimap<LogTime, LogPacketTrajectory> LogVTrajectory;
+typedef multimap<LogTime, LogPacketEnumValue>  LogVBridge;
+typedef multimap<LogTime, LogPacketLcd>        LogVLcd;
+typedef multimap<LogTime, LogPacketBoolean>    LogVJack;
+typedef multimap<LogTime, LogPacketBoolean>    LogVEmergency;
 typedef multimap<LogTime, LogPacketObstacle>   LogVObstacle;
-typedef multimap<LogTime, LogPacketGonio>      LogVGonio;
 typedef multimap<LogTime, LogType>             LogVMisc; // autres infos
 
 typedef struct LogVData {
-    LogVMessage  msg;
-    LogVPosition pos;
-    LogVMotor    motor;
-    LogVSound    snd;
-    LogVMisc     misc;
-    LogVCamera   camera;
+    LogVMessage    msg;
+    LogVPosition   pos;
+    LogVMotor      motor;
+    LogVSound      snd;
+    LogVMisc       misc;
     LogVTrajectory traj;
-    LogVObstacle obs;
-    LogVGonio    gonio;
-    bool         simulated;
+    LogVObstacle   obs;
+    LogVLcd        lcd;
+    LogVJack       jack;
+    LogVEmergency  emergency;
+    LogVBridge     bridge;
+    bool           simulated;
+    RobotModel     model;
 } LogVData;
 
-static LogVData data_;
-static char info_[255];
-static char baseName[255];
-LogTime endTime_=0;
-static Viewer3DCL* viewer_=NULL;
+static LogVData data_[VIEWER_MAX_ROBOT_NBR]; // donnees des logs
+static char     info_[255];
+static char     baseName_[255]; // nom du fichier pour les screenshot
+LogTime         endTime_=0;     // date de fin du log
+bool            play_=false;    // animation
+bool            record_=false;  // enregistrement de screenshot pour faire une video apres
+double          playSpeed_=1;   // vitesse d'animation
+LogTime         realTime_[VIEWER_MAX_ROBOT_NBR];    // temps actuel utilise pour l'animation   
+int             nbrLogs_=0;
+
 // ---------------------------------------------------------------------------
 // timeval2LogTime
 // ---------------------------------------------------------------------------
@@ -199,9 +212,9 @@ void endSSMMFile(const char* filename)
 // ---------------------------------------------------------------------------
 // restorePacket
 // ---------------------------------------------------------------------------
-bool restorePacket(File* file,
+bool restorePacket(File*            file,
                    LogPacketHeader& packetHeader, 
-                   Byte* data)
+                   Byte*            data)
 {
     if (file) {
         if (file->read((Byte*)(&packetHeader), 
@@ -222,7 +235,7 @@ bool restorePacket(File* file,
 // ---------------------------------------------------------------------------
 // Lit le fichier est sauvegarde les donnees dans la structure data_
 // ---------------------------------------------------------------------------
-void loadLog(const char* filename)
+void loadLog(int id, const char* filename)
 {
     ZFile file;
     if (!file.open(filename, FILE_MODE_READ)) {
@@ -240,63 +253,75 @@ void loadLog(const char* filename)
 	    first=false;
 	}
 	LogTime currentTime = timeval2LogTime(packetHeader.timeStamp-packetTime);
-	endTime_ = currentTime;
+	if (endTime_<currentTime) endTime_ = currentTime;
 	switch(packetHeader.type) {
 	case LOG_TYPE_SIMU:
-	    data_.simulated=true;
+	    data_[id].simulated=true;
 	    break; 
 	case LOG_TYPE_REAL:
-	    data_.simulated=false;
+	    data_[id].simulated=false;
+	    break; 
+        case LOG_TYPE_ROBOT_MODEL:
+	    data_[id].model=(RobotModel)((LogPacketEnumValue*)data)->value;
 	    break; 
 	case LOG_LEVEL_ERROR:
 	case LOG_LEVEL_WARNING:
 	case LOG_LEVEL_INFO:
 	case LOG_LEVEL_OK:
 	case LOG_LEVEL_FUNCTION:
-	    data_.msg.insert(std::pair<LogTime, LogPacketMessage>
-			     (currentTime, *((LogPacketMessage*)data)));
+	    data_[id].msg.insert(std::pair<LogTime, LogPacketMessage>
+                                 (currentTime, *((LogPacketMessage*)data)));
 	    break;
 
 	case LOG_TYPE_POSITION:
-	    data_.pos.insert(std::pair<LogTime, LogPacketPosition>
-			     (currentTime, *((LogPacketPosition*)data)));
+	    data_[id].pos.insert(std::pair<LogTime, LogPacketPosition>
+                                 (currentTime, *((LogPacketPosition*)data)));
 	    break;
 	case LOG_TYPE_MOTOR:
-	    data_.motor.insert(std::pair<LogTime, LogPacketMotorInfo>
-			     (currentTime, *((LogPacketMotorInfo*)data)));
+	    data_[id].motor.insert(std::pair<LogTime, LogPacketMotorInfo>
+                                   (currentTime, *((LogPacketMotorInfo*)data)));
 	    break;
 	case LOG_TYPE_SOUND:
-	    data_.snd.insert(std::pair<LogTime, LogPacketEnumValue>
-			     (currentTime, *((LogPacketEnumValue*)data)));
+	    data_[id].snd.insert(std::pair<LogTime, LogPacketEnumValue>
+                                 (currentTime, *((LogPacketEnumValue*)data)));
 	    break;
-	case LOG_TYPE_CAMERA_SIMU:
-	    data_.camera.insert(std::pair<LogTime, LogPacketCamera>
-			     (currentTime, *((LogPacketCamera*)data)));
-	    break;
-	case LOG_TYPE_TRAJECTORY:
-	    data_.traj.insert(std::pair<LogTime, LogPacketTrajectory>
-			     (currentTime, *((LogPacketTrajectory*)data)));
+        case LOG_TYPE_TRAJECTORY:
+	    data_[id].traj.insert(std::pair<LogTime, LogPacketTrajectory>
+                                  (currentTime, *((LogPacketTrajectory*)data)));
 	    break;
 	case LOG_TYPE_OBSTACLE:
-	    data_.obs.insert(std::pair<LogTime,LogPacketObstacle>
-			     (currentTime,  *((LogPacketObstacle*)data)));
+	    data_[id].obs.insert(std::pair<LogTime,LogPacketObstacle>
+                                 (currentTime,  *((LogPacketObstacle*)data)));
 	    break;
-	case LOG_TYPE_GONIO:
-	    data_.gonio.insert(std::pair<LogTime,LogPacketGonio>
-			       (currentTime,  *((LogPacketGonio*)data)));
+        case LOG_TYPE_EMERGENCY_STOP:
+	    data_[id].emergency.insert(std::pair<LogTime, LogPacketBoolean>
+                                       (currentTime, *((LogPacketBoolean*)data)));
 	    break;
-	case LOG_TYPE_PING:
+        case LOG_TYPE_JACKIN:
+	    data_[id].jack.insert(std::pair<LogTime, LogPacketBoolean>
+                                  (currentTime, *((LogPacketBoolean*)data)));
+	    break;
+	case LOG_TYPE_LCD:
+	    data_[id].lcd.insert(std::pair<LogTime,LogPacketLcd>
+                                 (currentTime,  *((LogPacketLcd*)data)));
+	    break;
+        case LOG_TYPE_BRIDGE:
+	    data_[id].bridge.insert(std::pair<LogTime,LogPacketEnumValue>
+                                 (currentTime,  *((LogPacketEnumValue*)data)));
+	    break;
+        case LOG_TYPE_PING:
 	case LOG_TYPE_START_MATCH: 
 	case LOG_TYPE_END_MATCH:
 	case LOG_TYPE_START_STRATEGY: 
 	default: 
-	    while (data_.misc.find(currentTime) != data_.misc.end()) currentTime++;
-	    data_.misc.insert(std::pair<LogTime, LogType>
-			      (currentTime, packetHeader.type));
+	    while (data_[id].misc.find(currentTime) != data_[id].misc.end()) 
+                currentTime++;
+	    data_[id].misc.insert(std::pair<LogTime, LogType>
+                                  (currentTime, packetHeader.type));
 	    break; 
 	}
     }
-    printf("  %s loaded\n", filename);
+    LOG_OK("Robot[%d] : %s loaded\n", id, filename);
 }
 
 // ==========================================================================
@@ -320,19 +345,19 @@ bool getNearestBefore(LogTime t, multimap<LogTime, T> data, T& result)
 	}
 	result = (*it).second;
     }
-    return false;
+    return false; 
 }
 
 // ---------------------------------------------------------------------------
 // getSound
 // ---------------------------------------------------------------------------
-bool getSound(LogTime t1, LogTime t2, int& snd)
+bool getSound(int robotId, LogTime t1, LogTime t2, SoundId& snd)
 {
     LogVSound::iterator it;
-    for(it=data_.snd.begin(); it!=data_.snd.end(); it++) {
+    for(it=data_[robotId].snd.begin(); it!=data_[robotId].snd.end(); it++) {
 	if ((*it).first > t2 ) return false;
 	if ((*it).first >= t1) {
-	    snd = (*it).second.value;
+	    snd = (SoundId)(*it).second.value;
 	    return true;
 	}
     }
@@ -342,18 +367,18 @@ bool getSound(LogTime t1, LogTime t2, int& snd)
 // ---------------------------------------------------------------------------
 // getPosition
 // ---------------------------------------------------------------------------
-Position getPosition(LogTime t)
+Position getPosition(int robotId, LogTime t)
 {
     LogVPosition::iterator it;
     LogTime t1=0, t2=0;
     Point p1, p2;
     Radian dir1=0, dir2=0;
-    for(it=data_.pos.begin(); it != data_.pos.end(); it++) {
+    for(it=data_[robotId].pos.begin(); it != data_[robotId].pos.end(); it++) {
 	if ((*it).first > t) {
 	    t2 = (*it).first;
 	    p2 = Point((*it).second.x, (*it).second.y);
 	    dir2=(*it).second.theta;
-	    if (t2 == t1 || it == data_.pos.begin()) {
+	    if (t2 == t1 || it == data_[robotId].pos.begin()) {
 		return Position(p2, dir2);
 	    } else {
 		return Position(p1.x+(p2.x-p1.x)*(t-t1)/(t2-t1),
@@ -371,11 +396,12 @@ Position getPosition(LogTime t)
 // ---------------------------------------------------------------------------
 // getNextMatchBegin
 // ---------------------------------------------------------------------------
-bool getNextMatchBegin(LogTime fromTime,
+bool getNextMatchBegin(int robotId,
+                       LogTime fromTime,
 		       LogTime &nextMatchTime)
 {
     LogVMisc::iterator it;
-    for(it=data_.misc.begin(); it != data_.misc.end(); it++) {
+    for(it=data_[robotId].misc.begin(); it != data_[robotId].misc.end(); it++) {
 	if ((*it).first < fromTime) {
 	    continue;
 	}
@@ -390,12 +416,13 @@ bool getNextMatchBegin(LogTime fromTime,
 // ---------------------------------------------------------------------------
 // getPreviousMatchBegin
 // ---------------------------------------------------------------------------
-bool getPreviousMatchBegin(LogTime fromTime,
+bool getPreviousMatchBegin(int robotId, 
+                           LogTime fromTime,
 			   LogTime &previousMatchTime)
 {
     LogVMisc::iterator it;
     previousMatchTime=0;
-    for(it=data_.misc.begin(); it != data_.misc.end(); it++) {
+    for(it=data_[robotId].misc.begin(); it != data_[robotId].misc.end(); it++) {
 	if ((*it).first >= fromTime) {
 	    return true;
 	}
@@ -407,52 +434,15 @@ bool getPreviousMatchBegin(LogTime fromTime,
 }
 
 // ---------------------------------------------------------------------------
-// getCameraPosition
-// ---------------------------------------------------------------------------
-void getCameraPosition(LogTime fromTime,
-		       Millimeter& x, Millimeter& y, Millimeter& z)
-{
-    LogVCamera::iterator it;
-    x=0;
-    y=0;
-    z=700;
-    for(it=data_.camera.begin(); it != data_.camera.end(); it++) {
-	if ((*it).first >= fromTime) {
-	    return ;
-	}
-	x = (*it).second.eyesX;
-	y = (*it).second.eyesY;
-	z = (*it).second.eyesZ;
-    }
-}
-
-// ---------------------------------------------------------------------------
-// getCoconutPosition
-// ---------------------------------------------------------------------------
-/*
-void getCoconutPosition(LogTime fromTime, 
-			Point& pt)
-{
-    LogVCoconut::iterator it;
-    pt=Point();
-    for(it=data_.coconut.begin(); it != data_.coconut.end(); it++) {
-	if ((*it).first >= fromTime) {
-	    return ;
-	}
-	pt = (*it).second;
-    }
-}
-*/
-
-// ---------------------------------------------------------------------------
 // getTrajectory
 // ---------------------------------------------------------------------------
-void getTrajectory(LogTime fromTime,
+void getTrajectory(int robotId, 
+                   LogTime fromTime,
 		   Trajectory &t)
 {
     LogVTrajectory::iterator it;
     t.clear();
-    for(it=data_.traj.begin(); it != data_.traj.end(); it++) {
+    for(it=data_[robotId].traj.begin(); it != data_[robotId].traj.end(); it++) {
 	if ((*it).first > fromTime) {
 	    return ;
 	}
@@ -463,15 +453,60 @@ void getTrajectory(LogTime fromTime,
     }
 }
 
+void getBridgePosition(int robotId, 
+                       LogTime fromTime,
+                       BridgePosition &bridge)
+{
+    LogPacketEnumValue bv;
+    if (!getNearestBefore(fromTime, data_[robotId].bridge, bv))
+        bridge = BRIDGE_POS_UNKNOWN;
+    else
+        bridge = (BridgePosition)bv.value;
+}
+
+bool getJackin(int robotId, 
+               LogTime fromTime)
+{
+    LogPacketBoolean bv;
+    if (!getNearestBefore(fromTime, data_[robotId].jack, bv))
+        return false;
+    else 
+        return bv.value;
+}
+
+bool getEmergencyStop(int robotId, 
+                      LogTime fromTime)
+{
+    LogPacketBoolean bv;
+    if (!getNearestBefore(fromTime, data_[robotId].emergency, bv))
+        return false;
+    else 
+        return bv.value;
+}
+
+void getLcd(int robotId, 
+            LogTime fromTime,
+            char* txt)
+{
+    LogPacketLcd bv("");
+    if (!getNearestBefore(fromTime, data_[robotId].lcd, bv)) {
+        txt[0]=0;
+    } else {
+        strcpy(txt, bv.txt);
+        printf("lcd mesage found\n");
+    }
+}
+
 // ---------------------------------------------------------------------------
 // getObstacles
 // ---------------------------------------------------------------------------
-void getObstacles(LogTime fromTime,
+void getObstacles(int robotId, 
+                  LogTime fromTime,
 		  ListOfObstacles &obstacles,
                   int maxObstacles)
 {
     LogVObstacle::iterator it;
-    for(it=data_.obs.begin(); it != data_.obs.end(); it++) {
+    for(it=data_[robotId].obs.begin(); it != data_[robotId].obs.end(); it++) {
 	if ((*it).first > fromTime) {
 	    return ;
 	}
@@ -481,128 +516,67 @@ void getObstacles(LogTime fromTime,
         if ((int)obstacles.size() > maxObstacles) obstacles.pop_front();
     }
 }
-
 // ---------------------------------------------------------------------------
-// getBalls
+// getMatchTime
 // ---------------------------------------------------------------------------
-/*
-void getBalls(LogTime fromTime,
-	      ListOfBalls &balls,
-              int maxBalls)
+void getMatchTime(int id,
+                  LogTime t,
+                  LogTime &matchTime)
 {
-    LogVBall::iterator it;
-    for(it=data_.balls.begin(); it != data_.balls.end(); it++) {
-	if ((*it).first > fromTime) {
-	    return ;
+    LogVMisc::iterator it;
+    for(it=data_[id].misc.begin(); it != data_[id].misc.end(); it++) {
+	if ((*it).first > t) {
+	    return;
 	}
-	Ball ball;
-	ball.center.x = (*it).second.ball.x;
-	ball.center.y = (*it).second.ball.y;
-	balls.push_back(ball);
-        if ((int)balls.size() > maxBalls) balls.pop_front();
+	switch((*it).second) {
+	case LOG_TYPE_START_MATCH:
+	    matchTime=t-(*it).first;
+	    break;
+	case LOG_TYPE_END_MATCH:
+	    matchTime=t;
+	    break;
+	default:
+	    break;
+	}
     }
 }
-*/
-
-// ---------------------------------------------------------------------------
-// getGonio
-// ---------------------------------------------------------------------------
-bool getGonio(LogTime fromTime,
-	      Point& gonioCenter,
-	      Radian& baliseDir,
-	      int& baliseId)
-{
-    bool found=false;
-    LogVGonio::iterator it;
-    LogTime minTime=10000; // 10s
-    for(it=data_.gonio.begin(); it != data_.gonio.end(); it++) {
-	if ((*it).first < fromTime-minTime) continue;
-	if ((*it).first > fromTime) return found;
-	baliseId = (int)(*it).second.baliseId;
-	gonioCenter.x = (*it).second.pos.x;
-	gonioCenter.y = (*it).second.pos.y;
-	baliseDir = d2r((*it).second.pos.t);
-	found=true;
-    }
-    return found;
-}
-
-
 // ---------------------------------------------------------------------------
 // updateDisplay
 // ---------------------------------------------------------------------------
 // Actualise l'affichage avec les valeurs a l'instant t
 // ---------------------------------------------------------------------------
-void updateDisplay(Viewer3DCL &viewer,
-		   LogTime time)
+void updateDisplay()
 {
-    /*    viewer.setRobotPosition(getPosition(time));
+    for(int id=0;id < nbrLogs_; id++) {
+        Viewer3D->setRobotPosition(id, getPosition(id, realTime_[id]));
 
-    Position robotRS; 
-    Position ennemyRP; 
-    Position ennemyRS;
-    static Ball balls[BALLON_NBR];
-    if (data_.simulated) {
-	getSimuPosition(time, robotRS, ennemyRP, ennemyRS, balls);
-	if (robotRS.center.x>10)
-	    viewer.setRobotRSPosition(robotRS);
-	if (ennemyRP.center.x>10)
-	    viewer.setEnnemyPosition(ennemyRP);
-	if (ennemyRS.center.x>10)
-	    viewer.setEnnemyRSPosition(ennemyRS);
-	viewer.setBallsPosition(balls);
+        Trajectory t;
+        getTrajectory(id, realTime_[id], t);
+        Viewer3D->setRobotTrajectory(id, t);
+        
+        ListOfObstacles obstacles;
+        getObstacles(id, realTime_[id], obstacles, 10);
+        Viewer3D->setObstacleList(id, obstacles, ALL_OBSTACLES);
+
+        BridgePosition estimatedBridge;
+        getBridgePosition(id, realTime_[id], estimatedBridge);
+        Viewer3D->setEstimatedBridgePosition(id, estimatedBridge);
+
+        Viewer3D->setBtnClick((ViewerControlButtonId)(CTRL_BTN_R0_JACK+id*CTRL_BTN_NBR_PER_ROBOT),
+                              getJackin(id, realTime_[id]));
+
+        Viewer3D->setBtnClick((ViewerControlButtonId)(CTRL_BTN_R0_AU+id*CTRL_BTN_NBR_PER_ROBOT),
+                              getEmergencyStop(id, realTime_[id]));
+
+        static char lcdMsg[35];
+        getLcd(id, realTime_[id], lcdMsg);
+        Viewer3D->setRobotLcd(id, lcdMsg);
+       
     }
-  
-    LogTime matchTime=time;
-    bool armLeft=false;
-    bool armRight=false;
-    bool entryOpened=true;
-    bool lowerArmOut=true;
-    bool backDoorClosed=true;
-    getActuatorStatus(time, matchTime, armLeft, armRight, entryOpened, 
-		      lowerArmOut, backDoorClosed);
-    viewer.setRobotActuators(armLeft, armRight, entryOpened, 
-			     lowerArmOut, backDoorClosed);
-
-    Millimeter cx; 
-    Millimeter cy; 
-    Millimeter cz;
-    if (data_.simulated) {
-	getCameraPosition(time, cx, cy, cz);
-	viewer.setCameraPosition(cx, cy, cz); 
-    }
-    
-    LogGrid* grid=NULL;
-    getGrid(time, &grid);
-    viewer.setGrid(grid);
-
-
-    Trajectory t;
-    getTrajectory(time, t);
-    viewer.setTargetTrajectory(t);
-
-    ListOfObstacles obstacles;
-    getObstacles(time, obstacles, 10);
-    viewer.setObstacleList(obstacles, ALL_OBSTACLES);
-
-    ListOfBalls ballsDetected;
-    getBalls(time, ballsDetected, 10);
-    viewer.setBallListDetected(ballsDetected);
-
-    Point coconut;
-    getCoconutPosition(time, coconut);
-    viewer.setCoconutPosition(coconut);
-
-    Point gonioCenter;
-    Radian baliseDir;
-    GonioBalise baliseId;
-    if (getGonio(time, gonioCenter, baliseDir, baliseId)) {
-	viewer.setGonioBalise(baliseId, gonioCenter, baliseDir);
-    } 
-    
-    playerControlSetTimes(time, matchTime, info_);
-    viewer.updateDisplay((Millisecond)matchTime);
-    */
+    LogTime matchTime=realTime_[0];
+    getMatchTime(0, realTime_[0], matchTime);
+    Viewer3D->setTime(realTime_[0]);
+    Viewer3D->setMatchTime(matchTime);
 }
 
 struct timeval chronometerTic;
@@ -634,103 +608,106 @@ LogTime realTimeDeltaT()
 // -------------------------------------------------------------------------
 // boutons
 // -------------------------------------------------------------------------
-bool   play=false;
-bool   record=false;
-double playSpeed=1;
-LogTime realTime=0;
-
-void btnPlay()
+void btnPlay(ViewerControlButtonId btnId)
 {
-    play = !play;
-    if (play) {
+    play_ = !play_;
+    if (play_) {
 	realTimeReset();
-	playerControlSetBtnTexture(CTRL_BTN_PLAY, TEX_BTN_PAUSE_0, TEX_BTN_PAUSE_1);
+	Viewer3D->setBtnTexture(CTRL_BTN_PLAY, TEX_BTN_PAUSE_0, TEX_BTN_PAUSE_1);
+        Viewer3D->setBtnEnable(CTRL_BTN_PREVIOUS, true);
+        Viewer3D->setBtnEnable(CTRL_BTN_STEP_BACKWARD, true); 
     } else {
-	playerControlSetBtnTexture(CTRL_BTN_PLAY, TEX_BTN_PLAY_0, TEX_BTN_PLAY_1);
+	Viewer3D->setBtnTexture(CTRL_BTN_PLAY, TEX_BTN_PLAY_0, TEX_BTN_PLAY_1);
     }
 }
 
-void btnBack()
+void btnBack(ViewerControlButtonId btnId)
 {
-    play=false;
-    if (viewer_) viewer_->reset();
-    getPreviousMatchBegin(realTime, realTime);
-    if (realTime==0) {
-	playerControlSetBtnEnable(CTRL_BTN_PREVIOUS, false);
-	playerControlSetBtnEnable(CTRL_BTN_STEP_BACKWARD, false); 
+    play_=false;
+    Viewer3D->reset();
+    for(int id=0; id<nbrLogs_; id++)
+        getPreviousMatchBegin(id, realTime_[id], realTime_[id]);
+    if (realTime_[0] == 0) {
+        Viewer3D->setBtnEnable(CTRL_BTN_PREVIOUS, false);
+        Viewer3D->setBtnEnable(CTRL_BTN_STEP_BACKWARD, false); 
     }
-    playerControlSetBtnTexture(CTRL_BTN_PLAY, TEX_BTN_PLAY_0, TEX_BTN_PLAY_1);
+    Viewer3D->setBtnTexture(CTRL_BTN_PLAY, TEX_BTN_PLAY_0, TEX_BTN_PLAY_1);
 }
 
-void btnForward()
+void btnForward(ViewerControlButtonId btnId)
 {
-    play=false;
-    getNextMatchBegin(realTime, realTime);
-    if (realTime>0) {
-	playerControlSetBtnEnable(CTRL_BTN_PREVIOUS, true);
-	playerControlSetBtnEnable(CTRL_BTN_STEP_BACKWARD, true); 
+    play_=false;
+    for(int id=0; id<nbrLogs_; id++)
+        getNextMatchBegin(id, realTime_[id], realTime_[id]);
+    if (realTime_[0] > 0) {
+        Viewer3D->setBtnEnable(CTRL_BTN_PREVIOUS, true);
+        Viewer3D->setBtnEnable(CTRL_BTN_STEP_BACKWARD, true); 
     }
-    playerControlSetBtnTexture(CTRL_BTN_PLAY, TEX_BTN_PLAY_0, TEX_BTN_PLAY_1);
+    Viewer3D->setBtnTexture(CTRL_BTN_PLAY, TEX_BTN_PLAY_0, TEX_BTN_PLAY_1);
 }
 
-void btnStepForward()
+void btnStepForward(ViewerControlButtonId btnId)
 {
-    play=false;
-    realTime+=1000;
-    if (realTime>0) {
-	playerControlSetBtnEnable(CTRL_BTN_PREVIOUS, true);
-	playerControlSetBtnEnable(CTRL_BTN_STEP_BACKWARD, true); 
+    play_=false;
+    for(int id=0; id<nbrLogs_; id++)
+        realTime_[id]+=1000;
+    if (realTime_[0] > 0) {
+        Viewer3D->setBtnEnable(CTRL_BTN_PREVIOUS, true);
+        Viewer3D->setBtnEnable(CTRL_BTN_STEP_BACKWARD, true); 
     }
-    playerControlSetBtnTexture(CTRL_BTN_PLAY, TEX_BTN_PLAY_0, TEX_BTN_PLAY_1);
+    Viewer3D->setBtnTexture(CTRL_BTN_PLAY, TEX_BTN_PLAY_0, TEX_BTN_PLAY_1);
 }
 
-void btnStepBackward()
+void btnStepBackward(ViewerControlButtonId btnId)
 {
-    play=false;
-    realTime-=1000;
-    if (realTime<0) realTime=0;
-
-    if (realTime<=0) {
-	playerControlSetBtnEnable(CTRL_BTN_PREVIOUS, false);
-	playerControlSetBtnEnable(CTRL_BTN_STEP_BACKWARD, false); 
+    play_=false;
+    for(int id=0; id<nbrLogs_; id++) {
+        realTime_[id] -= 1000;
+        if (realTime_[id] < 0) realTime_[id] = 0;
     }
-    playerControlSetBtnTexture(CTRL_BTN_PLAY, TEX_BTN_PLAY_0, TEX_BTN_PLAY_1);
+    if (realTime_[0] <= 0) {
+        Viewer3D->setBtnEnable(CTRL_BTN_PREVIOUS, false);
+        Viewer3D->setBtnEnable(CTRL_BTN_STEP_BACKWARD, false); 
+    }
+    Viewer3D->setBtnTexture(CTRL_BTN_PLAY, TEX_BTN_PLAY_0, TEX_BTN_PLAY_1);
 }
 
-void btnFaster()
+void btnFaster(ViewerControlButtonId btnId)
 {
-    if (playSpeed<10) playSpeed*=1.5;
-    if (playSpeed>=10) {
-	playSpeed=10;
-	playerControlSetBtnEnable(CTRL_BTN_FASTER, false);
+    if (playSpeed_ < 10) playSpeed_ *= 1.5;
+    if (playSpeed_ >= 10) {
+	playSpeed_ = 10;
+        Viewer3D->setBtnEnable(CTRL_BTN_FASTER, false);
     }
-    playerControlSetBtnEnable(CTRL_BTN_SLOWER, true);
+    Viewer3D->setBtnEnable(CTRL_BTN_SLOWER, true);
 }
 
-void btnSlower()
+void btnSlower(ViewerControlButtonId btnId)
 {
-    if (playSpeed>0.1) playSpeed/=1.5;
-    if (playSpeed<=0.1) {
-	playSpeed=0.1;
-	playerControlSetBtnEnable(CTRL_BTN_SLOWER, false);
+    if (playSpeed_ > 0.1) playSpeed_ /= 1.5;
+    if (playSpeed_ <= 0.1) {
+	playSpeed_ = 0.1;
+        Viewer3D->setBtnEnable(CTRL_BTN_SLOWER, false);
     }
-    playerControlSetBtnEnable(CTRL_BTN_FASTER, true);
+    Viewer3D->setBtnEnable(CTRL_BTN_FASTER, true);
 }
 
 
-void btnRecordMovie()
+void btnRecordMovie(ViewerControlButtonId btnId)
 {
-    record = !record;
-    if (record) {
+    record_ = !record_;
+    if (record_) {
 	//reshapeRobot3D(200, 150);
-	printf("Start recording %s\n", baseName);
-	Viewer3D::movieStart(baseName, LOGVIEWER_RECORD_SCREEN);
-	playerControlSetBtnTexture(CTRL_BTN_RECORD, TEX_BTN_REC_STOP_0, TEX_BTN_REC_STOP_1);
+	printf("Start recording %s\n", baseName_);
+	Viewer3D->movieStart(baseName_, LOGVIEWER_RECORD_SCREEN);
+	Viewer3D->setBtnTexture(CTRL_BTN_RECORD, 
+                                TEX_BTN_REC_STOP_0, TEX_BTN_REC_STOP_1);
     } else {
-	Viewer3D::movieStop(LOGVIEWER_RECORD_SCREEN);
-	playerControlSetBtnTexture(CTRL_BTN_RECORD, TEX_BTN_REC_START_0, TEX_BTN_REC_STOP_1);
+	Viewer3D->movieStop(LOGVIEWER_RECORD_SCREEN);
+	Viewer3D->setBtnTexture(CTRL_BTN_RECORD, 
+                                TEX_BTN_REC_START_0, TEX_BTN_REC_STOP_1);
 	static char filename[256];
-	Viewer3D::getMovieBaseName(LOGVIEWER_RECORD_SCREEN, 
+	Viewer3D->getMovieBaseName(LOGVIEWER_RECORD_SCREEN, 
 				   filename, false);
 	filename[strlen(filename)-5]=0;
 	endSSMMFile(filename);
@@ -747,111 +724,129 @@ extern void (*viewer3DDisplayCB)();
 void displayCB()
 {
     bool soundAdded=false;
-    if (record && play) {
-	realTime += 80; // un multiple de 40 (unite de temps de base de SSMM)
-	SoundId snd;
-	if (getSound(realTime-80, realTime, snd)) {
-	    soundAdded=copySoundFile(snd);
-	}
+    if (record_ && play_) {
+	for(int id=0; id<nbrLogs_; id++) {
+            realTime_[id] += 80; // un multiple de 40 (unite de temps de base de SSMM)
+            SoundId snd;
+            if (getSound(id, realTime_[id]-80, realTime_[id], snd)) {
+                //   soundAdded = copySoundFile(snd);
+            }
+        }
     } 
-    if (record) {
+    if (record_) {
 	static char filename[256];
-	int counter = Viewer3D::getMovieBaseName(LOGVIEWER_RECORD_SCREEN, 
+	int counter = Viewer3D->getMovieBaseName(LOGVIEWER_RECORD_SCREEN, 
 						 filename, false);
 	filename[strlen(filename)-5]=0;
 	updateSSMMFile(filename, counter, soundAdded);
     }
 }
 
+
+bool parseArgs(int argc, char*argv[],  std::string** filename)
+{
+    if (argc<2) {
+        printf("Usage: %s logFileName1 (logFileName2)  (logFileName1) (logFileName2) "
+               "(-c=configFileName)\n", argv[0]);
+        return false;
+    }
+    for(int i=0; i<VIEWER_MAX_ROBOT_NBR+1; i++) {
+        if (argc<i+2) break;
+        if (strncmp(argv[i+1], "-c=", 3) == 0) {
+            *filename[VIEWER_MAX_ROBOT_NBR] = (argv[i+1]+3); 
+        } else {
+            *filename[nbrLogs_++] = (argv[i+1]); 
+        }
+    }
+    return true;
+}
+
 // ---------------------------------------------------------------------------
 // main
 // ---------------------------------------------------------------------------
 int main(int argc, char*argv[]) 
-{    
-    if (argc<2) {
-        printf("Usage: %s logFileName \n", argv[0]);
+{   
+    std::string* filenames = new std::string[VIEWER_MAX_ROBOT_NBR+1];
+    nbrLogs_ = 0;
+    if (!parseArgs(argc, argv, &filenames)) {
         return -1;
     }
-    viewer3DDisplayCB = displayCB;
 
+    // load log
     char* tmp=strrchr(argv[1], '/');
     if (tmp) {
-        strcpy(baseName, tmp+1);
+        strcpy(baseName_, tmp+1);
     } else {
-	strcpy(baseName, argv[1]);
+	strcpy(baseName_, argv[1]);
     }
-    tmp=strchr(baseName, '.');
+    tmp=strchr(baseName_, '.');
     if (tmp) tmp[0]=0;
 
-    loadLog(argv[1]);
-    RobotConfigSimu config;
-    config.viewerLogPlayer=true;
-    Log log(&config);
-    Viewer3D viewer(&config);
-    viewer_=&viewer;
-    viewer.enableRobotPoint(true);
+    // start viewer
+    RobotConfigSimuCL config;
+    LogCL log;
+    Viewer3D->createWindows(true, true);
     realTimeReset();
 
-    playerControlRecordBtnCB(CTRL_BTN_PREVIOUS, btnBack);
-    playerControlRecordBtnCB(CTRL_BTN_STEP_BACKWARD, btnStepBackward);
-    playerControlRecordBtnCB(CTRL_BTN_PLAY, btnPlay);
-    playerControlRecordBtnCB(CTRL_BTN_STEP_FORWARD, btnStepForward);
-    playerControlRecordBtnCB(CTRL_BTN_NEXT, btnForward);
-    playerControlRecordBtnCB(CTRL_BTN_SLOWER, btnSlower);
-    playerControlRecordBtnCB(CTRL_BTN_FASTER, btnFaster);
-    playerControlRecordBtnCB(CTRL_BTN_RECORD, btnRecordMovie);
+    // load logs
+    for(int i=0; i < nbrLogs_; i++) {
+        realTime_[i] = 0;
+        loadLog(i, filenames[i].c_str()); 
+        Viewer3D->setRobotModel(i,
+                                filenames[i].c_str(),
+                                data_[i].model,
+                                false);
+    }
     
-    realTime=0;
-    play=false;
-    getNextMatchBegin(realTime, realTime);
+    Viewer3D->registerBtnCallback(CTRL_BTN_PREVIOUS, btnBack);
+    Viewer3D->registerBtnCallback(CTRL_BTN_STEP_BACKWARD, btnStepBackward);
+    Viewer3D->registerBtnCallback(CTRL_BTN_PLAY, btnPlay);
+    Viewer3D->registerBtnCallback(CTRL_BTN_STEP_FORWARD, btnStepForward);
+    Viewer3D->registerBtnCallback(CTRL_BTN_NEXT, btnForward);
+    Viewer3D->registerBtnCallback(CTRL_BTN_SLOWER, btnSlower);
+    Viewer3D->registerBtnCallback(CTRL_BTN_FASTER, btnFaster);
+    Viewer3D->registerBtnCallback(CTRL_BTN_RECORD, btnRecordMovie);
+    
+    play_=false;
+    for(int i=0; i < nbrLogs_; i++) {
+        getNextMatchBegin(i, realTime_[i], realTime_[i]);
+    }
     while(1) {
-	sprintf(info_, "Speed x%.1f ", (float)playSpeed);
-	if (record) strcat(info_, "Recording... ");
-	else strcat(info_, baseName);
+	sprintf(info_, "Speed x%.1f ", (float)playSpeed_);
+	if (record_) strcat(info_, "Recording... ");
+	else strcat(info_, baseName_);
       
-	updateDisplay(viewer, realTime);
+	updateDisplay();
 	//   if (!record) {
 	// quand on fait une video c'est deja assez lent, pas 
 	// besoin de s'arreter un peu plus...
 	usleep(50000);
 
-	if (play) {
-	    if (!record) {
-		realTime+=(LogTime)(playSpeed*realTimeDeltaT());
+	if (play_) {
+	    if (!record_) {
+		for(int i=0; i < nbrLogs_; i++) {
+                    realTime_[i]+=(LogTime)(playSpeed_*realTimeDeltaT());
+                }
 	    } else {
 		// ca c'est fait par le displayCallBack
 		// realTime+=100;
 	    }
-	}
-	if (realTime >= endTime_) {
-	    play = false;
-	    if (record) {
-		Viewer3D::movieStop(LOGVIEWER_RECORD_SCREEN);
-		record = false;
-		playerControlSetBtnTexture(CTRL_BTN_RECORD, 
-					   TEX_BTN_REC_START_0, TEX_BTN_REC_STOP_1);
+	}	
+        bool end=false;
+        for(int i=0; i < nbrLogs_; i++) {
+            if (realTime_[i] >= endTime_) end = true;
+        }
+        if (end) {
+	    play_ = false;
+	    if (record_) {
+		Viewer3D->movieStop(LOGVIEWER_RECORD_SCREEN);
+		record_ = false;
+		Viewer3D->setBtnTexture(CTRL_BTN_RECORD, 
+                                        TEX_BTN_REC_START_0, TEX_BTN_REC_STOP_1);
 	    }
-	    playerControlSetBtnTexture(CTRL_BTN_PLAY, 
-				       TEX_BTN_PLAY_0, TEX_BTN_PLAY_1);
+	    Viewer3D->setBtnTexture(CTRL_BTN_PLAY, 
+                                    TEX_BTN_PLAY_0, TEX_BTN_PLAY_1);
 	}
     }
-    viewer_=NULL;
     return(EXIT_SUCCESS);
 }
-
-// function pour eviter des warnign du compilo car music* n'est pas utilise
-void dummyFunction()
-{
-    printf("%s %s %s\n", 
-	   musicList[0],
-	   musicYukulele[0],
-	   musicHaka);
-}
-
-#else 
-#include <stdio.h>
-int main() {
-    printf("Not implemented\n");
-    return -1;
-}
-#endif

@@ -105,6 +105,11 @@ RobotMainFullCL::RobotMainFullCL() :
             }
         }
     }
+    if (RobotConfig->isRobotAttack) {
+        Log->robotModel(ROBOT_MODEL_ATTACK);
+    } else {
+        Log->robotModel(ROBOT_MODEL_DEFENCE);
+    }
     evtMgr_   = new EVENTS_MANAGER_DEFAULT();
     ioMgr_    = new IoManagerCL();
     mvtMgr_   = new MovementManager(); // simulator doit etre cree avant mvtMgr

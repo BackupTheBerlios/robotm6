@@ -114,8 +114,7 @@ void Lcd_03::print(const char* fmt, ...)
   status = uart_->read(data);
 
   txt[i]='\n'; txt[i+1]=0;
-  LOG_INFO("LCD:\n%s%s%s\n", KB_BLUE, txt, KB_RESTORE);
-
+  Log->lcdMessage(txt);
   if (!status || data[0] != LCD_PRINTF) {
     LOG_ERROR("lcd_printf read status=%s, read value = %d\n", 
 	      status?"OK":"ERR", data[0]);
@@ -136,7 +135,7 @@ void Lcd_03::clear()
   bool status = false;
   uart_->write(LCD_CLEAR);
   status = uart_->read(data);
-
+  Log->lcdMessage("");
   if (!status || data[0] != LCD_CLEAR) {
     LOG_ERROR("lcd_clear read status=%s, read value = %d\n", 
 	      status?"OK":"ERR", data[0]);

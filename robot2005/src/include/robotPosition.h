@@ -77,6 +77,8 @@ typedef enum OdometerType {
     ODOMETER_MOTOR
 } OdometerType;
 
+void robotPositionMotorHasBeenReset();
+
 /**
  * @class RobotPosition
  * Calcul de la position du robot en temps réel.

@@ -119,7 +119,7 @@ void Lcd_04::print(const char* fmt, ...)
     uart_->write(LCD_REQ_PRINTF_EOF); 
     
     txt[i]='\n'; txt[i+1]=0;
-    LOG_INFO("LCD:\n%s%s%s\n", KB_BLUE, txt, KB_RESTORE);
+    Log->lcdMessage(txt);
 }
 
 // ---------------------------------------------------------------------------
@@ -132,6 +132,7 @@ void Lcd_04::clear()
 {
     if (!uart_) return;
     uart_->write(LCD_REQ_CLEAR);
+    Log->lcdMessage("");
 }
 
 // ---------------------------------------------------------------------------

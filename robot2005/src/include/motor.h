@@ -74,8 +74,8 @@ class Motor : public RobotIODevice
 
     /** enregistre un callback execute quand les moteurs sont resete */
     void registerResetCallback(FunctionPtr cb);
-    /** Fonction a appeler periodiquement pour verfifier ques les roues ne sont pas bloquees. 
-        Si c'est le cas l'evenement EVENTS_PWM_ALERT est raise */
+    /** Fonction a appeler periodiquement pour verfifier ques les roues ne sont
+        pas bloquees.  Si c'est le cas l'evenement EVENTS_PWM_ALERT est raise */
     void checkMotorEvents();
 
  private:

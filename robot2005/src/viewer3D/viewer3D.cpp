@@ -91,6 +91,24 @@ void Viewer3DCL::setBtnClick(ViewerControlButtonId btnId, bool click)
 {
     if (btn_[btnId]) btn_[btnId]->setClicked(click);
 }
+// ---------------------------------------------------------------------------
+// Viewer3DCL::setBtnTexture
+// ---------------------------------------------------------------------------
+void Viewer3DCL::setBtnTexture(ViewerControlButtonId btnId, 
+                               TextureId tunclick, 
+                               TextureId tclick)
+{
+    if (btn_[btnId]) btn_[btnId]->setTexture(tunclick, tclick);
+}
+
+// ---------------------------------------------------------------------------
+// Viewer3DCL::setBtnEnable
+// ---------------------------------------------------------------------------
+void Viewer3DCL::setBtnEnable(ViewerControlButtonId btnId, 
+                              bool enable)
+{
+    if (btn_[btnId]) btn_[btnId]->setEnable(enable);
+}
 
 // ---------------------------------------------------------------------------
 // Viewer3DCL::setRobotPosition
@@ -235,7 +253,6 @@ void Viewer3DCL::setCameraPosition(Millimeter cx,
 {
 #ifndef VIEWER_DISACTIVATED 
     setCameraPosition3D(cx, cy, cz);
-    Log->simuCamera(cx, cy, cz);
 #endif // VIEWER_DISACTIVATED 
 }
 // ---------------------------------------------------------------------------
@@ -269,6 +286,34 @@ void Viewer3DCL::setRobotPosition(int robotId,
     }
 #endif // VIEWER_DISACTIVATED 
 }
+
+// ---------------------------------------------------------------------------
+// Viewer3DCL::setEstimatedBridgePosition
+// ---------------------------------------------------------------------------
+void Viewer3DCL::setEstimatedBridgePosition(int robotId, 
+                                            BridgePosition pos)
+{
+#ifndef VIEWER_DISACTIVATED 
+    if (robotId >= 0 && robotId < VIEWER_MAX_ROBOT_NBR) {
+        robotData_[robotId].setEstimatedBridge(pos);
+    }
+#endif // VIEWER_DISACTIVATED 
+}
+
+// ---------------------------------------------------------------------------
+// Viewer3DCL::setEstimatedSupportPosition
+// ---------------------------------------------------------------------------
+void Viewer3DCL::setEstimatedSupportPosition(int robotId, 
+                                             Point const& pt1, 
+                                             Point const& pt2)
+{
+#ifndef VIEWER_DISACTIVATED 
+    if (robotId >= 0 && robotId < VIEWER_MAX_ROBOT_NBR) {
+        robotData_[robotId].setEstimatedSupport(pt1, pt2);
+    }
+#endif // VIEWER_DISACTIVATED 
+}
+
 // ---------------------------------------------------------------------------
 // Viewer3DCL::setRobotEstimatedPosition
 // ---------------------------------------------------------------------------

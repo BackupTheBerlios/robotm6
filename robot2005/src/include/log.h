@@ -82,13 +82,12 @@ typedef enum LogType {
     LOG_TYPE_FIRE_BALLS,
     LOG_TYPE_TRAJECTORY,
     LOG_TYPE_OBSTACLE,
-    LOG_TYPE_GONIO,
 
-    LOG_TYPE_SKITTLE_SIMU,
-    LOG_TYPE_BRIDGE_SIMU,
-    LOG_TYPE_SUPPORT_SIMU,
-    LOG_TYPE_CAMERA_SIMU,
-        
+    LOG_TYPE_ROBOT_MODEL,
+    LOG_TYPE_EMERGENCY_STOP,
+    LOG_TYPE_JACKIN,
+    LOG_TYPE_LCD,
+
     LOG_TYPE_NBR
 } LogType;
 
@@ -126,6 +125,17 @@ typedef struct LogPacketMotorInfo {
     LogPacketMotorInfo(): posLeft(0), posRight(0), pwmLeft(0), pwmRight(0){}
 } LogPacketMotorInfo;
 
+typedef struct LogPacketLcd {
+    char txt[35];
+    LogPacketLcd(const char* msg) { strncpy(txt,msg,34); txt[34]=0; }
+    LogPacketLcd(LogPacketLcd const& l2) { strcpy(txt, l2.txt); }
+} LogPacketLcd;
+
+typedef struct LogPacketBoolean {
+    bool value;
+    LogPacketBoolean(bool v=false): value(v) {}
+} LogPacketBoolean;
+
 typedef struct LogPacketEnumValue {
     short value;
     LogPacketEnumValue(int v=0): value(v) {}
@@ -162,32 +172,6 @@ typedef struct LogPosition {
   }
 } LogPosition;
 
-typedef struct LogPacketSkittleSimu {
-    LogPt3D  skittles[QUILLE_NBR];
-    LogPt3D  GRSBalls[BALLE_GRS_NBR];
-    LogPt3D  squatchBalls[BALLE_SQUATCH_NBR];
-    LogPacketSkittleSimu(Skittle* ski,
-			 GRSBall* grs,
-			 SquatchBall* balls) {
-        unsigned int i=0;
-        for(i=0;i<QUILLE_NBR;i++) {
-	    skittles[i] = LogPt3D(ski[i].center.x, 
-				  ski[i].center.y, 
-				  ski[i].altitude);
-	}
-        for(i=0;i<BALLE_GRS_NBR;i++) {
-	    GRSBalls[i] = LogPt3D(grs[i].center.x ,
-				  grs[i].center.y, 
-				  grs[i].altitude);
-	}
-        for(i=0;i<BALLE_SQUATCH_NBR;i++) {
-	    squatchBalls[i] = LogPt3D(balls[i].center.x,
-				      balls[i].center.y, 
-				      balls[i].altitude);
-	}
-    }
-} LogPacketSkittleSimu;
-
 typedef struct LogPacketObstacle {
     short x, y;
     unsigned char type;
@@ -210,13 +194,6 @@ typedef struct LogPacketGonio {
 		   Radian  direction): 
 	pos(gonioCenter, direction), baliseId((unsigned char)baliseId) {}
 } LogPacketGonio;
-
-typedef struct LogPacketCamera {
-    Millimeter eyesX, eyesY, eyesZ;
-    LogPacketCamera():eyesX(0), eyesY(0), eyesZ(700){}
-    LogPacketCamera(Millimeter x, Millimeter y, Millimeter z):
-      eyesX(x), eyesY(y), eyesZ(z){}
-} LogPacketCamera;
 
 typedef struct LogPacketTrajectory {
   unsigned char nbrPt;
@@ -360,7 +337,7 @@ typedef struct LogPacketTrajectory {
 #endif // solaris
 
 #ifdef LOG_SOCKET_INFO
-#define LOG_SOCKET_PATH "/dev/log_robot1"   
+#define LOG_SOCKET_PATH "/tmp/log_robot1"   
 #endif // LOG_INFO
 
 #ifdef LOG_DIRECTORY_INFO
@@ -417,10 +394,6 @@ class LogCL : RobotComponent
                  Point const& supportCenter2); 
     /** @brief Enregistre le tire des balles de squatch */
     void fireBalls();
-    /** @brief Enregistre la detection d'une balise par le gonio*/
-    void gonioBalise(int baliseId,
-		     Point const& gonioCenter,
-		     Radian const& direction);
     /** @brief enregistre la position du pont */
     void bridge(BridgePosition pos);
     /** @brief enregistre la position du robot */
@@ -430,26 +403,14 @@ class LogCL : RobotComponent
 	       MotorPWM motorPwmRight,
 	       MotorPosition posLeft,
 	       MotorPosition posRight);
-
-    /** 
-     * @brief Dit qu'on est en mode simule 
-     * Par defaut on est en mode reel
-     */
-    void simuMode(bool simu); 
-    /** 
-     * @brief Fonction reservee au simulateur pour qu'il mette a jour 
-     * la position des quilles
-     */
-    void simuData(Skittle*     skittles,
-		  GRSBall*     grs,
-		  SquatchBall* balls);
-    /** @brief enregistre la position de la camera */
-    void simuCamera(Millimeter x, Millimeter y, Millimeter z);
-    /** @brief enregistre la position du pont simulee*/
-    void simuBridge(BridgePosition pos);
-    /** @brief enregistre la position du pont simulee*/
-    void simuSupport(Point const& supportCenter1,
-		     Point const& supportCenter2);
+    /** @brief defini le type de robot */
+    void robotModel(RobotModel model);
+    /** @brief message affiche sur le lcd */
+    void lcdMessage(const char* message);
+    /** @brief jack de depart enfoncee ou non */
+    void jackIn(bool jackin);
+    /** @brief arret d'urgence enfonce ou non */
+    void emergencyStopPressed(bool esp);
 
  private:
     void initSocket();

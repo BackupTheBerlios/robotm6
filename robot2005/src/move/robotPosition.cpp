@@ -12,6 +12,12 @@
 #include "robotConfig.h"
 #include "simulatorClient.h"
 
+void robotPositionMotorHasBeenReset()
+{
+    ROBOT_POS->resetHctlCoders();
+}
+
+
 // ----------------------------------------------------------------------------
 // Static members
 // ----------------------------------------------------------------------------

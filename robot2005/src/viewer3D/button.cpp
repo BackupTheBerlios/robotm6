@@ -38,16 +38,12 @@ void ControlButton::checkUnclick(int mx, int my) {
 }
 void ControlButton::draw()
 {
-    if (enable) {
-	glColor3f(1.0f,1.0f,1.0f);
-    } else {
-	glColor3f(.5f,.5f,.5f);
-    }
     if (clicked) {
 	Texture->apply(texturePushed);
     } else {
 	Texture->apply(texture1);
     }
+    glColor4f(1,1,1,1);
     glBegin(GL_QUADS);
     glTexCoord2f( 0.0, 0.0 ); glVertex2d(x+l, y);
     glTexCoord2f( 0.0, 1.0 ); glVertex2d(x+l, y+l);
@@ -55,6 +51,18 @@ void ControlButton::draw()
     glTexCoord2f( 1.0, 0.0 ); glVertex2d(x,   y);	
     glEnd(); 
     glDisable(GL_TEXTURE_2D);
+    if (!enable) {
+        glEnable(GL_ALPHA_TEST);
+        glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+	glColor4f(.5f,.5f,.5f, 0.5f);
+        glBegin(GL_QUADS);
+          glVertex2d(x+l, y);
+          glVertex2d(x+l, y+l);
+          glVertex2d(x,   y+l);	
+          glVertex2d(x,   y);	
+        glEnd();
+    }
+    glColor4f(1,1,1,1);
 }
 
 void ControlButton::registerCB(clickBtnCB ClickCB,
@@ -66,7 +74,10 @@ void ControlButton::registerCB(clickBtnCB ClickCB,
 
 void ControlButton::setEnable(bool Enable)
 {
-    enable=Enable;
+    enable=Enable; 
+    if (!maintain && !enable) {
+	clicked=false;
+    }
 }
 
 void ControlButton::setTexture(TextureId t1, 

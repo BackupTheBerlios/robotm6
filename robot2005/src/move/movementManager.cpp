@@ -136,6 +136,7 @@ void MovementManager::periodicTask()
         } else {
 	    motor_ = new MotorReal(RobotConfig->automaticMotorReset);
 	}
+        motor_->registerResetCallback(robotPositionMotorHasBeenReset);
     }
     if (motorCom_.reset && motor_) {
         motor_->reset();
@@ -157,11 +158,17 @@ void MovementManager::periodicTask()
       motor_->setSpeed(motorCom_.speedLeft, motorCom_.speedRight);
       motor_->getPosition(motorCom_.posLeft, motorCom_.posRight);
       motor_->getPWM(motorCom_.pwmLeft, motorCom_.pwmRight);
-      // TODO: Motor doesn't have periodicTask anymore [flo]
-      //motor_->periodicTask(time); 
+      motor_->checkMotorEvents();
     }
     if (periodicCallback_) {
         periodicCallback_();
+    }
+    static short logCounter=0;
+    if (logCounter++ > 5) {
+        if (motor_) Log->motor(motorCom_.pwmLeft, motorCom_.pwmRight,
+                               motorCom_.posLeft, motorCom_.posRight);
+        if (position_) Log->position(position_->pos());
+        logCounter = 0;
     }
 }
 

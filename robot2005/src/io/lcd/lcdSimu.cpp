@@ -43,7 +43,7 @@ void LcdSimu::print(const char* fmt, ...)
   va_end(argp);
   // to be sure not exceeding the lcd display
   txt[33]=0; // not 32 because of the first \n
-  LOG_INFO("LCD: \n%s%s%s\n", KB_BLUE, txt, KB_RESTORE);
+  Log->lcdMessage(txt);
   Simulator->setLCDMessage(txt);
 }
 

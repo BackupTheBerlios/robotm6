@@ -35,7 +35,7 @@ all: lib bin validate
 ## Main rules : ----- CLEAN -----
 ## ===========================================================================
 clean:	default_clean
-	${RM} -f ${BIN_DIR}/logger ${BIN_SIMU_DIR}/log2html ${BIN_SIMU_DIR}/logViewer
+	${RM} -f ${BIN_SIMU_DIR}/logger ${BIN_DIR}/logger ${BIN_SIMU_DIR}/log2html ${BIN_SIMU_DIR}/logViewer
 	${RM} -f  ${STATIC_LIB_DIR}/${LIB_NAME}.a    \
                   ${DYNAMIC_LIB_DIR}/${LIB_NAME}.so  \
                   $(STATIC_LIB_DIR)/${LIB_NAME}Basic.a
@@ -50,7 +50,7 @@ lib: $(STATIC_LIB_DIR)/${LIB_NAME}Basic.a
 ## Main rules : ----- BIN -----
 ## ===========================================================================
 bin: ${BIN_DIR}/logger ${BIN_SIMU_DIR}/log2html ${BIN_SIMU_DIR}/logViewer
-
+	cp ${BIN_DIR}/logger ${BIN_SIMU_DIR}/logger
 ## ===========================================================================
 ## Main rules : ----- VALIDATE -----
 ## ===========================================================================
@@ -67,7 +67,7 @@ ${BIN_SIMU_DIR}/log2html: log2html.o ${SRC_DIR}/include/log.h
 	${CC} -o $@ log2html.o ${DEFAULT_INC_DIR} -I/usr/include ${DEFAULT_CFLAGS} $(STATIC_LIB_DIR)/libtools.a -lz -l$(LIB_STDCPP)
 
 ${BIN_SIMU_DIR}/logViewer: logViewer.o ${SRC_DIR}/include/log.h
-	${CC} -o $@ logViewer.o ${DEFAULT_INC_DIR} -I/usr/include ${DEFAULT_CFLAGS} -L${DYNAMIC_LIB_DIR} ${ALL_DYNAMIC_LIB_SIMU}
+	${CC} -o $@ logViewer.o ${DEFAULT_INC_DIR} -I/usr/include ${DEFAULT_CFLAGS} ${STATIC_LIB_DIR}/libsoundPlayer.a ${STATIC_LIB_DIR}/libviewer3D.a ${STATIC_LIB_DIR}/liblogBasic.a ${STATIC_LIB_DIR}/libtools.a ${STATIC_LIB_DIR}/libfthread.a -lglut ${STATIC_LIB_DIR}/libviewer3D.a -lGLU -lGL -lm -lpthread -l$(LIB_STDCPP) -lz
 
 
 $(STATIC_LIB_DIR)/${LIB_NAME}Basic.a: logBasic.o

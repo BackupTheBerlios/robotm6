@@ -288,6 +288,69 @@ void LogCL::sound(int snd)
     header.length = sizeof(LogPacketEnumValue);
     sendPacket(header, (Byte*)&data);
 }
+// ---------------------------------------------------------------------------
+// LogCL::robotModel
+// ---------------------------------------------------------------------------
+// Enregistre le type de robot
+// ---------------------------------------------------------------------------
+void LogCL::robotModel(RobotModel model)
+{
+    LogPacketHeader header(LOG_TYPE_ROBOT_MODEL);
+    LogPacketEnumValue data((int)model);
+    header.length = sizeof(LogPacketEnumValue);
+    sendPacket(header, (Byte*)&data);
+}
+
+// ---------------------------------------------------------------------------
+// LogCL::lcdMessage
+// ---------------------------------------------------------------------------
+// message affiche sur le lcd 
+// ---------------------------------------------------------------------------
+void LogCL::lcdMessage(const char* message)
+{
+    if (LogCL::getPrintf()) { 
+        ::printf("%sLCD:%s \n%s%s%s\n", 
+                 KB_INFO, KB_RESTORE, KB_BLUE, message, KB_RESTORE); 
+    }   
+    LogPacketHeader header(LOG_TYPE_LCD);
+    LogPacketLcd data(message);
+    header.length = sizeof(LogPacketLcd);
+    sendPacket(header, (Byte*)&data);
+}
+
+// ---------------------------------------------------------------------------
+// LogCL::jackIn
+// ---------------------------------------------------------------------------
+// jack de depart enfoncee ou non 
+// ---------------------------------------------------------------------------
+void LogCL::jackIn(bool jackin)
+{
+    if (LogCL::getPrintf()) { 
+        if (jackin) ::printf("%sJACK-IN%s\n", KB_INFO, KB_RESTORE); 
+        else ::printf("%sJACK-OUT%s\n", KB_INFO, KB_RESTORE); 
+    }   
+    LogPacketHeader header(LOG_TYPE_JACKIN);
+    LogPacketBoolean data(jackin);
+    header.length = sizeof(LogPacketBoolean);
+    sendPacket(header, (Byte*)&data);
+}
+
+// ---------------------------------------------------------------------------
+// LogCL::emergencyStopPressed
+// ---------------------------------------------------------------------------
+// arret d'urgence enfonce ou non 
+// ---------------------------------------------------------------------------
+void LogCL::emergencyStopPressed(bool esp)
+{
+    if (LogCL::getPrintf()) { 
+        if (esp) ::printf("%sEMERGENCY STOP PRESSED%s\n", KB_INFO, KB_RESTORE); 
+        else ::printf("%sEMERGENCY STOP RELEASED%s\n", KB_INFO, KB_RESTORE); 
+    }   
+    LogPacketHeader header(LOG_TYPE_EMERGENCY_STOP);
+    LogPacketBoolean data(esp);
+    header.length = sizeof(LogPacketBoolean);
+    sendPacket(header, (Byte*)&data);
+}
 
 // ---------------------------------------------------------------------------
 // LogCL::trajectory
@@ -357,21 +420,6 @@ void LogCL::bridge(BridgePosition pos)
 }
 
 // ---------------------------------------------------------------------------
-// LogCL::gonioBalise
-// ---------------------------------------------------------------------------
-// Enregistre la detection d'une balise
-// ---------------------------------------------------------------------------
-void LogCL::gonioBalise(int baliseId,
-		      Point const& gonioCenter,
-		      Radian const& direction)
-{
-    LogPacketHeader header(LOG_TYPE_GONIO);
-    LogPacketGonio data(baliseId, gonioCenter, direction);
-    header.length = sizeof(LogPacketGonio);
-    sendPacket(header, (Byte*)&data);
-}
-
-// ---------------------------------------------------------------------------
 // LogCL::closeLogFile
 // ---------------------------------------------------------------------------
 // Ferme le log ce qui le squve sur le disque
@@ -382,64 +430,3 @@ void LogCL::closeLogFile()
     sendPacket(header, NULL);
 }
 
-// ===========================================================================
-// Mode Simule
-// ===========================================================================
-
-// ---------------------------------------------------------------------------
-// LogCL::simuMode
-// ---------------------------------------------------------------------------
-// Enregister le mode dans lequel tourne le programme
-// ---------------------------------------------------------------------------
-void LogCL::simuMode(bool simu)
-{
-    LogPacketHeader header(simu?LOG_TYPE_SIMU:LOG_TYPE_REAL);
-    sendPacket(header, NULL);
-}
-
-// ---------------------------------------------------------------------------
-// LogCL::simuCamera
-// ---------------------------------------------------------------------------
-void LogCL::simuCamera(Millimeter x, Millimeter y, Millimeter z)
-{
-    LogPacketHeader header(LOG_TYPE_CAMERA_SIMU);
-    LogPacketCamera a(x,y,z);
-    header.length = sizeof(LogPacketCamera);
-    sendPacket(header, (Byte*)&a);
-}
-
-// ---------------------------------------------------------------------------
-// LogCL::simuData
-// ---------------------------------------------------------------------------
-void LogCL::simuData(Skittle*     skittles,
-		     GRSBall*     grs,
-		     SquatchBall* balls)
-{
-    LogPacketHeader header(LOG_TYPE_SKITTLE_SIMU);
-    LogPacketSkittleSimu data(skittles, grs, balls);
-    header.length = sizeof(LogPacketSkittleSimu);
-    sendPacket(header, (Byte*)&data);
-}
-
-// ---------------------------------------------------------------------------
-// LogCL::setSimuBridge
-// ---------------------------------------------------------------------------
-void LogCL::simuBridge(BridgePosition pos)
-{
-    LogPacketHeader header(LOG_TYPE_BRIDGE_SIMU);
-    LogPacketEnumValue data(pos);
-    header.length = sizeof(LogPacketEnumValue);
-    sendPacket(header, (Byte*)&data);
-}
-
-// ---------------------------------------------------------------------------
-// LogCL::setSimuSupport
-// ---------------------------------------------------------------------------
-void LogCL::simuSupport(Point const& supportCenter1,
-			Point const& supportCenter2)
-{
-    LogPacketHeader header(LOG_TYPE_SUPPORT_SIMU);
-    LogSupport data(supportCenter1, supportCenter2);
-    header.length = sizeof(LogSupport);
-    sendPacket(header, (Byte*)&data);
-}

@@ -83,8 +83,7 @@ void updateCorrepondanceFile(int &num)
         }
         fclose(configFile);
     }
-    printf("i=%d\n", i);
-			
+    			
     time_t tloc;
     time(&tloc);
     struct tm *ltime=localtime(&tloc);
@@ -427,7 +426,6 @@ int main(int argc, char*argv[])
 	bool close=false;
         processPacket(sock, &file, display, close);
 	if (close) {
-	    printf("Close packet\n");
 	    file.close();
 	    initFile(&file);
 	    file_=&file;
