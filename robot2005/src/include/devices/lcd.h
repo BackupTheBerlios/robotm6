@@ -18,8 +18,8 @@ typedef unsigned int LcdMessage;
 static const unsigned int LCD_CHAR_PER_LINE = 16;
 
 typedef enum LcdLed {
-    LCD_LED_LEFT=1,
-    LCD_LED_RIGHT=0
+    LCD_LED_RIGHT=1,
+    LCD_LED_LEFT=0
 } LcdLed;
 
 static const LcdLed LCD_LED_RED   = LCD_LED_RIGHT;

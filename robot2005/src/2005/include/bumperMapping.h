@@ -37,26 +37,26 @@ BumperMappingStruct BumpersMapping[BUMPERS_NBR]= {
     true},
     {BUTTON_NO,     "Button No",       EVENTS_BUTTON_NO,       false, 0, 0,
     true},
-    {SWITCH_MATCH,  "Switch Match",    EVENTS_GROUP_NONE,      false, 0, 0,
+    {SWITCH_MATCH,  "Switch Match",    EVENTS_GROUP_NONE,      false, 2, 0,
     true},
-    {SWTICH_REBOOT, "Switch Reboot",   EVENTS_SWITCH_REBOOT,   false, 0, 0,
+    {SWTICH_REBOOT, "Switch Reboot",   EVENTS_SWITCH_REBOOT,   false, 1, 2,
     true},
-    {EMERGENCY_STOP,"Emergency Stop",  EVENTS_EMERGENCY_STOP,  false, 0, 0,
+    {EMERGENCY_STOP,"Emergency Stop",  EVENTS_EMERGENCY_STOP,  false, 1, 1,
     true},
-    {START_JACK,    "Start Jack",      EVENTS_JACKIN,          false, 0, 0,
+    {START_JACK,    "Start Jack",      EVENTS_JACKIN,          false, 1, 0,
     true},
  
     {BRIDG_BUMP_LEFT,"BumpBridgeLeft",        EVENTS_BRIDGE_BUMP_LEFT, 
-     false, 0, 0, true},
+     false, 0, 4, true},
     {BRIDG_BUMP_RIGHT,"BumpBridgeRight",      EVENTS_BRIDGE_BUMP_RIGHT, 
-     false, 0, 0, true},
+     false, 0, 3, true},
     {BRIDG_SHARP_LEFT,"SharpBridgeLeft",      EVENTS_GROUP_NONE,        
-     false, 0, 0, true},
+     true, 0, 0, true},
     {BRIDG_SHARP_CENTER, "SharpBridgeCenter", EVENTS_GROUP_NONE,        
-     false, 0, 0, true},
+     true, 0, 1, true},
     {BRIDG_SHARP_RIGHT,"SharpBridgeRight",    EVENTS_GROUP_NONE,        
-     false, 0, 0, true}
-    // TODO: add bumpers
+     true, 0, 2, true}
+    // TODO: add bumpers 2,1 a 2,7
 };
 
 #endif

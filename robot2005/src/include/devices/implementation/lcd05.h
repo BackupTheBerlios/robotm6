@@ -36,7 +36,34 @@ class Lcd_05 : public LcdCL
   /**
    * @brief This function erase the lcd screen
    */
-  void clear();
+  void clear(); 
+
+  /**
+   * @brief This function turns on the backlight (retro eclairage)
+   * Not implemented on the board we use
+   */
+  void backlightOn();
+  /**
+   * @brief This function turns off the backlight (retro eclairage)
+   * Not implemented on the board we use
+   */
+  void backlightOff();
+  /**
+   * @brief This function turns on the automatic backlight (retro eclairage)
+   */
+  void automaticBacklightOn();
+  /**
+   * @brief This function turns off the automatic backlight (retro eclairage)
+   */
+  void automaticBacklightOff();
+  /**
+   * @brief This function turn on the led ledId
+   */
+  void setLed(LcdLed ledId, LcdLedMode mode);
+  /**
+   * @brief This function set led blinking alternatively
+   */
+  void ledPolice();
  private:
   IoDevice* device_;
 };

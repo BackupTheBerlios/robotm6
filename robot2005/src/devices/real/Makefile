@@ -62,8 +62,12 @@ all: lib bin validate
 clean:	default_clean
 	${RM} -f  ${STATIC_LIB_DIR}/${LIB_NAME}.a        \
                   ${DYNAMIC_LIB_DIR}/${LIB_NAME}.so      \
+		   ${BIN_DIR}/lcdPrint05      \
+                   ${BIN_DIR}/getButton05     \
 		   ${BIN_DIR}/testBumper      \
 		   ${BIN_DIR}/testEnv         \
+		   ${BIN_DIR}/testServo       \
+		   ${BIN_DIR}/testLcd         \
                    ${BIN_DIR}/telecommandIsa  \
                    ${BIN_DIR}/telecommand05
 #	${RM} -f  ${BIN_DIR}/${BIN_NAME}                 
@@ -78,8 +82,7 @@ lib: $(STATIC_LIB_DIR)/${LIB_NAME}.a ${DYNAMIC_LIB_DIR}/${LIB_NAME}.so
 ## Main rules : ----- BIN -----
 ## ===========================================================================
 #bin: ${BIN_DIR}/${BIN_NAME}
-bin: ${BIN_DIR}/testBumper ${BIN_DIR}/testEnv ${BIN_DIR}/telecommandIsa ${BIN_DIR}/telecommand05
-
+bin: ${BIN_DIR}/testServo ${BIN_DIR}/testBumper ${BIN_DIR}/testEnv ${BIN_DIR}/telecommandIsa ${BIN_DIR}/telecommand05 ${BIN_DIR}/lcdPrint05 ${BIN_DIR}/testLcd ${BIN_DIR}/getButton05
 ## ===========================================================================
 ## Main rules : ----- VALIDATE -----
 ## ===========================================================================
@@ -88,6 +91,18 @@ validate:
 ## ===========================================================================
 ## Specific rules
 ## ===========================================================================
+${BIN_DIR}/getButton05: bumper_05.cpp
+	${CC} -o $@ $^ ../base/bumper.o $(DEFAULT_CFLAGS) ${INC_DIR} ${DEFAULT_INC_DIR} -DGET_BUMPER_MAIN $(STATIC_LIB_DIR)/libevents.a $(IO_STATIC_LIB)
+
+${BIN_DIR}/lcdPrint05: lcd_05.cpp
+	${CC} -o $@ $^ ../base/lcd.o $(DEFAULT_CFLAGS) ${INC_DIR} ${DEFAULT_INC_DIR} -DLCD_PRINT_MAIN $(IO_STATIC_LIB)
+
+${BIN_DIR}/testLcd: lcd_05.cpp
+	${CC} -o $@ $^ ../base/lcd.o $(DEFAULT_CFLAGS) ${INC_DIR} ${DEFAULT_INC_DIR} -DTEST_MAIN $(IO_STATIC_LIB)
+
+${BIN_DIR}/testServo: servo_05.cpp
+	${CC} -o $@ $^ ../base/servo.o $(DEFAULT_CFLAGS) ${INC_DIR} ${DEFAULT_INC_DIR} -DTEST_MAIN $(IO_STATIC_LIB)
+
 ${BIN_DIR}/testBumper: bumper_05.cpp
 	${CC} -o $@ $^ ../base/bumper.o $(DEFAULT_CFLAGS) ${INC_DIR} ${DEFAULT_INC_DIR} -DTEST_MAIN $(STATIC_LIB_DIR)/libevents.a $(IO_STATIC_LIB)
 

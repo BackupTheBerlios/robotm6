@@ -171,3 +171,29 @@ int main(int argc, char* argv[])
 }
 
 #endif
+
+#ifdef GET_BUMPER_MAIN
+
+#include "io/serialPort.h"
+int main(int argc, char* argv[]) 
+{
+  if (argc!=3) {
+    printf("Usage: %s byte, bit\n  "
+	   "Return the value of a bit in the 3 bytes returned "
+	   "by the bumper device\n", argv[0]);
+    return -1;
+  }
+  IoManager->submitIoHost(new SerialPort(0, false));
+  IoManager->submitIoHost(new SerialPort(1, false));
+  if (IoManager->getIoDevice(IO_ID_BUMPER_05)) {
+    Bumper05 bumper;
+    unsigned char data[BUMPER_DATA_NBR];
+    bumper.getAllCaptors(data);
+    return (data[atoi(argv[1])] & (1<<atoi(argv[2])))?1:0;
+  } else {
+    printf("Bumper device not found\n");
+  }
+  return -1;
+}
+
+#endif
