@@ -1,5 +1,6 @@
 // variables static definies dans robot*.h
 #include "classConfig.h"
+#include "robotConfig.h"
 
 // --------------------------------------------------------------------------
 // ClassConfig.h
@@ -20,3 +21,8 @@ ClassConfig* ClassConfig::find(ClassId id)
     initClassConfig();
     return classConfigArray_[(int)id];
 }
+
+// --------------------------------------------------------------------------
+// RobotConfig.h
+// --------------------------------------------------------------------------
+RobotConfigCL* RobotConfigCL::lastInstance_=NULL;
