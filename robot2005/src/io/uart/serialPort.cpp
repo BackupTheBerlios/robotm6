@@ -102,7 +102,7 @@ bool SerialDevice::open() {
     newtio.c_iflag = INPCK; // | IGNBRK | IGNPAR ; // input parity check
     newtio.c_lflag = 0;
     newtio.c_oflag = 0;
-    newtio.c_cflag = CREAD | CS8 | CLOCAL; // | B9600
+    newtio.c_cflag = CREAD | CS8 | CLOCAL;// | B9600
     if (isBlocking_) {
       newtio.c_cc[ VMIN ] = 1;
       newtio.c_cc[ VTIME ] = 0;
@@ -297,10 +297,18 @@ const IoDeviceScanInfoPairVector& SerialPort::scan() {
     LOG_INFO("Scanning serial port\n");
     IoByte scanAnswer;
     scannedDevice_.clear(); // new scan...
-    const unsigned int NB_MAX_NB_SPEEDS = 8;
+    const unsigned int NB_MAX_NB_SPEEDS = SERIAL_SPEED_MAX;
     SerialSpeed scanSpeeds[NB_MAX_NB_SPEEDS];
-    unsigned int nbSpeeds;
+    unsigned int nbSpeeds=0;
+    printf("%d\n", (unsigned int)SERIAL_SPEED_MAX);
     if (speed_ == SERIAL_SPEED_SCAN) {
+/*
+      for(unsigned int i=0;i<NB_MAX_NB_SPEEDS; i++) {
+        
+	scanSpeeds[i]=(SerialSpeed)i;
+      }
+      nbSpeeds = NB_MAX_NB_SPEEDS;
+*/
 	scanSpeeds[0] = SERIAL_SPEED_9600;
 	scanSpeeds[1] = SERIAL_SPEED_38400;
 	nbSpeeds = 2;
