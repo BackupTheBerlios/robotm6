@@ -135,10 +135,17 @@ public: // blocking read/write methods
 	return writeRead(send, sendLength, receive, receiveLength);
     }
 
+    /**
+     * @brief returns true, if this device blocks on read/write operations
+     */
+    virtual bool isBlocking() const { return false; }
+    
 public: // non-blocking read/write methods
 
     /**
-     * @brief returns true, if this device can do non-blocking operations.
+     * @brief returns true, if this device can listen.
+     * A device might be non-blocking and still be able do listen
+     * and inversively a listen-able device might be blocking.
      */
     virtual bool canListen() const { return false; }
     

@@ -14,9 +14,10 @@
 
 #pragma once
 
-#include "ioDevice.h"
+#include "io/ioDevice.h"
+#include "io/ioHost.h"
 #include "robotBase.h"
-#include "ioHost.h"
+//#include "mthread.h"
 
 static const unsigned int UBART_DEFAULT_ID = 0;
 static const unsigned int UBART_MAX_DEVICES = 8;
@@ -44,6 +45,7 @@ private: // UbartMultiplexer-methods
     void switchToUbart(Ubart* ubart);
     bool openUbart();
     bool closeUbart();
+    bool isBlocking() const;
     bool write(IoByte* buf, unsigned int& length);
     bool read(IoByte* buf, unsigned int& length);
 
@@ -54,4 +56,5 @@ private: // fields
     unsigned int openedUbarts_;
     unsigned int currentId_;
     unsigned int targetId_;
+    pthread_mutex_t lock_;
 };
