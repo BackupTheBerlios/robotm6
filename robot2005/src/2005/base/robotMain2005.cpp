@@ -8,7 +8,7 @@
 // -------------------------------------------------------------------------
 // RobotMain2005CL::RobotMain2005CL
 // -------------------------------------------------------------------------
-RobotMain2005CL::RobotMain2005CL() : 
+RobotMain2005CL::RobotMain2005CL() :
     RobotMainCL()
 { 
     if (RobotConfig->needSimulator()) {
@@ -20,14 +20,14 @@ RobotMain2005CL::RobotMain2005CL() :
             if (RobotConfig2005->isRobotAttack) {
                 Simulator->setRobotModel(ROBOT_MODEL_ATTACK);
             } else {
-                Simulator->setRobotModel(ROBOT_MODEL_DEFENCE);  
+                Simulator->setRobotModel(ROBOT_MODEL_DEFENCE);
             } 
             Simulator->setRobotMotorCoef(RobotConfig->getMotorD(),
-                                         RobotConfig->motorK, 
+                                         RobotConfig->motorK,
                                          RobotConfig->motorSignLeft,
                                          RobotConfig->motorSignRight);
             Simulator->setRobotOdomCoef(RobotConfig->odometerD,
-                                        M_PI/2, 
+                                        M_PI/2,
                                         RobotConfig->odometerK, 
                                         RobotConfig->odometerSignLeft,
                                         RobotConfig->odometerSignRight);

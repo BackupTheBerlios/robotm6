@@ -17,10 +17,10 @@ class StrategyAttackCL : public Strategy2005CL
     // il faut regarder sa position 
 
 
-    // ================ Detection et traversee du pont ==================
-    /** @brief Tire des balles avec la catapulte */
+    // ================ Tire des catapultes ==================
+    /** @brief Tire des balles avec les catapultes */
     void fireCatapults();
-    
+
     // ================ Detection et traversee du pont ==================
 
     /** @brief va a l'endroit ou on detecte les pont par capteurs sharps */

@@ -16,7 +16,7 @@
 
 
 // ============================================================================
-// ==============================   class Strategy2005CL   ==========================
+// ==============================   class Strategy2005CL   ====================
 // ============================================================================
 
 // -------------------------------------------------------------------------
@@ -78,7 +78,7 @@ void Strategy2005CL::emergencyStop()
         LOG_WARNING("EMERGENCY_STOP is pressed\n");
         Lcd->print("EMERGENCY STOP");
         Log->stopMatch();
-        
+
         // unregister game over and emergency stop exceptions
 	Events->registerCallback(EVENTS_EMERGENCY_STOP, this, NULL, "");
 	Events->registerCallback(EVENTS_GAME_OVER, this, NULL, "");
@@ -110,23 +110,23 @@ void Strategy2005CL::gameOver()
     Move->stop();
     LOG_WARNING("GAME is OVER\n");
     Lcd->print("GAME OVER");
-    
+
     Log->stopMatch();
     Position pos = RobotPos->pos();
-    
+
     // unregister game over and emergency stop exceptions
     Events->registerCallback(EVENTS_EMERGENCY_STOP, this, NULL, "");
     Events->registerCallback(EVENTS_GAME_OVER,      this, NULL, "");
     Events->registerCallback(EVENTS_TIMER_ALERT,    this, NULL, "");
-    
+
     // Action a exectuer en fin de match: on arrete le robot!
     Timer->reset();
     Move->emergencyStop();
     MvtMgr->reset();
     IOMGR->emergencyStop();
-    
+
     Log->closeLogFile();
-    
+
     Sound->play(SOUND_C_FAIT);
     sleep(2);
     if (menu("End of the match\nWinner   Loser")) {
@@ -183,7 +183,7 @@ bool Strategy2005CL::checkEvents(bool &endEvt)
 // ----------------------------------------------------------------------------
 // evtEndNoMove
 // ----------------------------------------------------------------------------
-// Cette fonction est un EventsFn qui permet d'attendre la fin d'un 
+// Cette fonction est un EventsFn qui permet d'attendre la fin d'un
 // mouvement sans detecter les collisions ou le patinage du robot.
 // Attends: find du mouvment, arret d'urgence, fin du match, timer_alert
 // ----------------------------------------------------------------------------
@@ -259,9 +259,9 @@ bool Strategy2005CL::checkCollision(bool &collisionEvt)
     do {
       LOG_COMMAND("Avoid Collision\n");
       collisionEvt = true;
-      
+
       Obstacle obstacle;
-      
+
       // evitement de collision
       MvtMgr->setRobotDirection(MOVE_DIRECTION_FORWARD);
       if (Events->isInWaitResult(EVENTS_PWM_ALERT)) {
@@ -342,7 +342,7 @@ bool Strategy2005CL::checkCollision(bool &collisionEvt)
 	HLI->setBumpObstacle(obstacle);
 #endif
       }
-      
+
       Events->wait(evtEndMoveCollision);
       bool tmpEvt=false;
       if (!checkEvents(tmpEvt)) return false;
@@ -380,7 +380,7 @@ bool Strategy2005CL::menu(const char*fmt, ...)
     va_start(argp, fmt);
     vsprintf(text, fmt, argp);
     va_end(argp);
-    
+
     if (strlen(text)>0 && fmt != NULL) {
         Lcd->print(text);
     }

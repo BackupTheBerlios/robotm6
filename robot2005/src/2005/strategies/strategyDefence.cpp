@@ -37,10 +37,10 @@ void StrategyDefenceCL::run(int argc, char* argv[])
 
     Move->go2Target(Point(3190,1650));
     Events->wait(evtEndMove);
-    
+
     Move->go2Target(Point(3190,750));
     Events->wait(evtEndMove);
-    
+
     MvtMgr->setRobotDirection(MOVE_DIRECTION_BACKWARD);
     Move->go2Target(Point(3190, 1350));
     Events->wait(evtEndMove);

@@ -11,7 +11,7 @@
 
 
 // ============================================================================
-// ==============================   class Strategy2005CL   ==========================
+// ==============================   class Strategy2005CL   ====================
 // ============================================================================
 
 // -------------------------------------------------------------------------
@@ -207,16 +207,16 @@ void Strategy2005CL::testMove()
 bool Strategy2005CL::autoCheck()
 {
     LOG_COMMAND("== Auto check begin ==\n");
-    
+
 
     testUARTCom();
 
     if (testMove_)        testMove();
-    
+
     unlockEmergencyStop();
-    
+
     LOG_OK("== Auto check DONE ==\n");
-    
+
     return true;
 }
 
@@ -226,7 +226,7 @@ bool Strategy2005CL::autoCheck()
 bool Strategy2005CL::waitJackout()
 {
     RobotConfig->disableUartAnswerRequest=true;
-  
+
     LOG_COMMAND("== waitJackout ==\n");
     unlockEmergencyStop();
     if (Events->check(EVENTS_JACKIN)) {
@@ -236,7 +236,7 @@ bool Strategy2005CL::waitJackout()
 	Events->waitNot(EVENTS_JACKIN);
 	sleep(1);
     }
-    
+
     LOG_COMMAND("WAIT JACKIN\n");
     Lcd->print("Wait jack in");
     Sound->play(SOUND_WAIT_JACKIN, SND_PRIORITY_URGENT);
@@ -252,7 +252,7 @@ bool Strategy2005CL::waitJackout()
     Lcd->print("Ready to start\nWait jack out");
     Sound->play(SOUND_GO_FOR_LAUNCH, SND_PRIORITY_URGENT);
     Events->waitNot(EVENTS_JACKIN);
-   
+
     Lcd->print("Go, go, go...");
     LOG_WARNING("Go, go, go...\n");
     return true;

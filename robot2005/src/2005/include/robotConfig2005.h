@@ -20,13 +20,13 @@ class RobotConfig2005CL : public RobotConfigCL
     /** @brief Renvoie true si l'un des composant du robot est simule */
     virtual bool needSimulator() const;
     static RobotConfig2005CL* instance();
-   
+
  protected:
     // only the main can create the config
     RobotConfig2005CL(const char* name,
                       bool simulated);
 
- public:  
+ public:
     /** @brief True si c'est le robot d'attack, false sinon */
     bool isRobotAttack;
     /** @brief True si on utilise la catapulte en debut de match */

@@ -37,11 +37,11 @@ class Strategy2005CL : public StrategyCL
     const char* menuName() const;
     /** @brief Configure the robot and wait for the startJack */
     bool waitStart(InitMode mode);
-    /** @brief Fonction qui effectiue la derniere action du robot puis arrete le robot */
+    /** @brief Fonction qui effectue la derniere action du robot puis arrete le robot */
     virtual bool timerAlert();
     /** @brief Function lancee au bout d'1min30 */
     virtual void gameOver();
-    /** @brief Fonction lancee si l'arret d'urgence est enfonce pendant 
+    /** @brief Fonction lancee si l'arret d'urgence est enfonce pendant
      * le match */
     virtual void emergencyStop();
     /** 
@@ -51,7 +51,7 @@ class Strategy2005CL : public StrategyCL
      * endEvt=true si l'evenement a ete catche
      */
     virtual bool checkEvents(bool &endEvt);
-    /** 
+    /**
      * @brief Gere les collisions 
      */
     virtual bool checkCollision(bool &collisionEvt);
@@ -81,7 +81,7 @@ class Strategy2005CL : public StrategyCL
     /** @brief Fonction lancee si l'arret d'urgence est enfonce pendant 
      * le match */
     void unlockEmergencyStop();
-    
+
     // === Teste et calibre les capteurs ===
     /** @brief Verifie que les bumpers sont dans le bon etat */
     void testEnvDetector();

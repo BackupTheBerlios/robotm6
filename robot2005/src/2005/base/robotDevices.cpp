@@ -58,7 +58,7 @@ void RobotDevicesCL::emergencyStop()
     if (sound_)    sound_->emergencyStop();
 }
 
-/** @brief Envoie le signal d'arret d'urgence a toutes les cartes */
+/** @brief Envoie le signal de reset a toutes les cartes */
 void RobotDevicesCL::reset()
 {
     if (motor_)    motor_->reset();

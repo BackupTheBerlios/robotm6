@@ -19,7 +19,7 @@ class RobotDevicesCL : public RobotBase {
 
     /** @brief Envoie le signal d'arret d'urgence a toutes les cartes */
     void emergencyStop();
-    
+
     /** @brief reset all devices */
     void reset();
 
