@@ -12,7 +12,7 @@
 #include "robotPosition.h"
 #include "move.h"
 #include "movementManager.h"
-#include "ioManager.h"
+//#include "ioManager.h"
 
 
 // ============================================================================
@@ -86,7 +86,7 @@ void Strategy2005CL::emergencyStop()
 	
 	Move->emergencyStop();
 	MvtMgr->reset();
-	IOMGR->emergencyStop();
+	//IOMGR->emergencyStop();
 	
 	Log->closeLogFile();
 	Sound->play(SOUND_ANORMAL_EMERGENCY_STOP, SND_PRIORITY_URGENT);
@@ -123,7 +123,7 @@ void Strategy2005CL::gameOver()
     Timer->reset();
     Move->emergencyStop();
     MvtMgr->reset();
-    IOMGR->emergencyStop();
+    //IOMGR->emergencyStop();
 
     Log->closeLogFile();
 
