@@ -172,11 +172,11 @@ void SimulatorRobot::checkPosAndBridge(BridgePosition const& bridge)
     for(unsigned int i=0;i+1<SIMU_BRIDGE_BORDER_PTS_NBR;i+=2) {
         Segment bridgeBorder(bridgePts[i], bridgePts[i+1]);
         if(checkSegmentIntersectionWithRobot(bridgeBorder, 30, intersection)){
-            printf("Intersection:"); 
+          /*  printf("Intersection:"); 
             intersection.print();
             bridgePts[i].print();
             bridgePts[i+1].print();
-
+          */
             isValid_ = false;
             setRealPos(realPosOld_);
             return;
@@ -192,7 +192,13 @@ void SimulatorRobot::checkPosAndOtherRobot(SimulatorRobot* other)
 
 void SimulatorRobot::checkPosAndGRSBall(SimulatorGrsBall* ball)
 {
-
+    if (!ball || !ball->ball_) return;
+    Circle circle(ball->ball_->center, BALLE_GRS_RAYON);
+    Point intersection;
+    if (checkCircleIntersectionWithRobot(circle, BALLE_GRS_RAYON, intersection)) {
+        Point newCenter = ball->ball_->center+(ball->ball_->center-intersection)* BALLE_GRS_RAYON/dist(ball->ball_->center,intersection);
+        ball->setRobotCollision(newCenter);
+    }
 }
 
 void SimulatorRobot::checkPosAndSkittle(SimulatorSkittle* skittle)
@@ -246,24 +252,68 @@ bool SimulatorRobot::checkSegmentIntersectionWithRobot(Segment const& seg,
                                                        Millimeter z,
                                                        Point& intersectionPt) 
 {
-    if (z>70) {
+    if (z>60) {
         for(unsigned int i=0;i!=4;i++) {
             Segment robotBorder(borderRealPts_[8+i], borderRealPts_[8+((i+1)%4)]);
             if(Geometry2D::getSegmentsIntersection(robotBorder, seg, intersectionPt)) return true;
         }
     } else {
         for(unsigned int i=0;i!=4;i++) {
-       /*     printf("\n");
-            borderRealPts_[i].print();
-            borderRealPts_[(i+1)%4].print();
-            seg.lowerLeft.print();
-            seg.upperRight.print();*/
             Segment robotBorder(borderRealPts_[i], borderRealPts_[(i+1)%4]);
             if(Geometry2D::getSegmentsIntersection(robotBorder, seg, intersectionPt)) return true;
         }
         for(unsigned int i=0;i!=4;i++) {
             Segment robotBorder(borderRealPts_[4+i], borderRealPts_[4+((i+1)%4)]);
             if(Geometry2D::getSegmentsIntersection(robotBorder, seg, intersectionPt)) return true;
+        }
+    }
+    return false;
+}
+
+bool SimulatorRobot::checkCircleIntersectionWithRobot(Circle const& circle,
+                                                      Millimeter z,
+                                                      Point& intersectionPt) 
+{
+    Point intersectionPt1;
+    Point intersectionPt2;
+    int npts=0;
+    if (z>60) {
+        for(unsigned int i=0;i!=4;i++) {
+            Segment robotBorder(borderRealPts_[8+i], borderRealPts_[8+((i+1)%4)]);
+            npts=Geometry2D::getSegmentCircleIntersection(robotBorder, circle,
+                                                          intersectionPt1, intersectionPt2);
+            if (npts==1) {
+                intersectionPt = intersectionPt1;
+                return true;
+            } else if (npts==2) {
+                intersectionPt = (intersectionPt1+intersectionPt2)/2.;
+                return true;
+            } 
+        }
+    } else {
+        for(unsigned int i=0;i!=4;i++) {
+            Segment robotBorder(borderRealPts_[i], borderRealPts_[(i+1)%4]);
+            npts=Geometry2D::getSegmentCircleIntersection(robotBorder, circle,
+                                                          intersectionPt1, intersectionPt2);
+            if (npts==1) {
+                intersectionPt = intersectionPt1;
+                return true;
+            } else if (npts==2) {
+                intersectionPt = (intersectionPt1+intersectionPt2)/2.;
+                return true;
+            } 
+        }
+        for(unsigned int i=0;i!=4;i++) {
+            Segment robotBorder(borderRealPts_[4+i], borderRealPts_[4+((i+1)%4)]);
+            npts=Geometry2D::getSegmentCircleIntersection(robotBorder, circle,
+                                                          intersectionPt1, intersectionPt2);
+            if (npts==1) {
+                intersectionPt = intersectionPt1;
+                return true;
+            } else if (npts==2) {
+                intersectionPt = (intersectionPt1+intersectionPt2)/2.;
+                return true;
+            } 
         }
     }
     return false;

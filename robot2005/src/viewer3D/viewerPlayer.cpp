@@ -33,7 +33,7 @@ void Viewer3DCL::drawPlayer()
     drawPlayerControls();
     for(unsigned int i=0; i<VIEWER_MAX_ROBOT_NBR; i++) {
 	glPushMatrix();
-	glTranslatef(0, 120+i*50, 0);
+	glTranslatef(0, 130+i*50, 0);
 	drawPlayerRobotInfo(i);
 	glPopMatrix();
     }
@@ -147,7 +147,7 @@ void reshapePlayerControl(int w, int h)
   glMatrixMode(GL_PROJECTION);
   glLoadIdentity();
   scaleX=276./w;
-  scaleY=320./h;
+  scaleY=330./h;
   glOrtho(0.0f, scaleX*w, scaleY*h, 0.0f,-1.0f,1.0f);
   glMatrixMode(GL_MODELVIEW);
   glLoadIdentity();

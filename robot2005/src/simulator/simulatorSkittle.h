@@ -52,14 +52,18 @@ class SimulatorSkittle : public RobotBase {
                          Segment const& captorVision, 
                          Millimeter     zPosCaptor, 
                          Point&         intersectionPt);
+    void collisionWithRobot(Point& newCenter);
     // -------------------------------------------------------------------
     // private members
     // -------------------------------------------------------------------
  private:
-    Skittle* skittle_;
+    Skittle*   skittle_;
     Millimeter speedX_;
     Millimeter speedY_;
-    bool isValid_;
+    bool       isValid_;
+    bool       hasMoved_;
+    Position   newPos_;
+    friend     class SimulatorRobot;
 };
 
 #endif // __SIMULATOR_SKITTLE_H__

@@ -52,14 +52,18 @@ class SimulatorGrsBall : public RobotBase {
                          Segment const& captorVision, 
                          Millimeter     zPosCaptor, 
                          Point&         intersectionPt);
+    void setRobotCollision(Point& newBallCenter);
     // -------------------------------------------------------------------
     // private members
     // -------------------------------------------------------------------
  private:
-    GRSBall* ball_;
+    GRSBall*   ball_;
     Millimeter speedX_;
     Millimeter speedY_;
-    bool isValid_;
+    bool       isValid_;
+    bool       hasMoved_;
+    Position   newPos_;
+    friend     class SimulatorRobot;
 };
 
 #endif // __SIMULATOR_GRS_BALL_H__

@@ -422,7 +422,7 @@ namespace {
 	    if (displayPlayer_) {
 		// boutons du player
 		glutInitWindowPosition(500,0); 
-		glutInitWindowSize(276, 320); 
+		glutInitWindowSize(276, 330); 
 		windowIdPlayer_=glutCreateWindow ("Player"); 
 		glutReshapeFunc(reshapePlayerControl);
 		glutDisplayFunc(displayPlayerControl); 
@@ -593,7 +593,7 @@ Viewer3DCL::Viewer3DCL() :
 			    100, 100, true);
 
     for(unsigned int i=0; i<VIEWER_MAX_ROBOT_NBR;i++) {
-	int y=135+i*50;
+	int y=145+i*50;
 	btn_[CTRL_BTN_R0_JACK+i*CTRL_BTN_NBR_PER_ROBOT]
 	    = new ControlButton((ViewerControlButtonId)(CTRL_BTN_R0_JACK+i*CTRL_BTN_NBR_PER_ROBOT),
 				TXT_JACKOUT, TXT_JACKIN, "",
@@ -609,11 +609,11 @@ Viewer3DCL::Viewer3DCL() :
 	btn_[CTRL_BTN_R0_YES+i*CTRL_BTN_NBR_PER_ROBOT]
 	    = new ControlButton((ViewerControlButtonId)(CTRL_BTN_R0_YES+i*CTRL_BTN_NBR_PER_ROBOT),
 				TEX_BTN_0, TXT_BTN_1, "",
-				200, 150+i*50, true, false);
+				200, y+15, true, false);
 	btn_[CTRL_BTN_R0_NO+i*CTRL_BTN_NBR_PER_ROBOT]
 	    = new ControlButton((ViewerControlButtonId)(CTRL_BTN_R0_NO+i*CTRL_BTN_NBR_PER_ROBOT),
 				TEX_BTN_0, TXT_BTN_1, "",
-				224, 150+i*50, true, false);
+				224, y+15, true, false);
 	btn_[CTRL_BTN_R0_COULEUR+i*CTRL_BTN_NBR_PER_ROBOT]->registerCB(clickColorBtn,
 						  unclickColorBtn);
     }

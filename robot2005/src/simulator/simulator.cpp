@@ -838,9 +838,7 @@ void SimulatorCL::setBridgeBorder()
     bridgeXPts_[11]=Point(x2, bridgeXPts_[10].y);
     bridgeXPts_[12]=Point(x1, TERRAIN_Y-bridgeXPts_[10].y);
     bridgeXPts_[13]=Point(x2, TERRAIN_Y-bridgeXPts_[10].y);
-    for(unsigned int i=0;i<14;i++) {
-        bridgeXPts_[i].print();
-    }
+    // for(unsigned int i=0;i<14;i++) bridgeXPts_[i].print();
 }   
 void SimulatorCL::setWallBorder()
 {

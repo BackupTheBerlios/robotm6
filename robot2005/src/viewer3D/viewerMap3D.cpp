@@ -884,87 +884,96 @@ void Viewer3DCL::drawSkittle3D(Skittle* skittle)
 		  1);
 	break;
     }
-	
-    glColor4f(COLOR_SKITTLE_METAL, 1.0f);
-    glPushMatrix ();
-    glTranslatef(QUILLE_RAYON/2.,0,0);
-    gluCylinder(quad, 0, QUILLE_TVIS_R, 
-		QUILLE_H_TVIS, 10, 1);
-    glTranslatef(-5./6.*QUILLE_RAYON,QUILLE_RAYON/2.,0);
-    gluCylinder(quad, 0, QUILLE_TVIS_R, 
-		QUILLE_H_TVIS, 10, 1);
-    glTranslatef(0,-QUILLE_RAYON,0);
-    gluCylinder(quad, 0, QUILLE_TVIS_R, 
-		QUILLE_H_TVIS, 10, 1);
-    glPopMatrix();
-    glTranslatef(0,0,QUILLE_H_TVIS);
-    
-    glPushMatrix ();
-    glTranslatef(QUILLE_RAYON/2.,0,0);
-    gluCylinder(quad, QUILLE_VIS_R, QUILLE_VIS_R, 
-		QUILLE_H_VIS, 10, 1);
-    gluDisk(quad, 0, QUILLE_TVIS_R, 10,10);   
-    glTranslatef(-5./6.*QUILLE_RAYON,QUILLE_RAYON/2.,0);
-    gluCylinder(quad, QUILLE_VIS_R, QUILLE_VIS_R, 
-		QUILLE_H_VIS, 10, 1);
-    gluDisk(quad, 0, QUILLE_TVIS_R, 10,10);
-    glTranslatef(0,-QUILLE_RAYON,0);
-    gluCylinder(quad, QUILLE_VIS_R, QUILLE_VIS_R, 
-		QUILLE_H_VIS, 10, 1);
-    gluDisk(quad, 0, QUILLE_TVIS_R, 10,10);
-    glPopMatrix();
-    glTranslatef(0,0,QUILLE_H_VIS);
-
-    if (skittle->color==COLOR_RED) glColor4f(COLOR_SKITTLE_RED, 1.0f);
-    else glColor4f(COLOR_SKITTLE_GREEN, 1.0f);
-    gluDisk(quad, 0, QUILLE_RAYON, 10,10);   
-    gluCylinder(quad, QUILLE_RAYON, QUILLE_RAYON, QUILLE_H_BOIS, 10, 1);
-    
-    glTranslatef(0,0,QUILLE_H_BOIS);
-    glColor4f(COLOR_SKITTLE_REFLECT, 1.0f);
-    gluCylinder(quad, QUILLE_RAYON, QUILLE_RAYON, QUILLE_H_REFLE, 10, 1);
-    
-    glTranslatef(0, 0, QUILLE_H_REFLE);
-    if (skittle->color==COLOR_RED) glColor4f(COLOR_SKITTLE_RED, 1.0f);
-    else glColor4f(COLOR_SKITTLE_GREEN, 1.0f);
-    gluDisk(quad, 0, QUILLE_RAYON, 16,16);
-    glPopMatrix();
     if (useTexture_) {
-	glPushMatrix();
-	glEnable(GL_ALPHA_TEST);
-        glEnable(GL_DEPTH_TEST);
-        glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-	glColor4f(0,0,0,0.3); 
-	Millimeter z=getGroundLevel(skittle->center);
-	if(skittle->altitude>10) {
-	    z = TERRAIN_SUPPORT_QUILLE_HAUTEUR+5;
-	}
-	glTranslatef((skittle->center.x-20)*SCALE3D, 
-		     (skittle->center.y-20)*SCALE3D, 
-		     (z+5)*SCALE3D);
-	switch(skittle->status) {
-	case SKITTLE_UP:
-	case SKITTLE_REVERSED:
-	    {
-		gluDisk (quad, 0, QUILLE_RAYON*SCALE3D, 15, 15);
-	    }
-	    break;
-	case SKITTLE_DOWN:
-	    glRotatef(r2d(skittle->direction), 
-		      0, 
-		      0,
-		      1);
-	    glBegin(GL_QUADS);
-	    glVertex3d(QUILLE_RAYON,  0, 0);
-	    glVertex3d(-QUILLE_RAYON, 0, 0);
-	    glVertex3d(-QUILLE_RAYON, QUILLE_HAUTEUR, 0);	
-	    glVertex3d(QUILLE_RAYON,  QUILLE_HAUTEUR, 0);
-	    glEnd();
-	    break;
-	}
-	glPopMatrix();
+        glColor4f(COLOR_SKITTLE_METAL, 1.0f);
+        glPushMatrix ();
+        glTranslatef(QUILLE_RAYON/2.,0,0);
+        gluCylinder(quad, 0, QUILLE_TVIS_R, 
+                    QUILLE_H_TVIS, 10, 1);
+        glTranslatef(-5./6.*QUILLE_RAYON,QUILLE_RAYON/2.,0);
+        gluCylinder(quad, 0, QUILLE_TVIS_R, 
+                    QUILLE_H_TVIS, 10, 1);
+        glTranslatef(0,-QUILLE_RAYON,0);
+        gluCylinder(quad, 0, QUILLE_TVIS_R, 
+                    QUILLE_H_TVIS, 10, 1);
+        glPopMatrix();
+        glTranslatef(0,0,QUILLE_H_TVIS);
+        
+        glPushMatrix ();
+        glTranslatef(QUILLE_RAYON/2.,0,0);
+        gluCylinder(quad, QUILLE_VIS_R, QUILLE_VIS_R, 
+                    QUILLE_H_VIS, 10, 1);
+        gluDisk(quad, 0, QUILLE_TVIS_R, 10,10);   
+        glTranslatef(-5./6.*QUILLE_RAYON,QUILLE_RAYON/2.,0);
+        gluCylinder(quad, QUILLE_VIS_R, QUILLE_VIS_R, 
+                    QUILLE_H_VIS, 10, 1);
+        gluDisk(quad, 0, QUILLE_TVIS_R, 10,10);
+        glTranslatef(0,-QUILLE_RAYON,0);
+        gluCylinder(quad, QUILLE_VIS_R, QUILLE_VIS_R, 
+                    QUILLE_H_VIS, 10, 1);
+        gluDisk(quad, 0, QUILLE_TVIS_R, 10,10);
+        glPopMatrix();
+        glTranslatef(0,0,QUILLE_H_VIS);
+        
+        if (skittle->color==COLOR_RED) glColor4f(COLOR_SKITTLE_RED, 1.0f);
+        else glColor4f(COLOR_SKITTLE_GREEN, 1.0f);
+        gluDisk(quad, 0, QUILLE_RAYON, 10,10);   
+        gluCylinder(quad, QUILLE_RAYON, QUILLE_RAYON, QUILLE_H_BOIS, 10, 1);
+        
+        glTranslatef(0,0,QUILLE_H_BOIS);
+        glColor4f(COLOR_SKITTLE_REFLECT, 1.0f);
+        gluCylinder(quad, QUILLE_RAYON, QUILLE_RAYON, QUILLE_H_REFLE, 10, 1);
+        
+        glTranslatef(0, 0, QUILLE_H_REFLE);
+        if (skittle->color==COLOR_RED) glColor4f(COLOR_SKITTLE_RED, 1.0f);
+        else glColor4f(COLOR_SKITTLE_GREEN, 1.0f);
+        gluDisk(quad, 0, QUILLE_RAYON, 16,16);
+        glPopMatrix();
+        if (useTexture_) {
+            glPushMatrix();
+            glEnable(GL_ALPHA_TEST);
+            glEnable(GL_DEPTH_TEST);
+            glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+            glColor4f(0,0,0,0.3); 
+            Millimeter z=getGroundLevel(skittle->center);
+            if(skittle->altitude>10) {
+                z = TERRAIN_SUPPORT_QUILLE_HAUTEUR+5;
+            }
+            glTranslatef((skittle->center.x-20)*SCALE3D, 
+                         (skittle->center.y-20)*SCALE3D, 
+                         (z+5)*SCALE3D);
+            switch(skittle->status) {
+            case SKITTLE_UP:
+            case SKITTLE_REVERSED:
+                {
+                    gluDisk (quad, 0, QUILLE_RAYON*SCALE3D, 15, 15);
+                }
+                break;
+            case SKITTLE_DOWN:
+                glRotatef(r2d(skittle->direction), 
+                          0, 
+                          0,
+                          1);
+                glBegin(GL_QUADS);
+                glVertex3d(QUILLE_RAYON,  0, 0);
+                glVertex3d(-QUILLE_RAYON, 0, 0);
+                glVertex3d(-QUILLE_RAYON, QUILLE_HAUTEUR, 0);	
+                glVertex3d(QUILLE_RAYON,  QUILLE_HAUTEUR, 0);
+                glEnd();
+                break;
+            }
+            glPopMatrix();
+        }
+    } else {
+        if (skittle->color==COLOR_RED) glColor4f(COLOR_SKITTLE_RED, 1.0f);
+        else glColor4f(COLOR_SKITTLE_GREEN, 1.0f);
+        gluDisk(quad, 0, QUILLE_RAYON, 10,10);   
+        gluCylinder(quad, QUILLE_RAYON, QUILLE_RAYON, QUILLE_HAUTEUR, 10, 1);
+        glTranslatef(0, 0, QUILLE_HAUTEUR);
+        gluDisk(quad, 0, QUILLE_RAYON, 10,10);
     }
     gluDeleteQuadric(quad);
+    glPopMatrix();
 #endif // VIEWER_DISACTIVATED 
 }
 // ---------------------------------------------------------------

@@ -46,10 +46,10 @@ VTexture::VTexture()
   loadImage(TEX_TEAM_RED, "team_red.bmp");
   loadImage(TEX_TEAM_GREEN, "team_green.bmp");
 
-  loadImage(TEX_BRIDGE0, "bridge0.bmp");
-  loadImage(TEX_BRIDGE1, "bridge1.bmp");
-  loadImage(TEX_SUPPORT0, "support0.bmp");
-  loadImage(TEX_SUPPORT1, "support1.bmp");
+  loadImage(TEX_BRIDGE0, "btn_bridge.bmp");
+  loadImage(TEX_BRIDGE1, "btn_bridge.bmp");
+  loadImage(TEX_SUPPORT0, "btn_skittle.bmp");
+  loadImage(TEX_SUPPORT1, "btn_skittle.bmp");
 
   loadImage(TEX_BTN_PREV_0, "btnprev0.bmp");
   loadImage(TEX_BTN_PREV_1, "btnprev1.bmp");

@@ -145,7 +145,7 @@ void* connectionThread(void* conn)
     }
     SimulatorServer::unregisterConnection(connection);
     delete connection;
-    LOG_ERROR("Connection closed\n");
+    LOG_WARNING("Connection closed\n");
 #ifndef USE_FTHREAD
     return NULL;
 #endif
