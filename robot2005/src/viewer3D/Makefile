@@ -49,7 +49,8 @@ all: lib bin validate
 ## ===========================================================================
 clean:	default_clean
 	${RM} -f  ${STATIC_LIB_DIR}/${LIB_NAME}.a        \
-                  ${DYNAMIC_LIB_DIR}/${LIB_NAME}.so 
+                  ${DYNAMIC_LIB_DIR}/${LIB_NAME}.so \
+                  $(BIN_SIMU_DIR)/ViewerTest
 
 ## ===========================================================================
 ## Main rules : ----- LIB -----
@@ -61,7 +62,7 @@ lib: $(STATIC_LIB_DIR)/${LIB_NAME}.a ${DYNAMIC_LIB_DIR}/${LIB_NAME}.so
 ## Main rules : ----- BIN -----
 ## ===========================================================================
 bin: OpenGlMain.o dummyXmuColor.o $(STATIC_LIB_DIR)/${LIB_NAME}.a
-	${CC} -o $(BIN_DIR)/ViewerTest ${DEFAULT_INC_DIR} ${DEFAULT_CFLAGS} OpenGlMain.o dummyXmuColor.o $(STATIC_LIB_DIR)/${LIB_NAME}.a $(STATIC_LIB_DIR)/libtools.a $(STATIC_LIB_DIR)/liblogBasic.a -lglut -lGLU -lGL -lm -lpthread -l$(LIB_STDCPP) -lz
+	${CC} -o $(BIN_SIMU_DIR)/ViewerTest ${DEFAULT_INC_DIR} ${DEFAULT_CFLAGS} OpenGlMain.o dummyXmuColor.o $(STATIC_LIB_DIR)/${LIB_NAME}.a $(STATIC_LIB_DIR)/libtools.a $(STATIC_LIB_DIR)/liblogBasic.a -lglut -lGLU -lGL -lm -lpthread -l$(LIB_STDCPP) -lz
 
 ## ===========================================================================
 ## Main rules : ----- VALIDATE -----

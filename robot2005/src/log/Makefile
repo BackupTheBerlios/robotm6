@@ -35,7 +35,7 @@ all: lib bin validate
 ## Main rules : ----- CLEAN -----
 ## ===========================================================================
 clean:	default_clean
-	${RM} -f ${BIN_DIR}/logger ${BIN_DIR}/log2html ${BIN_DIR}/logViewer
+	${RM} -f ${BIN_DIR}/logger ${BIN_SIMU_DIR}/log2html ${BIN_SIMU_DIR}/logViewer
 	${RM} -f  ${STATIC_LIB_DIR}/${LIB_NAME}.a    \
                   ${DYNAMIC_LIB_DIR}/${LIB_NAME}.so  \
                   $(STATIC_LIB_DIR)/${LIB_NAME}Basic.a
@@ -49,7 +49,7 @@ lib: $(STATIC_LIB_DIR)/${LIB_NAME}Basic.a
 ## ===========================================================================
 ## Main rules : ----- BIN -----
 ## ===========================================================================
-bin: ${BIN_DIR}/logger ${BIN_DIR}/log2html ${BIN_DIR}/logViewer
+bin: ${BIN_DIR}/logger ${BIN_SIMU_DIR}/log2html ${BIN_SIMU_DIR}/logViewer
 
 ## ===========================================================================
 ## Main rules : ----- VALIDATE -----
@@ -63,10 +63,10 @@ validate:
 ${BIN_DIR}/logger: logger.o ${SRC_DIR}/include/log.h
 	${CC} -o $@ logger.o ${DEFAULT_INC_DIR} -I/usr/include ${DEFAULT_CFLAGS} $(STATIC_LIB_DIR)/libtools.a -lz -l$(LIB_STDCPP)
 
-${BIN_DIR}/log2html: log2html.o ${SRC_DIR}/include/log.h
+${BIN_SIMU_DIR}/log2html: log2html.o ${SRC_DIR}/include/log.h
 	${CC} -o $@ log2html.o ${DEFAULT_INC_DIR} -I/usr/include ${DEFAULT_CFLAGS} $(STATIC_LIB_DIR)/libtools.a -lz -l$(LIB_STDCPP)
 
-${BIN_DIR}/logViewer: logViewer.o ${SRC_DIR}/include/log.h
+${BIN_SIMU_DIR}/logViewer: logViewer.o ${SRC_DIR}/include/log.h
 	${CC} -o $@ logViewer.o ${DEFAULT_INC_DIR} -I/usr/include ${DEFAULT_CFLAGS} -L${DYNAMIC_LIB_DIR} ${ALL_DYNAMIC_LIB_SIMU}
 
 

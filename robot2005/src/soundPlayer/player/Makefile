@@ -27,14 +27,14 @@ OBJ = dump.o formats.o getbits.o huffman.o layer3.o getdata.o misc2.o transform.
 
 LIBS = -lm -lpthread
 
-all: amp ../../../bin/soundPlayer
+all: amp ../../../binsimu/soundPlayer
 
-../../../bin/soundPlayer: amp
-	cp amp ../../../bin/soundPlayer
+../../../binsimu/soundPlayer: amp
+	cp amp ../../../binsimu/soundPlayer
 
 .PHONY: clean cleandist dep 
 clean:
-	rm -f *.o *~ amp core ../../../bin/soundPlayer
+	rm -f *.o *~ amp core ../../../binsimu/soundPlayer
 
 cleandist: clean
 	rm -f *~ config.status config.cache config.log config.h Makefile .depend
