@@ -35,7 +35,7 @@ static const Millisecond PERIOD_CHECK_PATINAGE=100;
 static const int    POSITION_TEXT_LENGTH = 256;
 /** @brief Conversion pas de codeur HCTl/distance parcourue par une roue
     motrice*/
-static const double POSITION_ROBOT_HCTL_K     = .0043286478;  // 1700/3014
+static const double POSITION_ROBOT_HCTL_K     = 0.0043286478;  // 1700/3014
 /** @brief Distance entre les 2 roues motrices */
 static const double POSITION_ROBOT_HCTL_D     = 269.51872;
 /** 
@@ -55,7 +55,7 @@ static const double POSITION_CODER_HCTL_SIGN_RIGHT = -1.;
 
 /** @brief Conversion pas de codeur ODOMETRE/distance parcourue par une roue
     odometre */
-static const double POSITION_ROBOT_ODOM_K     = .057521639;
+static const double POSITION_ROBOT_ODOM_K     = 0.057521639;
 /** @brief Distance entre les 2 roues motrices */
 static const double POSITION_ROBOT_ODOM_D     = 206.11;//205.01; // 206.11;
 /** @brief Facteurs de correction */
