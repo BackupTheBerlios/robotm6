@@ -107,9 +107,9 @@ inline void RobotConfigCL::reset()
 inline RobotConfigCL::RobotConfigCL() : 
     uartPortMask(0xFFFF),
    
-    motorSimu(true), 
-    automaticMotorReset(true), 
-    disableUartAnswerRequest(false), 
+    motorSimu(false),
+    automaticMotorReset(true),
+    disableUartAnswerRequest(false),
     ioManagerAlloc(true),
     lcdSimu(false),
     odometerSimu(false),

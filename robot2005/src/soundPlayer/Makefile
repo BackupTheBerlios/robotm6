@@ -48,7 +48,7 @@ lib: $(STATIC_LIB_DIR)/${LIB_NAME}.a ${DYNAMIC_LIB_DIR}/${LIB_NAME}.so
 ## Main rules : ----- BIN -----
 ## ===========================================================================
 bin:
-	cd player; ${MAKE} all
+#	cd player; ${MAKE} all
 
 ## ===========================================================================
 ## Main rules : ----- VALIDATE -----

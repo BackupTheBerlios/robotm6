@@ -9,6 +9,7 @@
 
 #define FORMATS
 #include "formats.h"
+#include <stdlib.h>
 
 /* leave room for .wav header
 */

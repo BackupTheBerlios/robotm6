@@ -1,5 +1,6 @@
 #include "strategy.h"
 #include "robotMain.h"
+#define LOG_CLASSID CLASS_DEFAULT
 #include "log.h"
 #include "motor.h"
 #include "odometer.h"
@@ -36,21 +37,29 @@ void TestMoveStrategy1CL::run(int argc, char* argv[])
     Move->enableAccelerationController(false);
     MvtMgr->enableAutomaticReset(false);
 
-    //RobotPos->set(0,0,0);
+    sleep(5);
 
-    Move->go2Target(Point(1000, 1500)); // le robot tourne sur lui meme et va au point (1000, 1800)
+    // ====================    
+    // HERE ICI HERE ICI HERE ICI
+    // ====================    
+
+    RobotPos->set(0,0,0);
+    Move->rotateFromAngle(d2r(720));
+    //Move->go2Target(Point(1500, 0));
     Events->wait(evtEndMove);
     
+    /*
     Move->rotate(d2r(-90)); // tourne de 90degre a droite
     Events->wait(evtEndMove);
 
     Move->forward(400); // avance de 20cm (pas de regulation)
     Events->wait(evtEndMove);
-
+    */
     RobotPos->print();
     Move->stop();
 
     sleep(5);
+    RobotPos->print();
     return;
 }
 
@@ -75,16 +84,35 @@ void TestMoveStrategy2CL::run(int argc, char* argv[])
     Move->enableAccelerationController(false);
     MvtMgr->enableAutomaticReset(false);
 
-    //ROBOT_POS->set(0,0,0);
+    RobotPos->set(490, 1675, 0);
     Trajectory t;
     t.push_back(Point(RobotPos->x(), RobotPos->y()));
-    t.push_back(Point(RobotPos->x()+100, RobotPos->y()));
-    t.push_back(Point(RobotPos->x()+300, RobotPos->y()-50));
-    t.push_back(Point(1350-300, 1725+50));
-    t.push_back(Point(1350-100, 1725));
-    t.push_back(Point(1350, 1725));
+    t.push_back(Point(900,1675));
+    t.push_back(Point(1200,1580));
+    t.push_back(Point(1500,1580));
+    t.push_back(Point(2140,1580));
+    t.push_back(Point(2290,1580));
+    t.push_back(Point(2590,1650));
     Move->followTrajectory(t/*, TRAJECTORY_SPLINE*/);
     Events->wait(evtEndMove);
+
+    Move->go2Target(Point(3190,1650));
+    Events->wait(evtEndMove);
+    
+    Move->go2Target(Point(3190,750));
+    Events->wait(evtEndMove);
+    
+    MvtMgr->setRobotDirection(MOVE_DIRECTION_BACKWARD);
+    Move->go2Target(Point(3190, 1350));
+    Events->wait(evtEndMove);
+
+    MvtMgr->setRobotDirection(MOVE_DIRECTION_FORWARD);
+    Move->go2Target(Point(2590, 1350));
+    Events->wait(evtEndMove);
+
+    Move->go2Target(Point(2250, 1270));
+    Events->wait(evtEndMove);
+
     Move->stop();
     RobotPos->print();
     sleep(2);
@@ -104,8 +132,10 @@ int main(int argc, char* argv[])
 
 
 #ifdef SIMULATED
+  LOG_INFO("SIMULATED\n");
   config = new RobotConfigSimuCL();
 #else
+  LOG_INFO("MODE REAL\n");
   config = new RobotConfigCL();
 #endif
 
@@ -114,7 +144,9 @@ int main(int argc, char* argv[])
   strategy2 = new TestMoveStrategy2CL(robotMain);
 
   //ClassConfig::find(CLASS_MOVE)->setVerboseLevel(VERBOSE_DEBUG);
-  robotMain->run(strategy2, argc, argv);
+  //// ICI ICI ICI => strategy2 = traverse le pont
+  robotMain->run(strategy2, argc, argv); // traverse le pont
+  //robotMain->run(strategy1, argc, argv); // test des deplacements
 
   while(1) {sleep(1);}
   delete strategy2;
