@@ -1020,7 +1020,7 @@ bool Geometry2D::validate()
   
   // distance
   test_condition((dist(A,O)<=sqrt(2.)+0.001) && (sqrt(2.)-0.001)<=dist(A,O));
-  test_condition((norme(A)<=sqrt(2.)+0.001) && (sqrt(2.)-0.001)<=norme(A)));
+  test_condition((norme(A)<=sqrt(2.)+0.001) && (sqrt(2.)-0.001)<=norme(A));
   test_condition(getSquareDistance(A,O)==2);
 
   // directions
