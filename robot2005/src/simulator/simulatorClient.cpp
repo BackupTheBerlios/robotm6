@@ -27,7 +27,13 @@ unsigned char* SimulatorClient::setBufferHeader(SimuRequestType type,
 // ----------------------------------------------------------------------------
 void SimulatorClient::sendBuffer()
 {
-    if (socket_) socket_->write(buffer_, buffer_[1] + 2);
+    if (socket_) {
+        if (socket_->write(buffer_, buffer_[1] + 2)==-1) {
+            LOG_ERROR("Connection to simulator closed\n");
+            delete socket_;
+            socket_ = NULL;
+        }
+    }
 }
 
 // ----------------------------------------------------------------------------
