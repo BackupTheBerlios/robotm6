@@ -51,13 +51,13 @@ void Lcd_05::print(const char* fmt, ...)
     device_->write(LCD_REQ_PRINTF_EOF);
 
     txt[i]='\n'; txt[i+1]=0;
-    Log->lcdMessage(txt);
+    if (Log) Log->lcdMessage(txt);
 }
 void Lcd_05::clear() 
 {
     if (!device_) return;
     device_->write(LCD_REQ_CLEAR);
-    Log->lcdMessage("");
+    if (Log) Log->lcdMessage("");
 }
 /**
  * @brief This function turns on the backlight (retro eclairage)
