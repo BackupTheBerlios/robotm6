@@ -300,7 +300,7 @@ const IoDeviceScanInfoPairVector& SerialPort::scan() {
     const unsigned int NB_MAX_NB_SPEEDS = SERIAL_SPEED_MAX;
     SerialSpeed scanSpeeds[NB_MAX_NB_SPEEDS];
     unsigned int nbSpeeds=0;
-    printf("%d\n", (unsigned int)SERIAL_SPEED_MAX);
+    //printf("%d\n", (unsigned int)SERIAL_SPEED_MAX);
     if (speed_ == SERIAL_SPEED_SCAN) {
 /*
       for(unsigned int i=0;i<NB_MAX_NB_SPEEDS; i++) {
