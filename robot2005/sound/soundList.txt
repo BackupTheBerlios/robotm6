@@ -1,0 +1,123 @@
+segmentationfault.wav - Je suis dans la merde le programme s'est arrete ou n'a pas ete lance.... Charette t'es qu'un boulet @$$!!
+reboot.wav - j'ai reboote! C'est la faute aux electroniciens $%%!
+vaNiquerPollet.wav  - Pollet! on va te niquer!
+aNiquePollet.wav    - Pollet! On ta niquer!
+bye.wav - a plus tard
+bonjour.wav - bonjour
+bonjourMac.wav - bonjour mac
+merci.wav - merci
+cafe.wav - apportez moi un cafe svp
+heureux.wav - je suis heureux
+perduStand.wav - "pleur" j'ai perdu mon stand
+cfait.wav - ca c'est fait
+waitStart.wav - je n'attends plus que le signal de départ
+gogogo.wav - c'est parti!
+gagne.wav - j'ai gagne!
+perdu.wav - j'ai perdu...
+homologue.wav - je suis homologue!
+missionDone.wav - mission accomplie!
+victory.wav - victoire!
+programmation.wav - je demarre en mode programmation
+comabt.wav - je demarre en mode combat!
+codeUploaded.wav - le code est charge dans le robot
+shutdown.wav - je suis etteint
+logCopy.wav - les logs sont copies ("Char* tu m'as vide!")
+startInit.wav - procédure d'initialisation en cours
+startCalibration.wav - calibration en cours
+segmentationfault.wav - le programme à planté...
+essi.wav - essi
+isia.wav - isia
+esinsa.wav - esinsa
+eucalyptus.wav - eukalyptus
+sophiateam.wav - sophia team
+oui.wav - oui
+non.wav - non
+perduStand.wav- je suis perdu
+tele.wav - je suis à la télé!
+collision.wav - ouch! ---> collision
+pasCommeCa.wav - ca ne va pas se passer comme ca!
+rsattaque.wav - petit robot, attaque!
+degage.wav - dégage de mon chemin!
+garcimore.wav - comme dirait Garcimore: hihihi des fois ca marche, des fois ca marche pas
+holdup.wav - ceci est un hold up! Haut les mains ou je tire!
+policeTire.wav - Police! ne bougez plus ou je tire!
+bienJoue.wav - Bien joue
+onLaFait.wav - On l'a fait
+yoMan.wav - Yo man
+topLa.wav - Top la
+essai.wav - essai 
+drop1.wav - drop (1 balle)
+drop2.wav - drop (2 balles)
+drop3.wav - drop (3 balles)
+detecteCocotier.wav - detection d'un cocotier
+detecteObstacle.wav - detection d'un obstacle
+modeEnv.wav - mode detecteur d'environnement
+modeTrajec.wav - mode trajectoire
+modeDrop.wav - mode drop
+modeEssai.wav - mode essai
+cataArmed.wav - La capulte est elle armee?
+rsPing.wav - Le RS repond il?
+errArmRightOut.wav - le bras droit ne peut pas sortir
+errArmLeftOut.wav - le bras gauche ne peut pas sortir
+errArmRightIn.wav - le bras droit ne peut pas rentrer
+errArmLeftIn.wav - le bras gauche ne peut pas rentrer
+errLcd.wav - Je suis autiste! Le lcd ne marche pas
+
+
+
+Son a ne pas modifier:
+----------------------
+- "chiffres de 0 a 16"
+- relachez l'arret d'urgence
+- auto vérification accomplie
+- le robot s'auto-détruira dans 10 secondes
+- retirez la jack de départ
+- insérez la jack de départ
+- la tension de la batterie est faible
+- la carte odometre ne repond plus
+- attention
+- le bumper
+- le detecteur de couleur
+- le detecteur d'environnement
+- le laser
+- le servo
+- cocotier
+- droit
+- gauche
+- pied
+- cote
+- arriere
+- avant
+- la carte couleur
+- la carte détecteur d'environnement
+- la carte servo
+- la carte gonio
+- la carte odomètre
+- la carte mécanique
+- la carte lcd
+- Poussez moi de 15cm
+- Placer moi en position de depart
+- Pressez une touche pour tester le départ du RS
+- la carte batterie
+- la carte secrète
+- un bumper
+- un détecteur de couleur
+- ne fonctionne pas
+- ne répond pas
+- la balise
+- la balise de but gauche
+- la balise de but droit
+- la balise RP
+- la balise RS
+- n'est pas détectée
+- l'ascenseur est bloqué
+- la catapulte est bloquée
+- pressez une touche pour lancer la calibration des bras
+- match de type
+- depart a droite
+- depart a gauche
+- contre un robot videur
+- contre robot normal
+- je visite chez moi d'abord
+- j'explore les cotes
+- evite la zone ennemie
