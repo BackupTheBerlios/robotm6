@@ -11,7 +11,7 @@ OBJS=${FILE}.o ${FILE}Simu.o ${FILE}_03.o ${FILE}_04.o
 
 BIN_NAME=${FILE}Test_04
 BIN_OBJS=${FILE}04Main.o ${FILE}Simu.o ${FILE}.o ${FILE}_03.o 
-BIN_LIBS=${SRC_ROOT}/../lib/libsimulator.a ${SRC_ROOT}/../lib/libevents.a  ${SRC_ROOT}/../lib/libuart.a ${SRC_ROOT}/../lib/liblcd.a ${SRC_ROOT}/../lib/libodometer.a ${SRC_ROOT}/../lib/libevents.a  ${SRC_ROOT}/../lib/libuart.a ${SRC_ROOT}/../lib/libtools.a ${SRC_ROOT}/../lib/liblog.a -lm -lz -l$(LIB_STDCPP) -lpthread
+BIN_LIBS=${SRC_ROOT}/../lib/libevents.a  ${SRC_ROOT}/../lib/libuart.a ${SRC_ROOT}/../lib/liblcd.a ${SRC_ROOT}/../lib/libsimulator.a ${SRC_ROOT}/../lib/libodometer.a ${SRC_ROOT}/../lib/libevents.a  ${SRC_ROOT}/../lib/libuart.a ${SRC_ROOT}/../lib/libtools.a ${SRC_ROOT}/../lib/liblog.a -lm -lz -l$(LIB_STDCPP) -lpthread
 BIN_LIBS_LOCATION=
 BIN_FLAGS=
 BIN_SIMU_OBJS=
