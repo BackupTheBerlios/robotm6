@@ -124,11 +124,11 @@ void SimulatorGrsBall::checkPosAndBridge(BridgePosition const& bridge)
             // sur un pont
             if (ball_->center.y>(TERRAIN_Y-TERRAIN_CASE_LARGEUR)/2 &&
                 ball_->center.y<(TERRAIN_Y)/2) {
-                if (speedY_>0) speedY_=-speedY_;
+                if (speedY_>0) speedY_=0;
                 newPos_.center.y = TERRAIN_Y/2-BALLE_GRS_RAYON;
             } else if (ball_->center.y<(TERRAIN_Y+TERRAIN_CASE_LARGEUR)/2 &&
                        ball_->center.y>(TERRAIN_Y)/2) {
-                if (speedY_>0) speedY_=-speedY_;
+                if (speedY_>0) speedY_=0;
                 newPos_.center.y = TERRAIN_Y/2+BALLE_GRS_RAYON;
             } else {
                 Point* bridgePts=SimulatorCL::instance()->getBridgePts();
