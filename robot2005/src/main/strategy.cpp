@@ -6,6 +6,7 @@
 #include "robotTimer.h"
 #include "odometer.h"
 #include "lcd.h"
+#include "simulatorClient.h"
 
 // ============================================================================
 // ==============================   class StrategyCL   ==========================
@@ -403,6 +404,7 @@ void StrategyCL::setStartingPosition()
         ROBOT_POS->set(ROBOT_A_INIT_X, ROBOT_A_INIT_Y, ROBOT_A_INIT_THETA);
     } else {
         ROBOT_POS->set(ROBOT_D_INIT_X, ROBOT_D_INIT_Y, ROBOT_D_INIT_THETA);
-    }
+    }    
+    Simulator->setRobotPosition(ROBOT_POS->pos());
     LOG_WARNING("setStartingPosition: %s\n", ROBOT_POS->txt());
 }

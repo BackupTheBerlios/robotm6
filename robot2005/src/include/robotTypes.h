@@ -23,12 +23,12 @@ typedef double Millimeter;
 /** @brief Unité d'angle par défaut */
 typedef double Radian;
 /** @brief Unite des codeurs montes sur des axes de rotation (odometres) */
-typedef short CoderPosition;
-/** @brief Unite des consignes en vitesse du robot */
+typedef int CoderPosition;
+/** @brief Unite des consignes en vitesse du robot On a besoin que d'un short, mais pour faire les calculs et la detection des overflow, c'est plus simple d'avoir plus grand qu'un short=>un int */
 typedef signed char MotorSpeed;
-/** @brief Unite des codeurs montes sur les moteurs */
-typedef short MotorPosition;
-/** @brief Unite de la consigne envoyee aux moteurs */
+/** @brief Unite des codeurs montes sur les moteurs. On a besoin que d'un short, mais pour faire les calculs et la detection des overflow, c'est plus simple d'avoir plus grand qu'un short=>un int */
+typedef int MotorPosition;
+/** @brief Unite de la consigne envoyee aux moteurs.  */
 typedef signed char MotorPWM;
 /** @brief Unite de l'acceleration des moteurs (cf hctl1100) */
 typedef short MotorAcceleration;

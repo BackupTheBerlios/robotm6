@@ -42,6 +42,11 @@ void SimulatorRobot::updatePosition()
     if (brick_) return;
     // sauve l'etat courant au cas ou la nouvelle position soit invalide
     realPosOld_    = realPos_;
+
+    // calcul la valeur des odometres
+
+
+    // Calcule de la position des odometres
     motorLeftOld_  = motorLeft_;
     motorRightOld_ = motorRight_;
 
@@ -59,6 +64,17 @@ void SimulatorRobot::updatePosition()
         motorRightOld_ = motorRight_;
         motorLeftOld_  = motorLeft_;
 	simuPosFirst_ = false;
+    } else {
+        if (motorLeft_ - motorLeftOld_ > SHRT_MAX) { // short max =unsigned short max /2
+            motorLeftOld_ += USHRT_MAX;   // unsigned short max
+        } else if (motorLeft_ - motorLeftOld_  < SHRT_MIN) {
+            motorLeftOld_ -= USHRT_MAX;
+        }
+        if (motorRight_ - motorRightOld_ > SHRT_MAX) { // short max =unsigned short max /2
+            motorRightOld_ += USHRT_MAX;   // unsigned short max
+        } else if (motorRight_ - motorRightOld_ < SHRT_MIN) {
+            motorRightOld_ -= USHRT_MAX;
+        } 
     }
     deltaRight = KRight - simuCoderSignRight_*K_*motorRightOld_;
     deltaLeft  = KLeft  - simuCoderSignLeft_*K_*motorLeftOld_;
@@ -79,9 +95,12 @@ void SimulatorRobot::updatePosition()
 	realPos_.center.x += deltaSum * cos(deltaTheta);  
 	realPos_.center.y += deltaSum * sin(deltaTheta);
     }
-    // printf("%d %d %d%d %d\n",(int)motorRight_, (int)speedRight_, (int)KRight, (int)deltaRight, (int)realPos_.center.x);
-    
+ /*   printf("%lf %lf %d %d %d %lf %lf %lf\n", K_, D_, (int)simuCoderSignRight_,
+                    (int)motorRight_, (int)speedRight_, KRight, 
+                    deltaRight, realPos_.center.x);
+    */
 
+/*
     // calcul position estimee
     Radian oldEDir = estimatedPos_.direction;
     deltaTheta = (deltaRight-deltaLeft)/(D_);
@@ -97,6 +116,7 @@ void SimulatorRobot::updatePosition()
 	estimatedPos_.center.x += deltaSum * cos(deltaTheta);  
 	estimatedPos_.center.y += deltaSum * sin(deltaTheta);
     }
+*/
     isValid_=true;
     setRealPos(realPos_);
 }

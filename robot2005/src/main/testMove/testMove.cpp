@@ -29,15 +29,16 @@ class TestMoveStrategy1CL : public StrategyCL
 void TestMoveStrategy1CL::run(int argc, char* argv[])
 {
     LCD->print("SophiaTeam");
-    ROBOT_POS->set(300,1000,0);
+    setStartingPosition();
     waitStart(INIT_NONE);
     MOVE->enableAccelerationController(false);
     MVTMGR->enableAutomaticReset(false);
 
-    MOVE->go2Target(Point(1000, 1000));
+    MOVE->go2Target(Point(1000, 1800));
     Events->wait(evtEndMove);
     ROBOT_POS->print();
     MOVE->stop();
+
     sleep(5);
     return;
 }
@@ -60,6 +61,7 @@ int main(int argc, char* argv[])
   robotMain = new RobotMainFullCL();
   strategy1 = new TestMoveStrategy1CL(robotMain);
 
+  //ClassConfig::find(CLASS_MOVE)->setVerboseLevel(VERBOSE_DEBUG);
   robotMain->run(strategy1, argc, argv);
 
   while(1) {sleep(1);}
