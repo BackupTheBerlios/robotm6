@@ -17,6 +17,8 @@
 #ifndef __ROBOT_CONFIG_H__
 #define __ROBOT_CONFIG_H__
 
+#include "robotTypes.h"
+
 #define RobotConfig RobotConfigCL::instance()
 
 // ----------------------------------------------------------------------------
@@ -30,94 +32,123 @@
 class RobotConfigCL
 {
  public:
-    RobotConfigCL();
+    RobotConfigCL(const char* name,
+                  bool simulated);
     virtual ~RobotConfigCL();
     static RobotConfigCL* instance();
-    virtual void reset();
+    virtual void reset(){};
+    
+    /** @brief Renvoie true si l'un des composant du robot est simule */
+    bool needSimulator() const;
+
 
  public:
     /** @brief liste des port de l'UART a scanner */
     unsigned short uartPortMask; 
-
-    // -------------------------------------------
-    // ---          M O T E U R S              ---
-    // -------------------------------------------
-    /**  @brief utilse le motorReal ou motorSimu */
-    bool motorSimu;
-    /** @brief reset automatiquement les moteurs quand on detecte que la 
-	consigne envoyée aux moteurs sature */
-    bool automaticMotorReset; 
-
-    // --------------------------------------------
-    // --- E N T R E E S    /   S O R T I E S   ---
-    // --------------------------------------------
     bool disableUartAnswerRequest;
     /** @brief Est ce aue ioManager alloue les classes des cartes electroniques */
     bool ioManagerAlloc;
+    // --------------------------------------------
+    // --- E N T R E E S    /   S O R T I E S   ---
+    // --------------------------------------------
+    /**  @brief utilse le motorReal ou motorSimu */
+    bool motorSimu;
     /** @brief simule le lcd ou envoie les messages sur l'uart */
     bool lcdSimu;
     /** @brief simule la carte odometre */
     bool odometerSimu;
-     /** @brief affiche la position estimee du robot toutes les secondes */
-    bool displayOdomPos;
     /** @brief simule la carte odometre */
     bool soundSimu;
     
     // --------------------------------------------
-    // --- description du robot   ---
-    // --------------------------------------------
+    // --- description du robot                 ---
+    // --------------------------------------------  
+    /** nom de la config */
+    char name[64];
     /** @brief True si c'est le robot d'attack, false sinon */
-   bool isRobotAttack;
-   /** @brief True si la carte des moteurs est sur port isa, false si
-       c'est sur port serie */
-   bool isMotorISA;
-
-   bool needSimulator() const;
-
-   private:
+    bool isRobotAttack;
+    /** @brief True si la carte des moteurs est sur port isa, false si
+        c'est sur port serie */
+    bool isMotorISA;
+    /** @brief position de depart du robot */
+    Position startingPos;
+    /** @brief moment de la derniere action du match */
+    Millisecond timeAlertBeforeEnd;
+    
+    // --------------------------------------------
+    // --- constantes des odometres             ---
+    // --------------------------------------------
+    double odometerK;
+    double odometerD;
+    double odometerEd;
+    double odometerCr;
+    double odometerCl;
+    double odometerSignLeft;
+    double odometerSignRight;
+    double getOdometerKLeft()  const { return odometerSignLeft*odometerK*odometerCl; }
+    double getOdometerKRight() const { return odometerSignRight*odometerK*odometerCr; }
+    double getOdometerD()      const { return odometerD; }
+    
+    // --------------------------------------------
+    // --- constantes des motors                ---
+    // --------------------------------------------
+    /** @brief reset automatiquement les moteurs quand on detecte que la 
+	consigne envoyée aux moteurs sature */
+    bool   automaticMotorReset; 
+    double motorK;
+    double motorD;
+    double motorEd;
+    double motorCr;
+    double motorCl;
+    double motorSignLeft;
+    double motorSignRight;
+    double getMotorKLeft()  const { return motorSignLeft*motorK*motorCl; }
+    double getMotorKRight() const { return motorSignRight*motorK*motorCr; }
+    double getMotorD()      const { return motorD; }
+    
+ private:
     static RobotConfigCL* lastInstance_;
 };
 
 // ----------------------------------------------------------------------------
-// class RobotConfigSimu : robot en mode mtch simule
-// ----------------------------------------------------------------------------
-/**
- * @class RobotConfigSimu
- * Configuration du robot utilisée en mode simulé
- */
-class RobotConfigSimuCL : public RobotConfigCL
-{
-  public:
-    RobotConfigSimuCL();
-    virtual void reset();
-};
-
-
-// ----------------------------------------------------------------------------
-// RobotConfigSimuCL::reset
-// ----------------------------------------------------------------------------
-inline void RobotConfigCL::reset() 
-{
-    
-}
-
-// ----------------------------------------------------------------------------
 // RobotConfig::RobotConfig
 // ----------------------------------------------------------------------------
-inline RobotConfigCL::RobotConfigCL() : 
+inline RobotConfigCL::RobotConfigCL(const char* Name, 
+                                    bool simulated) : 
     uartPortMask(0xFFFF),
-   
-    motorSimu(false),
-    automaticMotorReset(true),
     disableUartAnswerRequest(false),
     ioManagerAlloc(true),
-    lcdSimu(false),
-    odometerSimu(false),
-    displayOdomPos(true),
-    soundSimu(false),
+
+    motorSimu(simulated),
+    lcdSimu(simulated),
+    odometerSimu(simulated),
+    soundSimu(simulated),
+
     isRobotAttack(true),
-    isMotorISA(true)
+    isMotorISA(true),
+    startingPos(),
+    timeAlertBeforeEnd(TIME_MATCH),
+
+    odometerK(0.1),
+    odometerD(313),
+    odometerEd(1),
+    odometerCr(1),
+    odometerCl(1),
+    odometerSignLeft(1),
+    odometerSignRight(1),
+
+    automaticMotorReset(true),
+    motorK(0.004),
+    motorD(340),
+    motorEd(1),
+    motorCr(1),
+    motorCl(1),
+    motorSignLeft(1),
+    motorSignRight(1)
+    
 {
+    assert(!lastInstance_);
+    strcpy(name, Name);
     lastInstance_ = this;
     reset();
 }
@@ -127,7 +158,8 @@ inline RobotConfigCL::RobotConfigCL() :
 // ----------------------------------------------------------------------------
 inline bool RobotConfigCL::needSimulator() const
 {
-    return lcdSimu || odometerSimu || motorSimu;
+    return lcdSimu || odometerSimu || motorSimu; 
+    // soundSimu n'a pas besoin du simulateur !
 }
 
 // ----------------------------------------------------------------------------
@@ -142,30 +174,11 @@ inline RobotConfigCL::~RobotConfigCL()
 // ----------------------------------------------------------------------------
 inline RobotConfigCL* RobotConfigCL::instance()
 {
-    if(!lastInstance_) lastInstance_ = new RobotConfigCL();
+    if(!lastInstance_) {
+        lastInstance_ = new RobotConfigCL("Config par defaut", false);
+    }
     return lastInstance_;
 }
 
-// ----------------------------------------------------------------------------
-// RobotConfigSimu::RobotConfigSimu
-// ----------------------------------------------------------------------------
-inline RobotConfigSimuCL::RobotConfigSimuCL() : RobotConfigCL()
-{
-    uartPortMask=0x00;
-    motorSimu=true;
-    lcdSimu=true;
-    odometerSimu=true;
-    soundSimu=true;
-
-    reset();
-}
-
-// ----------------------------------------------------------------------------
-// RobotConfigSimuCL::reset
-// ----------------------------------------------------------------------------
-inline void RobotConfigSimuCL::reset() 
-{
-
-}
 
 #endif // __ROBOT_CONFIG_H__

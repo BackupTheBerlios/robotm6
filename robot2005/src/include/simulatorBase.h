@@ -62,7 +62,8 @@ typedef enum SimuRequestType {
     SIMU_REQ_SET_ODOM_COEF,
     SIMU_REQ_GET_ODOM,
     SIMU_REQ_SET_ODOM,
-    SIMU_REQ_SET_ESTIMATED_POS
+    SIMU_REQ_SET_ESTIMATED_POS,
+    SIMU_REQ_RESET_ESTIMATED_POS
 };
 
 // ----------------------------------------------------------------------------

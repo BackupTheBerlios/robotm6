@@ -117,11 +117,27 @@ void SimulatorRobot::updatePosition()
 	realPos_.center.x += deltaSum * cos(deltaTheta);  
 	realPos_.center.y += deltaSum * sin(deltaTheta);
     }
- /*   printf("%lf %lf %d %d %d %lf %lf %lf\n", K_, D_, (int)simuCoderSignRight_,
+
+    // calcul position estimee // ne tient pas compte des collisions
+    oldDir = estimatedPos_.direction;
+    deltaTheta = (deltaRight-deltaLeft)/(D_);
+    estimatedPos_.direction += deltaTheta;
+  
+    if (fabs(deltaTheta) > 0.0001) {
+	estimatedPos_.center.x += deltaSum *
+	    (sin(estimatedPos_.direction)-sin(oldDir))/deltaTheta;
+	estimatedPos_.center.y += -deltaSum *
+	    (cos(estimatedPos_.direction)-cos(oldDir))/deltaTheta;
+    } else {
+	deltaTheta = (estimatedPos_.direction +oldDir)/2.;
+	estimatedPos_.center.x += deltaSum * cos(deltaTheta);  
+	estimatedPos_.center.y += deltaSum * sin(deltaTheta);
+    }
+ /*   printf("%lf %lf %d %d %lf %lf %lf\n", motorK_, D_,
                     (int)motorRight_, (int)speedRight_, KRight, 
                     deltaRight, realPos_.center.x);
-    */
-
+    
+*/
     isValid_=true;
     setRealPos(realPos_);
 }

@@ -920,7 +920,7 @@ int main(int argc, char*argv[])
     if (tmp) tmp[0]=0;
 
     // start viewer
-    RobotConfigSimuCL config;
+//    RobotConfigCL config("Viewer config", true);
     LogCL log;
     Viewer3D->createWindows(true, true);
     realTimeReset();

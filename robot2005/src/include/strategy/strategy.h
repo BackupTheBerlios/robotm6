@@ -48,18 +48,13 @@ class StrategyCL : public RobotBase
     const char* menuName() const;
     /** @brief Configure the robot and wait for the startJack */
     bool waitStart(InitMode mode);
-    /** @brief Fonction qui libere les dernieres balles contenues dans 
-     * le robot puis attend la fin du match */
+    /** @brief Fonction qui effectiue la derniere action du robot puis arrete le robot */
     virtual bool timerAlert();
     /** @brief Function lancee au bout d'1min30 */
     virtual void gameOver();
     /** @brief Fonction lancee si l'arret d'urgence est enfonce pendant 
      * le match */
     virtual void emergencyStop();
-    /** @brief Fonctionqui renvoie l'heure a laquelle l'evenement TIMER_ALERT
-     * est decenche */
-    Millisecond getTimerAlertTime() { return timeAlert_;}
-
     /** 
      * @brief Execute les commandes en cas d'arret d'urgence, de fin de match
      * Retourne false si la strategy est terminee et qu'il faut retourner 
@@ -74,8 +69,7 @@ class StrategyCL : public RobotBase
 
  protected:
     RobotMainCL* main_;
-    Millisecond timeAlert_;
-
+    
     // Variables qui activent les tests pendant l'autoCheck
     bool testBumper_;
     bool testMove_;

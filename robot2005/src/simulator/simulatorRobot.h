@@ -35,6 +35,7 @@ class SimulatorRobot : public RobotBase {
                                               simuPosFirst_ = true;
                                               isDead_=0;
                                               needSendDisplayInfo_=true;}
+    void resetRobotEstimatedPosition()      { estimatedPos_ = realPos_; }
     void setRobotEstimatedPos(Position const& pos)   { estimatedPos_ = pos; }
     void setRobotName(const char* name)     { name_ = std::string(name); 
                                               needSendDisplayInfo_=true;}
@@ -185,7 +186,7 @@ class SimulatorRobot : public RobotBase {
     bool        lcdBtnNo_;
     std::string lcdMessage_;
     Position    realPos_;
-    Position    estimatedPos_;
+    Position    estimatedPos_; // position utilise pour les odometres
     MotorSpeed  speedLeft_, speedRight_;
     MotorPWM    pwmLeft_,   pwmRight_;
     MotorPosition  motorLeft_, motorRight_;
@@ -194,6 +195,7 @@ class SimulatorRobot : public RobotBase {
 
     MotorPosition  motorLeftOld_, motorRightOld_;
     Position       realPosOld_;
+    Position       PosOld_;
    
     Point odomLeftPt_;
     Point odomRightPt_;

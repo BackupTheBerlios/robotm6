@@ -15,7 +15,7 @@ BIN_FLAGS=
 BIN_SIMU_OBJS=${FILE}Simu.o
 BIN_SIMU_LIBS=${ALL_DYNAMIC_LIB} 
 BIN_SIMU_LIBS_LOCATION=-L${DYNAMIC_LIB_DIR}
-BIN_SIMU_FLAGS= 
+BIN_SIMU_FLAGS=
 
 ## ===========================================================================
 ## Source files used to generate dependencies
@@ -72,7 +72,7 @@ validate:
 ## ===========================================================================
 
 ${FILE}Simu.o: ${FILE}.cpp
-	${CC} -o $@ -c ${FILE}.cpp ${DEFAULT_INC_DIR} -DSIMULATED
+	${CC} -o $@ -c ${FILE}.cpp ${DEFAULT_INC_DIR} -DSIMULATED=true
 
 
 ## ===========================================================================

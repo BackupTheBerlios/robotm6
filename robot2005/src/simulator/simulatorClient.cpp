@@ -397,6 +397,16 @@ void SimulatorClient::getRobotEstimatedPosition(Point& pt, Radian& dir)
 }
 
 // ----------------------------------------------------------------------------
+// Copie la vraie position dans la position estimee
+// ----------------------------------------------------------------------------
+void SimulatorClient::resetRobotEstimatedPosition()
+{
+    if (!socket_) return;
+    setBufferHeader(SIMU_REQ_RESET_ESTIMATED_POS, 0);
+    sendBuffer();
+}
+
+// ----------------------------------------------------------------------------
 // SimulatorClient::getRobotRealPosition
 // ----------------------------------------------------------------------------
 // Renvoie la position simulee du robot

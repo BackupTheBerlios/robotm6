@@ -19,8 +19,7 @@ StrategyCL::StrategyCL(const char* name,
 		   const char* menuName, 
 		   ClassId classId, 
 		   RobotMainCL* main): 
-    RobotBase(name, classId), main_(main), 
-    timeAlert_(TIME_ALERT_BEFORE_END), 
+    RobotBase(name, classId), main_(main),  
     testBumper_(true), testMove_(true)
 {
     strncpy(menuName_, menuName, LCD_CHAR_PER_LINE);
@@ -400,11 +399,9 @@ bool StrategyCL::checkCollision(bool &collisionEvt)
 // --------------------------------------------------------------------------
 void StrategyCL::setStartingPosition()
 {
-    if (RobotConfig->isRobotAttack) {
-        RobotPos->set(ROBOT_A_INIT_X, ROBOT_A_INIT_Y, ROBOT_A_INIT_THETA);
-    } else {
-        RobotPos->set(ROBOT_D_INIT_X, ROBOT_D_INIT_Y, ROBOT_D_INIT_THETA);
-    }    
+    RobotPos->set(RobotConfig->startingPos.center.x,
+                  RobotConfig->startingPos.center.y,
+                  RobotConfig->startingPos.direction);
     Simulator->setRobotPosition(RobotPos->pos());
     LOG_WARNING("setStartingPosition: %s\n", RobotPos->txt());
 }

@@ -57,16 +57,7 @@ inline bool operator != (Position const& pos1, Position const& pos2) {
 // ROBOT_D == robot defence
 static const Millimeter INFINITE_DIST = -1;
 
-static const Millimeter ROBOT_A_INIT_X           = 500;
-static const Millimeter ROBOT_A_INIT_Y           = 1800;
-static const Millimeter ROBOT_A_INIT_THETA       = 0;
-
-static const Millimeter ROBOT_D_INIT_X           = 20;
-static const Millimeter ROBOT_D_INIT_Y           = 1700;
-static const Millimeter ROBOT_D_INIT_THETA       = 0;
-
 static const Millisecond TIME_MATCH             = 87000;
-static const Millisecond TIME_ALERT_BEFORE_END  = 75000;
 static const Millisecond TIME_MARGIN            =  2000;
 static const Millisecond TIME_INFINITE          = -1;
 static const Millisecond TIME_NEVER             = -1;

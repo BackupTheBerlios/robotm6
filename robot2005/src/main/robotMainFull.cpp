@@ -89,34 +89,25 @@ RobotMainFullCL::RobotMainFullCL() :
     ioMgr_(NULL), mvtMgr_(NULL), evtMgr_(NULL)
 { 
     if (RobotConfig->needSimulator()) {
+        LOG_INFO("needSimulator == true\n");
         if (!Simulator->connectToServer()) {
             LOG_ERROR("Cannot connect to SIMULATOR server\n");
         } else {
+            Simulator->setRobotName(RobotConfig->name);
             if (RobotConfig->isRobotAttack) {
-                Simulator->setRobotName("RobotMain Attack");
                 Simulator->setRobotModel(ROBOT_MODEL_ATTACK);
-                Simulator->setRobotMotorCoef(POSITION_ROBOT_HCTL_D*0.9,
-                                             POSITION_ROBOT_HCTL_K, 
-                                             (POSITION_CODER_HCTL_SIGN_LEFT),
-                                             (POSITION_CODER_HCTL_SIGN_RIGHT));
-                Simulator->setRobotOdomCoef(POSITION_ROBOT_ODOM_D/2,
-                                            M_PI/2, 
-                                            POSITION_ROBOT_ODOM_K, 
-                                            POSITION_CODER_ODOM_SIGN_LEFT,
-                                            POSITION_CODER_ODOM_SIGN_RIGHT);
             } else {
-                Simulator->setRobotName("RobotMain Defence");
-                Simulator->setRobotModel(ROBOT_MODEL_DEFENCE);
-                Simulator->setRobotMotorCoef(POSITION_ROBOT_HCTL_D,
-                                             POSITION_ROBOT_HCTL_K, 
-                                             POSITION_CODER_HCTL_SIGN_LEFT,
-                                             POSITION_CODER_HCTL_SIGN_RIGHT);
-                Simulator->setRobotOdomCoef(POSITION_ROBOT_ODOM_D/2,
-                                            M_PI/2, 
-                                            POSITION_ROBOT_ODOM_K, 
-                                            POSITION_CODER_ODOM_SIGN_LEFT,
-                                            POSITION_CODER_ODOM_SIGN_RIGHT);
-            }
+                Simulator->setRobotModel(ROBOT_MODEL_DEFENCE);  
+            } 
+            Simulator->setRobotMotorCoef(RobotConfig->getMotorD(),
+                                         RobotConfig->motorK, 
+                                         RobotConfig->motorSignLeft,
+                                         RobotConfig->motorSignRight);
+            Simulator->setRobotOdomCoef(RobotConfig->odometerD,
+                                        M_PI/2, 
+                                        RobotConfig->odometerK, 
+                                        RobotConfig->odometerSignLeft,
+                                        RobotConfig->odometerSignRight);
         }
     }
     if (RobotConfig->isRobotAttack) {

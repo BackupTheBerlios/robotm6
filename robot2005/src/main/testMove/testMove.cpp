@@ -4,6 +4,7 @@
 #include "log.h"
 #include "motor.h"
 #include "odometer.h"
+#include "robot2005.h"
 // ----------------------------------------------------------------------------
 // evtEndMove
 // ----------------------------------------------------------------------------
@@ -130,13 +131,19 @@ int main(int argc, char* argv[])
   StrategyCL*     strategy1=NULL;
   StrategyCL*     strategy2=NULL;
 
-
-#ifdef SIMULATED
-  LOG_INFO("SIMULATED\n");
-  config = new RobotConfigSimuCL();
+#ifndef SIMULATED
+#define SIMULATED false
+LOG_INFO("MODE REAL\n");
 #else
-  LOG_INFO("MODE REAL\n");
-  config = new RobotConfigCL();
+LOG_INFO("SIMULATED\n");
+#endif
+
+#ifdef ROBOT_DEFENCE
+  LOG_INFO("ROBOT_DEFENCE\n");
+  config = new RobotConfigDefence2005CL(SIMULATED);
+#else
+  LOG_INFO("ROBOT_ATTACK\n");
+  config = new RobotConfigAttack2005CL(SIMULATED);
 #endif
 
   robotMain = new RobotMainFullCL();

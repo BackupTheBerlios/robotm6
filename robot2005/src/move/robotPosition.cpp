@@ -5,7 +5,6 @@
 #include "log.h"
 #include "movementManager.h"
 #include "odometer.h"
-//#include "sound.h" TODO: 2004? [flo]
 #include "robotTimer.h"
 #include "events.h"
 #include "geometry2D.h"
@@ -70,14 +69,20 @@ char* RobotPositionCL::txt()
 // RobotPositionCL::set
 // ----------------------------------------------------------------------------
 void RobotPositionCL::set(Millimeter X, 
-			Millimeter Y, 
-			Radian T)
+                          Millimeter Y, 
+                          Radian T)
 {
     pos_.center.x  = X;
     pos_.center.y  = Y;
     pos_.direction = T;
     posOdom_       = pos_;
+    if (RobotConfig->odometerSimu) {
+        Simulator->setRobotPosition(pos_);
+    }
     posHctl_       = pos_;
+    if (RobotConfig->motorSimu) {
+        Simulator->setEstimatedRobotPosition(pos_);
+    }
     clearOdoColliDetectBuffer();
     txtChanged_    = true;
     clearBufferPosition();
@@ -159,7 +164,7 @@ OdometerType RobotPositionCL::getOdometerType() const
 // ----------------------------------------------------------------------------
 void RobotPositionCL::print() 
 {
-    printf("Robot Position:%s\n", txt());
+    LOG_INFO("Robot Position: %s\n", txt());
 }
 
 // ----------------------------------------------------------------------------
@@ -170,12 +175,11 @@ bool RobotPositionCL::reset()
     LOG_FUNCTION();
     resetHctlCoders();
     resetOdomCoders();
-    // TODO: I would prefer that RobotPosition doesn't know if there are several robots...
-    // (for instance put the initial-pos into robotConfig).
-    if (RobotConfig->isRobotAttack)
-	set(ROBOT_A_INIT_X, ROBOT_A_INIT_Y, ROBOT_A_INIT_THETA);
-    else
-	set(ROBOT_D_INIT_X, ROBOT_D_INIT_Y, ROBOT_D_INIT_THETA);
+
+    set(RobotConfig->startingPos.center.x,
+        RobotConfig->startingPos.center.y,
+        RobotConfig->startingPos.direction);
+
     odometerType_ = ODOMETER_MOTOR; 
     odometerIsAutomatic_ = false;
     odometerErrorCount_ = 0;
@@ -269,18 +273,22 @@ void RobotPositionCL::getPosition(Position&      posi,
 // ----------------------------------------------------------------------------
 void RobotPositionCL::updateHctlPosition()
 {
-    CoderPosition left=0, right=0;
-    MvtMgr->getCoderPosition(left, right);
-    getPosition(posHctl_,
-                left, 
-                right,
-                leftHctlOld_, 
-                rightHctlOld_,
-                POSITION_CODER_HCTL_SIGN_LEFT  * POSITION_ROBOT_HCTL_K * POSITION_ROBOT_HCTL_Cl,
-                POSITION_CODER_HCTL_SIGN_RIGHT * POSITION_ROBOT_HCTL_K * POSITION_ROBOT_HCTL_Cr,
-                POSITION_ROBOT_HCTL_D*POSITION_ROBOT_HCTL_Eb,
-                firstHctl_);
-    firstHctl_    = false;
+    if (RobotConfig->motorSimu) {
+        Simulator->getRobotEstimatedPosition(posHctl_.center, posHctl_.direction);
+    } else {
+        CoderPosition left=0, right=0;
+        MvtMgr->getCoderPosition(left, right);
+        getPosition(posHctl_,
+                    left, 
+                    right,
+                    leftHctlOld_, 
+                    rightHctlOld_,
+                    RobotConfig->getMotorKLeft(),
+                    RobotConfig->getMotorKRight(),
+                    RobotConfig->getMotorD(),
+                    firstHctl_);
+        firstHctl_    = false;
+    }
 }
 
 // ----------------------------------------------------------------------------
@@ -310,35 +318,38 @@ void RobotPositionCL::setOdometerAliveStatus(bool alive)
 // ----------------------------------------------------------------------------
 void RobotPositionCL::updateOdometerPosition()
 {
-    CoderPosition left=0, right=0;
-    //printf("updateOdometerPosition\n");
-    if (!Odometer->getCoderPosition(left, right)) {
-        setOdometerAliveStatus(false);
-        return;
+    if (RobotConfig->odometerSimu) {
+        Simulator->getRobotRealPosition(posOdom_.center, posOdom_.direction);
     } else {
-        setOdometerAliveStatus(true);
+        CoderPosition left=0, right=0;
+        //printf("updateOdometerPosition\n");
+        if (!Odometer->getCoderPosition(left, right)) {
+            setOdometerAliveStatus(false);
+            return;
+        } else {
+            setOdometerAliveStatus(true);
+        }
+        Position oldPos=posOdom_;
+        getPosition(posOdom_,
+                    left, 
+                    right,
+                    leftOdomOld_, 
+                    rightOdomOld_,
+                    RobotConfig->getOdometerKLeft(),
+                    RobotConfig->getOdometerKRight(),
+                    RobotConfig->getOdometerD(),
+                    firstOdom_);
+        
+        if (!firstOdom_) {
+            if ((fabs(oldPos.center.x - posOdom_.center.x) > 200)
+                || (fabs(oldPos.center.y - posOdom_.center.y) > 200)
+                || (fabs(na2PI(oldPos.direction - posOdom_.direction, -M_PI)) 
+                    > M_PI/2)) {
+                posOdom_ = oldPos;
+            }
+        }
+        firstOdom_ = false;
     }
-    Position oldPos=posOdom_;
-    getPosition(posOdom_,
-                left, 
-                right,
-                leftOdomOld_, 
-                rightOdomOld_,
-                POSITION_CODER_ODOM_SIGN_LEFT  * POSITION_ROBOT_ODOM_K * POSITION_ROBOT_ODOM_Cl,
-                POSITION_CODER_ODOM_SIGN_RIGHT * POSITION_ROBOT_ODOM_K * POSITION_ROBOT_ODOM_Cr,
-                POSITION_ROBOT_ODOM_D * POSITION_ROBOT_ODOM_Eb,
-                firstOdom_);
-
-    if (!firstOdom_) {
-	if ((fabs(oldPos.center.x - posOdom_.center.x) > 200)
-	    || (fabs(oldPos.center.y - posOdom_.center.y) > 200)
-	    || (fabs(na2PI(oldPos.direction - posOdom_.direction, -M_PI)) 
-		> M_PI/2)) {
-	    posOdom_ = oldPos;
-	}
-    }
-
-    firstOdom_ = false;
 }
 
 // ----------------------------------------------------------------------------
@@ -436,7 +447,6 @@ void RobotPositionCL::detectCollision()
     oldPosOdom_ = posOdom_;
 }
 
-#define DEBUG_ODOMETRE
 // ----------------------------------------------------------------------------
 // RobotPositionCL::periodicTask
 // ----------------------------------------------------------------------------
@@ -458,42 +468,35 @@ void RobotPositionCL::periodicTask(Millisecond time)
                       "ODOMETER_HCTL\n");
 //          Sound->play(SOUND_ODOMETER_ALERT, SND_PRIORITY_URGENT); TODO: 2004? [flo]
             setOdometerType(ODOMETER_MOTOR);
-        } else {
-#ifndef DEBUG_ODOMETRE
-            posHctl_ = getOdometerPosition();
-#endif
         }
-#ifndef DEBUG_ODOMETRE
-        // en mode DEBUG_ODOMETRE on calcule la position avec les hctl et 
-        // avec les odometres pour pouvoir les comparer
-        break;
-#endif
     case ODOMETER_MOTOR:
+        // dans tous les cas on calcul la position a partir des moteurs comme 
+        // ca on peut la comparer a la valeur calculee par les odometres
         updateHctlPosition();
         break;
     }
 
+    // met a jour la position utilisee par le robot: soit celle des moteurs, soit celle
+    // des odometres
     if (odometerType_ == ODOMETER_MOTOR) {
         pos_ = getHctlPosition();
     } else {
         pos_ = getOdometerPosition();
     }
 
+    // une fois de temps en temps on verifie que le robot ne patine pas
     if (timeToCheckPatinage_+PERIOD_CHECK_PATINAGE<time) { 
         detectCollision();
 	timeToCheckPatinage_=time;
     }
-
     static Millisecond oldTimeBuffer=0;
     if (oldTimeBuffer+POS_BUFFER_STEP_TIME < time) {
 	addPositionToBuffer();
     }
+
     // toutes les secondes on affiche la position estimee du robot
     static Millisecond oldTime=0;
-    // TODO: depends on verbose-level now? [flo]
-    //if (getClassConfig()->displayOdomPos 
-    if (getClassConfig()->verbose() > 1 
-        && oldTime+1000<time) { 
+    if (oldTime+1000<time) { 
         LOG_INFO("Time=%ds, "
 		 "%sOdometer: x=%d y=%d t=%d %s "
 		 "-- %sHctl: x=%d y=%d t=%d %s\n",
@@ -508,7 +511,6 @@ void RobotPositionCL::periodicTask(Millisecond time)
                  KB_RESTORE);
         oldTime=time;
     }
-    Simulator->setEstimatedRobotPosition(pos_);
 
     txtChanged_ = true;
 }

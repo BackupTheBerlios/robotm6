@@ -7,7 +7,7 @@ SRC_ROOT=..
 ## ===========================================================================
 LIB_NAME=libtools
 OBJS=robotCommon.o geometry2D.o mthread.o robotFThread.o robotString.o \
-     robotTimer.o shm.o network.o serialPort.o image.o
+     robotTimer.o shm.o network.o serialPort.o image.o robotConfig.o
 
 ## ===========================================================================
 ## Source files used to generate dependencies

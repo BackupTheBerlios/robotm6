@@ -100,9 +100,13 @@ class SimulatorClient : public RobotBase {
     /** @brief Renvoie la valeur des codeurs des odometres */
     void getOdomPosition(CoderPosition& left, 
                          CoderPosition& right);
-    /** @brief Renvoie la position estimee du robot (simulation de codeurs) */
+    /** @brief Renvoie la position estimee du robot (simulation de codeurs)
+        Utilise comme position calculée par les codeurs des moteurs */
     void getRobotEstimatedPosition(Point& pt, Radian& dir);
-    /** @brief Renvoie la position simulee du robot */
+    /** @brief copie la position real dans estimated */
+    void resetRobotEstimatedPosition();
+    /** @brief Renvoie la position simulee du robot
+        utilise comme position calculee par les odometres */
     void getRobotRealPosition(Point& pt, Radian& dir);
     /** @brief envoie un message sur l'afficheur LCD */
     void setLCDMessage(const char* message);

@@ -404,6 +404,11 @@ void SimulatorConnection::parseReceivedData(SimuRequestType type,
             sendBuffer();
         }
         break;
+    case SIMU_REQ_RESET_ESTIMATED_POS:
+        {
+            robot_->resetRobotEstimatedPosition();
+        }
+        break;
     case SIMU_REQ_GET_REAL_POS:
         {
             buf = setBufferHeader(SIMU_REQ_SET_REAL_POS, sizeof(Point)+sizeof(Radian));
