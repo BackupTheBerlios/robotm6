@@ -22,9 +22,10 @@ SimulatorRobot::SimulatorRobot() :
     motorLeft_(0), motorRight_(0),
     needSendDisplayInfo_(false),
     matchStatus_(SIMU_STATUS_WAIT_START),
-
     motorLeftOld_(0), motorRightOld_(0),
-    realPosOld_(), simuSpeed_(20.), 
+    realPosOld_(), 
+    odomK_(1), odomSpeed_(1), odomLeft_(0), odomRight_(0),
+    simuSpeed_(20.), 
     simuCoderSignRight_(1.), simuCoderSignLeft_(-1.),
     simuMotorNoise_(false), simuPosFirst_(true), isValid_(true), isDead_(0)
 {
@@ -36,6 +37,29 @@ SimulatorRobot::~SimulatorRobot()
 
 }
 
+void SimulatorRobot::updateOdometer()
+{
+    if (dist(realPosOld_.center, realPos_.center) < 100) {
+        double simuSpeed = odomSpeed_*SimulatorCL::instance()->getSimulationSpeed();
+        Point odoLeftOld=odomLeftPt_, odoLeft=odomLeftPt_;
+        Point odoRightOld=odomRightPt_, odoRight=odomRightPt_;
+        Geometry2D::convertToOrthogonalCoord(realPos_.center, realPos_.direction, 
+                                             odoLeft);
+        Geometry2D::convertToOrthogonalCoord(realPos_.center, realPos_.direction, 
+                                             odoRight);
+        Geometry2D::convertToOrthogonalCoord(realPosOld_.center, realPosOld_.direction, 
+                                             odoLeftOld);
+        Geometry2D::convertToOrthogonalCoord(realPosOld_.center, realPosOld_.direction, 
+                                             odoRightOld);
+        odomLeft_ += (CoderPosition)(simuSpeed*dist(odoLeft, odoLeftOld)/odomK_*(((na2PI(dir(odoLeftOld, odoLeft)-realPos_.direction,-M_PI/2))<(M_PI/2))?1:-1)); 
+        odomRight_ += (CoderPosition)(simuSpeed*dist(odoRight, odoRightOld)/odomK_*(((na2PI(dir(odoRightOld, odoRight)-realPos_.direction,-M_PI/2))<(M_PI/2))?1:-1));
+        if (odomLeft_<SHRT_MIN) odomLeft_+=USHRT_MAX;
+        if (odomLeft_>SHRT_MAX) odomLeft_-=USHRT_MAX;
+        if (odomRight_<SHRT_MIN) odomRight_+=USHRT_MAX;
+        if (odomRight_>SHRT_MAX) odomRight_-=USHRT_MAX;
+    }
+}
+
 void SimulatorRobot::updatePosition()
 {
     if (isDead_) return;
@@ -43,17 +67,16 @@ void SimulatorRobot::updatePosition()
     // sauve l'etat courant au cas ou la nouvelle position soit invalide
     realPosOld_    = realPos_;
 
-    // calcul la valeur des odometres
-
-
+    double simuSpeed = SimulatorCL::instance()->getSimulationSpeed();
+   
     // Calcule de la position des odometres
     motorLeftOld_  = motorLeft_;
     motorRightOld_ = motorRight_;
 
     // calcul variation des deplacements des moteurs
-    motorRight_+= (int)(simuSpeed_*(simuCoderSignRight_*33.28*speedRight_
+    motorRight_+= (int)((simuCoderSignRight_*simuSpeed*speedRight_
 					  +(simuMotorNoise_?(10*rand()/(RAND_MAX+1.0)):0)));
-    motorLeft_ += (int)(simuSpeed_*(simuCoderSignLeft_*33.28*speedLeft_
+    motorLeft_ += (int)((simuCoderSignLeft_*simuSpeed*speedLeft_
 					  +(simuMotorNoise_?(10*rand()/(RAND_MAX+1.0)):0)));
 
     double deltaRight=0, deltaLeft=0;
@@ -76,8 +99,8 @@ void SimulatorRobot::updatePosition()
             motorRightOld_ -= USHRT_MAX;
         } 
     }
-    deltaRight = KRight - simuCoderSignRight_*K_*motorRightOld_;
-    deltaLeft  = KLeft  - simuCoderSignLeft_*K_*motorLeftOld_;
+    deltaRight = simuSpeed_*(KRight - simuCoderSignRight_*K_*motorRightOld_);
+    deltaLeft  = simuSpeed_*(KLeft  - simuCoderSignLeft_*K_*motorLeftOld_);
     deltaSum   = (deltaRight + deltaLeft)/2.;
     
     // calcul position reelle

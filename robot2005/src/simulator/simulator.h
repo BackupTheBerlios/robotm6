@@ -85,7 +85,8 @@ class SimulatorCL : public RobotBase {
     Point* getWallPts()   { return wallBorderPts_; }
     Point* getBridgePts() { return bridgeXPts_; }
     Point* getRiverPts()  { return riverYPts_; }
-    bool isInRiver(Point const& pt);
+    bool isInRiver(Point const& pt); 
+    double getSimulationSpeed() { return simulationSpeed_; }
  protected:
     void registerViewerBtnCB();
     void createSkittlePacket(Skittle* skittles,
@@ -95,6 +96,7 @@ class SimulatorCL : public RobotBase {
                              bool red);
     void setBridgeBorder();
     void setWallBorder();
+    void computeSimulationSpeed();
  private:
     static SimulatorCL* simulator_;
     SimulatorServer* server_;
@@ -113,6 +115,7 @@ class SimulatorCL : public RobotBase {
     Point          wallBorderPts_[SIMU_WALL_BORDER_PTS_NBR];
     Point          bridgeXPts_[SIMU_BRIDGE_BORDER_PTS_NBR];
     Point          riverYPts_[SIMU_RIVER_BORDER_PTS_NBR];
+    double         simulationSpeed_;
 };
 
 #endif // __SIMULATOR_H__

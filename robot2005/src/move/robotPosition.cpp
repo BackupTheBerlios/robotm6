@@ -264,7 +264,6 @@ void RobotPosition::updateHctlPosition()
 {
     CoderPosition left=0, right=0;
     MVTMGR->getCoderPosition(left, right);
-
     getPosition(posHctl_,
                 left, 
                 right,

@@ -1,5 +1,5 @@
 #include "odometer.h"
-
+#include "simulatorClient.h"
 
 // =========================================================================
 // Odometer
@@ -37,7 +37,8 @@ OdometerSimu::~OdometerSimu()
 bool OdometerSimu::getCoderPosition(CoderPosition &left,
 				    CoderPosition &right)
 {
-  return false;
+    Simulator->getOdomPosition(left, right);
+    return true;
 }
 
 // -------------------------------------------------------------------------

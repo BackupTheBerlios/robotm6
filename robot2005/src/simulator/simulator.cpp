@@ -7,6 +7,7 @@
  */
 #include <unistd.h>
 #include <string>
+#include <time.h>
 
 #include "simulator.h"
 #include "simulatorServer.h"
@@ -29,6 +30,11 @@ ft_thread_t threadUpdatePos;
 #else
 MThreadId threadUpdatePos;
 #endif
+
+extern "C" {
+    struct timeval chronometerTic;
+}
+
 // ===========================================================================
 // Constructeurs
 // ===========================================================================
@@ -67,7 +73,7 @@ SimulatorCL::SimulatorCL() :
     supportPosition1_(450, 450), 
     supportPosition2_(750, 1050), 
     supportPosition3_(1050, 750), 
-    supportConfigId_(0)
+    supportConfigId_(0), simulationSpeed_(1)
 {
     for(unsigned int i=0;i!=BALLE_GRS_NBR;i++) {
       sgBalls_[i] = new SimulatorGrsBall();
@@ -84,7 +90,9 @@ SimulatorCL::SimulatorCL() :
     if (server_) server_->startReceiver();
     Viewer3D->createWindows(true, true);
     registerViewerBtnCB();
-    reset();
+    reset(); 
+    
+    gettimeofday(&chronometerTic, NULL);
     // Start thread simulatorThread() 
 #ifdef USE_FTHREAD
     threadUpdatePos = ft_thread_create(ftThread::getScheduler(),
@@ -439,6 +447,7 @@ void SimulatorCL::reset()
 void SimulatorCL::update()
 {
   if (server_) {
+      computeSimulationSpeed(); 
     // calcul la nouvelle position des objets
     for(unsigned int i=0; i<SIMU_PORT_MAX_CONNECTIONS; i++) {
       SimulatorRobot* robot = server_->getRobot(i);
@@ -518,6 +527,7 @@ void SimulatorCL::update()
       SimulatorRobot* robot = server_->getRobot(i);
       if (robot) {
 	robot->setNewPositionValid();
+        robot->updateOdometer();
       }
     }
     for(unsigned int i=0;i!=BALLE_GRS_NBR;i++) {
@@ -848,6 +858,22 @@ void SimulatorCL::setWallBorder()
     wallBorderPts_[2]=Point(TERRAIN_X,TERRAIN_Y);
     wallBorderPts_[3]=Point(0,TERRAIN_Y);
 }
+
+// calcul du coeffient qui permet d'avoir toujours la meme vitesse de deplacement, meme sur une machine lente ou rapide
+void SimulatorCL::computeSimulationSpeed() 
+{
+    struct timeval tv_after;
+    int result;
+    gettimeofday(&tv_after, NULL);
+    
+    result = (tv_after.tv_sec- chronometerTic.tv_sec)*10000 +
+	(tv_after.tv_usec - chronometerTic.tv_usec)/100;
+    if (result>=10) {
+        simulationSpeed_ = 200./result;  // >>>>>> changer ici pour aller plus vite
+        chronometerTic = tv_after;
+    }
+}
+
 // ===========================================================================
 // main
 // ===========================================================================

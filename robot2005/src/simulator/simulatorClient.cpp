@@ -37,7 +37,7 @@ unsigned char* SimulatorClient::recvBuffer(SimuRequestType type)
 {
     if (socket_) {
         if (socket_->read(buffer_, 2) != 2) return NULL; 
-        if (socket_->read(buffer_+2, buffer_[1])) return NULL; 
+        if (socket_->read(buffer_+2, buffer_[1]) != buffer_[1]) return NULL; 
         if (buffer_[0] == type) return buffer_;
     } 
     return NULL;
@@ -185,7 +185,27 @@ void SimulatorClient::setRobotMotorCoef(Millimeter D, Millimeter K, double speed
     memcpy(buf, &speed, sizeof(double));
     sendBuffer();
 }
- 
+
+// ----------------------------------------------------------------------------
+// SimulatorClient::setRobotMotorCoef
+// ----------------------------------------------------------------------------
+// Valeurs de coefficient concernant les odometres position en coordonnees
+// cylindriques + coefficient 1pas=>distance en mm
+  // ----------------------------------------------------------------------------
+   
+void SimulatorClient::setRobotOdomCoef(Millimeter D, Radian R, Millimeter K, double speed)
+{
+    if (!socket_) return;
+    unsigned char* buf = setBufferHeader(SIMU_REQ_SET_ODOM_COEF,  
+                                         2*sizeof(Millimeter)
+                                         +sizeof(Radian)
+                                         +sizeof(double));
+    memcpy(buf, &D, sizeof(Millimeter)); buf += sizeof(Millimeter);
+    memcpy(buf, &R, sizeof(Millimeter)); buf += sizeof(Radian);
+    memcpy(buf, &K, sizeof(Millimeter)); buf += sizeof(Radian);
+    memcpy(buf, &speed, sizeof(double));
+    sendBuffer();
+}
 
 // ----------------------------------------------------------------------------
 // SimulatorClient::setModeBrick
@@ -313,9 +333,27 @@ void SimulatorClient::getMotorPosition(MotorPosition& left,
     sendBuffer(); 
 
     unsigned char* buf=recvBuffer(SIMU_REQ_SET_MOTOR);
-    if (!buf) return;
+    if (!buf) { return;}
     memcpy(&left, buf, sizeof(MotorPosition)); buf += sizeof(MotorPosition);
     memcpy(&right, buf, sizeof(MotorPosition));
+}
+
+// ----------------------------------------------------------------------------
+// SimulatorClient::getOdomPosition
+// ----------------------------------------------------------------------------
+// Renvoie la valeur des codeurs des odometres
+// ----------------------------------------------------------------------------
+void SimulatorClient::getOdomPosition(CoderPosition& left, 
+                                      CoderPosition& right)
+{
+    if (!socket_) return;
+    setBufferHeader(SIMU_REQ_GET_ODOM, 0);
+    sendBuffer(); 
+
+    unsigned char* buf=recvBuffer(SIMU_REQ_SET_ODOM);
+    if (!buf) return;
+    memcpy(&left, buf, sizeof(CoderPosition)); buf += sizeof(CoderPosition);
+    memcpy(&right, buf, sizeof(CoderPosition));
 }
 
 // ----------------------------------------------------------------------------

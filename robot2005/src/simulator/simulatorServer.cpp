@@ -239,7 +239,7 @@ unsigned char* SimulatorConnection::setBufferHeader(SimuRequestType type,
                                                     int dataLength)
 {
     buffer_[0] = type;
-    buffer_[1] = dataLength;
+    buffer_[1] = (char)dataLength;
     return &(buffer_[2]);
 }
 
@@ -311,6 +311,18 @@ void SimulatorConnection::parseReceivedData(SimuRequestType type,
 	    robot_->setRobotMotorCoef(D, K, speed);
         }
         break;
+    case SIMU_REQ_SET_ODOM_COEF: 
+        {
+            Millimeter D=0, K=0;
+	    Radian R=0;
+            double speed=0;
+            memcpy(&D, buffer, sizeof(Millimeter)); buffer+= sizeof(Millimeter);
+            memcpy(&R, buffer, sizeof(Radian)); buffer+= sizeof(Radian);
+            memcpy(&K, buffer, sizeof(Millimeter)); buffer+= sizeof(Millimeter);
+            memcpy(&speed, buffer, sizeof(double)); 
+	    robot_->setRobotOdomCoef(D, R, K, speed);
+        }
+        break;
     case SIMU_REQ_GET_STATUS:
         {
             buf = setBufferHeader(SIMU_REQ_SET_STATUS, 1);
@@ -366,6 +378,16 @@ void SimulatorConnection::parseReceivedData(SimuRequestType type,
             robot_->getMotorPosition(left, right);
             memcpy(buf, &left, sizeof(MotorPosition)); buf+= sizeof(MotorPosition);
             memcpy(buf, &right, sizeof(MotorPosition)); 
+            sendBuffer();
+        }
+        break;
+    case SIMU_REQ_GET_ODOM:
+        {
+            buf = setBufferHeader(SIMU_REQ_SET_ODOM, 2*sizeof(CoderPosition));
+            CoderPosition left=0, right=0;
+            robot_->getOdomPosition(left, right);
+            memcpy(buf, &left, sizeof(CoderPosition)); buf+= sizeof(CoderPosition);
+            memcpy(buf, &right, sizeof(CoderPosition)); 
             sendBuffer();
         }
         break;

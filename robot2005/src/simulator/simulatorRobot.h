@@ -49,7 +49,13 @@ class SimulatorRobot : public RobotBase {
                                             }
     void setModeBrick(bool brick)           { brick_ = brick;
                                               needSendDisplayInfo_=true;}
-    void setRobotMotorCoef(Millimeter D, Millimeter K, double speed)    { D_ = D; K_ = K; simuSpeed_ = speed;}
+    void setRobotMotorCoef(Millimeter D, Millimeter K, double speed)   
+                                            { D_ = D; K_ = K; simuSpeed_ = speed;}
+    void setRobotOdomCoef(Millimeter D, Radian R, Millimeter K, double speed)  
+                                            {   odomLeftPt_=Point(D, R);
+                                                odomRightPt_=Point(D,-R); 
+                                                odomK_ = K;
+                                                odomSpeed_=speed; }
     void setJackin(bool jackin)             { jackin_ = jackin; }
     void setEmergencyStop(bool es)          { emergencyStop_ = es; }
     void setLcdButtonsYes(bool yes)         { lcdBtnYes_=yes; }
@@ -93,6 +99,11 @@ class SimulatorRobot : public RobotBase {
         left  = motorLeft_;
         right = motorRight_;
     }
+    void getOdomPosition(CoderPosition& left, 
+                         CoderPosition& right) const {
+        left  = odomLeft_;
+        right = odomRight_;
+    }
     void getRobotEstimatedPosition(Point& pt, Radian& dir) const {
         pt  = estimatedPos_.center;
         dir = estimatedPos_.direction;
@@ -129,6 +140,7 @@ class SimulatorRobot : public RobotBase {
     /** @brief calcul la nouvell position du robot en mettant a jour la 
         consigne des moteurs */
     void updatePosition();
+    void updateOdometer();
     /** @brief cete fonction permet de restaurer les donnes du robot en cas de
         nouvelle position invalide. */
     void setNewPositionValid();
@@ -179,6 +191,13 @@ class SimulatorRobot : public RobotBase {
 
     MotorPosition  motorLeftOld_, motorRightOld_;
     Position       realPosOld_;
+    Point odomLeftPt_;
+    Point odomRightPt_;
+    Millimeter odomK_;
+    double odomSpeed_;
+    CoderPosition odomLeft_;
+    CoderPosition odomRight_;
+
     double simuSpeed_;
     double simuCoderSignRight_;
     double simuCoderSignLeft_;

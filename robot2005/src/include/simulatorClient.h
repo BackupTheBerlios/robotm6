@@ -58,10 +58,15 @@ class SimulatorClient : public RobotBase {
     void setRobotModel(RobotModel model);
 
     /** 
-     * @brief Valeurs de coefficient concernant les codeurs, la taille des roues, 
-     * l'entre 2 roues ...
+     * @brief Valeurs de coefficient concernant les codeurs des moteurs
+     * l'entre 2 roues, coef pas codeur/distance, vitesse de simulation=1...
      */
     void setRobotMotorCoef(Millimeter D, Millimeter K, double speed);
+    /** 
+     * @brief Valeurs de coefficient concernant les odometres position en coordonnees
+     * cylindriques + coefficient 1pas=>distance en mm, speed donne le signe des codeurs=1 ou -1
+     */
+    void setRobotOdomCoef(Millimeter D, Radian R, Millimeter K, double speed);
 
     /** @brief le robot est considere comme une brique: il peut se deplacer 
         partout, sa position n'est pas inversee quand il change d'equipe */
@@ -89,6 +94,9 @@ class SimulatorClient : public RobotBase {
     /** @brief Renvoie la valeur des codeurs des moteurs des roues */
     void getMotorPosition(MotorPosition& left, 
 			  MotorPosition& right);
+    /** @brief Renvoie la valeur des codeurs des odometres */
+    void getOdomPosition(CoderPosition& left, 
+                         CoderPosition& right);
     /** @brief Renvoie la position estimee du robot (simulation de codeurs) */
     void getRobotEstimatedPosition(Point& pt, Radian& dir);
     /** @brief Renvoie la position simulee du robot */

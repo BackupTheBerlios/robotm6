@@ -2,7 +2,7 @@
 #include "robotMain.h"
 #include "log.h"
 #include "motor.h"
-
+#include "odometer.h"
 // ----------------------------------------------------------------------------
 // evtEndMove
 // ----------------------------------------------------------------------------
@@ -29,6 +29,8 @@ class TestMoveStrategy1CL : public StrategyCL
 void TestMoveStrategy1CL::run(int argc, char* argv[])
 {
     LCD->print("SophiaTeam");
+    ROBOT_POS->setOdometerType(ODOMETER_MOTOR);
+    //ROBOT_POS->setOdometerType(ODOMETER_UART_MANUAL);
     setStartingPosition();
     waitStart(INIT_NONE);
     MOVE->enableAccelerationController(false);

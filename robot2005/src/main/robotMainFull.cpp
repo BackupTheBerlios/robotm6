@@ -94,11 +94,13 @@ RobotMainFullCL::RobotMainFullCL() :
             if (RobotConfig->isRobotAttack) {
                 Simulator->setRobotName("RobotMain Attack");
                 Simulator->setRobotModel(ROBOT_MODEL_ATTACK);
-                Simulator->setRobotMotorCoef(300, 0.0001, 1);
+                Simulator->setRobotMotorCoef(300, 0.004, 1);
+                Simulator->setRobotOdomCoef(100, M_PI/2, 0.1, 1);
             } else {
                 Simulator->setRobotName("RobotMain Defence");
                 Simulator->setRobotModel(ROBOT_MODEL_DEFENCE);
-                Simulator->setRobotMotorCoef(300, 0.0001, 1);
+                Simulator->setRobotMotorCoef(300, 0.004, 1);
+                Simulator->setRobotOdomCoef(100, M_PI/2, 0.1, 1);
             }
         }
     }
