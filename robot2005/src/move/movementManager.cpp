@@ -131,8 +131,7 @@ void MovementManager::startThread()
 void MovementManager::periodicTask()
 {
     if (!motor_) {
-	// TODO: getClassConfig doesn't contain motorReal and no automaticMotorReset [flo]
-        if (RobotConfig->motorSimu) {
+	if (RobotConfig->motorSimu) {
 	    motor_ = new MotorSimu(RobotConfig->automaticMotorReset);
         } else {
 	    motor_ = new MotorReal(RobotConfig->automaticMotorReset);

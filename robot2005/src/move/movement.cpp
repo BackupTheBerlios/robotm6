@@ -49,8 +49,6 @@ bool Movement::endOfMovement_          = true;
 int  Movement::countMovementAllocated_ = 0;
 char Movement::txt_[MOVEMENT_TXT_LENGHT];
 
-// TODO: [flo] INFINITE_TIME from 2004 has become???
-#define INFINITE_TIME 0
 // ----------------------------------------------------------------------------
 // Movement::Movement
 // ----------------------------------------------------------------------------
@@ -61,7 +59,7 @@ Movement::Movement(MoveType    type,
                    Move*       move):
     RobotBase("Movement", CLASS_MOVEMENT), 
     maxSpeed_(maxSpeed), gain_(gain),
-    robotPosition_(NULL),  startTime_(INFINITE_TIME),
+    robotPosition_(NULL),  startTime_(TIME_INFINITE),
     type_(type), move_(move), nextMovement_(NULL)
 {
     robotPosition_=ROBOT_POS;
