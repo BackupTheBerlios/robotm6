@@ -28,6 +28,7 @@ class TestMoveStrategy1CL : public StrategyCL
 
 void TestMoveStrategy1CL::run(int argc, char* argv[])
 {
+    LCD->print("SophiaTeam");
     ROBOT_POS->set(300,1000,0);
     waitStart(INIT_NONE);
     MOVE->enableAccelerationController(false);

@@ -3,6 +3,7 @@
 #include "lcdCom_03.h"
 #include "lcd.h"
 #include "log.h"
+#include "simulatorClient.h"
 #include <assert.h>
 #include <stdarg.h>
 #include <stdio.h>
@@ -43,6 +44,7 @@ void LcdSimu::print(const char* fmt, ...)
   // to be sure not exceeding the lcd display
   txt[33]=0; // not 32 because of the first \n
   LOG_INFO("LCD: \n%s%s%s\n", KB_BLUE, txt, KB_RESTORE);
+  Simulator->setLCDMessage(txt);
 }
 
 
