@@ -10,6 +10,7 @@
 #include "events.h"
 #include "geometry2D.h"
 #include "simulatorClient.h"
+#include "robotConfig.h"
 
 // ----------------------------------------------------------------------------
 // Static members
@@ -164,8 +165,12 @@ bool RobotPosition::reset()
     LOG_FUNCTION();
     resetHctlCoders();
     resetOdomCoders();
-    // TODO: depends on mode of robot (A or D) [flo]
-    set(ROBOT_A_INIT_X, ROBOT_A_INIT_Y, ROBOT_A_INIT_THETA);
+    // TODO: I would prefer that RobotPosition doesn't know if there are several robots...
+    // (for instance put the initial-pos into robotConfig).
+    if (RobotConfig->isRobotAttack)
+	set(ROBOT_A_INIT_X, ROBOT_A_INIT_Y, ROBOT_A_INIT_THETA);
+    else
+	set(ROBOT_D_INIT_X, ROBOT_D_INIT_Y, ROBOT_D_INIT_THETA);
     odometerType_ = ODOMETER_MOTOR; 
     odometerIsAutomatic_ = false;
     odometerErrorCount_ = 0;
