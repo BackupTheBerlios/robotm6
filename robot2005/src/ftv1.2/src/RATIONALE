@@ -1,0 +1,12 @@
+the link field in thread is not redondant with
+the scheduler field. One can set the scheduler
+and then unlink. 
+
+ft_scheduler_react has been introduced in the 
+API. Thus one can make several schedulers run in
+coordination.
+
+ft_scheduler_nd_create returns a scheduler that
+does not preserve the order in which threads are
+executed. It is thus nondeterministic, but can
+also be run more efficiently.

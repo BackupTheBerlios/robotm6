@@ -1,0 +1,13 @@
+To compile the library:
+
+1) go in the directory src and type make. This should produce the
+library libfthread.a and install it in ../lib with fthread.h in
+../include. However, one assumes that gcc, make, ar, and ranlib are
+available. If it is not the case, you should edit the makefile to set
+correctly the corresponding variables. Same thing if ../lib or
+../include are wrong.
+   
+2) you can verify that the installation is correct by running the
+tests in the directory tests, or the examples in the directory
+examples.
+
