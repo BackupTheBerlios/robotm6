@@ -23,9 +23,16 @@
 #include "io/fileDescriptorPoller.h"
 #include "log.h"
 
+static const speed_t SERIAL_SPEEDS[SERIAL_SPEED_MAX] =
+{
+    B50, B75, B110, B134, B150, B200, B300,
+    B600, B1200, B1800, B2400, B4800, B9600,
+    B19200, B38400, B57600, B115200, B230400
+};
+
 class SerialDevice : public IoDevice {
 public: // constructor/destructor
-    SerialDevice(int ttyNbr, bool isBlocking, unsigned int maxRetries);
+    SerialDevice(int ttyNbr, bool isBlocking, unsigned int maxRetries, SerialSpeed speed);
     ~SerialDevice();
 
 public: // overwritten IoDevice methods
@@ -44,31 +51,33 @@ public: // overwritten IoDevice methods
 
     void pollerTask(int fd);
 
-    int getTttyNbr() const { return ttyNbr_; }
-    int getFileDescriptor() const {return fd_; }
+    int getTtyNbr() const { return ttyNbr_; }
+    int getFileDescriptor() const { return fd_; }
+    SerialSpeed getSpeed() const { return speed_; }
+    bool setSpeed(SerialSpeed newSpeed);
     
 private:
     int ttyNbr_;
     bool isBlocking_;
     int fd_;
     unsigned int maxRetries_;
+    SerialSpeed speed_;
     struct termios oldtio_;
 };
 
-SerialDevice::SerialDevice(int ttyNbr, bool isBlocking, unsigned int maxRetries)
+SerialDevice::SerialDevice(int ttyNbr, bool isBlocking,
+			   unsigned int maxRetries, SerialSpeed speed)
     : IoDevice("SerialDevice", CLASS_SERIAL_DEVICE),
       ttyNbr_(ttyNbr), isBlocking_(isBlocking),
-      fd_(-1), maxRetries_(maxRetries)
+      fd_(-1), maxRetries_(maxRetries), speed_(speed)
 {
 }
 
-SerialDevice::~SerialDevice()
-{
+SerialDevice::~SerialDevice() {
     close();
 }
 
-bool SerialDevice::open()
-{
+bool SerialDevice::open() {
     char dev[20];
     close();
 
@@ -83,14 +92,17 @@ bool SerialDevice::open()
         return false;
     }
 
-    if( tcgetattr( fd_, &oldtio_ ) < 0 ) 
-        goto fail;/* save current port settings */
+    if (tcgetattr(fd_, &oldtio_) < 0) {
+	LOG_ERROR("tcgetattr failed on serial %s\n", dev);
+	close();
+	return false;
+    }
     struct termios newtio;
     memset(&newtio, 0, sizeof(newtio));
     newtio.c_iflag = INPCK; // | IGNBRK | IGNPAR ; // input parity check
     newtio.c_lflag = 0;
     newtio.c_oflag = 0;
-    newtio.c_cflag = B9600 | CREAD | CS8 | CLOCAL;
+    newtio.c_cflag = CREAD | CS8 | CLOCAL; // | B9600
     if (isBlocking_) {
       newtio.c_cc[ VMIN ] = 1;
       newtio.c_cc[ VTIME ] = 0;
@@ -98,13 +110,20 @@ bool SerialDevice::open()
       newtio.c_cc[ VMIN ] = 0;
       newtio.c_cc[ VTIME ] = 1;
     }
-    /*
-    if( cfsetospeed( &newtio, B9600 ) < 0 ) goto fail;
-    if( cfsetispeed( &newtio, B9600 ) < 0 ) goto fail;
-    */
+    if ((cfsetospeed(&newtio, SERIAL_SPEEDS[speed_]) < 0) ||
+	(cfsetispeed(&newtio, SERIAL_SPEEDS[speed_]) < 0)) {
+	LOG_ERROR("Can't set speed to %d on device %s\n", speed_, dev);
+	close();
+	return false;
+    }
+
     // start the communication
     tcflush(fd_, TCIFLUSH);
-    if( tcsetattr( fd_, TCSANOW, &newtio ) < 0 ) goto fail;
+    if(tcsetattr(fd_, TCSANOW, &newtio) < 0) {
+	LOG_ERROR("tcsetattr failed on device %s\n", dev);
+	close();
+	return false;
+    }
     
 #ifdef linux
     // not used because we use poll instead
@@ -113,21 +132,14 @@ bool SerialDevice::open()
 #endif
     LOG_OK("Serial port %s opened, %d\n", dev, fd_);
     return true;
- fail:
-    LOG_ERROR("Serial port %s configuration error, cannot open device\n", 
-              dev);
-    close();
-    return 1;
 }
 
-bool SerialDevice::isOpen() const
-{
+bool SerialDevice::isOpen() const {
     return  fd_ >= 0;
 }
 
 
-bool SerialDevice::close()
-{
+bool SerialDevice::close() {
     if (fd_ >= 0) {
         tcsetattr(fd_, TCSANOW, &oldtio_);
         ::close(fd_);
@@ -138,13 +150,11 @@ bool SerialDevice::close()
 }
 
 // TODO: implement this method (if there's something to do) [flo]
-bool SerialDevice::reset()
-{
+bool SerialDevice::reset() {
     return true;
 }
 
-bool SerialDevice::read(IoByte* buf, unsigned int& length) //, unsigned int retry)
-{
+bool SerialDevice::read(IoByte* buf, unsigned int& length) { //, unsigned int retry)
     unsigned int retry = maxRetries_;
     unsigned int k=0, res=0;
     unsigned int N=length;
@@ -171,8 +181,7 @@ bool SerialDevice::read(IoByte* buf, unsigned int& length) //, unsigned int retr
     return (length == N);
 }
 
-bool SerialDevice::write(IoByte* buf, unsigned int& length)
-{
+bool SerialDevice::write(IoByte* buf, unsigned int& length) {
     //printf("length=%d\n", length);
     int length2 = 0;
     do {
@@ -185,23 +194,19 @@ bool SerialDevice::write(IoByte* buf, unsigned int& length)
     return true;
 }
 
-bool SerialDevice::isBlocking() const
-{
+bool SerialDevice::isBlocking() const {
     return isBlocking_;
 }
 
-bool SerialDevice::canListen() const
-{
+bool SerialDevice::canListen() const {
     return !isBlocking_;
 }
 
-void SerialDeviceCallBack(void* userData, int fd)
-{
+void SerialDeviceCallBack(void* userData, int fd) {
     static_cast<SerialDevice*>(userData)->pollerTask(fd);
 }
 
-void SerialDevice::startListening()
-{
+void SerialDevice::startListening() {
     if (isBlocking_)
     {
 	LOG_ERROR("Can't listen on blocking Serial port %d\n", ttyNbr_);
@@ -213,8 +218,7 @@ void SerialDevice::startListening()
 						 this);
 }
 
-void SerialDevice::pollerTask(int fd)
-{
+void SerialDevice::pollerTask(int fd) {
     if (fd != fd_ || !isOpen()) return;
     unsigned int lread=0;
     static const unsigned int BUFFER_SIZE=255;
@@ -230,54 +234,93 @@ void SerialDevice::pollerTask(int fd)
     } 
 }
 
-void SerialDevice::stopListening()
-{
+void SerialDevice::stopListening() {
     FileDescriptorPoller->unregisterFileDescriptor(fd_);
 }
 
+bool SerialDevice::setSpeed(SerialSpeed newSpeed) {
+    if (isOpen()) {
+	LOG_ERROR("Can't set speed of open device (tty %d)." , ttyNbr_);
+	return false;
+    }
+    LOG_INFO("Setting speed of tty %d to %d\n", ttyNbr_, newSpeed);
+    speed_ = newSpeed;
+    return true;
+}
+    
+
 
 //=============================================================================
 //=============================================================================
 
-SerialPort::SerialPort(int ttyNbr, bool isBlocking)
-    : RobotBase("SerialPort", CLASS_SERIAL_PORT)
+SerialPort::SerialPort(int ttyNbr, bool isBlocking, SerialSpeed speed)
+    : RobotBase("SerialPort", CLASS_SERIAL_PORT), speed_(speed)
 {
     unsigned int retries;
     if (isBlocking)
 	retries = 0;
     else
 	retries = DEFAULT_READ_RETRIES;
-    
-    device_.push_back(new SerialDevice(ttyNbr, isBlocking, retries));
+    addInitialDevice(ttyNbr, isBlocking, retries, speed);
 }
 
-SerialPort::SerialPort(int ttyNbr, unsigned int retries)
-    : RobotBase("SerialPort", CLASS_SERIAL_PORT)
+SerialPort::SerialPort(int ttyNbr, unsigned int retries, SerialSpeed speed)
+    : RobotBase("SerialPort", CLASS_SERIAL_PORT), speed_(speed)
 {
-    device_.push_back(new SerialDevice(ttyNbr, false, retries));
+    addInitialDevice(ttyNbr, false, retries, speed);
 }
 
-SerialPort::~SerialPort()
-{
+void SerialPort::addInitialDevice(int ttyNbr,
+				  bool isBlocking,
+				  unsigned int retries,
+				  SerialSpeed speed) {
+    SerialSpeed initialSpeed;
+    if (speed == SERIAL_SPEED_SCAN) {
+	initialSpeed = DEFAULT_SERIAL_SPEED;
+    } else {
+	initialSpeed = speed;
+    }
+
+    device_.push_back(new SerialDevice(ttyNbr, isBlocking, retries, initialSpeed));
+}
+
+SerialPort::~SerialPort() {
     delete(device_[0]);
 }
 
-const IoDeviceVector& SerialPort::listPorts()
-{
+const IoDeviceVector& SerialPort::listPorts() {
     return device_;
 }
 
-const IoDeviceScanInfoPairVector& SerialPort::scan()
-{
+const IoDeviceScanInfoPairVector& SerialPort::scan() {
     // TODO: we could implement a scan for blocking-devices using select. [flo]
     LOG_INFO("Scanning serial port\n");
     IoByte scanAnswer;
     scannedDevice_.clear(); // new scan...
-    if (IoHost::doIoDeviceScan(device_[0], &scanAnswer)) {
-	IoDeviceScanInfoPair info;
-	info.device = device_[0];
-	info.scanInfo = scanAnswer;
-	scannedDevice_.push_back(info);
+    const unsigned int NB_MAX_NB_SPEEDS = 8;
+    SerialSpeed scanSpeeds[NB_MAX_NB_SPEEDS];
+    unsigned int nbSpeeds;
+    if (speed_ == SERIAL_SPEED_SCAN) {
+	scanSpeeds[0] = SERIAL_SPEED_9600;
+	scanSpeeds[1] = SERIAL_SPEED_38400;
+	nbSpeeds = 2;
+    } else {
+	scanSpeeds[0] = speed_;
+	nbSpeeds = 1;
+    }
+
+    SerialDevice* device = static_cast<SerialDevice*>(device_[0]);
+    for (unsigned int i = 0; i < nbSpeeds; ++i) {
+	device->setSpeed(scanSpeeds[i]);
+	LOG_INFO("Scanning device tty %d at speed %d\n", device->getTtyNbr(), scanSpeeds[i]);
+	
+	if (IoHost::doIoDeviceScan(device, &scanAnswer)) {
+	    IoDeviceScanInfoPair info;
+	    info.device = device;
+	    info.scanInfo = scanAnswer;
+	    scannedDevice_.push_back(info);
+	    break; // don't continue scanning at other speeds.
+	}
     }
     return scannedDevice_;
 }

@@ -20,8 +20,7 @@
 #include "log.h"
 
 namespace {
-    // TODO: copied the name from ioManager. what's the meaning of the "4"? [flo]
-    pthread_mutex_t repositoryLock4 = PTHREAD_MUTEX_INITIALIZER;
+    pthread_mutex_t repositoryLock = PTHREAD_MUTEX_INITIALIZER;
     void no_op(...){};
 }
 
@@ -180,7 +179,7 @@ void RobotDevicesCL::reset()
 
 void RobotDevicesCL::periodicTask()
 {
-    Lock localLock(&repositoryLock4);
+    Lock localLock(&repositoryLock);
     RobotDevicesSet::iterator it;
     for (it = watchedDevices_.begin();
 	 it != watchedDevices_.end();
@@ -191,13 +190,13 @@ void RobotDevicesCL::periodicTask()
 
 void RobotDevicesCL::startWatching(RobotDeviceCL* device)
 {
-  Lock localLock(&repositoryLock4);
+  Lock localLock(&repositoryLock);
   watchedDevices_.insert(device);
 }
 
 void RobotDevicesCL::stopWatching(RobotDeviceCL* device)
 {
-  Lock localLock(&repositoryLock4);
+  Lock localLock(&repositoryLock);
   RobotDevicesSet::iterator it = watchedDevices_.find(device);
   if (it != watchedDevices_.end()) {
     watchedDevices_.erase(it);
