@@ -72,7 +72,10 @@ class Polygon {
  public:
   /** Points must be order in clockwise order */
   Polygon(Point* pts, int nbrPts);
+  Polygon(Polygon const& p);
+  Polygon():nbrPts(0), pts(NULL){}
   virtual ~Polygon();
+  Polygon& operator=(Polygon const& p);
   
   int nbrPts;
   Point* pts;
@@ -355,7 +358,17 @@ void rectilinear(Trajectory const& trajectory,
                  double            index,
                  Point           & point);
 
-
+/**
+ * Conversion d'un point en coordonnees cylindriques
+ */
+Point& convertToCylindricCoord(Point const& center, 
+                               Point&       pt);
+/**
+ * Conversion d'un point en coordonnees orthogonales
+ */
+Point& convertToOrthogonalCoord(Point const& center, 
+                                Radian       direction,
+                                Point&       pt);
 /**
  * @brief this function tests all functions of this lib
  */

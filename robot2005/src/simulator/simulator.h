@@ -15,6 +15,8 @@
 class SimulatorServer;
 class SimulatorConnection;
 class SimulatorRobot;
+class SimulatorSkittle;
+class SimulatorGrsBall;
 
 /**
  * @class Simulator
@@ -28,9 +30,9 @@ class SimulatorCL : public RobotBase {
 
     SimulatorCL();
     virtual ~SimulatorCL();
-    // ------------------------------------------------------------------------
+    // -------------------------------------------------------------------
     // Simulation des capteurs
-    // ------------------------------------------------------------------------
+    // -------------------------------------------------------------------
     /** 
      * @brief Simulation d'un capteur de distance place horizontalement
      * Retoune la distance au plus proche objet sur le terrain pour capteur 
@@ -77,6 +79,12 @@ class SimulatorCL : public RobotBase {
     void changeBridge();
     /** @brief change la position des supports de quilles */
     void changeSupport();
+#define SIMU_WALL_BORDER_PTS_NBR   4
+#define SIMU_BRIDGE_BORDER_PTS_NBR 14
+#define SIMU_RIVER_BORDER_PTS_NBR  18
+    Point* getWallPts()   { return wallBorderPts_; }
+    Point* getBridgePts() { return bridgeXPts_; }
+    Point* getRiverPts()  { return riverYPts_; }
 
  protected:
     void registerViewerBtnCB();
@@ -85,7 +93,8 @@ class SimulatorCL : public RobotBase {
                              Millimeter altitude, 
                              bool four,
                              bool red);
- 
+    void setBridgeBorder();
+    void setWallBorder();
  private:
     static SimulatorCL* simulator_;
     SimulatorServer* server_;
@@ -93,11 +102,17 @@ class SimulatorCL : public RobotBase {
     SquatchBall    sBalls_[BALLE_SQUATCH_NBR];
     GRSBall        gBalls_[BALLE_GRS_NBR];
     Skittle        skittles_[QUILLE_NBR];
+    SimulatorGrsBall* sgBalls_[BALLE_GRS_NBR];
+    SimulatorSkittle* sskittles_[QUILLE_NBR];
     BridgePosition bridge_;
     Point          supportPosition1_;
     Point          supportPosition2_;
     Point          supportPosition3_;
     int            supportConfigId_;
+
+    Point          wallBorderPts_[SIMU_WALL_BORDER_PTS_NBR];
+    Point          bridgeXPts_[SIMU_BRIDGE_BORDER_PTS_NBR];
+    Point          riverYPts_[SIMU_RIVER_BORDER_PTS_NBR];
 };
 
 #endif // __SIMULATOR_H__

@@ -35,8 +35,8 @@ typedef struct Order {
   void reset() {
      motorReset=0;
      resetRobotPos=false;
-     speedRight=0;
-     speedLeft=0;
+     //speedRight=0;
+     //speedLeft=0;
   }
 
   bool operator != (Order const & o) const {
@@ -274,7 +274,9 @@ bool getKeyboardOrder(Order &order)
 //--------------------------------------------------------------------
 int main(int argc, char* argv[]) {
     configureKeyboard();
-    
+    printf("Usage: %s [robotType]\n  robotType=1:attack\n"
+	   "  robotType=2:defence\n  default: robot brique\n", 
+	   argv[0]);
     if (!Simulator->connectToServer()) {
 	LOG_ERROR("Cannot connect to server\n");
 	return -1;

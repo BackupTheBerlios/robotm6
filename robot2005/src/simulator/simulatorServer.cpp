@@ -303,11 +303,11 @@ void SimulatorConnection::parseReceivedData(SimuRequestType type,
         break;
     case SIMU_REQ_SET_MOTOR_COEF: 
         {
-            int D=0, K=0;
+            Millimeter D=0, K=0;
 	    double speed=0;
-            memcpy(&D, buffer, sizeof(int)); buffer+= sizeof(int);
-            memcpy(&K, buffer, sizeof(int)); buffer+= sizeof(int);
-            memcpy(&speed, buffer, sizeof(int)); 
+            memcpy(&D, buffer, sizeof(Millimeter)); buffer+= sizeof(Millimeter);
+            memcpy(&K, buffer, sizeof(Millimeter)); buffer+= sizeof(Millimeter);
+            memcpy(&speed, buffer, sizeof(double)); 
 	    robot_->setRobotMotorCoef(D, K, speed);
         }
         break;

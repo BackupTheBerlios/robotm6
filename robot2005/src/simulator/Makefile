@@ -9,7 +9,7 @@ LIB_NAME=libsimulator
 OBJS=simulatorClient.o
 
 BIN_NAME=simulator
-OBJS_SERVER=simulator.o simulatorServer.o simulatorRobot.o
+OBJS_SERVER=simulator.o simulatorServer.o simulatorRobot.o simulatorSkittle.o simulatorGrsBall.o
 
 
 ## ===========================================================================

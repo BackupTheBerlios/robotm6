@@ -1,5 +1,5 @@
 /**
- * @file simulatorServer.h
+ * @file simulatorRobot.h
  *
  * @author Laurent Saint-Marcel
  *
@@ -13,6 +13,10 @@
 
 #include "robotBase.h"
 #include "simulatorBase.h"
+#include "geometry2D.h"
+
+class SimulatorGrsBall;
+class SimulatorSkittle;
 
 /**
  * @class SimulatorRobot
@@ -34,10 +38,16 @@ class SimulatorRobot : public RobotBase {
                                               needSendDisplayInfo_=true;}
     void setRobotWeight(SimuWeight weight)  { weight_ = weight; }
     void setRobotModel(RobotModel model)    { model_ = model; 
+                                              needSendDisplayInfo_=true;
+                                              if (model_==ROBOT_MODEL_ATTACK)
+                                                  setBorderRobotAttack();
+                                              else if (model_==ROBOT_MODEL_DEFENCE)
+                                                  setBorderRobotDefence();
+                                              else setBorderRobotBrick();
+                                            }
+    void setModeBrick(bool brick)           { brick_ = brick;
                                               needSendDisplayInfo_=true;}
-    void setModeBrick(bool brick)           { brick_ = brick; 
-                                              needSendDisplayInfo_=true;}
-    void setRobotMotorCoef(int D, int K, double speed)    { D_ = D; K_ = K; simuSpeed_ = speed;}
+    void setRobotMotorCoef(Millimeter D, Millimeter K, double speed)    { D_ = D; K_ = K; simuSpeed_ = speed;}
     void setJackin(bool jackin)             { jackin_ = jackin; }
     void setEmergencyStop(bool es)          { emergencyStop_ = es; }
     void setLcdButtonsYes(bool yes)         { lcdBtnYes_=yes; }
@@ -116,7 +126,23 @@ class SimulatorRobot : public RobotBase {
     void updatePosition();
     /** @brief cete fonction permet de restaurer les donnes du robot en cas de
         nouvelle position invalide. */
-    void setNewPositionValid(bool isValid);
+    void setNewPositionValid();
+    void checkPosAndWall();
+    void checkPosAndBridge(BridgePosition const& bridge);
+    void checkPosAndOtherRobot(SimulatorRobot* other);
+    void checkPosAndGRSBall(SimulatorGrsBall* ball);
+    void checkPosAndSkittle(SimulatorSkittle* skittle);
+
+ protected:
+    void setRealPos(Position const& pos);
+    bool checkSegmentIntersectionWithRobot(Segment const& seg,
+                                           Millimeter z,
+                                           Point intersectionPt);
+    void convertBorderToCylindric(Point const& center);
+    void convertBorderToOrthogonal(Position const& pos);
+    void setBorderRobotAttack();
+    void setBorderRobotDefence();
+    void setBorderRobotBrick();
 
     // ------------------------------------------------------------------------
     // private members
@@ -126,7 +152,7 @@ class SimulatorRobot : public RobotBase {
     SimuWeight  weight_;
     RobotModel  model_;
     bool        brick_;
-    int         D_, K_;
+    Millimeter  D_, K_;
     bool        jackin_;
     bool        emergencyStop_;
     bool        lcdBtnYes_;
@@ -147,9 +173,13 @@ class SimulatorRobot : public RobotBase {
     double simuCoderSignLeft_;
     bool   simuMotorNoise_;
     bool   simuPosFirst_;
-
+    bool   isValid_;
        
- 
+#define SIMU_ROBOT_PTS_NBR     12
+#define SIMU_ROBOT_POLYGON_NBR 3
+    Point    borderPts_[SIMU_ROBOT_PTS_NBR];
+    Point    borderRealPts_[SIMU_ROBOT_PTS_NBR];
+    Polygon  borderPol_[SIMU_ROBOT_POLYGON_NBR]; // 2 polygon au niveau bas moins de 70mm et 1 au dessus
 };
 
 #endif // __SIMULATOR_CLIENT_H__

@@ -11,6 +11,8 @@
 #include "simulator.h"
 #include "simulatorServer.h"
 #include "simulatorRobot.h"
+#include "simulatorGrsBall.h"
+#include "simulatorSkittle.h"
 #include "viewer3D.h"
 #define LOG_CLASSID CLASS_SIMULATOR
 #include "log.h"
@@ -66,6 +68,16 @@ SimulatorCL::SimulatorCL() :
     supportPosition3_(1050, 750), 
     supportConfigId_(0)
 {
+    for(unsigned int i=0;i!=BALLE_GRS_NBR;i++) {
+      sgBalls_[i] = new SimulatorGrsBall();
+      sgBalls_[i]->set(&gBalls_[i]);
+    }
+    for(unsigned int i=0;i!=QUILLE_NBR;i++) {
+      sskittles_[i] = new SimulatorSkittle();
+      sskittles_[i]->set(&skittles_[i]);
+    }
+    setBridgeBorder();
+    setWallBorder();
     server_ = new SimulatorServer();
     if (server_) server_->startReceiver();
     Viewer3D->createWindows(true, true);
@@ -96,7 +108,13 @@ SimulatorCL::~SimulatorCL()
     ft_scheduler_stop(threadUpdatePos);
 #endif
     if (server_) delete server_;
-    delete Viewer3D; 
+    delete Viewer3D;
+    for(unsigned int i=0;i!=BALLE_GRS_NBR;i++) {
+      delete sgBalls_[i];
+    }
+    for(unsigned int i=0;i!=QUILLE_NBR;i++) {
+      delete sskittles_[i];
+    } 
 }
 
 // ---------------------------------------------------------------------------
@@ -172,6 +190,7 @@ void SimulatorCL::changeBridge()
     bridge_ = (BridgePosition)((1+bridge_)%(BRIDGE_POS_CENTER+1));
     if (bridge_ == BRIDGE_POS_UNKNOWN) bridge_ = BRIDGE_POS_BORDURE;
     Viewer3D->setBridgePosition(bridge_);
+    setBridgeBorder();
 }
 
 // ---------------------------------------------------------------------------
@@ -296,7 +315,95 @@ void SimulatorCL::reset()
 // ---------------------------------------------------------------------------
 void SimulatorCL::update()
 {
-    
+  if (server_) {
+    // calcul la nouvelle position des objets
+    for(unsigned int i=0; i<SIMU_PORT_MAX_CONNECTIONS; i++) {
+      SimulatorRobot* robot = server_->getRobot(i);
+      if (robot) {
+	robot->updatePosition();
+      }
+    }
+    for(unsigned int i=0;i!=BALLE_GRS_NBR;i++) {
+      sgBalls_[i]->updatePosition();
+    }
+    for(unsigned int i=0;i!=QUILLE_NBR;i++) {
+      sskittles_[i]->updatePosition();
+    }
+    // verifie que la position des objets n'entre pas en collision avec le terrain
+    for(unsigned int i=0; i<SIMU_PORT_MAX_CONNECTIONS; i++) {
+      SimulatorRobot* robot = server_->getRobot(i);
+      if (robot) {
+	robot->checkPosAndWall();
+        robot->checkPosAndBridge(bridge_);
+      }
+    } 
+    for(unsigned int i=0;i!=BALLE_GRS_NBR;i++) {
+      sgBalls_[i]->checkPosAndWall();
+      sgBalls_[i]->checkPosAndBridge(bridge_);
+    }
+    for(unsigned int i=0;i!=QUILLE_NBR;i++) {
+      sskittles_[i]->checkPosAndWall();
+      sskittles_[i]->checkPosAndBridge(bridge_);
+    } 
+    // verifie la position des robots
+    for(unsigned int i=0; i<SIMU_PORT_MAX_CONNECTIONS; i++) {
+      SimulatorRobot* robot1 = server_->getRobot(i);
+      if (robot1) {
+	for(unsigned int j=i; j<SIMU_PORT_MAX_CONNECTIONS; j++) {
+	  SimulatorRobot* robot2 = server_->getRobot(j);
+	  if (robot2) {
+	    robot1->checkPosAndOtherRobot(robot2);
+	  }
+	}
+      }
+    }
+    // verifie la position des balles de grs
+    for(unsigned int i=0; i<SIMU_PORT_MAX_CONNECTIONS; i++) {
+      SimulatorRobot* robot = server_->getRobot(i);
+      if (robot) {
+	for(unsigned int i=0;i!=BALLE_GRS_NBR;i++) {
+	  robot->checkPosAndGRSBall(sgBalls_[i]);
+	}
+      }
+    }
+    for(unsigned int i=0;i!=BALLE_GRS_NBR;i++) {
+      for(unsigned int j=0;j!=BALLE_GRS_NBR;j++) {
+	sgBalls_[i]->checkPosAndGRSBall(sgBalls_[j]);
+      }
+    }
+    // verifie la position des quilles
+    for(unsigned int i=0; i<SIMU_PORT_MAX_CONNECTIONS; i++) {
+      SimulatorRobot* robot = server_->getRobot(i);
+      if (robot) {
+	for(unsigned int i=0;i!=QUILLE_NBR;i++) {
+	  robot->checkPosAndSkittle(sskittles_[i]);
+	}
+      }
+    }
+    for(unsigned int i=0;i!=BALLE_GRS_NBR;i++) {
+      for(unsigned int j=0;j!=QUILLE_NBR;j++) {
+	sgBalls_[i]->checkPosAndSkittle(sskittles_[j]);
+      }
+    }
+    for(unsigned int i=0;i!=QUILLE_NBR;i++) {
+      for(unsigned int j=0;j!=QUILLE_NBR;j++) {
+	sskittles_[i]->checkPosAndSkittle(sskittles_[j]);
+      }
+    }
+    // met a jour la position reelle
+    for(unsigned int i=0; i<SIMU_PORT_MAX_CONNECTIONS; i++) {
+      SimulatorRobot* robot = server_->getRobot(i);
+      if (robot) {
+	robot->setNewPositionValid();
+      }
+    }
+    for(unsigned int i=0;i!=BALLE_GRS_NBR;i++) {
+      sgBalls_[i]->setNewPositionValid();
+    }
+    for(unsigned int i=0;i!=QUILLE_NBR;i++) {
+      sskittles_[i]->setNewPositionValid();
+    } 
+  }
 }
 
 // ===========================================================================
@@ -495,7 +602,93 @@ void SimulatorCL::registerViewerBtnCB()
     }
 }
 
-
+void SimulatorCL::setBridgeBorder()
+{
+    Millimeter x1=(TERRAIN_X-TERRAIN_PONT_LONGUEUR)/2;
+    Millimeter x2=(TERRAIN_X+TERRAIN_PONT_LONGUEUR)/2;
+    // pont du milieu
+    bridgeXPts_[0]=Point(x1, TERRAIN_Y/2-TERRAIN_CASE_LARGEUR/2);
+    bridgeXPts_[1]=Point(x2, bridgeXPts_[1].y);
+    bridgeXPts_[2]=Point(x1,TERRAIN_Y/2);
+    bridgeXPts_[3]=Point(x2, bridgeXPts_[3].y);
+    bridgeXPts_[4]=Point(x1,TERRAIN_Y/2+TERRAIN_CASE_LARGEUR/2);
+    bridgeXPts_[5]=Point(x2, bridgeXPts_[5].y);
+    // pont du haut
+    switch(bridge_) {
+    case BRIDGE_POS_UNKNOWN:
+        bridgeXPts_[6]=Point(x1,TERRAIN_Y*2); // out of terrain
+        riverYPts_[0]=Point(x1, 0);
+        riverYPts_[1]=Point(x1, TERRAIN_Y/2-TERRAIN_CASE_LARGEUR/2);
+        riverYPts_[2]=Point(x1, TERRAIN_Y);
+        riverYPts_[3]=Point(x1, TERRAIN_Y/2+TERRAIN_CASE_LARGEUR/2);
+        riverYPts_[4]=Point(x1, 2*TERRAIN_Y);// out of terrain
+        riverYPts_[5]=Point(x1, 3*TERRAIN_Y);
+        riverYPts_[6]=Point(x1, 4*TERRAIN_Y);
+        riverYPts_[7]=Point(x1, 5*TERRAIN_Y);
+        break;
+    case BRIDGE_POS_BORDURE: 
+        bridgeXPts_[6]=Point(x1,0); // out of terrain
+        riverYPts_[0]=Point(x1, TERRAIN_PONT_LARGEUR);
+        riverYPts_[1]=Point(x1, TERRAIN_Y/2-TERRAIN_CASE_LARGEUR/2);
+        riverYPts_[2]=Point(x1, TERRAIN_Y-riverYPts_[0].y);
+        riverYPts_[3]=Point(x1, TERRAIN_Y-riverYPts_[1].y);
+        riverYPts_[4]=Point(x1, 2*TERRAIN_Y);// out of terrain
+        riverYPts_[5]=Point(x1, 3*TERRAIN_Y);
+        riverYPts_[6]=Point(x1, 4*TERRAIN_Y);
+        riverYPts_[7]=Point(x1, 5*TERRAIN_Y);
+        break;  
+    case BRIDGE_POS_MIDDLE_BORDURE: 
+        bridgeXPts_[6]=Point(x1,TERRAIN_PONT_LARGEUR*0.5); // out of terrain
+        riverYPts_[0]=Point(x1, TERRAIN_PONT_LARGEUR+bridgeXPts_[6].y);
+        riverYPts_[1]=Point(x1, TERRAIN_Y/2-TERRAIN_CASE_LARGEUR/2);
+        riverYPts_[2]=Point(x1, TERRAIN_Y-riverYPts_[0].y);
+        riverYPts_[3]=Point(x1, TERRAIN_Y-riverYPts_[1].y);
+        riverYPts_[4]=Point(x1, 0);// out of terrain
+        riverYPts_[5]=Point(x1, bridgeXPts_[6].y);
+        riverYPts_[6]=Point(x1, TERRAIN_Y-riverYPts_[4].y);
+        riverYPts_[7]=Point(x1, TERRAIN_Y-riverYPts_[5].y);
+        break;  
+    case BRIDGE_POS_MIDDLE_CENTER: 
+        bridgeXPts_[6]=Point(x1,TERRAIN_PONT_LARGEUR); // out of terrain
+        riverYPts_[0]=Point(x1, TERRAIN_PONT_LARGEUR+bridgeXPts_[6].y);
+        riverYPts_[1]=Point(x1, TERRAIN_Y/2-TERRAIN_CASE_LARGEUR/2);
+        riverYPts_[2]=Point(x1, TERRAIN_Y-riverYPts_[0].y);
+        riverYPts_[3]=Point(x1, TERRAIN_Y-riverYPts_[1].y);
+        riverYPts_[4]=Point(x1, 0);// out of terrain
+        riverYPts_[5]=Point(x1, bridgeXPts_[6].y);
+        riverYPts_[6]=Point(x1, TERRAIN_Y-riverYPts_[4].y);
+        riverYPts_[7]=Point(x1, TERRAIN_Y-riverYPts_[5].y);
+        break;  
+    case BRIDGE_POS_CENTER:
+        bridgeXPts_[6]=Point(x1,TERRAIN_PONT_LARGEUR*1.5); // out of terrain
+        riverYPts_[0]=Point(x1, TERRAIN_PONT_LARGEUR*1.5);
+        riverYPts_[1]=Point(x1, 0);
+        riverYPts_[2]=Point(x1, TERRAIN_Y-riverYPts_[0].y);
+        riverYPts_[3]=Point(x1, TERRAIN_Y-riverYPts_[1].y);
+        riverYPts_[4]=Point(x1, 2*TERRAIN_Y);// out of terrain
+        riverYPts_[5]=Point(x1, 3*TERRAIN_Y);
+        riverYPts_[6]=Point(x1, 4*TERRAIN_Y);
+        riverYPts_[7]=Point(x1, 5*TERRAIN_Y);
+        break;
+    }
+    for(unsigned int i=8;i!=SIMU_RIVER_BORDER_PTS_NBR;i++) {
+        riverYPts_[i]=Point(x2, riverYPts_[i-8].y);
+    }
+    bridgeXPts_[7]=Point(x2, bridgeXPts_[6].y);
+    bridgeXPts_[8]=Point(x1, TERRAIN_Y-bridgeXPts_[6].y);
+    bridgeXPts_[9]=Point(x2, TERRAIN_Y-bridgeXPts_[6].y);
+    bridgeXPts_[10]=Point(x1, bridgeXPts_[6].y+TERRAIN_PONT_LARGEUR);
+    bridgeXPts_[11]=Point(x2, bridgeXPts_[10].y);
+    bridgeXPts_[12]=Point(x1, TERRAIN_Y-bridgeXPts_[10].y);
+    bridgeXPts_[13]=Point(x2, TERRAIN_Y-bridgeXPts_[10].y);
+}   
+void SimulatorCL::setWallBorder()
+{
+    wallBorderPts_[0]=Point(0,0);
+    wallBorderPts_[1]=Point(TERRAIN_X,0);
+    wallBorderPts_[2]=Point(TERRAIN_X,TERRAIN_Y);
+    wallBorderPts_[3]=Point(0,TERRAIN_Y);
+}
 // ===========================================================================
 // main
 // ===========================================================================

@@ -167,12 +167,13 @@ void SimulatorClient::setRobotModel(RobotModel model)
 // Valeurs de coefficient concernant les codeurs, la taille des roues, 
 // l'entre 2 roues ...
 // ----------------------------------------------------------------------------
-void SimulatorClient::setRobotMotorCoef(int D, int K, double speed)
+void SimulatorClient::setRobotMotorCoef(Millimeter D, Millimeter K, double speed)
 {
     unsigned char* buf = setBufferHeader(SIMU_REQ_SET_MOTOR_COEF,  
-                                         2*sizeof(int));
-    memcpy(buf, &D, sizeof(int)); buf += sizeof(int);
-    memcpy(buf, &K, sizeof(int)); buf += sizeof(int);
+                                         2*sizeof(Millimeter)
+                                         +sizeof(double));
+    memcpy(buf, &D, sizeof(Millimeter)); buf += sizeof(Millimeter);
+    memcpy(buf, &K, sizeof(Millimeter)); buf += sizeof(Millimeter);
     memcpy(buf, &speed, sizeof(double));
     sendBuffer();
 }

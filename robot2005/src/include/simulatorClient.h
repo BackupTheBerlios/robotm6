@@ -70,7 +70,7 @@ class SimulatorClient : public RobotBase {
      * @brief Valeurs de coefficient concernant les codeurs, la taille des roues, 
      * l'entre 2 roues ...
      */
-    void setRobotMotorCoef(int D, int K, double speed);
+    void setRobotMotorCoef(Millimeter D, Millimeter K, double speed);
 
     /** @brief le robot est considere comme une brique: il peut se deplacer 
         partout, sa position n'est pas inversee quand il change d'equipe */

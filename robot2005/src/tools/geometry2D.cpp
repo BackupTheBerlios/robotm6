@@ -872,6 +872,27 @@ Polygon::Polygon(Point* Pts, int NbrPts):
   pts = new Point[nbrPts];
   memcpy(pts, Pts, sizeof(Point)*nbrPts);
 }
+Polygon::Polygon(Polygon const& p):
+  nbrPts(p.nbrPts), pts(NULL)
+{
+    if (nbrPts!=0) {
+        pts = new Point[nbrPts];
+        memcpy(pts, p.pts, sizeof(Point)*nbrPts);
+    }
+}
+Polygon& Polygon::operator=(Polygon const& p)
+{
+    if (nbrPts!=p.nbrPts) {
+        if (pts) delete pts;
+        pts=NULL;
+        nbrPts=p.nbrPts;
+        if (nbrPts!=0) pts = new Point[nbrPts];
+    }
+    if (nbrPts!=0) memcpy(pts, p.pts, sizeof(Point)*nbrPts);
+    return *this;
+    
+}
+
 Polygon::~Polygon()
 {
   if (pts) delete[] pts;
@@ -922,6 +943,30 @@ bool Geometry2D::isCircleInPolygon(Polygon const& p1,
     return false;
 }
 
+/**
+ * Conversion d'un point en coordonnees cylindriques
+ */
+Point& Geometry2D::convertToCylindricCoord(Point const& center, Point& pt)
+{
+    Millimeter d=dist(center, pt);
+    Radian     r=dir( center, pt);
+    pt.x=d;
+    pt.y=r;
+    return pt;
+}
+/**
+ * Conversion d'un point en coordonnees orthogonales
+ */
+Point& Geometry2D::convertToOrthogonalCoord(Point const& center, 
+                                            Radian direction,
+                                            Point& pt)
+{
+    Millimeter x=pt.x*cos(pt.y+direction);
+    Millimeter y=pt.x*sin(pt.y+direction);
+    pt.x = center.x + x;
+    pt.y = center.y + y;
+    return pt;
+}
 // ---------------------------------------------------------------------
 // Validation
 // ---------------------------------------------------------------------
