@@ -274,8 +274,8 @@ class TestMoveStrategy2CL : public Strategy2005CL
 void TestMoveStrategy2CL::run(int argc, char* argv[])
 {
     Lcd->print("SophiaTeam");
-    RobotPos->setOdometerType(ODOMETER_MOTOR);
-    //RobotPos->setOdometerType(ODOMETER_UART_MANUAL);
+    //RobotPos->setOdometerType(ODOMETER_MOTOR);
+    RobotPos->setOdometerType(ODOMETER_UART_MANUAL);
     setStartingPosition();
     waitStart(INIT_NONE);
     Move->enableAccelerationController(false);
