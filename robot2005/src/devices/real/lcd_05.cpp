@@ -156,6 +156,8 @@ int main(int argc, char* argv[])
 #include "io/serialPort.h"
 int main(int argc, char* argv[]) 
 {
+    ClassConfig::find(CLASS_SERIAL_DEVICE)->setVerboseLevel(VERBOSE_NO_MESSAGE);
+    ClassConfig::find(CLASS_SERIAL_PORT)->setVerboseLevel(VERBOSE_NO_MESSAGE);
     IoManager->submitIoHost(new SerialPort(0, false));
     IoManager->submitIoHost(new SerialPort(1, false));
     if (argc==1) {

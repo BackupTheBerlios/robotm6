@@ -183,6 +183,8 @@ int main(int argc, char* argv[])
 	   "by the bumper device\n", argv[0]);
     return -1;
   }
+  ClassConfig::find(CLASS_SERIAL_DEVICE)->setVerboseLevel(VERBOSE_NO_MESSAGE);
+  ClassConfig::find(CLASS_SERIAL_PORT)->setVerboseLevel(VERBOSE_NO_MESSAGE);
   IoManager->submitIoHost(new SerialPort(0, false));
   IoManager->submitIoHost(new SerialPort(1, false));
   if (IoManager->getIoDevice(IO_ID_BUMPER_05)) {
