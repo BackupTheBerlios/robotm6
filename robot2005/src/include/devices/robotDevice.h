@@ -9,8 +9,8 @@ class RobotDeviceCL : public RobotBase {
     /** @brief Fonction appelée quand l'utilisateur a appuyé sur l'arret d'urgence */
     virtual void emergencyStop() {}
     /** @brief Renvoie vrai si le composant est réel */
-    virtual bool exists() const =0;
-    /** @brief Appele quand on redemare une strategie */
+    virtual bool exists() const = 0;
+    /** @brief Appele quand on redemarre une strategie */
     virtual bool reset() { return true; }
     /** @brief Tache periodic appelee par le robotDevices callback */
     virtual void periodicTask() {}
