@@ -27,10 +27,12 @@
 // ===============================  typedef   =================================
 // ============================================================================
 
-#define EVENTS         EventsManager::instance()
+// TODO: I renamed the Events - enum into EventsEnum (so it's easy to find and
+// replace to give it a better name. [flo]
+#define Events         EventsManager::instance()
 #define EVENTS_MANAGER_DEFAULT EventsManagerActive
 
-typedef enum Events {
+typedef enum EventsEnum {
     EVENTS_GROUP_NONE, 
     EVENTS_GROUP_BUMPER,
     EVENTS_GROUP_USER,
@@ -93,12 +95,12 @@ typedef enum Events {
     EVENTS_BUMPER_TOP_R, // top rear 
    
      EVENTS_NBR
-} Events;
+} EventsEnum;
 
 typedef struct EventsInfoStruct {
-    Events evt;
+    EventsEnum evt;
     char* name;
-    Events groupEvt;
+    EventsEnum groupEvt;
 } EventsInfoStruct;
 
 typedef bool (*EventsFn)(bool[]);
@@ -180,7 +182,7 @@ static EventsInfoStruct EventsInfo[EVENTS_NBR] = {
 // =============================  class EventsManager   =======================
 // ============================================================================
 
-typedef void (*EventsFunctionPtr)(void*, Events); 
+typedef void (*EventsFunctionPtr)(void*, EventsEnum); 
 typedef struct EventsCallBackStruct {
   EventsCallBackStruct():function(NULL), userData(NULL) {name[0]=0;}
 
@@ -210,9 +212,9 @@ class EventsManager : public RobotComponent
     static EventsManager* instance();
 
     /** @brief Déclenche un évenement et l'evenement correspondant au group */
-    virtual void raise(Events evt)=0;
+    virtual void raise(EventsEnum evt)=0;
     /** @brief Annule un évenement */
-    virtual void unraise(Events evt)=0;
+    virtual void unraise(EventsEnum evt)=0;
     /** @brief unraise tous les EventsGroups, cette fonction est appelee
      * par les fonctions wait
      */
@@ -223,61 +225,61 @@ class EventsManager : public RobotComponent
      * l'évenement pourra declencher les fonctions wait. Par défaut un 
      * évenement est enablé 
      */
-    void enable(Events evt);
+    void enable(EventsEnum evt);
     /** @brief Désactive un évenement: les callbacks ne seront pas appelés et 
      * l'évenement ne pourra pas declencher les fonctions wait. Par défaut un 
      * évenement est enablé 
      */
-    void disable(Events evt);
+    void disable(EventsEnum evt);
     /** @brief Enregistre un callback exécuté par le thread qui fait un move 
      * (permet de thrower des exceptions dans le callback quand un evenement est raisé
      */
-    void registerCallback(Events evt,
+    void registerCallback(EventsEnum evt,
 			  void* userData,
                           EventsFunctionPtr evtCallback,
 			  const char* callBackName);
     /** @brief Enregistre un callback exécuté par la fonction raise */
-    void registerImmediatCallback(Events evt,
+    void registerImmediatCallback(EventsEnum evt,
 				  void* userData,
                                   EventsFunctionPtr evtCallback,
 				  const char* callBackName);
     /** @brief Enregistre un callback exécuté par le thread qui fait un move 
      * (permet de thrower des exceptions dans le callback quand un evenement est unraisé
      */
-    void registerNotCallback(Events evt,
+    void registerNotCallback(EventsEnum evt,
 			     void* userData,
 			     EventsFunctionPtr evtCallback,
 			     const char* callBackName);
     /** @brief Enregistre un callback exécuté par la fonction unraise */
-    void registerNotImmediatCallback(Events evt,
+    void registerNotImmediatCallback(EventsEnum evt,
 				     void* userData,
 				     EventsFunctionPtr evtCallback,
 				     const char* callBackName);
 
 
     /** @brief Function qui ne retourne que quand l'évenement evt est raisé */
-    virtual void wait(Events evt)=0;
+    virtual void wait(EventsEnum evt)=0;
     /** @brief Fonction qui attend que la fonction evtFn retourne vrai */
     virtual void wait(EventsFn evtFn)=0;
     /** @brief Function qui ne retourne que quand l'évenement evt est unraisé */
-    virtual void waitNot(Events evt)=0;
+    virtual void waitNot(EventsEnum evt)=0;
     /** @brief Fonction qui attend que la fonction evtFn retourne faux */
     virtual void waitNot(EventsFn evtFn)=0;
 
     /** @brief Retourne TRUE si l'evenement a permis de sortir du dernier wait
 	ou waitNot. Utilie pour savoir quels evenement on declenché 
 	l'EventsFunction. A utiliser de preference au check */
-    bool isInWaitResult(Events evt);
+    bool isInWaitResult(EventsEnum evt);
 
     /** @brief Retourne TRUE si la fonction evtFn retourne true */
     bool check(EventsFn evtFn);
     /** @brief Retourne TRUE si l'évenement est raisé */
-    bool check(Events evt);
+    bool check(EventsEnum evt);
 
     /** @brief Retourne le nom de l'évenement correspondant */
-    const char* evtName(Events evt);
+    const char* evtName(EventsEnum evt);
 
-    bool isEnabled(Events evt);
+    bool isEnabled(EventsEnum evt);
 
  protected:
     static EventsManager* evtMgr_;
@@ -310,16 +312,16 @@ class EventsManagerPassive : public EventsManager
     virtual ~EventsManagerPassive();
     
     /** @brief Déclenche un évenement et l'evenement correspondant au group */
-    void raise(Events evt);
+    void raise(EventsEnum evt);
     /** @brief Annule un évenement */
-    void unraise(Events evt);
+    void unraise(EventsEnum evt);
 
     /** @brief Function qui ne retourne que quand l'évenement evt est raisé */
-    void wait(Events evt);
+    void wait(EventsEnum evt);
     /** @brief Fonction qui attend que la fonction evtFn retourne vrai */
     void wait(EventsFn evtFn);
     /** @brief Function qui ne retourne que quand l'évenement evt est unraisé */
-    void waitNot(Events evt);
+    void waitNot(EventsEnum evt);
     /** @brief Fonction qui attend que la fonction evtFn retourne faux */
     void waitNot(EventsFn evtFn);
 };
@@ -338,16 +340,16 @@ class EventsManagerActive : public EventsManager
     virtual ~EventsManagerActive();
     
     /** @brief Déclenche un évenement et l'evenement correspondant au group */
-    void raise(Events evt);
+    void raise(EventsEnum evt);
     /** @brief Annule un évenement */
-    void unraise(Events evt);
+    void unraise(EventsEnum evt);
 
     /** @brief Function qui ne retourne que quand l'évenement evt est raisé */
-    void wait(Events evt);
+    void wait(EventsEnum evt);
     /** @brief Fonction qui attend que la fonction evtFn retourne vrai */
     void wait(EventsFn evtFn);
     /** @brief Function qui ne retourne que quand l'évenement evt est unraisé */
-    void waitNot(Events evt);
+    void waitNot(EventsEnum evt);
     /** @brief Fonction qui attend que la fonction evtFn retourne faux */
     void waitNot(EventsFn evtFn);
 };
@@ -368,7 +370,7 @@ inline EventsManager* EventsManager::instance()
 // ----------------------------------------------------------------------------
 // EventsManager::isEnabled
 // ----------------------------------------------------------------------------
-inline bool EventsManager::isEnabled(Events evt)
+inline bool EventsManager::isEnabled(EventsEnum evt)
 {
     return evtEnables_[(int)evt];
 }

@@ -1,6 +1,6 @@
 SRC_ROOT=.
 ## list of directories to compile and their orders
-COMPILE_DIR_ORDER=ftv1.2 log tools viewer3D simulator events io
+COMPILE_DIR_ORDER=ftv1.2 log tools viewer3D simulator move events io
 #modules
 
 SRCS=*.cpp

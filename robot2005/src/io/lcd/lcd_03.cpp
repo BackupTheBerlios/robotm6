@@ -20,9 +20,9 @@
 Lcd_03::Lcd_03() : 
   Lcd(), uart_(NULL)
 {
-  UartManager* uartMgr = UartManager::instanceNoCheck();
+  UartManagerCL* uartMgr = UartManagerCL::instanceNoCheck();
   if (!uartMgr) {
-    uartMgr = new UartManager();
+    uartMgr = new UartManagerCL();
   }
   uart_ = uartMgr->getUartById(UART_LCD_03);
   if (uart_ != NULL) {
@@ -63,7 +63,7 @@ bool Lcd_03::reset()
 {
   LOG_FUNCTION();
   if (!uart_) {
-    uart_ = UARTMGR->getUartById(UART_LCD_03);
+    uart_ = UartMgr->getUartById(UART_LCD_03);
     if (uart_ != NULL) {
       init_ = true;
       LOG_OK("Initialization Done\n");

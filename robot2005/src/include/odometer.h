@@ -17,7 +17,7 @@
 #include "robotBase.h"
 
 
-#define ODOMETER Odometer::instance()
+#define Odometer OdometerCL::instance()
 
 static const bool ODOMETER_MANUAL    = false;
 static const bool ODOMETER_AUTOMATIC = true;
@@ -34,11 +34,11 @@ class Uart;
  * Interface avec la carte qui controle les servo moteurs
  */
 
-class Odometer : public RobotIODevice
+class OdometerCL : public RobotIODevice
 {
  public:
-  static Odometer* instance();
-  virtual ~Odometer();
+  static OdometerCL* instance();
+  virtual ~OdometerCL();
 
   // fonctions de RobotIODevice
   const char* getIoName(int coderId) const;
@@ -74,11 +74,11 @@ class Odometer : public RobotIODevice
   virtual bool getMode(bool& automatic)=0;
 
  private:
-  Odometer(Odometer const& color); // disabled
+  OdometerCL(OdometerCL const& color); // disabled
 
  protected:
-  Odometer();
-  static Odometer* odometer_; // singleton
+  OdometerCL();
+  static OdometerCL* odometer_; // singleton
 };
 
 // ===========================================================================
@@ -89,7 +89,7 @@ class Odometer : public RobotIODevice
  * @class OdometerSimu
  * Implementation des fonctions de class Odometer dans le cas simule
  */
-class OdometerSimu : public Odometer
+class OdometerSimu : public OdometerCL
 {
  public:
   virtual ~OdometerSimu();
@@ -130,7 +130,7 @@ class OdometerSimu : public Odometer
 
  protected:
   OdometerSimu();
-  friend class UartManager;
+  friend class UartManagerCL;
   friend int main(int argc, char* argv[]);
 };
   
@@ -143,7 +143,7 @@ class OdometerSimu : public Odometer
  * Implementation des fonctions de class Odometer dans le cas d'une carte sur 
  * l'UART. Protocole de communication avec la carte 2004
  */
-class Odometer_04 : public Odometer
+class Odometer_04 : public OdometerCL
 {
  public:
   ~Odometer_04();
@@ -189,7 +189,7 @@ class Odometer_04 : public Odometer
   Odometer_04();
   UartBuffer* uart_;
 
-  friend class UartManager;
+  friend class UartManagerCL;
   friend int main(int argc, char* argv[]);
 
   bool filter(Byte byte);
@@ -211,7 +211,7 @@ class Odometer_04 : public Odometer
 // ---------------------------------------------------------------------------
 // Odometer::instance
 // ---------------------------------------------------------------------------
-inline Odometer* Odometer::instance()
+inline OdometerCL* OdometerCL::instance()
 {
   assert(odometer_!=NULL); // Odometer must have been initialized by IoManager
   return odometer_;

@@ -25,11 +25,11 @@ typedef double Radian;
 /** @brief Unite des codeurs montes sur des axes de rotation (odometres) */
 typedef short CoderPosition;
 /** @brief Unite des consignes en vitesse du robot */
-typedef char  MotorSpeed;
+typedef signed char MotorSpeed;
 /** @brief Unite des codeurs montes sur les moteurs */
 typedef short MotorPosition;
 /** @brief Unite de la consigne envoyee aux moteurs */
-typedef short MotorPWM;
+typedef signed char MotorPWM;
 /** @brief Unite de l'acceleration des moteurs (cf hctl1100) */
 typedef unsigned char MotorAcceleration;
 /** @brief Point pour le robot, on parle en nombre a virgules */

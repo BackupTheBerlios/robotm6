@@ -7,7 +7,7 @@
 #include "lcd.h"
 #include "odometer.h"
 // ============================================================================
-// =============================  class UartManager   =========================
+// =============================  class UartManagerCL   =======================
 // ============================================================================
 
 /** 
@@ -15,12 +15,12 @@
  * Gestion de la carte Uart: autodetection des cartes presentes et
  * auto-assignation des cartes sur le port surlequel elles sont connectees
  */
-UartManager* UartManager::uartManager_=NULL;
+UartManagerCL* UartManagerCL::uartManager_=NULL;
 
 // -------------------------------------------------------------------------
-// UartManager::checkMSerieIsAlive
+// UartManagerCL::checkMSerieIsAlive
 // -------------------------------------------------------------------------
-bool UartManager::checkMSerieIsAlive()
+bool UartManagerCL::checkMSerieIsAlive()
 {
     for(int i=0;i<UART_PORT_NBR; ++i) {
         if (uartListByPort_[i] != NULL) {
@@ -33,9 +33,9 @@ bool UartManager::checkMSerieIsAlive()
 }
 
 // -------------------------------------------------------------------------
-// UartManager::UartManager
+// UartManagerCL::UartManagerCL
 // -------------------------------------------------------------------------
-UartManager::UartManager(bool dontScan) : 
+UartManagerCL::UartManagerCL(bool dontScan) : 
   RobotComponent("uartManager", CLASS_UART_MANAGER), 
   lcd_(NULL), odometer_(NULL)
 {
@@ -77,9 +77,9 @@ UartManager::UartManager(bool dontScan) :
 }
 
 // -------------------------------------------------------------------------
-// UartManager::~uartManager
+// UartManagerCL::~uartManagerCL
 // -------------------------------------------------------------------------
-UartManager::~UartManager()
+UartManagerCL::~UartManagerCL()
 {
     LOG_WARNING("Destructing UartManager\n");
     if (lcd_)         { delete lcd_;         lcd_        = NULL; }
@@ -93,9 +93,9 @@ UartManager::~UartManager()
 }
 
 // -------------------------------------------------------------------------
-// UartManager::isOpened
+// UartManagerCL::isOpened
 // -------------------------------------------------------------------------
-bool UartManager::reset()
+bool UartManagerCL::reset()
 {
     LOG_FUNCTION();
     init_ = true;
@@ -105,17 +105,17 @@ bool UartManager::reset()
 }
 
 // -------------------------------------------------------------------------
-// UartManager::emergencyStop
+// UartManagerCL::emergencyStop
 // -------------------------------------------------------------------------
-void UartManager::emergencyStop()
+void UartManagerCL::emergencyStop()
 {
     if (odometer_)  { odometer_->setMode(ODOMETER_MANUAL); } 
 }
 
 // -------------------------------------------------------------------------
-// UartManager::validate
+// UartManagerCL::validate
 // -------------------------------------------------------------------------
-bool UartManager::validate()
+bool UartManagerCL::validate()
 {
     UartInfo infos[UART_PORT_NBR];
     scan(infos);
@@ -123,9 +123,9 @@ bool UartManager::validate()
 }
 
 // -------------------------------------------------------------------------
-// UartManager::scanAndAlloc
+// UartManagerCL::scanAndAlloc
 // -------------------------------------------------------------------------
-void UartManager::scanAndAlloc()
+void UartManagerCL::scanAndAlloc()
 {
     searchAndOpen();
     allocDevices();
@@ -133,9 +133,9 @@ void UartManager::scanAndAlloc()
 }
 
 // -------------------------------------------------------------------------
-// UartManager::listConnected
+// UartManagerCL::listConnected
 // -------------------------------------------------------------------------
-void UartManager::listConnected()
+void UartManagerCL::listConnected()
 {
     bool atLeastOneConnected=false;
     for(int i=0; i<UART_PORT_NBR; i++) {
@@ -152,11 +152,11 @@ void UartManager::listConnected()
 
 
 // -------------------------------------------------------------------------
-// UartManager::scan
+// UartManagerCL::scan
 // -------------------------------------------------------------------------
 // Regarde ce qui est connecte sur les ports non ouverts
 // -------------------------------------------------------------------------
-void UartManager::scan(UartInfo infos[UART_PORT_NBR]) 
+void UartManagerCL::scan(UartInfo infos[UART_PORT_NBR]) 
 {
     for(int i=0; i<UART_PORT_NBR; i++) {
         infos[i].id = UART_NONE;
@@ -180,12 +180,12 @@ void UartManager::scan(UartInfo infos[UART_PORT_NBR])
 }
 
 // -------------------------------------------------------------------------
-// UartManager::searchAndOpen
+// UartManagerCL::searchAndOpen
 // -------------------------------------------------------------------------
 // Regarde les ports non ouverts et si une carte est connectee, le port 
 // reste ouvert
 // -------------------------------------------------------------------------
-int  UartManager::searchAndOpen()
+int  UartManagerCL::searchAndOpen()
 {
      UartInfo infos[UART_PORT_NBR];
 
@@ -202,11 +202,11 @@ int  UartManager::searchAndOpen()
 }
 
 // -------------------------------------------------------------------------
-// UartManager::allocLcd
+// UartManagerCL::allocLcd
 // -------------------------------------------------------------------------
 // start the lcd board
 // -------------------------------------------------------------------------
-void UartManager::allocLcd()
+void UartManagerCL::allocLcd()
 {
 #ifndef UART_SCANNER_MAIN
     LOG_FUNCTION();
@@ -230,11 +230,11 @@ void UartManager::allocLcd()
 
 
 // -------------------------------------------------------------------------
-// UartManager::allocOdometer
+// UartManagerCL::allocOdometer
 // -------------------------------------------------------------------------
 // start the odometer board
 // -------------------------------------------------------------------------
-void UartManager::allocOdometer()
+void UartManagerCL::allocOdometer()
 {
 #ifndef UART_SCANNER_MAIN
     LOG_FUNCTION();
@@ -255,11 +255,11 @@ void UartManager::allocOdometer()
 
 
 // -------------------------------------------------------------------------
-// UartManager::allocDevices
+// UartManagerCL::allocDevices
 // -------------------------------------------------------------------------
 // Alloue l'instance du controleur de carte des cartes qui ont ete trouvees
 // -------------------------------------------------------------------------
-void UartManager::allocDevices() 
+void UartManagerCL::allocDevices() 
 {
     if (RobotConfig->ioManagerAlloc) {
         
@@ -270,9 +270,9 @@ void UartManager::allocDevices()
 }
 
 // -------------------------------------------------------------------------
-// UartManager::close
+// UartManagerCL::close
 // -------------------------------------------------------------------------
-void UartManager::close()
+void UartManagerCL::close()
 {
     UartPortMask closeMask = RobotConfig->uartPortMask;
     for(int i=0; i<UART_PORT_NBR; ++i) {
@@ -286,17 +286,17 @@ void UartManager::close()
 }
 
 // -------------------------------------------------------------------------
-// UartManager::getUartById
+// UartManagerCL::getUartById
 // -------------------------------------------------------------------------
-Uart* UartManager::getUartById(UartId id)
+Uart* UartManagerCL::getUartById(UartId id)
 {
     return uartListById_[(int)id]->isOpened() ? uartListById_[(int)id] : NULL;
 }
 
 // -------------------------------------------------------------------------
-// UartManager::getUartByPort
+// UartManagerCL::getUartByPort
 // -------------------------------------------------------------------------
-Uart* UartManager::getUartByPort(UartPort port)
+Uart* UartManagerCL::getUartByPort(UartPort port)
 {
     return uartListByPort_[(int)port];
 }
@@ -311,7 +311,7 @@ int main(int argc, char* argv[])
     ClassConfig::find(CLASS_UART)->setVerboseLevel(VERBOSE_NO_MESSAGE);
     ClassConfig::find(CLASS_ROBOT_TIMER)->setVerboseLevel(VERBOSE_NO_MESSAGE);
     ClassConfig::find(CLASS_UART_MANAGER)->setVerboseLevel(VERBOSE_DEBUG);
-    UartManager mgr(true);
+    UartManagerCL mgr(true);
     UartInfo infos[UART_PORT_NBR];
     
     mgr.scan(infos);

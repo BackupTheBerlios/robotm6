@@ -21,7 +21,8 @@
 #include "serialPort.h"
 #include "mthread.h"
 
-#define UARTMGR UartManager::instance()
+// TODO: call this UartManager instead of UartMgr?
+#define UartMgr UartManagerCL::instance()
 
 //#define TTYS0_NOT_USED
 //#define TTYS1_NOT_USED
@@ -298,24 +299,25 @@ class UartBuffer : public Uart {
 // =============================  class UartManager   =========================
 // ============================================================================
 class Lcd;
-class Odometer;
+class OdometerCL;
 
 /** 
  * @class UartManager
  * Gestion de la carte Uart: autodetection des cartes presentes et
  * auto-assignation des cartes sur le port surlequel elles sont connectees
  */
-class UartManager : public RobotComponent
+class UartManagerCL : public RobotComponent
 {
  public:
     /** 
      * Crée un UartManager, ouvre les ports specifiés dans robotConfig et y
      * attache les uartInfos correspondant 
      */
-    UartManager(bool dontScan=false);
-    virtual ~UartManager();
-    static UartManager* instance();
-    static UartManager* instanceNoCheck();
+    UartManagerCL(bool dontScan=false);
+    virtual ~UartManagerCL();
+    static UartManagerCL* instance();
+    // TODO: remove this method and always instanciate with default-param? [flo]
+    static UartManagerCL* instanceNoCheck();
 
     bool reset();
     bool validate();
@@ -389,7 +391,7 @@ class UartManager : public RobotComponent
     friend int main(int argc, char* argv[]);
 
  protected:
-    static UartManager* uartManager_;
+    static UartManagerCL* uartManager_;
     Uart* uartListByPort_[UART_PORT_NBR];
     Uart* uartListById_[UART_NBR];
 
@@ -397,7 +399,7 @@ class UartManager : public RobotComponent
     // liste des composant initialise par le uartManager et qui se connectent 
     // sur un uart
     Lcd*         lcd_;
-    Odometer*    odometer_;
+    OdometerCL*    odometer_;
 };
 
 // ============================================================================
@@ -416,7 +418,7 @@ inline void Uart::comErrorDetected()
 // ----------------------------------------------------------------------------
 // UartManager::instance
 // ----------------------------------------------------------------------------
-inline UartManager* UartManager::instance() 
+inline UartManagerCL* UartManagerCL::instance() 
 {
   assert(uartManager_);
   return uartManager_;
@@ -425,7 +427,7 @@ inline UartManager* UartManager::instance()
 // ----------------------------------------------------------------------------
 // UartManager::instanceNoCheck
 // ----------------------------------------------------------------------------
-inline UartManager* UartManager::instanceNoCheck() 
+inline UartManagerCL* UartManagerCL::instanceNoCheck() 
 {
   return uartManager_;
 }

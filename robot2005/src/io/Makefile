@@ -1,6 +1,6 @@
 SRC_ROOT=..
 
-COMPILE_FIRST_DIRS=uart lcd odometer motor
+COMPILE_FIRST_DIRS=uart lcd odometer #motor
 ## ===========================================================================
 ## LIB_NAME and .o files for making libraries .a and .so
 ## ===========================================================================

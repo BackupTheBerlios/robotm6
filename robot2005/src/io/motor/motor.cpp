@@ -74,7 +74,7 @@ void Motor::checkMotorEvents()
   // quand il y a l'arret d'urgence, on reset les hctl une seule fois
   static int emergencyResetCounter=0;
   static int emergencyResetCounter2=0;
-  if (EVENTS->check(EVENTS_EMERGENCY_STOP)) {
+  if (Events->check(EVENTS_EMERGENCY_STOP)) {
       if (enableAutomaticReset_
           && emergencyResetCounter2 == emergencyResetCounter) {
           LOG_WARNING("Motor emergency stop reset\n");
@@ -121,7 +121,7 @@ void Motor::checkMotorEvents()
       reset();
     }
 #ifndef TELECOMMAND_MAIN
-    EVENTS->raise(EVENTS_PWM_ALERT);
+    Events->raise(EVENTS_PWM_ALERT);
 #endif
     if (alertFunction_) {
       alertFunction_(left, right);

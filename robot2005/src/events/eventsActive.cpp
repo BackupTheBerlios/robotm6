@@ -10,8 +10,7 @@
 // ----------------------------------------------------------------------------
 // EventsManagerActive::EventsManagerActive
 // ----------------------------------------------------------------------------
-EventsManagerActive::EventsManagerActive() : 
-    EventsManager()
+EventsManagerActive::EventsManagerActive()
 {
     LOG_FUNCTION();
     // reset les events status
@@ -30,7 +29,7 @@ EventsManagerActive::~EventsManagerActive()
 // ----------------------------------------------------------------------------
 // EventsManagerActive::raise
 // ----------------------------------------------------------------------------
-void EventsManagerActive::raise(Events evt)
+void EventsManagerActive::raise(EventsEnum evt)
 {
     if (evtStatus_[(int)evt])   return;
     if (!evtEnables_[(int)evt]) return;
@@ -55,7 +54,7 @@ void EventsManagerActive::raise(Events evt)
 // ----------------------------------------------------------------------------
 // EventsManagerActive::unraise
 // ----------------------------------------------------------------------------
-void EventsManagerActive::unraise(Events evt)
+void EventsManagerActive::unraise(EventsEnum evt)
 {
     if (!evtStatus_[(int)evt]) return;
     evtStatus_[(int)evt] = false;
@@ -74,7 +73,7 @@ void EventsManagerActive::unraise(Events evt)
 // ----------------------------------------------------------------------------
 // EventsManagerActive::wait
 // ----------------------------------------------------------------------------
-void EventsManagerActive::wait(Events evt)
+void EventsManagerActive::wait(EventsEnum evt)
 {
     unraiseEventsGroups();
     unraiseEventsBumpers();
@@ -90,7 +89,7 @@ void EventsManagerActive::wait(Events evt)
 // ----------------------------------------------------------------------------
 // EventsManagerActive::waitNot
 // ----------------------------------------------------------------------------
-void EventsManagerActive::waitNot(Events evt)
+void EventsManagerActive::waitNot(EventsEnum evt)
 {
     unraiseEventsGroups();
     unraiseEventsBumpers();

@@ -19,7 +19,7 @@
 
 bool Odometer04Filter(UartByte byte)
 {
-    return ((Odometer_04*)ODOMETER)->filter(byte);
+    return ((Odometer_04*)Odometer)->filter(byte);
 }
 
 namespace {
@@ -41,12 +41,12 @@ namespace {
 // Odometer_04::Odometer_04
 // -------------------------------------------------------------------------
 Odometer_04::Odometer_04() : 
-    Odometer(), uart_(NULL), left_(0), right_(0), mode_(0), 
+    OdometerCL(), uart_(NULL), left_(0), right_(0), mode_(0), 
     bufIndex_(-1), dataAvailable_(false)
 {
-    UartManager* uartMgr = UartManager::instanceNoCheck();
+    UartManagerCL* uartMgr = UartManagerCL::instanceNoCheck();
     if (!uartMgr) {
-        uartMgr = new UartManager();
+        uartMgr = new UartManagerCL();
     }
     uart_ = (UartBuffer*)uartMgr->getUartById(UART_ODOMETER_04);
     if (uart_ != NULL) {
@@ -92,7 +92,7 @@ bool Odometer_04::reset()
 {
     LOG_FUNCTION();
     if (!uart_) {
-        uart_ = (UartBuffer*)UARTMGR->getUartById(UART_ODOMETER_04);
+        uart_ = (UartBuffer*)UartMgr->getUartById(UART_ODOMETER_04);
         if (uart_ != NULL) {
             init_ = true;
             uart_->registerFilterFunction(Odometer04Filter);

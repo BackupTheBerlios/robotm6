@@ -32,7 +32,7 @@
       <prio>0</prio>
       <dontact>false</dontact>
       <makebin></makebin>
-      <makeoptions></makeoptions>
+      <makeoptions>CC=gcc</makeoptions>
       <selectedenvironment>default</selectedenvironment>
       <environments>
         <default/>

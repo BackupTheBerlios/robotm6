@@ -6,12 +6,12 @@
 // Interface avec la carte de detection de couleur
 // =========================================================================
 
-Odometer* Odometer::odometer_=NULL;
+OdometerCL* OdometerCL::odometer_=NULL;
 
 // -------------------------------------------------------------------------
-// Odometer::Odometer
+// OdometerCL::OdometerCL
 // -------------------------------------------------------------------------
-Odometer::Odometer() : 
+OdometerCL::OdometerCL() : 
   RobotIODevice("Odometer", CLASS_ODOMETER, 2)
 {
   assert(!odometer_);
@@ -19,9 +19,9 @@ Odometer::Odometer() :
 }
 
 // -------------------------------------------------------------------------
-// Odometer::~Odometer
+// OdometerCL::~OdometerCL
 // -------------------------------------------------------------------------
-Odometer::~Odometer()
+OdometerCL::~OdometerCL()
 {
   odometer_=NULL;
 }
@@ -29,7 +29,7 @@ Odometer::~Odometer()
 // -------------------------------------------------------------------------
 // Odometer::getIoName
 // -------------------------------------------------------------------------
-const char* Odometer::getIoName(int coderId) const
+const char* OdometerCL::getIoName(int coderId) const
 {
   static char txt[32];
   sprintf(txt, "Odometer %d", coderId);

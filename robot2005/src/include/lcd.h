@@ -154,7 +154,7 @@ class LcdSimu : public Lcd
   void ledPolice(){}
  protected:
   LcdSimu();
-  friend class UartManager;
+  friend class UartManagerCL;
   friend int main(int argc, char* argv[]);
 };
   
@@ -224,7 +224,7 @@ class Lcd_03 : public Lcd
  protected:
   Lcd_03();
   Uart* uart_;
-  friend class UartManager;
+  friend class UartManagerCL;
   friend int main(int argc, char* argv[]);
 };
 
@@ -294,7 +294,7 @@ class Lcd_04 : public Lcd
 protected:
   Lcd_04();
   UartBuffer* uart_;
-  friend class UartManager;
+  friend class UartManagerCL;
   friend int main(int argc, char* argv[]);
 
   bool filter(Byte data);

@@ -31,7 +31,8 @@ IoManagerCL::IoManagerCL() :
     FD_ZERO(&listenedFds_);
     if (RobotConfig->ioManagerAlloc) {
         // start the uart driver (ports serie) and scan all ports to find devices
-        uartMgr_ = new UartManager();
+	// TODO: don't use singleton? [flo]
+        uartMgr_ = new UartManagerCL();
     } else {
     }
     // start the thread which check for new messages on registered file 

@@ -54,7 +54,7 @@ EventsManagerPassive::~EventsManagerPassive()
 // ----------------------------------------------------------------------------
 // EventsManager::raise
 // ----------------------------------------------------------------------------
-void EventsManagerPassive::raise(Events evt)
+void EventsManagerPassive::raise(EventsEnum evt)
 {
     Lock localLock(&repositoryLock2);
     if (evtStatus_[(int)evt]) return;
@@ -86,7 +86,7 @@ void EventsManagerPassive::raise(Events evt)
 // ----------------------------------------------------------------------------
 // EventsManager::unraise
 // ----------------------------------------------------------------------------
-void EventsManagerPassive::unraise(Events evt)
+void EventsManagerPassive::unraise(EventsEnum evt)
 {
     Lock localLock(&repositoryLock2);
     if (!evtStatus_[(int)evt]) return;
@@ -113,7 +113,7 @@ void EventsManagerPassive::unraise(Events evt)
 // ----------------------------------------------------------------------------
 // EventsManager::wait
 // ----------------------------------------------------------------------------
-void EventsManagerPassive::wait(Events evt)
+void EventsManagerPassive::wait(EventsEnum evt)
 {
     Lock localLock(&repositoryLock2);
     unraiseEventsGroups();
@@ -130,7 +130,7 @@ void EventsManagerPassive::wait(Events evt)
 // ----------------------------------------------------------------------------
 // EventsManagerPassive::waitNot
 // ----------------------------------------------------------------------------
-void EventsManagerPassive::waitNot(Events evt)
+void EventsManagerPassive::waitNot(EventsEnum evt)
 {
     Lock localLock(&repositoryLock2);
     unraiseEventsGroups();

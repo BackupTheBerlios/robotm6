@@ -26,9 +26,9 @@ bool lcd04Filter(UartByte data)
 Lcd_04::Lcd_04() : 
     Lcd(), uart_(NULL)
 {
-    UartManager* uartMgr = UartManager::instanceNoCheck();
+    UartManagerCL* uartMgr = UartManagerCL::instanceNoCheck();
     if (!uartMgr) {
-        uartMgr = new UartManager();
+        uartMgr = new UartManagerCL();
     }
     uart_ = (UartBuffer*)uartMgr->getUartById(UART_LCD_04);
     if (uart_ != NULL) {
@@ -70,7 +70,7 @@ bool Lcd_04::reset()
 {
     LOG_FUNCTION();
     if (!uart_) {
-        uart_ = (UartBuffer*)UARTMGR->getUartById(UART_LCD_04);
+        uart_ = (UartBuffer*)UartMgr->getUartById(UART_LCD_04);
         if (uart_ != NULL) {
             uart_->registerFilterFunction(lcd04Filter);
             init_ = true;
@@ -222,16 +222,16 @@ bool Lcd_04::filter(UartByte data)
 {
   // printf("lcd: 0x%x\n", data);
     if (data == LCD_EVENTS_BTN1_PUSHED) {
-        EVENTS->raise(EVENTS_BUTTON_YES);
+        Events->raise(EVENTS_BUTTON_YES);
         return true;
     } else if (data == LCD_EVENTS_BTN1_RELEASED) {
-        EVENTS->unraise(EVENTS_BUTTON_YES);
+        Events->unraise(EVENTS_BUTTON_YES);
         return true;
     } else if (data == LCD_EVENTS_BTN2_PUSHED) {
-        EVENTS->raise(EVENTS_BUTTON_NO);
+        Events->raise(EVENTS_BUTTON_NO);
         return true;
     } else if (data == LCD_EVENTS_BTN2_RELEASED) {
-        EVENTS->unraise(EVENTS_BUTTON_NO);
+        Events->unraise(EVENTS_BUTTON_NO);
         return true;
     } else {
         return false; // data is not filtered

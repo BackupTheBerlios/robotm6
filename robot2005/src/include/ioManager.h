@@ -32,7 +32,7 @@
 #define IOMGR IoManagerCL::instance()
 #define IoManager IoManagerCL::instance()
 
-class UartManager;
+class UartManagerCL;
 
 typedef void (*IoManagerCallBack)(void*, int); //void* userdata, int fileDescriptor
 
@@ -81,7 +81,7 @@ class IoManagerCL : public RobotComponent
   void emergencyStop();
 
  protected:
-  UartManager* uartMgr_;
+  UartManagerCL* uartMgr_;
 
  protected:
   /** 

@@ -11,7 +11,7 @@
 // OdometerSimu::OdometerSimu
 // -------------------------------------------------------------------------
 OdometerSimu::OdometerSimu() : 
-  Odometer()
+  OdometerCL()
 {
   init_=true;
 }
