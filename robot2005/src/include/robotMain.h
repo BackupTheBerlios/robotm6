@@ -19,14 +19,15 @@
 // ==================================  typedef   ==============================
 // ============================================================================
 
-class Strategy;
-class RobotMain;
-class RobotMainFull;
-class Log;
+class StrategyCL;
+class RobotMainCL;
+class RobotMainFullCL;
+class LogCL;
+class RobotTimerCL;
 
 typedef struct MainMenuItem {
     char      text[35];
-    Strategy* strategy;
+    StrategyCL* strategy;
 } MainMenuItem;
 typedef std::deque<MainMenuItem> MainMenuList;
 
@@ -36,30 +37,29 @@ typedef std::deque<MainMenuItem> MainMenuList;
 // ==============================  class RobotMain   ==========================
 // ============================================================================
 
-#include "robotTimer.h"
 /**
- * @class RobotMain
+ * @class RobotMainCL
  * Classe de depart permettant de configurer le robot (qui reset
  * automatiquement les composants) et de lancer des strategies en utilisant 
  * un menu
  */
-class RobotMain : public RobotBase
+class RobotMainCL : public RobotBase
 {
  public:
     /** Constructeur */
-    RobotMain();
+    RobotMainCL();
     /** Destructeur */
-    virtual ~RobotMain();
-    static RobotMain* instance() { return main_; }
+    virtual ~RobotMainCL();
+    static RobotMainCL* instance() { return main_; }
 
     /** Ajoute une strategie au menu */
-    void addStrategyToMenu(Strategy* strate);
+    void addStrategyToMenu(StrategyCL* strate);
     /** Enleve toutes les strategies du menu */
     void clearMenu();
     /** Menu utilisant le clavier. Il lance la strategy correspondante */
     virtual void menu(int argc, char* argv[]);
     /** Lancer une seule strategy, c'est une alternative a "menu" */
-    virtual void run(Strategy* strategy, int argc, char* argv[]);
+    virtual void run(StrategyCL* strategy, int argc, char* argv[]);
     /** Verifie que tous les composants sont initialisez correctement */
     bool checkInitDone(); 
     /** Met à zero le chronometre */
@@ -69,13 +69,13 @@ class RobotMain : public RobotBase
     virtual void resetAll();
 
  protected:
-    RobotComponentList* robotComponents_;
-    Log*                log_;
-    RobotTimer*         timer_;
+//    RobotComponentList* robotComponents_;
+    LogCL*              log_;
+    RobotTimerCL*       timer_;
     MainMenuList        menu_;
 
-    friend class Strategy;
-    static RobotMain* main_;
+    friend class StrategyCL;
+    static RobotMainCL* main_;
 };
 
 // ============================================================================
@@ -91,18 +91,18 @@ class RobotMain : public RobotBase
  * Classe de depart permettant de configurer le robot et de lancer des 
  * strategies pour les matchs
  */
-class RobotMainFull: public RobotMain
+class RobotMainFullCL: public RobotMainCL
 {
  public:
-    RobotMainFull();
-    ~RobotMainFull();
+    RobotMainFullCL();
+    ~RobotMainFullCL();
 
     /** Met à zero le chronometre */
     virtual void startMatch();
     /** Menu de strategies utilisant l'afficheur LCD */
     virtual void menu(int argc, char* argv[]);
     /** Lancer une seule strategy, c'est une alternative a "menu" */
-    virtual void run(Strategy* strategy, int argc, char* argv[]);
+    virtual void run(StrategyCL* strategy, int argc, char* argv[]);
 
 
  protected:
@@ -110,7 +110,7 @@ class RobotMainFull: public RobotMain
     virtual void resetAll();
 
  protected:
-    IoManager*       ioMgr_;
+    IoManagerCL*     ioMgr_;
     MovementManager* mvtMgr_;
     EventsManager*   evtMgr_;
 };

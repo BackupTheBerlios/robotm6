@@ -9,8 +9,8 @@
 // ==================================  typedef   ==============================
 // ============================================================================
 
-class Strategy;
-class RobotMain;
+class StrategyCL;
+class RobotMainCL;
 
 // ============================================================================
 // ===============================  class Strategy   ==========================
@@ -31,14 +31,14 @@ typedef enum InitMode {
  * Classe dont herites toutes les strategies du robot. Une strategie 
  * correspond en fait au programme du robot
  */
-class Strategy : public RobotBase
+class StrategyCL : public RobotBase
 {
  public:
-    Strategy(const char* name, 
-	     const char* menuName,
-	     ClassId classId, 
-	     RobotMain* main);
-    virtual ~Strategy();
+    StrategyCL(const char* name, 
+               const char* menuName,
+               ClassId classId, 
+               RobotMainCL* main);
+    virtual ~StrategyCL();
 
     /** @brief main function to implent in a strategy. It shoud first run waitStart */
     virtual void run(int argc, char* argv[])=0;
@@ -73,7 +73,7 @@ class Strategy : public RobotBase
     virtual bool checkCollision(bool &collisionEvt);
 
  protected:
-    RobotMain* main_;
+    RobotMainCL* main_;
     Millisecond timeAlert_;
 
     // Variables qui activent les tests pendant l'autoCheck
@@ -107,12 +107,10 @@ class Strategy : public RobotBase
     /** @brief Test les deplacements du robot */
     void testMove();
 
-    Obstacle estimateBumpObstaclePosition();
-
     /** @brief change le titre utilise pour le menu lcd */
     void setMenuName(const char* name);
-    /** @brief Met a jour la position de depart du robot */
-    void setStartingPosition(StartingPosition pos);
+    /** @brief Met a jour la position de depart du robot en fonction de robotConfig.isRobotAttack*/
+    void setStartingPosition();
     /** @brief Le robot va taper dans les mains des equipiers */
     void happyEnd();
 
@@ -136,7 +134,7 @@ bool evtEndMove(bool evt[]);
 // ---------------------------------------------------------------------
 // INLINE FUNCTIONS
 // ---------------------------------------------------------------------
-inline void Strategy::setMenuName(const char* name)
+inline void StrategyCL::setMenuName(const char* name)
 {
     strncpy(menuName_, name, LCD_CHAR_PER_LINE);
     menuName_[LCD_CHAR_PER_LINE]=0;

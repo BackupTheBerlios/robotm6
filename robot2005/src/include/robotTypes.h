@@ -31,7 +31,7 @@ typedef short MotorPosition;
 /** @brief Unite de la consigne envoyee aux moteurs */
 typedef signed char MotorPWM;
 /** @brief Unite de l'acceleration des moteurs (cf hctl1100) */
-typedef unsigned char MotorAcceleration;
+typedef short MotorAcceleration;
 /** @brief Point pour le robot, on parle en nombre a virgules */
 typedef RobotPoint2D<Millimeter, Radian> Point;
 /** @brief Pointeur sur fonction */
