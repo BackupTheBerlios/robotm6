@@ -6,10 +6,10 @@ SRC_ROOT=../..
 ## For standard directory you only need to set these values
 ## ===========================================================================
 LIB_NAME=libmotor
-OBJS=motor.o motorReal.o HCTLControl.o hct.o
+OBJS=motor.o motorReal.o motorSimu.o HCTLControl.o hct.o
 
-LIB_NAME_SIMU=${LIB_NAME}Simu
-OBJS_SIMU=${OBJS} motorSimu.o
+LIB_NAME_SIMU=
+OBJS_SIMU=
 
 
 ## ===========================================================================
@@ -45,14 +45,11 @@ clean:	default_clean
                  ${BIN_DIR}/testHctl
 	${RM} -f  ${STATIC_LIB_DIR}/${LIB_NAME}.a        \
                   ${DYNAMIC_LIB_DIR}/${LIB_NAME}.so  
-	${RM} -f  $(STATIC_LIB_DIR)/${LIB_NAME_SIMU}.a   \
-                  ${DYNAMIC_LIB_DIR}/${LIB_NAME_SIMU}.so 
 
 ## ===========================================================================
 ## Main rules : ----- LIB -----
 ## ===========================================================================
 lib: $(STATIC_LIB_DIR)/${LIB_NAME}.a ${DYNAMIC_LIB_DIR}/${LIB_NAME}.so 
-lib: $(STATIC_LIB_DIR)/${LIB_NAME_SIMU}.a ${DYNAMIC_LIB_DIR}/${LIB_NAME_SIMU}.so
 
 ## ===========================================================================
 ## Main rules : ----- BIN -----

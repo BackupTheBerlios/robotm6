@@ -410,6 +410,7 @@ int tgaLoadTheImage ( char *file_name, image_t *p, tgaFLAG mode, unsigned int co
 
 void tgaLoad ( char *file_name, image_t *p, tgaFLAG mode, unsigned int computeTransparency )
 {
+    if (file_name == NULL) return;
    tgaLoadTheImage ( file_name, p, mode,computeTransparency );
 
    if  ( !( mode&TGA_NO_PASS ))
@@ -489,6 +490,7 @@ unsigned char * ReadBMPImage(char *name, int *w, int *h)
 // -----------------------------------------------------------------------------------------
 GLuint bmpLoadAndBind(char *filename)
 {
+    if (filename == NULL) return 0;
 	GLubyte* tempimg;
 	GLint w, h;
 	GLuint texname;

@@ -155,14 +155,14 @@ void VTexture::loadImageTga(TextureId texnbr,
 }
 
 void VTexture::loadImage(TextureId texnbr,
-			const char* fileName){
+                         const char* fileName){
     
   char filename[255];
   FILE* file=NULL;
   if (!file) {
       sprintf(filename,"%s/%s", TEXTURE_DEFAULT_DIR, 
               fileName);
-      fopen(filename, "r");
+      file=fopen(filename, "r");
   }
   if (!file) {
       sprintf(filename,"%s/%s", TEXTURE_DEFAULT_DIR_1, 
