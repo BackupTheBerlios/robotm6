@@ -61,6 +61,15 @@ class RobotConfigCL
      /** @brief affiche la position estimee du robot toutes les secondes */
     bool displayOdomPos;
 
+    // --------------------------------------------
+    // --- description du robot   ---
+    // --------------------------------------------
+    /** @brief True si c'est le robot d'attack, false sinon */
+   bool isRobotAttack;
+   /** @brief True si la carte des moteurs est sur port isa, false si
+       c'est sur port serie */
+   bool isMotorISA;
+
    private:
     static RobotConfigCL* lastInstance_;
 };
@@ -100,7 +109,9 @@ inline RobotConfigCL::RobotConfigCL() :
     ioManagerAlloc(true),
     lcdSimu(false),
     odometerSimu(false),
-    displayOdomPos(true)
+    displayOdomPos(true),
+    isRobotAttack(true),
+    isMotorISA(true)
 {
     lastInstance_ = this;
     reset();
