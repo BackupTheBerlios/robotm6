@@ -100,7 +100,7 @@ void Viewer3DCL::changeCameraAuto3D()
 // -----------------------------------------------------------------------
 void Viewer3DCL::changeTexture3D()
 {
-    useTexture3D_ = !useTexture3D_;
+    useTexture_ = !useTexture_;
 }
 
 // -----------------------------------------------------------------------

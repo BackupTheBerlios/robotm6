@@ -36,34 +36,7 @@ VTexture* VTexture::instance()
 
 VTexture::VTexture()
 {
-  loadImage(TEX_LOGO,          "logo.bmp");
-  loadImage(TEX_LOGO_ISIA,     "logo_isia.bmp");
-  loadImage(TEX_ROBOT_SIDE_LEFT, "robot_sl.bmp");
-  loadImage(TEX_ROBOT_SIDE_RIGHT,"robot_sr.bmp");
-  loadImage(TEX_ROBOT_FRONT,   "robot_fr.bmp");
-  loadImage(TEX_ROBOT_BACK,    "robot_bk.bmp");
-  loadImage(TEX_ROBOT_TOP,     "robot_tp.bmp"); 
-  loadImage(TEX_SALLE_SIDE1,   "side1.bmp");
-  loadImage(TEX_SALLE_SIDE2,   "side2.bmp");
-  loadImage(TEX_SALLE_SIDE3,   "side3.bmp");
-  loadImage(TEX_SALLE_SIDE4,   "side4.bmp");
-  loadImage(TEX_SALLE_PLAFOND, "plafond.bmp");
-
-  loadImage(TEX_ATTACK_SIDE_R1, "a_r1.bmp");
-  loadImage(TEX_ATTACK_SIDE_R2, "a_r2.bmp");
-  loadImage(TEX_ATTACK_SIDE_L1, "a_l1.bmp");
-  loadImage(TEX_ATTACK_SIDE_L2, "a_l2.bmp");
-  loadImage(TEX_ATTACK_SIDE_F,  "a_f.bmp");
-  loadImage(TEX_ATTACK_SIDE_R,  "a_r.bmp");
-  loadImage(TEX_ATTACK_TOP,     "a_top.bmp");
-
-  loadImage(TEX_DEFENCE_SIDE_R,  "d_r.bmp");
-  loadImage(TEX_DEFENCE_SIDE_L,  "d_l.bmp");
-  loadImage(TEX_DEFENCE_SIDE_F,  "d_f.bmp");
-  loadImage(TEX_DEFENCE_SIDE_RR, "d_rr.bmp");
-  loadImage(TEX_DEFENCE_TOP,     "d_top.bmp");
-
-  loadImage(TEX_LCD, "lcd.bmp");
+   loadImage(TEX_LCD, "lcd.bmp");
   loadImage(TEX_BTN_0, "btn_0.bmp");
   loadImage(TXT_BTN_1, "btn_1.bmp");
   loadImage(TXT_JACKIN, "jackin.bmp");
@@ -98,6 +71,34 @@ VTexture::VTexture()
   loadImage(TEX_BTN_REC_START_1, "btnrecstart1.bmp");
   loadImage(TEX_BTN_REC_STOP_0,  "btnrecstop0.bmp");
   loadImage(TEX_BTN_REC_STOP_1,  "btnrecstop1.bmp");
+
+
+  loadImage(TEX_LOGO,          "logo.bmp");
+  loadImage(TEX_LOGO_ISIA,     "logo_isia.bmp");
+  loadImage(TEX_ROBOT_SIDE_LEFT, "robot_sl.bmp");
+  loadImage(TEX_ROBOT_SIDE_RIGHT,"robot_sr.bmp");
+  loadImage(TEX_ROBOT_FRONT,   "robot_fr.bmp");
+  loadImage(TEX_ROBOT_BACK,    "robot_bk.bmp");
+  loadImage(TEX_ROBOT_TOP,     "robot_tp.bmp"); 
+  loadImage(TEX_SALLE_SIDE1,   "side1.bmp");
+  loadImage(TEX_SALLE_SIDE2,   "side2.bmp");
+  loadImage(TEX_SALLE_SIDE3,   "side3.bmp");
+  loadImage(TEX_SALLE_SIDE4,   "side4.bmp");
+  loadImage(TEX_SALLE_PLAFOND, "plafond.bmp");
+
+  loadImage(TEX_ATTACK_SIDE_R1, "a_r1.bmp");
+  loadImage(TEX_ATTACK_SIDE_R2, "a_r2.bmp");
+  loadImage(TEX_ATTACK_SIDE_L1, "a_l1.bmp");
+  loadImage(TEX_ATTACK_SIDE_L2, "a_l2.bmp");
+  loadImage(TEX_ATTACK_SIDE_F,  "a_f.bmp");
+  loadImage(TEX_ATTACK_SIDE_R,  "a_r.bmp");
+  loadImage(TEX_ATTACK_TOP,     "a_top.bmp");
+
+  loadImage(TEX_DEFENCE_SIDE_R,  "d_r.bmp");
+  loadImage(TEX_DEFENCE_SIDE_L,  "d_l.bmp");
+  loadImage(TEX_DEFENCE_SIDE_F,  "d_f.bmp");
+  loadImage(TEX_DEFENCE_SIDE_RR, "d_rr.bmp");
+  loadImage(TEX_DEFENCE_TOP,     "d_top.bmp");
 }
 
 VTexture::~VTexture()
@@ -197,6 +198,7 @@ void VTexture::apply(TextureId texnbr){
     glDisable( GL_TEXTURE_2D );
     return;
   }
+  init();
   glEnable( GL_TEXTURE_2D );
   glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
   glTexImage2D(GL_TEXTURE_2D, 

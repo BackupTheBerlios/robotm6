@@ -388,8 +388,8 @@ namespace {
 	    
 	    glutInit(&argc_, argv_); 
 	    glutInitDisplayMode ( GLUT_DOUBLE | GLUT_RGB | GLUT_DEPTH ); 
-	    // loadGLTextures();
-	    // buildFont();
+	    loadGLTextures();
+	    buildFont();
 	    
 	    // creation des fenetres
 	    if (displayMap2D_) {
