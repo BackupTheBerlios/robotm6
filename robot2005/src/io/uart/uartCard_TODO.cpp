@@ -2,7 +2,7 @@
 #include "log.h"
 #include "robotTimer.h"
 #include "ioManager.h"
-#include "robotConfig2005.h"
+#include "robotConfig.h"
 
 #include "lcd.h"
 #include "odometer.h"
@@ -109,6 +109,7 @@ bool UartManagerCL::reset()
 // -------------------------------------------------------------------------
 void UartManagerCL::emergencyStop()
 {
+    if (odometer_)  { odometer_->setMode(ODOMETER_MANUAL); } 
 }
 
 // -------------------------------------------------------------------------
@@ -208,11 +209,11 @@ int  UartManagerCL::searchAndOpen()
 // -------------------------------------------------------------------------
 void UartManagerCL::allocLcd()
 {
-#if 0
+#ifndef UART_SCANNER_MAIN
     LOG_FUNCTION();
     if (!lcd_ || lcd_->isSimu()) {
         if (lcd_) { delete lcd_; lcd_ = NULL; }
-        if (RobotConfig2005->lcdSimu) {
+        if (RobotConfig->lcdSimu) {
             lcd_   = new LcdSimu();
         } else {
             if (getUartById(UART_LCD_04) != NULL) {;
@@ -236,11 +237,11 @@ void UartManagerCL::allocLcd()
 // -------------------------------------------------------------------------
 void UartManagerCL::allocOdometer()
 {
-#if 0
+#ifndef UART_SCANNER_MAIN
     LOG_FUNCTION();
-    if (!odometer_ || !odometer_->exists()) {
+    if (!odometer_ || odometer_->isSimu()) {
         if (odometer_) {delete odometer_; odometer_ = NULL; }
-        if (RobotConfig2005->odometerSimu) {
+        if (RobotConfig->odometerSimu) {
             odometer_   = new OdometerSimu();
         } else {
             if (getUartById(UART_ODOMETER_04) != NULL) {

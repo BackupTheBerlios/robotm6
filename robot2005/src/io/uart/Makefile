@@ -6,10 +6,10 @@ SRC_ROOT=../..
 ## For standard directory you only need to set these values
 ## ===========================================================================
 LIB_NAME=libuart
-OBJS=uart.o uartBuffer.o uartManager.o ioManager.o
+OBJS=serialPort.o ubart.o fileDescriptorPoller.o
 
-BIN_NAME=uartScan
-BIN_OBJS=uartScannerMain.o uart.o uartBuffer.o ioManager.o
+BIN_NAME=#uartScan
+BIN_OBJS=#uartScannerMain.o uart.o uartBuffer.o ioManager.o
 BIN_LIBS=${SRC_ROOT}/../lib/libtools.a ${SRC_ROOT}/../lib/liblog.a -lm -lz -l$(LIB_STDCPP) -lpthread
 BIN_LIBS_LOCATION=
 BIN_FLAGS=
@@ -27,7 +27,7 @@ VALIDATE_FLAGS=
 ## ===========================================================================
 ## Source files used to generate dependencies
 ## ===========================================================================
-SRCS=uart.cpp uartBuffer.cpp uartManager.cpp
+SRCS=serialPort.cpp ubart.cpp fileDescriptorPoller.cpp
 
 ## ===========================================================================
 ## Additionnal flags for this directory. See makefile.include for common flags
@@ -53,7 +53,7 @@ all: lib bin validate
 clean:	default_clean
 	${RM} -f  ${STATIC_LIB_DIR}/${LIB_NAME}.a        \
                   ${DYNAMIC_LIB_DIR}/${LIB_NAME}.so  
-	${RM} -f  ${BIN_DIR}/${BIN_NAME}                 
+#	${RM} -f  ${BIN_DIR}/${BIN_NAME}                 
 
 
 ## ===========================================================================
