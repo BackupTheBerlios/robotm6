@@ -1,18 +1,18 @@
-#include "sound.h"
+#include "implementation/soundSimu.h"
 #include "soundPlayer.h"
 
-SoundSimuCL::SoundSimuCL() : SoundCL()
+SoundSimu::SoundSimu()
 {
     SoundPlayerCL::instance(); // init soundPlayer if necessary
 }
 
-void SoundSimuCL::play(SoundId sound, 
+void SoundSimu::play(SoundId sound, 
                        SoundPriority priority)
 {
     SoundPlayerCL::instance()->play(sound, priority);
 }
 
-void SoundSimuCL::clearStack()
+void SoundSimu::clearStack()
 {
     SoundPlayerCL::instance()->clearStack();
 }

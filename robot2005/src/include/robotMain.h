@@ -24,7 +24,7 @@ class RobotMainCL;
 class RobotMainFullCL;
 class LogCL;
 class RobotTimerCL;
-class IoManagerCL;
+class RobotDevicesCL;
 class MovementManagerCL;
 class EventsManagerCL;
 
@@ -77,9 +77,9 @@ class RobotMainCL : public RobotBase
 //    RobotComponentList* robotComponents_;
     LogCL*              log_;
     RobotTimerCL*       timer_;
-    IoManagerCL*       ioMgr_;
-    MovementManagerCL* mvtMgr_;
-    EventsManagerCL*   evtMgr_;
+    RobotDevicesCL*     devices_;
+    MovementManagerCL*  mvtMgr_;
+    EventsManagerCL*    evtMgr_;
     MainMenuList        menu_;
 
     friend class StrategyCL;

@@ -5,7 +5,7 @@
 
 #include "lcdCom_04.h"
 
-#include "lcd.h"
+#include "implementation/lcd04.h"
 #include "uart.h"
 #include "classConfig.h"
 #include "log.h"
@@ -32,10 +32,8 @@ Lcd_04::Lcd_04() : uart_(NULL)
     uart_ = (UartBuffer*)uartMgr->getUartById(UART_LCD_04);
     if (uart_ != NULL) {
         uart_->registerFilterFunction(lcd04Filter);
-        init_ = true;
         LOG_OK("Initialization Done\n");
     } else {
-        init_ = false;
         LOG_ERROR("Lcd device not found!\n");
     }
 }
@@ -45,19 +43,6 @@ Lcd_04::Lcd_04() : uart_(NULL)
 // ---------------------------------------------------------------------------
 Lcd_04::~Lcd_04()
 {
-}
-
-// ---------------------------------------------------------------------------
-// Lcd_04::ping
-// ---------------------------------------------------------------------------
-bool Lcd_04::ping()
-{
-    if (uart_) {
-        return uart_->ping();
-    } else {
-        LOG_ERROR("Lcd device not found and not pinging\n");
-        return false;
-    }
 }
 
 // ---------------------------------------------------------------------------
@@ -72,16 +57,14 @@ bool Lcd_04::reset()
         uart_ = (UartBuffer*)UartMgr->getUartById(UART_LCD_04);
         if (uart_ != NULL) {
             uart_->registerFilterFunction(lcd04Filter);
-            init_ = true;
             LOG_OK("Initialization Done\n");
+            return true;
         } else {
-            init_ = false;
             LOG_ERROR("Lcd device not found!");
         }
-        return init_;
+        return false;
     } else {
-        init_ = uart_->reset();
-        return init_;
+        return uart_->reset();
     }
 }
 
@@ -363,9 +346,6 @@ int main(int argc, char*argv[])
 	case 0:
 	  lcd.ledPolice();
 	  break;
-      case 10:
-          printf("Ping=%s\n", lcd.ping()?"OK":"ERROR");
-          break;
       case 11:
           goto LcdEnd;
       default:

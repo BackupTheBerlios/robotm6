@@ -11,7 +11,7 @@
 #include "timestamp.h"
 
 #include "events.h"
-#include "ioManager.h"
+#include "robotDevices.h"
 #include "movementManager.h"
 
 // ============================================================================
@@ -81,7 +81,7 @@ void RobotMainCL::robotMainUserAbortCB()
       }
       Log->closeLogFile();
 
-      ioMgr_->emergencyStop();
+      devices_->emergencyStop();
       mvtMgr_->reset();
       
       LOG_WARNING("exit\n");;
@@ -92,15 +92,16 @@ void RobotMainCL::robotMainUserAbortCB()
 RobotMainCL::RobotMainCL() : 
   RobotBase("RobotMain", CLASS_ROBOT_MAIN), 
   log_(NULL), timer_(NULL),
-  ioMgr_(NULL), mvtMgr_(NULL), evtMgr_(NULL)
+  devices_(NULL), mvtMgr_(NULL), evtMgr_(NULL)
 {
     main_     = this;
     log_      = new LogCL();
     timer_    = RobotTimerCL::instance(); 
     evtMgr_   = new EVENTS_MANAGER_DEFAULT();
-    ioMgr_    = new IoManagerCL();
-    mvtMgr_   = new MovementManagerCL(); // simulator doit etre cree avant mvtMgr
-  //  robotComponents_ = RobotComponent::getComponentsList();
+    devices_  = new RobotDevicesCL();
+    devices_->allocDevices();
+    mvtMgr_   = new MovementManagerCL(devices_->getMotor(), devices_->getOdometer());
+
     RString::bPrintfInit(); // enable printf(%b)
     LOG_WARNING("Program was compiled on %s at %s by %s in %s on %s\n", 
                 __COMPILE_DATE__, __COMPILE_TIME__, 
@@ -126,7 +127,7 @@ RobotMainCL::RobotMainCL() :
 RobotMainCL::~RobotMainCL() 
 {
     if (mvtMgr_) { delete mvtMgr_;  mvtMgr_ = NULL; }
-    if (ioMgr_)  { delete ioMgr_;   ioMgr_  = NULL; }
+    if (devices_){ delete devices_; devices_= NULL; }
     if (evtMgr_) { delete evtMgr_;  evtMgr_ = NULL; }
     if (timer_)  { delete timer_;   timer_  = NULL; }
     if (log_)    { delete log_;     log_    = NULL; }
@@ -195,7 +196,7 @@ void RobotMainCL::resetAll()
 {
     if (timer_)    { timer_->reset();    }
     if (evtMgr_)   { evtMgr_->reset();   }
-    if (ioMgr_)    { ioMgr_->reset();    }
+    if (devices_)  { devices_->reset();    }
     if (mvtMgr_)   { mvtMgr_->reset();   }
     if (!checkInitDone()) {
 	LOG_ERROR("Tous les composants ne sont pas resetés correctement !\n");

@@ -1,6 +1,6 @@
-#include "sound.h"
+#include "implementation/sound05.h"
 
-Sound05CL::Sound05CL() : SoundCL()
+Sound05CL::Sound05CL()
 {
     
 }

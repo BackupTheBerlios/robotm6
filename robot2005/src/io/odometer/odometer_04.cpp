@@ -3,7 +3,7 @@
 #include "log.h"
 #include "uart.h"
 #include "events.h"
-#include "odometer.h"
+#include "implementation/odometer04.h"
 #include "odometerCom_04.h"
 #include "mthread.h"
 #ifdef LSM_TODO
@@ -51,11 +51,8 @@ Odometer_04::Odometer_04() :
     uart_ = (UartBuffer*)uartMgr->getUartById(UART_ODOMETER_04);
     if (uart_ != NULL) {
         uart_->registerFilterFunction(Odometer04Filter);
-        init_ = true;
         LOG_OK("Initialization Done\n");
     } else {
-        setMode(ODOMETER_MANUAL);
-        init_ = false;
         LOG_ERROR("odometer device not found!\n");
     }
 }
@@ -65,22 +62,6 @@ Odometer_04::Odometer_04() :
 // -------------------------------------------------------------------------
 Odometer_04::~Odometer_04()
 {
-    setMode(ODOMETER_MANUAL);
-}
- 
-// -------------------------------------------------------------------------
-// Odometer_04::ping
-// -------------------------------------------------------------------------
-// Return true if the lcd board is responding
-// -------------------------------------------------------------------------
-bool Odometer_04::ping()
-{
-    if (uart_) {
-        return uart_->ping();
-    } else {
-        LOG_ERROR("Odometer device not found and not pinging\n");
-        return false;
-    }
 }
 
 // -------------------------------------------------------------------------
@@ -90,23 +71,23 @@ bool Odometer_04::ping()
 // -------------------------------------------------------------------------
 bool Odometer_04::reset()
 {
+    bool init=false;
     LOG_FUNCTION();
     if (!uart_) {
         uart_ = (UartBuffer*)UartMgr->getUartById(UART_ODOMETER_04);
         if (uart_ != NULL) {
-            init_ = true;
+            init = true;
             uart_->registerFilterFunction(Odometer04Filter);
             LOG_OK("Initialization Done\n");
         } else {
-            init_ = false;
+            init = false;
             LOG_ERROR("Odometer device not found!\n");
         }
-        return init_;
+        return init;
     } else {
-        setMode(ODOMETER_MANUAL);
-        init_ = uart_->reset();
+        init = uart_->reset();
         uart_->registerFilterFunction(Odometer04Filter);
-        return init_;
+        return init;
     }
 }
 
@@ -124,100 +105,24 @@ bool Odometer_04::getCoderPosition(CoderPosition &left,
                                    CoderPosition &right)
 {
     if (!uart_) return false;
-    if (mode_ == ODOMETER_AUTOMATIC) {
-        left = left_;
-        right = right_;
-        bool result = dataAvailable_;
-        dataAvailable_ = false;
-	/*   LOG_DEBUG("left = %d,  right = %d, available=%s\n", 
-	     left, right, b2s(result));*/
-        return result;
-    } else {
-        // ODOMETER_MANUAL
-        unsigned char data[8];
-        bool status = false;
-        uart_->write(ODOMETER_GET_POSITION);
-        unsigned int l=1;
-	status = uart_->read(data, l);
-        
-        if (!status) {
-            LOG_ERROR("Odometer getCoderPosition %s\n", 
-                      status?"OK":"ERR");
-            return false;
-        }
-        left=left_; 
-	right=right_;
-        LOG_DEBUG("left = %d,  right = %d\n", left, right);
-        return true;
-    }
-}
 
-// -------------------------------------------------------------------------
-// Odometer_04::setMode
-// -------------------------------------------------------------------------
-//  Definit le mode de communication avec la carte
-//  En mode automatique la carte envoie toute seule des donnees et 
-//    getCoderPosition retourne true si la carte a mise a jour la 
-//    position des codeurs depuis la derniere requete getCoderPosition
-//  En mode manuel getCoderPosition va directement lire la valeur 
-//    des codeurs et retourne true si la communication s'est bien passee.
-//  By default it is manual
-// Retourne FALSE en cas d'erreur de communication avec la carte
-// -------------------------------------------------------------------------
-bool Odometer_04::setMode(bool automatic)
-{
-    if (!uart_) return false;
-    bool result = false;
-    unsigned char data[2];
-    if (automatic == ODOMETER_AUTOMATIC) {
-        result = uart_->write(ODOMETER_SET_MODE_AUTOMATIC);
-	result |= uart_->read(data);
-   
-        LOG_DEBUG("ODOMETER_SET_MODE_AUTOMATIC\n");
-        if (!result || data[0] != ODOMETER_MODE_AUTOMATIC) {
-	  LOG_ERROR("Odometer %s invalide set mode %d\n", 
-		    result?"OK":"ERR", data[0]);
-	} else {
-	  mode_=1;
-	}
-    } else {
-        result = uart_->write(ODOMETER_SET_MODE_MANUAL);
-	result |= uart_->read(data);
-   
-        LOG_DEBUG("ODOMETER_SET_MODE_MANUAL\n");
-        if (!result || data[0] != ODOMETER_MODE_MANUAL) {
-	  LOG_ERROR("Odometer %s invalide set mode %d\n", 
-		    result?"OK":"ERR", data[0]);
-	} else {
-	  mode_=0;
-	}
-    }
-    return result;
-}
-
-// -------------------------------------------------------------------------
-// Odometer_04::getMode
-// -------------------------------------------------------------------------
-// Retourne le mode dans lequel se trouve la carte
-// -------------------------------------------------------------------------
-bool Odometer_04::getMode(bool& automatic)
-{
-    if (!uart_) return false;
-    unsigned char data[2];
+    // ODOMETER_MANUAL
+    unsigned char data[8];
     bool status = false;
-    uart_->write(ODOMETER_GET_MODE);
-    status = uart_->read(data);
+    uart_->write(ODOMETER_GET_POSITION);
+    unsigned int l=1;
+    status = uart_->read(data, l);
     
-    if (!status || (data[0] != ODOMETER_MODE_AUTOMATIC 
-                    && data[0] != ODOMETER_MODE_MANUAL) ) {
-        LOG_ERROR("Odometer %s invalide get mode %d\n", 
-                  status?"OK":"ERR", data[0]);
+    if (!status) {
+        LOG_ERROR("Odometer getCoderPosition %s\n", 
+                  status?"OK":"ERR");
         return false;
     }
-    automatic = (data[0] == ODOMETER_MODE_AUTOMATIC) ? 
-        ODOMETER_AUTOMATIC : ODOMETER_MANUAL;
-    LOG_DEBUG("Mode: %s\n", automatic ? "AUTOMATIC":"MANUAL");
+    left=left_; 
+    right=right_;
+    LOG_DEBUG("left = %d,  right = %d\n", left, right);
     return true;
+
 }
 
 //static int Odometer_04_periodCounter=0;
@@ -305,9 +210,6 @@ static Odometer_04* odometer_=NULL;
 // ---------------------------------------------------------------------------
 extern "C" void odometerSIGINT(int sig)
 {
-    if (odometer_) {
-        odometer_->setMode(false);
-    }
     MTHREAD_KILL_ALL();
     if (odometer_) {
         delete odometer_;

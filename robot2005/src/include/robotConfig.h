@@ -94,7 +94,8 @@ class RobotConfigCL
     double getMotorKLeft()  const { return motorSignLeft*motorK*motorCl; }
     double getMotorKRight() const { return motorSignRight*motorK*motorCr; }
     double getMotorD()      const { return motorD; }
-    
+
+    bool   positionSimu;
  protected:
     static RobotConfigCL* lastInstance_;
 };
@@ -128,8 +129,9 @@ inline RobotConfigCL::RobotConfigCL(const char* Name,
     motorCr(1),
     motorCl(1),
     motorSignLeft(1),
-    motorSignRight(1)
+    motorSignRight(1),
     
+    positionSimu(simulated)
 {
     assert(!lastInstance_);
     strcpy(name, Name);

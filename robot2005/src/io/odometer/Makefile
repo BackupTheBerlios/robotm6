@@ -76,7 +76,7 @@ validate:
 ## Specific rules
 ## ===========================================================================
 
-${FILE}04Main.o: ${FILE}_04.cpp ${SRC_DIR}/include/${FILE}.h
+${FILE}04Main.o: ${FILE}_04.cpp
 	${CC} -c ${DEFAULT_CFLAGS} -DMAKE_MAIN -o $@ ${FILE}_04.cpp ${DEFAULT_INC_DIR}
 
 ## ===========================================================================

@@ -12,9 +12,9 @@
  // ----------------------------------------------------------------------------
  // MovementManagerCL::MovementManagerCL
  // ----------------------------------------------------------------------------
- MovementManagerCL::MovementManagerCL() : 
+MovementManagerCL::MovementManagerCL(MotorCL* motor, OdometerCL* odom) : 
      RobotComponent("Movement Manager", CLASS_MOVEMENT_MANAGER),
-     motor_(NULL), position_(NULL), move_(NULL), 
+     motor_(motor), position_(NULL), move_(NULL), odometer_(odom), 
      periodicCallback_(NULL), needMotorReset_(false), threadStarted_(false), 
      direction_(MOVE_DIRECTION_FORWARD)
  {
@@ -40,7 +40,6 @@
      LOG_WARNING("Destructing MovementManager\n");
      motorReset();
      MTHREAD_CANCEL(thread_);
-     if (motor_)    { delete motor_;    motor_ = NULL; }
      if (position_) { delete position_; position_ = NULL; }
      if (move_)     { delete move_;     move_ = NULL; }
      mvtMgr_=NULL;
@@ -131,35 +130,33 @@
  // ----------------------------------------------------------------------------
  void MovementManagerCL::periodicTask()
  {
-     if (!motor_) {
-	 if (RobotConfig2005->motorSimu) {
-	     motor_ = new MotorSimu(RobotConfig->automaticMotorReset);
-	 } else {
-	     motor_ = new MotorReal(RobotConfig->automaticMotorReset);
-	 }
-	 motor_->registerResetCallback(robotPositionMotorHasBeenReset);
-     }
-     if (motorCom_.reset && motor_) {
-	 motor_->reset();
-	 motorCom_.reset = false;
-	 if (position_) { position_->resetHctlCoders(); }
-     }
-     if (motorCom_.setAcc > 0 && motor_) {
-	 motor_->setAcceleration(motorCom_.setAcc);
-	 motorCom_.setAcc =-1;
-     }
-     if (motorCom_.resetPwmAlert) {
-	 resetPwmAlert();
-	 motorCom_.resetPwmAlert=false;
+     if (motor_) {
+         if (!motor_->isStarted()) {
+             motor_->start();
+             motor_->registerResetCallback(robotPositionMotorHasBeenReset);
+         }
+         if (motorCom_.reset) {
+             motor_->reset();
+             motorCom_.reset = false;
+             if (position_) { position_->resetHctlCoders(); }
+         }
+         if (motorCom_.setAcc > 0 && motor_) {
+             motor_->setAcceleration(motorCom_.setAcc);
+             motorCom_.setAcc =-1;
+         }
+         if (motorCom_.resetPwmAlert) {
+             resetPwmAlert();
+             motorCom_.resetPwmAlert=false;
+         }
      }
      Millisecond time = Timer->time();
      if (position_) { position_->periodicTask(time); }
      if (move_)     { move_->periodicTask(time);     }
      if (motor_)    { 
-       motor_->setSpeed(motorCom_.speedLeft, motorCom_.speedRight);
-       motor_->getPosition(motorCom_.posLeft, motorCom_.posRight);
-       motor_->getPWM(motorCom_.pwmLeft, motorCom_.pwmRight);
-       motor_->checkMotorEvents();
+         motor_->setSpeed(motorCom_.speedLeft, motorCom_.speedRight);
+         motor_->getPosition(motorCom_.posLeft, motorCom_.posRight);
+         motor_->getPWM(motorCom_.pwmLeft, motorCom_.pwmRight);
+         motor_->periodicTask();
     }
     if (periodicCallback_) {
         periodicCallback_();

@@ -1,4 +1,4 @@
-#include "motor.h"
+#include "implementation/motorSimu.h"
 #include "log.h"
 #include "simulatorClient.h"
 
@@ -10,10 +10,9 @@
 bool MotorSimu::reset()
 {
   LOG_FUNCTION();
-  Motor::reset();
+  MotorCL::reset();
   
-  init_=true;
-  return init_;
+  return true;
 }
 
 /** Defini la constante d'acceleration des moteurs */
@@ -51,7 +50,7 @@ void MotorSimu::idle()
 
 MotorSimu::MotorSimu(bool   automaticReset, 
 		     MotorAlertFunction fn) :
-  Motor(automaticReset, fn)
+  MotorCL(automaticReset, fn)
 {
   LOG_FUNCTION();
   reset();

@@ -7,7 +7,7 @@ SRC_ROOT=../..
 ## ===========================================================================
 FILE=base2005
 LIB_NAME=lib${FILE}
-OBJS=robotConfig.o strategy2005.o strategyInit.o robotMain2005.o
+OBJS=robotConfig.o strategy2005.o strategyInit.o robotMain2005.o robotDevices.o
 
 BIN_NAME=
 BIN_OBJS=

@@ -109,7 +109,6 @@ bool UartManagerCL::reset()
 // -------------------------------------------------------------------------
 void UartManagerCL::emergencyStop()
 {
-    if (odometer_)  { odometer_->setMode(ODOMETER_MANUAL); } 
 }
 
 // -------------------------------------------------------------------------
@@ -209,7 +208,7 @@ int  UartManagerCL::searchAndOpen()
 // -------------------------------------------------------------------------
 void UartManagerCL::allocLcd()
 {
-#ifndef UART_SCANNER_MAIN
+#if 0
     LOG_FUNCTION();
     if (!lcd_ || lcd_->isSimu()) {
         if (lcd_) { delete lcd_; lcd_ = NULL; }
@@ -237,9 +236,9 @@ void UartManagerCL::allocLcd()
 // -------------------------------------------------------------------------
 void UartManagerCL::allocOdometer()
 {
-#ifndef UART_SCANNER_MAIN
+#if 0
     LOG_FUNCTION();
-    if (!odometer_ || odometer_->isSimu()) {
+    if (!odometer_ || !odometer_->exists()) {
         if (odometer_) {delete odometer_; odometer_ = NULL; }
         if (RobotConfig2005->odometerSimu) {
             odometer_   = new OdometerSimu();

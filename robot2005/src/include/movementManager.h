@@ -19,6 +19,7 @@
 #include "robotBase.h"
 #include "motor.h"
 #include "move.h"
+#include "odometer.h"
 #include "robotPosition.h"
 #include "robotBase.h"
 #include "mthread.h"
@@ -65,7 +66,7 @@ class MovementManagerCL : public RobotComponent
  public:
     /** Le constructeur ne doit etre appele qu'une fois par main. Ensuite, 
         utiliser instance */
-    MovementManagerCL();
+    MovementManagerCL(MotorCL* motor, OdometerCL* odom);
     virtual ~MovementManagerCL();
     /** Function réservée au thread!: calcul la nouvelle position et la 
         nouvelle consigne */
@@ -93,7 +94,6 @@ class MovementManagerCL : public RobotComponent
 
     RobotPositionCL* position(){return position_;}
     MoveCL*          move()    {return move_;}
-    bool             isMotorSimu() { return motor_?motor_->isSimu():false; }
     /** @brief Reset les moteurs quand on detecte qu'ils sont bloques */
     void enableAutomaticReset(bool enable);
    
@@ -119,7 +119,7 @@ class MovementManagerCL : public RobotComponent
     void setSpeed(MotorSpeed  speedLeft,
 		  MotorSpeed  speedRight);
  protected:
-    Motor* motor() { return motor_; }
+    MotorCL* motor() { return motor_; }
     void startThread();
     void getCoderPosition(CoderPosition& left, 
 			  CoderPosition& right);
@@ -131,9 +131,10 @@ class MovementManagerCL : public RobotComponent
 
  private:
     static MovementManagerCL* mvtMgr_;
-    Motor*           motor_;
+    MotorCL*         motor_;
     RobotPositionCL* position_;
     MoveCL*          move_;
+    OdometerCL*      odometer_;
     FunctionPtr      periodicCallback_;
     volatile bool    needMotorReset_;
     bool             threadStarted_;

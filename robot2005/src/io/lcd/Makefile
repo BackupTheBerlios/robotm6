@@ -80,16 +80,16 @@ validate:
 ## Specific rules
 ## ===========================================================================
 
-${FILE}04Main.o: ${FILE}_04.cpp ${FILE}_04.o ${SRC_DIR}/include/${FILE}.h
+${FILE}04Main.o: ${FILE}_04.cpp ${FILE}_04.o 
 	${CC} -c ${DEFAULT_CFLAGS} -DMAKE_MAIN -o $@ ${FILE}_04.cpp ${DEFAULT_INC_DIR}
 
 #${FILE}03Main.o: ${FILE}_03.cpp ${FILE}_03.o ${SRC_DIR}/include/${FILE}.h
 #	${CC} -c ${DEFAULT_CFLAGS} -DMAKE_MAIN -o $@ ${FILE}_03.cpp ${DEFAULT_INC_DIR}
 
-${BIN_DIR}/lcdPrint03: ${FILE}_03.o ${FILE}_03.cpp ${SRC_DIR}/include/${FILE}.h ${BASIC_STATIC_LIBS_DEP}
+${BIN_DIR}/lcdPrint03: ${FILE}_03.o ${FILE}_03.cpp  ${BASIC_STATIC_LIBS_DEP}
 	${CC} -o $@ ${FILE}_03.cpp ${DEFAULT_CFLAGS} ${DEFAULT_INC_DIR} -DMAKE_MAIN_LCD_PRINT ${BIN_LIBS}
 
-${BIN_DIR}/lcdPrint04: ${FILE}_04.o ${FILE}_04.cpp ${SRC_DIR}/include/${FILE}.h ${BASIC_STATIC_LIBS_DEP}
+${BIN_DIR}/lcdPrint04: ${FILE}_04.o ${FILE}_04.cpp  ${BASIC_STATIC_LIBS_DEP}
 	${CC} -o $@ ${FILE}_04.cpp ${DEFAULT_CFLAGS} ${DEFAULT_INC_DIR} -DMAKE_MAIN_LCD_PRINT ${BIN_LIBS}
 
 ## ===========================================================================

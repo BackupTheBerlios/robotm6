@@ -76,12 +76,10 @@ void RobotPositionCL::set(Millimeter X,
     pos_.center.x  = X;
     pos_.center.y  = Y;
     pos_.direction = T;
-    posOdom_       = pos_;
-    if (Odometer->isSimu()) {
-        Simulator->setRobotPosition(pos_);
-    }
+    posOdom_       = pos_; 
     posHctl_       = pos_;
-    if (MvtMgr->isMotorSimu()) {
+    if (RobotConfig->positionSimu) {
+        Simulator->setRobotPosition(pos_);
         Simulator->setEstimatedRobotPosition(pos_);
     }
     clearOdoColliDetectBuffer();
@@ -135,19 +133,9 @@ Position RobotPositionCL::getPosition(Millisecond deltaT)
 // ----------------------------------------------------------------------------
 void RobotPositionCL::setOdometerType(OdometerType odometer)
 {
-    odometerType_ = odometer;
-    if (odometerType_ == ODOMETER_UART_AUTOMATIC) {
-        odometerErrorCount_ = 0;
-	Odometer->setMode(ODOMETER_AUTOMATIC);
-        LOG_WARNING("Set odometer mode: UART_AUTOMATIC\n");
-        odometerIsAutomatic_ = true;
-        odometerErrorCount_ = 0;
-    } else {
-        LOG_WARNING("Set odometer mode: MOTOR\n");
-        Odometer->setMode(ODOMETER_MANUAL);
-        odometerIsAutomatic_ = false;
-	odometerErrorCount_ = 0;
-    }
+    odometerType_        = odometer;
+    odometerIsAutomatic_ = false;
+    odometerErrorCount_  = 0;
 }
     
 // ----------------------------------------------------------------------------
@@ -274,7 +262,7 @@ void RobotPositionCL::getPosition(Position&      posi,
 // ----------------------------------------------------------------------------
 void RobotPositionCL::updateHctlPosition()
 {
-    if (MvtMgr->isMotorSimu()) { 
+    if (RobotConfig->positionSimu) { 
         Simulator->getRobotEstimatedPosition(posHctl_.center, posHctl_.direction);
     } else {
         CoderPosition left=0, right=0;
@@ -319,7 +307,7 @@ void RobotPositionCL::setOdometerAliveStatus(bool alive)
 // ----------------------------------------------------------------------------
 void RobotPositionCL::updateOdometerPosition()
 {
-    if (Odometer->isSimu()) {
+    if (RobotConfig->positionSimu) {
         Simulator->getRobotRealPosition(posOdom_.center, posOdom_.direction);
     } else {
         CoderPosition left=0, right=0;

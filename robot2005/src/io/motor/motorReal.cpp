@@ -1,7 +1,5 @@
-#include "motor.h"
-#ifndef TELECOMMAND_MAIN
-#include "log.h"
-#else
+#include "implementation/motorIsa.h"
+#ifdef TELECOMMAND_MAIN
 #include <signal.h>
 #include <stdlib.h>
 #endif
@@ -9,17 +7,17 @@
 
 #include "log.h"
 // ============================================================================
-// ==============================  class MotorReal   ==========================
+// ==============================  class MotorIsa   ==========================
 // ============================================================================
 
 /** Reset les hctl (gauche et droite) */
-bool MotorReal::reset()
+bool MotorIsa::reset()
 {
 #ifndef TELECOMMAND_MAIN
   LOG_FUNCTION();
   // on previent robot_pos qu'il y a un saut possible dans la valeur des 
   // codeurs avant et apres le reset
-  Motor::reset();
+  MotorCL::reset();
   hctlSetMotorSpeed(0, 0);
   if (resetCallBack_) resetCallBack_();
   hctlIdle();
@@ -28,23 +26,22 @@ bool MotorReal::reset()
   if (resetCallBack_) resetCallBack_();
 
 #else
-  Motor::reset();
+  MotorCL::reset();
   hctlSetMotorSpeed(0, 0);
   hctlIdle();
   hctlInit();
 #endif
-  init_=true;
-  return init_;
+  return true;
 }
 
 /** Defini la constante d'acceleration des moteurs */
-void MotorReal::setAcceleration(MotorAcceleration acceleration)
+void MotorIsa::setAcceleration(MotorAcceleration acceleration)
 {
   hctlSetAcceleration(acceleration);
 }
 
 /** Specifie un consigne en vitesse pour les moteurs */
-void MotorReal::setSpeed(MotorSpeed left, 
+void MotorIsa::setSpeed(MotorSpeed left, 
 			 MotorSpeed right)
 {
     // on a change les moteurs et les codeurs, maintenant ca va 2 fois
@@ -54,7 +51,7 @@ void MotorReal::setSpeed(MotorSpeed left,
 }
 
 /** Retourne la position des codeurs */
-void MotorReal::getPosition(MotorPosition &left,
+void MotorIsa::getPosition(MotorPosition &left,
 			    MotorPosition &right)
 {
   right=hctlGetRightPos();
@@ -62,7 +59,7 @@ void MotorReal::getPosition(MotorPosition &left,
 }
 
 /** Retourne la consigne reellement envoyee au moteurs */
-void MotorReal::getPWM(MotorPWM &left,
+void MotorIsa::getPWM(MotorPWM &left,
 		       MotorPWM &right)
 {
   left =hctlGetLeftPWM();
@@ -70,28 +67,32 @@ void MotorReal::getPWM(MotorPWM &left,
 }
 
 /** Desasservit les moteurs */
-void MotorReal::idle()
+void MotorIsa::idle()
 {
-  hctlIdle();
+    hctlIdle();
 }
 
 /** Constructeur */
-MotorReal::MotorReal(bool   automaticReset, 
-		     MotorAlertFunction fn) : 
-  Motor(automaticReset, fn)
+MotorIsa::MotorIsa(bool   automaticReset, 
+                   MotorAlertFunction fn) : 
+    MotorCL(automaticReset, fn), isStarted_(false)
 {
-#ifndef TELECOMMAND_MAIN
-  LOG_FUNCTION();
-#endif
-  hctlInit();
-//  reset();
-#ifndef TELECOMMAND_MAIN
-  LOG_OK("Initialisation terminée\n");
-#endif
-
 }
 
-MotorReal::~MotorReal()
+void MotorIsa::start() 
+{
+#ifndef TELECOMMAND_MAIN
+    LOG_FUNCTION();
+#endif
+    hctlInit();
+//  reset();
+#ifndef TELECOMMAND_MAIN
+    LOG_OK("Initialisation terminée\n");
+#endif  
+    isStarted_ = true;
+}
+
+MotorIsa::~MotorIsa()
 {
   hctlCleanUp();
 }
@@ -190,7 +191,7 @@ void handle6()
   printf("setSpeed(%d, %d)\n", order.speedLeft, order.speedRight);
 }
 
-bool getKeyboardOrder(MotorReal& motor)
+bool getKeyboardOrder(MotorIsa& motor)
 {
   char rep;
   read(0,&rep,1);
@@ -251,7 +252,7 @@ bool getKeyboardOrder(MotorReal& motor)
   return true;
 }
 
-MotorReal * pMotor=NULL;
+MotorIsa * pMotor=NULL;
 void motorRealTelecommandSIGINT(int sig) {
   if (pMotor) pMotor->reset();
   usleep(10000);
@@ -263,7 +264,8 @@ int main() {
   configureKeyboard();
   (void) signal(SIGINT, motorRealTelecommandSIGINT);
 
-  MotorReal motor;
+  MotorIsa motor;
+  motor.start();
   pMotor=&motor;
 
   motor.reset();

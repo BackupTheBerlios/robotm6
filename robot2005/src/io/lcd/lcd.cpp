@@ -1,11 +1,4 @@
-
-
 #include "lcd.h"
-
-#include <assert.h>
-#include <stdarg.h>
-#include <stdio.h>
-
 
 // ---------------------------------------------------------------------------
 // Interface avec l'afficheur LCD
@@ -16,7 +9,7 @@ LcdCL* LcdCL::lcd_=NULL;
 // Lcd::Lcd
 // ---------------------------------------------------------------------------
 LcdCL::LcdCL():
-  RobotIODevice("Lcd", CLASS_LCD) 
+  RobotDeviceCL("Lcd", CLASS_LCD) 
 {
   assert(!lcd_);
   lcd_=this;

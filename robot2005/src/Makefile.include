@@ -67,7 +67,7 @@ export BIN_SIMU_DIR
 VALIDATE_DIR=${SRC_ROOT}/../validate
 export VALIDATE_DIR
 
-DEFAULT_INC_DIR=-I$(SRC_ROOT)/include -I$(SRC_ROOT)/include/driver -I$(SRC_ROOT)/include/strategy -I$(SRC_ROOT)/include/2005 -I.
+DEFAULT_INC_DIR=-I$(SRC_ROOT)/include -I$(SRC_ROOT)/include/driver -I$(SRC_ROOT)/include/strategy -I$(SRC_ROOT)/2005/include -I$(SRC_ROOT)/include/devices -I.
 export DEFAULT_INC_DIR
 
 ## ===========================================================================

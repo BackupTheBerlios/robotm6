@@ -2,7 +2,7 @@
 
 SoundCL* SoundCL::sound_=NULL;
 
-SoundCL::SoundCL() : RobotComponent("Sound", CLASS_SOUND)
+SoundCL::SoundCL() : RobotDeviceCL("Sound", CLASS_SOUND)
 {
     if (sound_) delete sound_;
     sound_=this;

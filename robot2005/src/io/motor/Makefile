@@ -67,10 +67,10 @@ validate:
 ## Specific rules
 ## ===========================================================================
 
-telecommand1.o: motorReal.cpp motorReal.o ${SRC_DIR}/include/motor.h HCTLControl.h
+telecommand1.o: motorReal.cpp motorReal.o HCTLControl.h
 	${CC} -o telecommand1.o -c motorReal.cpp ${DEFAULT_CFLAGS} ${DEFAULT_INC_DIR} -DTELECOMMAND_MAIN
 
-telecommand2.o: motor.cpp motor.o ${SRC_DIR}/include/motor.h
+telecommand2.o: motor.cpp motor.o 
 	${CC} -o telecommand2.o -c motor.cpp ${DEFAULT_CFLAGS}  ${DEFAULT_INC_DIR} -DTELECOMMAND_MAIN
 
 ${BIN_DIR}/telecommand2: telecommand1.o telecommand2.o HCTLControl.o hct.o

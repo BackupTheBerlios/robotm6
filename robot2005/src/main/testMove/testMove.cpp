@@ -422,7 +422,7 @@ LOG_INFO("SIMULATED\n");
   //// ICI ICI ICI => strategy2 = traverse le pont
   //robotMain->run(strategy2, argc, argv); // traverse le pont
   //robotMain->run(strategy1, argc, argv); //deplacement fichier  test des deplacements
-  robotMain->run(strategy3, argc, argv); //deplacement fichier  test des deplacements
+  robotMain->run(strategy2, argc, argv); //deplacement fichier  test des deplacements
 
   while(1) {sleep(1);}
   delete strategy2;

@@ -2,9 +2,8 @@
 #define  LCD_COM_INFO
 #include "lcdCom_03.h"
 
-#include "lcd.h"
+#include "implementation/lcd03.h"
 #include "uart.h"
-#include "classConfig.h"
 #include "log.h"
 #include <assert.h>
 #include <stdarg.h>
@@ -25,10 +24,8 @@ Lcd_03::Lcd_03() :  uart_(NULL)
   }
   uart_ = uartMgr->getUartById(UART_LCD_03);
   if (uart_ != NULL) {
-    init_ = true;
     LOG_OK("Initialization Done\n");
   } else {
-    init_ = false;
     LOG_ERROR("Lcd device not found!\n");
   }
 }
@@ -38,19 +35,6 @@ Lcd_03::Lcd_03() :  uart_(NULL)
 // ---------------------------------------------------------------------------
 Lcd_03::~Lcd_03()
 {
-}
-
-// ---------------------------------------------------------------------------
-// Lcd_03::ping
-// ---------------------------------------------------------------------------
-bool Lcd_03::ping()
-{
-  if (uart_) {
-    return uart_->ping();
-  } else {
-    LOG_ERROR("Lcd device not found and not pinging\n");
-    return false;
-  }
 }
 
 // ---------------------------------------------------------------------------
@@ -64,16 +48,14 @@ bool Lcd_03::reset()
   if (!uart_) {
     uart_ = UartMgr->getUartById(UART_LCD_03);
     if (uart_ != NULL) {
-      init_ = true;
       LOG_OK("Initialization Done\n");
+      return true;
     } else {
-      init_ = false;
       LOG_ERROR("Lcd device not found!");
+      return false;
     }
-    return init_;
   } else {
-    init_ = uart_->reset();
-    return init_;
+    return uart_->reset();
   }
 }
 
