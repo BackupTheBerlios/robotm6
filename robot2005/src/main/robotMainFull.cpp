@@ -164,6 +164,7 @@ void RobotMainFullCL::run(StrategyCL* strategy, int argc, char* argv[])
 
     // enregistre la detection du Ctrl+C et du callback correspondant qui 
     // stoppe le programme immediatement
+    // TODO: isn't this already done in the constructor? [flo]
     Events->registerCallback(EVENTS_USER_ABORT, this, 
 			     robotMainFullUserAbortCB, 
 			     "robotMainFullUserAbortCB");
