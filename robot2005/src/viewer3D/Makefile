@@ -13,7 +13,7 @@ LIB_NAME=
 OBJS=
 
 LIB_NAME=libviewer3D
-OBJS=viewer3D.o viewerMap3D.o viewerMap2D.o viewerPlayer.o gltools.o tgaload.o text.o texture.o button.o dummyXmuColor.o
+OBJS=viewer3D.o viewerMap3D.o viewerMap2D.o viewerPlayer.o tgaload.o text.o texture.o button.o dummyXmuColor.o
 
 VALIDATE_NAME=
 VALIDATE_OBJS=

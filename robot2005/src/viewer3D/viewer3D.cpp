@@ -13,7 +13,6 @@
 #ifndef VIEWER_DISACTIVATED 
 #include <GL/glut.h>
 #include "mthread.h"
-#include "gltools.h"
 #include "texture.h"
 #include "text.h"
 #include "button.h"
@@ -389,8 +388,6 @@ namespace {
 	    
 	    glutInit(&argc_, argv_); 
 	    glutInitDisplayMode ( GLUT_DOUBLE | GLUT_RGB | GLUT_DEPTH ); 
-	    loadGLTextures();
-	    buildFont();
 	    
 	    // creation des fenetres
 	    if (displayMap2D_) {

@@ -11,7 +11,6 @@
 #endif
 
 #include "viewerMap3D.h"
-#include "gltools.h"
 #include "viewer3D.h"
 #include "texture.h"
 

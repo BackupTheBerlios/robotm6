@@ -4,7 +4,6 @@
 #endif
 #include <string>
 #include "viewerMap2D.h"
-#include "gltools.h"
 #include "viewer3D.h"
 #include "text.h"
 #include "log.h"

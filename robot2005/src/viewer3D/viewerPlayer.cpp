@@ -3,7 +3,6 @@
 
 #include "viewerPlayer.h"
 #include "viewer3D.h"
-#include "gltools.h"
 #include "texture.h"
 #include "text.h"
 #include "button.h"
