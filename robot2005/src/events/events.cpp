@@ -170,6 +170,9 @@ void EventsManagerCL::registerNotImmediatCallback(EventsEnum        evt,
 // ----------------------------------------------------------------------------
 void EventsManagerCL::unraiseEventsBumpers()
 {
+    evtStatus_[(int)EVENTS_BRIDGE_BUMP_LEFT]=false;  // front center
+    evtStatus_[(int)EVENTS_BRIDGE_BUMP_RIGHT]=false;  // front right
+    
     evtStatus_[(int)EVENTS_BUMPER_FC]=false;  // front center
     evtStatus_[(int)EVENTS_BUMPER_FR]=false;  // front right
     evtStatus_[(int)EVENTS_BUMPER_FL]=false;  // front left
@@ -193,6 +196,7 @@ void EventsManagerCL::unraiseEventsGroups()
 {
   evtStatus_[(int)EVENTS_GROUP_NONE]         = false;
   evtStatus_[(int)EVENTS_GROUP_BUMPER]       = false;
+  evtStatus_[(int)EVENTS_GROUP_BRIDGE]       = false;
   evtStatus_[(int)EVENTS_GROUP_USER]         = false;
   evtStatus_[(int)EVENTS_GROUP_ENV_DETECTOR] = false;
   evtStatus_[(int)EVENTS_GROUP_MOTOR]        = false;

@@ -29,7 +29,9 @@ class RobotConfig2005CL : public RobotConfigCL
  public:  
     /** @brief True si c'est le robot d'attack, false sinon */
     bool isRobotAttack;
-  
+    /** @brief True si on utilise la catapulte en debut de match */
+    bool useCatapult;
+
     // --------------------------------------------
     // --- E N T R E E S    /   S O R T I E S   ---
     // --------------------------------------------
@@ -45,6 +47,8 @@ class RobotConfig2005CL : public RobotConfigCL
     bool bumperSimu;
     /** @brief simule la carte detecteur d'environement */
     bool envSimu;
+    /** @brief simule la carte servo moteur */
+    bool servoSimu;
 };
 
 // ----------------------------------------------------------------------------
@@ -54,13 +58,15 @@ inline RobotConfig2005CL::RobotConfig2005CL(const char* Name,
                                             bool simulated) : 
     RobotConfigCL(Name, simulated),
     isRobotAttack(true),
+    useCatapult(true),
 
     motorSimu(simulated),
     lcdSimu(simulated),
     odometerSimu(simulated),
     soundSimu(simulated),
     bumperSimu(simulated),
-    envSimu(simulated)
+    envSimu(simulated),
+    servoSimu(simulated)
 {
 
 }

@@ -8,7 +8,8 @@
 #include "log.h"
 
 StrategyAttackCL::StrategyAttackCL(RobotMainCL* main): 
-    Strategy2005CL("StrategyAttack", "Robot attack", CLASS_STRATEGY, main)
+    Strategy2005CL("StrategyAttack", "Robot attack", CLASS_STRATEGY, main),
+    bridgeAvailibility_(0xFF), bridge_(BRIDGE_POS_UNKNOWN), useLeftBridge_(true)
 {
 
 }
