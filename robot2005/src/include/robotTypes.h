@@ -22,6 +22,7 @@ typedef int Millisecond;
 typedef double Millimeter;
 /** @brief Unité d'angle par défaut */
 typedef double Radian;
+typedef short Millivolt;
 /** @brief Unite des codeurs montes sur des axes de rotation (odometres) */
 typedef int CoderPosition;
 /** @brief Unite des consignes en vitesse du robot On a besoin que d'un short, mais pour faire les calculs et la detection des overflow, c'est plus simple d'avoir plus grand qu'un short=>un int */

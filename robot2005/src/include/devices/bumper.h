@@ -41,7 +41,7 @@ class BumperCL: public RobotDeviceCL {
   /** @brief Retourne l'instance unique*/
   static BumperCL* instance();
   virtual bool reset()  { return true; }
-  virtual bool exists() { return false; }
+  virtual bool exists() const { return false; }
 
   //... todo
   virtual bool getBridgeCaptors(BridgeCaptorStatus captors[BRIDGE_CAPTORS_NBR]) { return false; }

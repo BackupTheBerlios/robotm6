@@ -31,8 +31,13 @@ enum IoId {
     IO_ID_CATAPULT_04,
     IO_ID_K2000_04,
 
-    IO_ID_ODOMETER_05,
+    IO_ID_MOTOR_ODOM_05,
     IO_ID_LCD_05,
+    IO_ID_BUMPER_05,
+    IO_ID_SOUND_05,
+    IO_ID_ENV_05,
+    IO_ID_SERVO_05,
+    IO_ID_ALIM_05,
 
     IO_ID_NBR
 };
@@ -76,7 +81,11 @@ static const IoInfo ioInfos_[IO_ID_NBR] = {
     {IO_ID_CATAPULT_04,        0xB1,    "IO_CATAPULT_04"},
     {IO_ID_K2000_04,           0xBC,    "IO_K2000_04"},
 
-    // TODO: put real pingId here. [flo]
-    {IO_ID_ODOMETER_05,        0xCC,    "IO_ODOMETER_05"},
-    {IO_ID_LCD_05,             0xCD,    "IO_LCD_05"}
+    {IO_ID_MOTOR_ODOM_05,      0xC0,    "IO_MOTOR_ODOM_05"},
+    {IO_ID_LCD_05,             0xC2,    "IO_LCD_05"},
+    {IO_ID_BUMPER_05,          0xC1,    "IO_BUMPER_05"},
+    {IO_ID_SOUND_05,           0xC3,    "IO_SOUND_05"},
+    {IO_ID_ENV_05,             0xCF,    "IO_ENV_DECTECTOR_05"},
+    {IO_ID_SERVO_05,           0xCB,    "IO_SERVO_05"},
+    {IO_ID_ALIM_05,            0xCD,    "IO_ALIM_05"}
 };

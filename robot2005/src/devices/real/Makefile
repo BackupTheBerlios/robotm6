@@ -7,7 +7,11 @@ ODOMETER_SRCS=odometer_04.cpp
 MOTOR_SRCS=HCTLControl.cpp hct.cpp motorIsa_05.cpp
 LCD_SRCS=lcd_03.cpp
 SOUND_SRCS=sound_05.cpp
-SRCS=$(ODOMETER_SRCS) $(MOTOR_SRCS) $(LCD_SRCS) $(SOUND_SRCS)
+SERVO_SRCS=servo_05.cpp
+BUMPER_SRCS=bumper_05.cpp
+ENV_SERCS=env_05.cpp
+ALIM_SRCS=alim_05.cpp
+SRCS=$(ODOMETER_SRCS) $(MOTOR_SRCS) $(LCD_SRCS) $(SOUND_SRCS) $(SERVO_SRCS) $(BUMPER_SRCS) $(ENV_SERCS) $(ALIM_SRCS) 
 
 ## ===========================================================================
 ## LIB_NAME and .o files for making libraries .a and .so

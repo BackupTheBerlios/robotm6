@@ -29,7 +29,7 @@ class SoundCL: public RobotDeviceCL {
   /** @brief Retourne l'instance unique de la class Sound */
   static SoundCL* instance();
   virtual bool exists() const { return false; }
-
+  virtual bool reset() { clearStack(); return true; }
   /** 
    * @brief Envoie un son dans la shared memory pour qu'il soit joue
    * @param priority SND_PRIORITY_PUSH_BACK: le son sera joue quand les 
