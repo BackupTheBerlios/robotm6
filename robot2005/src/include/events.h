@@ -50,7 +50,7 @@ typedef enum EventsEnum {
     EVENTS_USER_ABORT,     // CTRL+C
     EVENTS_BUTTON_YES,
     EVENTS_BUTTON_NO,
-    EVENTS_SWITCH_MATCH,
+    EVENTS_SWITCH_REBOOT,
 
     EVENTS_GAME_OVER,      // timer fin du match
     EVENTS_TIMER_ALERT,    // timer, proche de la fin du match
@@ -121,7 +121,7 @@ static EventsInfoStruct EventsInfo[EVENTS_NBR] = {
     { EVENTS_USER_ABORT,     "EVT_USER_ABORT",      EVENTS_GROUP_USER  },  
     { EVENTS_BUTTON_YES,     "EVT_BUTTON_YES",      EVENTS_GROUP_USER  },  
     { EVENTS_BUTTON_NO,      "EVT_BUTTON_NO",       EVENTS_GROUP_USER  },   
-    { EVENTS_SWITCH_MATCH,   "EVT_SWITCH_MATCH",    EVENTS_GROUP_USER  },
+    { EVENTS_SWITCH_REBOOT,  "EVT_SWITCH_REBOOT",   EVENTS_GROUP_USER  },
 
     { EVENTS_GAME_OVER,      "EVT_GAME_OVER",       EVENTS_GROUP_MATCH },   
     { EVENTS_TIMER_ALERT,    "EVT_TIMER_ALERT",     EVENTS_GROUP_MATCH }, 

@@ -12,6 +12,21 @@
 
 #define Bumper BumperCL::instance()
 
+enum BridgeCaptorStatus {
+    BRIDGE_NO=0,
+    BRIDGE_DECTECTED=1
+};
+
+enum BridgeCaptors {
+    BRIDGE_SHARP_LEFT,
+    BRIDGE_SHARP_CENTER,
+    BRIDGE_SHARP_RIGHT,
+    BRIDGE_BUMPER_LEFT,
+    BRIDGE_BUMPER_RIGHT,
+
+    BRIDGE_CAPTORS_NBR
+};
+
 /**
  * @class BumperCL
  * Classe permettant de jouer des sons. La liste des sons a jouer est envoyee
@@ -29,6 +44,16 @@ class BumperCL: public RobotDeviceCL {
   virtual bool exists() { return false; }
 
   //... todo
+  virtual bool getBridgeCaptors(BridgeCaptorStatus captors[BRIDGE_CAPTORS_NBR]) { return false; }
+  virtual bool getEmergencyStop(bool& emergencyStop) { return false; }
+  virtual bool getJackin(bool& jackin) { return false; }
+  virtual bool getMatchSwitch(bool& match) { return false; }
+  virtual bool getRebootSwitch(bool& reboot) { return false; }
+
+  /** @brief function that read all captors and run the corresponding events */
+  virtual void periodicTask() {}
+  /** @brief read all captors status: do this before other get functions */
+  virtual bool getAllCaptors() { return false; }
 
  private:
   static BumperCL*   bumper_;

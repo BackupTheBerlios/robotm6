@@ -234,7 +234,7 @@ bool evtRebootSwitch(bool evt[])
 {
   return (evt[EVENTS_BUTTON_YES] 
 	  || evt[EVENTS_BUTTON_NO]
-	  || evt[EVENTS_SWITCH_MATCH]);
+	  || evt[EVENTS_SWITCH_REBOOT]);
 }
 
 // -------------------------------------------------------------------------
