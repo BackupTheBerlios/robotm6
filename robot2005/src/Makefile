@@ -63,9 +63,7 @@ tarsrc: clean
 	./maketar robot05 ../../ robot2005/src                        \
                   robot2005/bin robot2005/binsimu robot2005/validate  \
                   robot2005/README robot2005/*/README                 \
-                  robot2005/sound/soundList.txt                       \
-                  robot2005/movie/Makefile                            \
-                  robot2005/doc/*.htm* robot2005/sbin/*.sh
+                  robot2005/sound/soundList.txt 
 
 tar:   
 	cd ../doc; ${RM} -rf core core* *~ .gz .xv* *.bmp *.tga
@@ -77,8 +75,6 @@ tar:
                   robot2005/*/*.sh  \
                   robot2005/README robot2005/*/README                 \
                   robot2005/sound/soundList.txt                       \
-                  robot2005/movie/Makefile                            \
-                  robot2005/doc/*.htm*
 
 tarall: clean doc
 	./maketar robot05 ../../ robot2005

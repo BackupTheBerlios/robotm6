@@ -4,7 +4,7 @@ then
   filename=$1_$(date '+%y%m%d_%Hh%Mm%Ss').tar.gz
   cd $2
   shift 2
-  tar cvzfX $filename robot2004/src/tarfilter.txt $*
+  tar cvzfX $filename robot2005/src/tarfilter.txt $*
   ls -l $(pwd)/${filename}
 else
 	echo "Usage $0 tarFilename baseDirectory tarDirectories"

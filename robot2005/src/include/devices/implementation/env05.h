@@ -19,9 +19,11 @@ class EnvDetector05 : public EnvDetectorCL {
   void periodicTask();
   /** @brief read all captors status: do this before other get functions */
   bool getAllCaptors();
+  bool getAllCaptors(unsigned char& data);
 
  private:
   IoDevice* device_;
+  unsigned char data_;
 };
 
 

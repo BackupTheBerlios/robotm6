@@ -9,6 +9,8 @@
 #include "devices/motor.h"
 #include "devices/bumper.h"
 #include "devices/sound.h"
+#include "devices/servo.h"
+#include "devices/env.h"
 
 /** @brief Initialisation des cartes electroniques */
 class RobotDevicesCL : public RobotBase {
@@ -30,6 +32,8 @@ class RobotDevicesCL : public RobotBase {
     LcdCL*      getLcd() const      { return lcd_; }
     BumperCL*   getBumper() const   { return bumper_; }
     SoundCL*    getSound() const    { return sound_; }
+    EnvDetectorCL*getEnv() const    { return env_; }
+    ServoCL*    getServo() const    { return servo_; }
 
 protected: // periodic
     friend void* RobotDevicesThreadBody(void*);
@@ -44,11 +48,13 @@ protected: // periodic fields
     RobotDevicesSet watchedDevices_;
     
 private:
-    MotorCL*    motor_;
-    OdometerCL* odometer_;
-    LcdCL*      lcd_;
-    BumperCL*   bumper_;
-    SoundCL*    sound_;
+    MotorCL*       motor_;
+    OdometerCL*    odometer_;
+    LcdCL*         lcd_;
+    BumperCL*      bumper_;
+    SoundCL*       sound_;
+    EnvDetectorCL* env_;
+    ServoCL*       servo_;
 };
 
 #endif

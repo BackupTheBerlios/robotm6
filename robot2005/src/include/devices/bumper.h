@@ -45,9 +45,13 @@ class BumperCL: public RobotDeviceCL {
 
   //... todo
   virtual bool getBridgeCaptors(BridgeCaptorStatus captors[BRIDGE_CAPTORS_NBR]) { return false; }
+  /** emergencyStop=true: arret d'urgence enfonce */
   virtual bool getEmergencyStop(bool& emergencyStop) { return false; }
+  /** jackin=true : la jack est inseree, jackin=false: la jack n'est pas la */
   virtual bool getJackin(bool& jackin) { return false; }
+  /** match=true: on est en mode match, match=false: on est en mode programation */
   virtual bool getMatchSwitch(bool& match) { return false; }
+  /** reboot=true : on a redemarre en match, reboot=false:mode normal */ 
   virtual bool getRebootSwitch(bool& reboot) { return false; }
 
   /** @brief function that read all captors and run the corresponding events */

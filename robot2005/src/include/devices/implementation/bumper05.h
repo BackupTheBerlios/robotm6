@@ -18,6 +18,7 @@ class Bumper05: public BumperCL {
   Bumper05();
   ~Bumper05();
 
+  bool reset();
   bool exists() const { return true; }
   
   bool getBridgeCaptors(BridgeCaptorStatus captors[BRIDGE_CAPTORS_NBR]);
@@ -30,10 +31,14 @@ class Bumper05: public BumperCL {
   void periodicTask();
   /** @brief read all captors status: do this before other get functions */
   bool getAllCaptors();
-
- private:
+  bool getAllCaptors(unsigned char data[BUMPER_DATA_NBR]);
+ 
+ private: 
+  bool getValue(int byte, int bit, bool reversed); 
+  
   unsigned char data_[BUMPER_DATA_NBR]; 
   IoDevice* device_;
+  bool      firstRead_;
 };
 
 #endif // __BUMPER_05_H__
