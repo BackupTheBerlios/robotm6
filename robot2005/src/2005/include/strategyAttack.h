@@ -32,6 +32,9 @@ class StrategyAttackCL : public Strategy2005CL
         savoir si le pont est bien la. La variable bridge doit deja etre mise 
         a jour */
     bool gotoBridgeEntry();
+    bool gotoBridgeEntry(Millimeter y, 
+			 bool rotateLeft=false, 
+			 bool rotateRight=false);
     /** @brief verifie que le pont est bien la ! */
     bool getBridgePosByBumper();
     /** @brief traverse le pont : detection de collisions...*/
@@ -58,7 +61,9 @@ class StrategyAttackCL : public Strategy2005CL
     unsigned char  bridgeAvailibility_;
     BridgePosition bridge_;
     /** utilise le pont de gauche ou de droite pour traverser */
-    bool           useLeftBridge_;  
+    bool           useLeftBridge_; 
+    /** utilise le pont du mileu pour essayer de traverser */
+    bool           bridgeDetectionByCenter_;
 };
 
 #endif // __STRATEGY_ATTACK_H__
