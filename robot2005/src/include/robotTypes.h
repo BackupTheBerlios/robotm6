@@ -535,6 +535,7 @@ inline int robotRand(int from, int to)
 // ===================================  MACRO  ================================
 // ============================================================================
 
+/* // [flo] doesn't work with newer versions of g++ (stdlib?)
 #ifndef max
 #define max(a, b) ((a) > (b) ? (a) : (b))
 #endif
@@ -542,6 +543,9 @@ inline int robotRand(int from, int to)
 #ifndef min
 #define min(a, b) ((a) < (b) ? (a) : (b))
 #endif
+*/
+template<typename T> T min(const T a, const T b) { return a>b? a: b; }
+template<typename T> T max(const T a, const T b) { return a<b? a: b; }
 
 #ifndef sign
 #define sign(a) ((a) >= 0 ? 1 : -1)

@@ -14,7 +14,7 @@
   </general>
   <kdevcustomproject>
     <run>
-      <mainprogram>robot2005</mainprogram>
+      <mainprogram></mainprogram>
       <directoryradio>executable</directoryradio>
       <customdirectory>/</customdirectory>
       <programargs></programargs>
@@ -24,10 +24,10 @@
     </run>
     <build>
       <buildtool>make</buildtool>
-      <builddir></builddir>
+      <builddir>src</builddir>
     </build>
     <make>
-      <abortonerror>false</abortonerror>
+      <abortonerror>true</abortonerror>
       <numberofjobs>1</numberofjobs>
       <prio>0</prio>
       <dontact>false</dontact>
