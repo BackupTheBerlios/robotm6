@@ -56,7 +56,7 @@ inline bool operator != (Position const& pos1, Position const& pos2) {
 static const Millimeter INFINITE_DIST = -1;
 
 static const Millimeter ROBOT_A_INIT_X           = 500;
-static const Millimeter ROBOT_A_INIT_Y           = 1850;
+static const Millimeter ROBOT_A_INIT_Y           = 1800;
 static const Millimeter ROBOT_A_INIT_THETA       = 0;
 
 static const Millimeter ROBOT_D_INIT_X           = 20;
@@ -535,22 +535,11 @@ inline int robotRand(int from, int to)
 // ===================================  MACRO  ================================
 // ============================================================================
 
-/* // [flo] doesn't work with newer versions of g++ (stdlib?)
-#ifndef max
-#define max(a, b) ((a) > (b) ? (a) : (b))
-#endif
+template<typename T> T max(const T a, const T b) { return a>b? a: b; }
+template<typename T> T min(const T a, const T b) { return a<b? a: b; }
+template<typename T> T sign(const T a) { return a>=0? (T)1 : (T)(-1); }
 
-#ifndef min
-#define min(a, b) ((a) < (b) ? (a) : (b))
-#endif
-*/
-template<typename T> T min(const T a, const T b) { return a>b? a: b; }
-template<typename T> T max(const T a, const T b) { return a<b? a: b; }
-
-#ifndef sign
-#define sign(a) ((a) >= 0 ? 1 : -1)
-#endif
-
+// b2s : boolean to string
 #ifndef b2s
 #define b2s(a) ((a)?"TRUE":"FALSE")
 #endif

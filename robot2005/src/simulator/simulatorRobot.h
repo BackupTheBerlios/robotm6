@@ -137,7 +137,7 @@ class SimulatorRobot : public RobotBase {
     void setRealPos(Position const& pos);
     bool checkSegmentIntersectionWithRobot(Segment const& seg,
                                            Millimeter z,
-                                           Point intersectionPt);
+                                           Point& intersectionPt);
     void convertBorderToCylindric(Point const& center);
     void convertBorderToOrthogonal(Position const& pos);
     void setBorderRobotAttack();

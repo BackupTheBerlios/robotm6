@@ -54,8 +54,8 @@ typedef struct Order {
 // --------------------------------------------------------------------------
 static const int MAX_NORMAL_SPEED = 120;
 static const Position startPositionBrick(1500,0,0);
-static const Position startPositionAttack(400,2000,0);
-static const Position startPositionDefence(200,1800,-M_PI/2);
+static const Position startPositionAttack(ROBOT_A_INIT_X,ROBOT_A_INIT_Y,0);
+static const Position startPositionDefence(ROBOT_D_INIT_X,ROBOT_D_INIT_Y,-M_PI/2);
 
 static bool quitApplication=false;
 static BasicClientMode mode=MODE_BRICK;

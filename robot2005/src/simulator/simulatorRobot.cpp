@@ -78,7 +78,7 @@ void SimulatorRobot::updatePosition()
 	realPos_.center.x += deltaSum * cos(deltaTheta);  
 	realPos_.center.y += deltaSum * sin(deltaTheta);
     }
-    printf("%d %d %d%d %d\n",(int)motorRight_, (int)speedRight_, (int)KRight, (int)deltaRight, (int)realPos_.center.x);
+    // printf("%d %d %d%d %d\n",(int)motorRight_, (int)speedRight_, (int)KRight, (int)deltaRight, (int)realPos_.center.x);
     
 
     // calcul position estimee
@@ -132,8 +132,9 @@ void SimulatorRobot::checkPosAndWall()
         return;
     }
     Point intersection;
+    Point* wallPts=SimulatorCL::instance()->getWallPts();
     for(unsigned int i=0;i!=SIMU_WALL_BORDER_PTS_NBR;i++) {
-        Segment wallBorder(borderRealPts_[i], borderRealPts_[((i+1)%SIMU_WALL_BORDER_PTS_NBR)]);
+        Segment wallBorder(wallPts[i], wallPts[((i+1)%SIMU_WALL_BORDER_PTS_NBR)]);
         if(checkSegmentIntersectionWithRobot(wallBorder, 30, intersection)){
             isValid_ = false;
             setRealPos(realPosOld_);
@@ -164,7 +165,7 @@ void SimulatorRobot::checkPosAndSkittle(SimulatorSkittle* skittle)
 
 bool SimulatorRobot::checkSegmentIntersectionWithRobot(Segment const& seg,
                                                        Millimeter z,
-                                                       Point intersectionPt) 
+                                                       Point& intersectionPt) 
 {
     if (z>70) {
         for(unsigned int i=0;i!=4;i++) {
@@ -173,6 +174,17 @@ bool SimulatorRobot::checkSegmentIntersectionWithRobot(Segment const& seg,
         }
     } else {
         for(unsigned int i=0;i!=4;i++) {
+         /*   if (i==0) {
+                printf("(%d %d) (%d %d) - (%d %d) (%d %d)\n", 
+                       (int)borderRealPts_[i].x, 
+                       (int)borderRealPts_[i].y,
+                       (int)borderRealPts_[(i+1)%4].x, 
+                       (int)borderRealPts_[(i+1)%4].y,
+                       (int)seg.lowerLeft.x,
+                       (int)seg.lowerLeft.y,
+                       (int)seg.upperRight.x,
+                       (int)seg.lowerLeft.y);
+            }*/
             Segment robotBorder(borderRealPts_[i], borderRealPts_[(i+1)%4]);
             if(Geometry2D::getSegmentsIntersection(robotBorder, seg, intersectionPt)) return true;
         }
