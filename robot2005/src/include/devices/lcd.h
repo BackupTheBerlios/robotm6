@@ -41,10 +41,13 @@ typedef enum LcdLedMode {
 
 class LcdCL : public RobotDeviceCL
 {
- public:
-  static LcdCL* instance();
-  virtual ~LcdCL();
+public:
+    LcdCL();
+    static LcdCL* instance();
+    virtual ~LcdCL();
 
+    bool exists() const { return false; }
+    
   /**
    * @brief This function prints a message on the lcd (2x16). Use it like 
    * printf.
@@ -86,8 +89,8 @@ class LcdCL : public RobotDeviceCL
 
  private:
   LcdCL(const LcdCL& lcd); // disabled
- protected:
-  LcdCL();
+
+protected:
   static LcdCL* lcd_; // singleton
 };
 
