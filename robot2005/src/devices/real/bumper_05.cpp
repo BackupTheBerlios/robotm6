@@ -20,10 +20,10 @@ Bumper05::Bumper05() : device_(NULL), firstRead_(true)
 	    LOG_OK("Initialization Done\n");
 	} else {
 	    device_=NULL;
-	    LOG_ERROR("Device-open for bumper 05 failed.\n");
+	    LOG_ERROR("Device-open for Bumper05 failed.\n");
 	}
     } else {
-        LOG_ERROR("Bumper 05 device not found!\n");
+        LOG_ERROR("Bumper05 device not found!\n");
     } 
 }
 

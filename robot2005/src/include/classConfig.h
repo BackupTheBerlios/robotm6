@@ -38,6 +38,7 @@ typedef enum ClassId {
   CLASS_IO_MANAGER,
   CLASS_SERIAL_PORT,
   CLASS_SERIAL_DEVICE,
+  CLASS_MOTOR_ODOM,
   CLASS_LCD,
   CLASS_ODOMETER,
   CLASS_BUMPER,
@@ -49,7 +50,7 @@ typedef enum ClassId {
   CLASS_TESLA, // carte electro aimant
   CLASS_SKITTLE_DETECTOR,
   CLASS_CRANE,  // grue electro aimant
-
+ 
   CLASS_MOVEMENT_MANAGER,
   CLASS_MOVE,
   CLASS_ROBOT_POSITION,

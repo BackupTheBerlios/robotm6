@@ -3,8 +3,8 @@ SRC_ROOT=../..
 ## ===========================================================================
 ## Source files used to generate dependencies
 ## ===========================================================================
-ODOMETER_SRCS=odometer_04.cpp
-MOTOR_SRCS=HCTLControl.cpp hct.cpp motorIsa_05.cpp
+ODOMETER_SRCS=odometer_04.cpp odometer_05.cpp
+MOTOR_SRCS=HCTLControl.cpp hct.cpp motorIsa_05.cpp motorOdom_05.cpp motor_05.cpp
 LCD_SRCS=lcd_03.cpp lcd_05.cpp
 SOUND_SRCS=sound_05.cpp
 SERVO_SRCS=servo_05.cpp
@@ -21,7 +21,7 @@ SRCS=$(ODOMETER_SRCS) $(MOTOR_SRCS) $(LCD_SRCS) $(SOUND_SRCS) $(SERVO_SRCS) $(BU
 LIB_NAME=librealdevices
 OBJS=$(SRCS:.cpp=.o)
 
-BINS=odometer_04 motorIsa_05 lcd_03
+BINS=
 BIN_NAME=
 BIN_OBJS=
 BIN_LIBS=${IO_STATIC_LIB}
@@ -63,7 +63,9 @@ clean:	default_clean
 	${RM} -f  ${STATIC_LIB_DIR}/${LIB_NAME}.a        \
                   ${DYNAMIC_LIB_DIR}/${LIB_NAME}.so      \
 		   ${BIN_DIR}/testBumper      \
-		   ${BIN_DIR}/testEnv
+		   ${BIN_DIR}/testEnv         \
+                   ${BIN_DIR}/telecommandIsa  \
+                   ${BIN_DIR}/telecommand05
 #	${RM} -f  ${BIN_DIR}/${BIN_NAME}                 
 
 
@@ -76,7 +78,7 @@ lib: $(STATIC_LIB_DIR)/${LIB_NAME}.a ${DYNAMIC_LIB_DIR}/${LIB_NAME}.so
 ## Main rules : ----- BIN -----
 ## ===========================================================================
 #bin: ${BIN_DIR}/${BIN_NAME}
-bin: ${BIN_DIR}/testBumper ${BIN_DIR}/testEnv
+bin: ${BIN_DIR}/testBumper ${BIN_DIR}/testEnv ${BIN_DIR}/telecommandIsa ${BIN_DIR}/telecommand05
 
 ## ===========================================================================
 ## Main rules : ----- VALIDATE -----
@@ -91,6 +93,12 @@ ${BIN_DIR}/testBumper: bumper_05.cpp
 
 ${BIN_DIR}/testEnv: env_05.cpp
 	${CC} -o $@ $^ ../base/env.o $(DEFAULT_CFLAGS) ${INC_DIR} ${DEFAULT_INC_DIR} -DTEST_MAIN $(STATIC_LIB_DIR)/libevents.a $(IO_STATIC_LIB)
+
+${BIN_DIR}/telecommandIsa: motorIsa_05.cpp HCTLControl.o hct.o
+	${CC} -o $@ $^ ../base/motor.o $(DEFAULT_CFLAGS) ${INC_DIR} ${DEFAULT_INC_DIR} -DTEST_MAIN $(STATIC_LIB_DIR)/libevents.a $(IO_STATIC_LIB)
+
+${BIN_DIR}/telecommand05: motorOdom_05.cpp
+	${CC} -o $@ $^ $(DEFAULT_CFLAGS) ${INC_DIR} ${DEFAULT_INC_DIR} -DTEST_MAIN $(IO_STATIC_LIB)
 ## ===========================================================================
 ## DO NOT ADD ANYTHING BELOW THIS LINE -- IT WILL BE ERASED BY MAKE DEPEND
 ## ===========================================================================

@@ -1,5 +1,5 @@
 #include "implementation/motorIsa.h"
-#ifdef TELECOMMAND_MAIN
+#ifdef TEST_MAIN
 #include <signal.h>
 #include <stdlib.h>
 #endif
@@ -13,7 +13,7 @@
 /** Reset les hctl (gauche et droite) */
 bool MotorIsa::reset()
 {
-#ifndef TELECOMMAND_MAIN
+#ifndef TEST_MAIN
   LOG_FUNCTION();
   // on previent robot_pos qu'il y a un saut possible dans la valeur des 
   // codeurs avant et apres le reset
@@ -81,12 +81,12 @@ MotorIsa::MotorIsa(bool   automaticReset,
 
 void MotorIsa::start() 
 {
-#ifndef TELECOMMAND_MAIN
+#ifndef TEST_MAIN
     LOG_FUNCTION();
 #endif
     hctlInit();
 //  reset();
-#ifndef TELECOMMAND_MAIN
+#ifndef TEST_MAIN
     LOG_OK("Initialisation terminée\n");
 #endif  
     isStarted_ = true;
@@ -102,7 +102,7 @@ MotorIsa::~MotorIsa()
 
 
 
-#ifdef TELECOMMAND_MAIN
+#ifdef TEST_MAIN
 
 #include <unistd.h>
 #include <termios.h>
@@ -276,4 +276,4 @@ int main() {
   printf("Bye\n"); 
 }
 
-#endif // TELECOMMAND_MAIN
+#endif // TEST_MAIN
