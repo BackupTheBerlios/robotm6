@@ -100,10 +100,21 @@ void Viewer3DCL::setBtnClick(ViewerControlButtonId btnId, bool click)
 void Viewer3DCL::enableDisplayRobots(bool enable)
 {
 #ifndef VIEWER_DISACTIVATED 
-    enableObjectDisplay_=true;
+    enableObjectDisplay_=enable;
 #endif
 }
 
+// ---------------------------------------------------------------------------
+// Viewer3DCL::enableDisplayEstimatedPos
+// ---------------------------------------------------------------------------
+// Autorise ou non l'affiche du point correspondant a la position du robot 
+// ---------------------------------------------------------------------------
+void Viewer3DCL::enableDisplayEstimatedPos(bool enable)
+{
+#ifndef VIEWER_DISACTIVATED 
+    enableEstimatedDisplay_=enable;
+#endif
+}
 // ---------------------------------------------------------------------------
 // Viewer3DCL::setRobotModel
 // ---------------------------------------------------------------------------
@@ -255,6 +266,20 @@ void Viewer3DCL::setRobotPosition(int robotId,
 #ifndef VIEWER_DISACTIVATED 
     if (robotId >= 0 && robotId < VIEWER_MAX_ROBOT_NBR) {
         robotData_[robotId].setPos(pos);
+    }
+#endif // VIEWER_DISACTIVATED 
+}
+// ---------------------------------------------------------------------------
+// Viewer3DCL::setRobotEstimatedPosition
+// ---------------------------------------------------------------------------
+// Met a jour la position du robot 
+// ---------------------------------------------------------------------------
+void Viewer3DCL::setRobotEstimatedPosition(int robotId,
+                                           Position const& pos)
+{
+#ifndef VIEWER_DISACTIVATED 
+    if (robotId >= 0 && robotId < VIEWER_MAX_ROBOT_NBR) {
+        robotData_[robotId].setEstimatedPos(pos);
     }
 #endif // VIEWER_DISACTIVATED 
 }
@@ -527,7 +552,7 @@ Viewer3DCL::Viewer3DCL() :
     title_("Viewer3D"), time_(0), matchTime_(0), 
     skittles_(NULL), grsBalls_(NULL), squatchBalls_(NULL), 
     bridge_(BRIDGE_POS_UNKNOWN), support1_(-10,0), support2_(-10,0),
-    enableObjectDisplay_(false), useTexture_(true), 
+    enableEstimatedDisplay_(false), enableObjectDisplay_(false), useTexture_(true), 
     createThread_(true),
     cameraModeAuto3D_(false), useTexture3D_(true), targetRobotId3D_(0)
 {

@@ -10,6 +10,7 @@
 #include "events.h"
 #include "geometry2D.h"
 #include "robotConfig.h"
+#include "simulatorClient.h"
 
 // ----------------------------------------------------------------------------
 // Static members
@@ -200,7 +201,7 @@ void RobotPosition::getPosition(Position&      posi,
                                 bool           first)
 {
     static int counter=0;
-    //printf("c=%d l=%d r=%d\n", counter, leftPosOld, rightPosOld);
+  //  printf("c=%d lo=%d ro=%d, l=%d, r=%d kl=%lf, kr=%lf, d=%lf\n", counter, leftPosOld, rightPosOld, leftPos, rightPos, KLeft, KRight, D);
     if (counter-- == 0) {
 	leftPosOld  = leftPos;
         rightPosOld = rightPos;
@@ -501,6 +502,7 @@ void RobotPosition::periodicTask(Millisecond time)
                  KB_RESTORE);
         oldTime=time;
     }
+    Simulator->setEstimatedRobotPosition(pos_);
 
     txtChanged_ = true;
 }

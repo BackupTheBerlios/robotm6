@@ -304,23 +304,25 @@ void SimulatorConnection::parseReceivedData(SimuRequestType type,
     case SIMU_REQ_SET_MOTOR_COEF: 
         {
             Millimeter D=0, K=0;
-	    double speed=0;
+	    double speedL=0, speedR=0;
             memcpy(&D, buffer, sizeof(Millimeter)); buffer+= sizeof(Millimeter);
             memcpy(&K, buffer, sizeof(Millimeter)); buffer+= sizeof(Millimeter);
-            memcpy(&speed, buffer, sizeof(double)); 
-	    robot_->setRobotMotorCoef(D, K, speed);
+            memcpy(&speedL, buffer, sizeof(double)); buffer+= sizeof(double);
+            memcpy(&speedR, buffer, sizeof(double)); 
+	    robot_->setRobotMotorCoef(D, K, speedL, speedR);
         }
         break;
     case SIMU_REQ_SET_ODOM_COEF: 
         {
             Millimeter D=0, K=0;
 	    Radian R=0;
-            double speed=0;
+            double speedL=0, speedR=0;
             memcpy(&D, buffer, sizeof(Millimeter)); buffer+= sizeof(Millimeter);
             memcpy(&R, buffer, sizeof(Radian)); buffer+= sizeof(Radian);
             memcpy(&K, buffer, sizeof(Millimeter)); buffer+= sizeof(Millimeter);
-            memcpy(&speed, buffer, sizeof(double)); 
-	    robot_->setRobotOdomCoef(D, R, K, speed);
+            memcpy(&speedL, buffer, sizeof(double)); buffer+= sizeof(double);
+            memcpy(&speedR, buffer, sizeof(double)); 
+	    robot_->setRobotOdomCoef(D, R, K, speedL, speedR);
         }
         break;
     case SIMU_REQ_GET_STATUS:
@@ -471,6 +473,13 @@ void SimulatorConnection::parseReceivedData(SimuRequestType type,
 	    Position pos;
 	    memcpy(&pos, buffer, sizeof(Position));
 	    robot_->setRobotPos(pos);
+        }
+        break;
+    case SIMU_REQ_SET_ESTIMATED_POS:
+        {
+	    Position pos;
+	    memcpy(&pos, buffer, sizeof(Position));
+	    robot_->setRobotEstimatedPos(pos);
         }
         break;
     case SIMU_REQ_SET_BRICK:

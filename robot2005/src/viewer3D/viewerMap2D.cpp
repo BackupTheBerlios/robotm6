@@ -64,7 +64,8 @@ void Viewer3DCL::draw2D()
 void Viewer3DCL::drawRobots2D()
 {
     for(unsigned int i=0; i<VIEWER_MAX_ROBOT_NBR; i++) {
-        drawRobot2D(i);
+        drawRobot2D(i, false);
+        if (enableEstimatedDisplay_) drawRobot2D(i, true);
     }
 }
 // ---------------------------------------------------------------
@@ -72,23 +73,23 @@ void Viewer3DCL::drawRobots2D()
 // ---------------------------------------------------------------
 // Dessine le robot en 2D
 // ---------------------------------------------------------------
-void Viewer3DCL::drawRobot2D(int robotId)
+void Viewer3DCL::drawRobot2D(int robotId, bool estimated)
 {
-    if (!robotData_[robotId].exist || 
-	!isInField(robotData_[robotId].pos.center)) return;
+    Position pos = estimated?robotData_[robotId].estimatedPos:robotData_[robotId].pos;
+    if (!robotData_[robotId].exist || !isInField(pos.center)) return;
     glPushMatrix();
-    robotData_[robotId].color.setGL();
+    robotData_[robotId].color.setGL(estimated?0.5:1.);
     if (robotData_[robotId].isBrick() ||
         robotData_[robotId].getTeam() == TEAM_RED) {
-	glTranslatef(MARGIN+robotData_[robotId].pos.center.x*SCALE, 
-		     MARGIN+TERRAIN_Y*SCALE-robotData_[robotId].pos.center.y*SCALE,
+	glTranslatef(MARGIN+pos.center.x*SCALE, 
+		     MARGIN+TERRAIN_Y*SCALE-pos.center.y*SCALE,
 		     0);
-	glRotatef(-r2d(robotData_[robotId].pos.direction),0,0,1);
+	glRotatef(-r2d(pos.direction),0,0,1);
     } else {
-	glTranslatef(MARGIN+(TERRAIN_X-robotData_[robotId].pos.center.x)*SCALE, 
-		     MARGIN+robotData_[robotId].pos.center.y*SCALE,
+	glTranslatef(MARGIN+(TERRAIN_X-pos.center.x)*SCALE, 
+		     MARGIN+pos.center.y*SCALE,
 		     0);
-	glRotatef(-r2d(M_PI-robotData_[robotId].pos.direction),0,0,1);
+	glRotatef(-r2d(M_PI-pos.direction),0,0,1);
     }
     switch(robotData_[robotId].model) {
     case ROBOT_MODEL_ATTACK:

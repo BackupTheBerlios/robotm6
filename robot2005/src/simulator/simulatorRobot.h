@@ -31,11 +31,11 @@ class SimulatorRobot : public RobotBase {
     // ------------------------------------------------------------------------
     // set
     // ------------------------------------------------------------------------   
-    void setRobotPos(Position const& pos)   { estimatedPos_ = pos; 
-                                              realPos_ = pos; 
+    void setRobotPos(Position const& pos)   { realPos_ = pos; 
                                               simuPosFirst_ = true;
                                               isDead_=0;
                                               needSendDisplayInfo_=true;}
+    void setRobotEstimatedPos(Position const& pos)   { estimatedPos_ = pos; }
     void setRobotName(const char* name)     { name_ = std::string(name); 
                                               needSendDisplayInfo_=true;}
     void setRobotWeight(SimuWeight weight)  { weight_ = weight; }
@@ -49,13 +49,16 @@ class SimulatorRobot : public RobotBase {
                                             }
     void setModeBrick(bool brick)           { brick_ = brick;
                                               needSendDisplayInfo_=true;}
-    void setRobotMotorCoef(Millimeter D, Millimeter K, double speed)   
-                                            { D_ = D; K_ = K; simuSpeed_ = speed;}
-    void setRobotOdomCoef(Millimeter D, Radian R, Millimeter K, double speed)  
+    void setRobotMotorCoef(Millimeter D, Millimeter K, double speedL, double speedR)   
+                                            {   D_ = D; motorK_ = K; 
+                                                motorSpeedL_ = speedL; 
+                                                motorSpeedR_ = speedR;}
+    void setRobotOdomCoef(Millimeter D, Radian R, Millimeter K, double speedL, double speedR)  
                                             {   odomLeftPt_=Point(D, R);
                                                 odomRightPt_=Point(D,-R); 
                                                 odomK_ = K;
-                                                odomSpeed_=speed; }
+                                                odomSpeedL_=speedL;
+                                                odomSpeedR_=speedR; }
     void setJackin(bool jackin)             { jackin_ = jackin; }
     void setEmergencyStop(bool es)          { emergencyStop_ = es; }
     void setLcdButtonsYes(bool yes)         { lcdBtnYes_=yes; }
@@ -175,7 +178,7 @@ class SimulatorRobot : public RobotBase {
     SimuWeight  weight_;
     RobotModel  model_;
     bool        brick_;
-    Millimeter  D_, K_;
+    Millimeter  D_, motorK_;
     bool        jackin_;
     bool        emergencyStop_;
     bool        lcdBtnYes_;
@@ -191,16 +194,17 @@ class SimulatorRobot : public RobotBase {
 
     MotorPosition  motorLeftOld_, motorRightOld_;
     Position       realPosOld_;
+   
     Point odomLeftPt_;
     Point odomRightPt_;
     Millimeter odomK_;
-    double odomSpeed_;
+    double odomSpeedL_;
+    double odomSpeedR_;
     CoderPosition odomLeft_;
     CoderPosition odomRight_;
 
-    double simuSpeed_;
-    double simuCoderSignRight_;
-    double simuCoderSignLeft_;
+    double motorSpeedL_;
+    double motorSpeedR_;
     bool   simuMotorNoise_;
     bool   simuPosFirst_;
     bool   isValid_;

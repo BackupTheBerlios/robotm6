@@ -52,8 +52,8 @@ typedef struct ViewerColorST {
     b=(float)B;
     a=(float)A;
   }
-  void setGL() {
-    glColor4f(r,g,b,a);
+  void setGL(float coef=1.) {
+    glColor4f(coef*r, coef*g, coef*b, a);
   }
 } ViewerColorST;
 
@@ -127,6 +127,7 @@ struct ViewerRobotData {
     RobotModel       model;
     ViewerColorST    color;
     Position         pos;
+    Position         estimatedPos;
     Trajectory       targetTrajectory;
     Trajectory       currentTrajectory;
     ListOfObstacles  obstacles_[OBSTACLE_TYPE_NBR];
@@ -137,8 +138,8 @@ struct ViewerRobotData {
 
     ViewerRobotData() :
 	id(-1), name(""), lcd("Booting..."), model(ROBOT_MODEL_ATTACK), 
-        color(1,0,0,1), pos(-100,0,0), exist(false), brick(false), dead(0), 
-         teamColor(TEAM_RED) {}
+        color(1,0,0,1), pos(-100,0,0), estimatedPos(-100,0,0), exist(false), 
+        brick(false), dead(0), teamColor(TEAM_RED) {}
     void set(int Id, std::string Name, RobotModel Model, bool isBrick, int isDead) {
         id    = Id;
         name  = Name;
@@ -168,6 +169,9 @@ struct ViewerRobotData {
     }
     void setPos(Position const& Pos) {
         pos = Pos;
+    }
+    void setEstimatedPos(Position const& Pos) {
+        estimatedPos = Pos;
     }
     void setPos(Millimeter x, Millimeter y, Radian t) {
         pos.center.x  = x;
@@ -232,6 +236,9 @@ class Viewer3DCL: public RobotBase
 	/** @brief Autorise ou non l'affiche du point correspondant a la 
             position du robot */
 	void enableDisplayRobots(bool enable);
+        /** @brief Autorise ou non l'affiche du point correspondant a la 
+            position estimee du robot */
+	void enableDisplayEstimatedPos(bool enable);
 
         /** @brief Definit la forme du robot, et son nom */
         void setRobotModel(int                  robotId,
@@ -286,6 +293,9 @@ class Viewer3DCL: public RobotBase
 	/** @brief Met a jour la position du robot */
 	void setRobotPosition(int robotId,
                               Position const& pos);
+	/** @brief Met a jour la position du robot */
+	void setRobotEstimatedPosition(int robotId,
+                                       Position const& pos);
 	/** @brief Defini la position de toutes les quilles sur le jeu */
         void setSkittlePosition(Skittle* skittles);
         /** @brief Defini la position des balles de GRS */
@@ -404,7 +414,7 @@ class Viewer3DCL: public RobotBase
 	/** @brief Dessine les robots en 2D */
 	void drawRobots2D();
 	/** @brief Dessine un robot en 2D */
-	void drawRobot2D(int robotId);
+	void drawRobot2D(int robotId, bool estimated);
 	/** @brief Dessine le terrain et la salle en 2D */
 	void drawBG2D();
 	/** @brief Dessine toutes les quilles */
@@ -482,6 +492,7 @@ class Viewer3DCL: public RobotBase
         Point            support1_;
         Point            support2_;
 
+        bool enableEstimatedDisplay_;
         bool enableObjectDisplay_;
 	bool useTexture_;
 	bool createThread_;

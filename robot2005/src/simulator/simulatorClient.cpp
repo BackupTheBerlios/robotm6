@@ -38,7 +38,7 @@ unsigned char* SimulatorClient::recvBuffer(SimuRequestType type)
     if (socket_) {
         if (socket_->read(buffer_, 2) != 2) return NULL; 
         if (socket_->read(buffer_+2, buffer_[1]) != buffer_[1]) return NULL; 
-        if (buffer_[0] == type) return buffer_;
+        if (buffer_[0] == type) return buffer_+2;
     } 
     return NULL;
 }
@@ -125,14 +125,27 @@ void SimulatorClient::setRobotName(const char* name)
 }
 
 // ----------------------------------------------------------------------------
-// SimulatorClient::setRobotWeight
+// SimulatorClient::setRobotPosition
 // ----------------------------------------------------------------------------
-// Defini la position du robot
+// Defini la position reelle du robot
 // ----------------------------------------------------------------------------
 void SimulatorClient::setRobotPosition(Position const& pos) 
 {
     if (!socket_) return;
     char* buf = (char*)setBufferHeader(SIMU_REQ_SET_POS,  sizeof(Position));
+    memcpy(buf, &pos, sizeof(Position));
+    sendBuffer();
+}
+
+// ----------------------------------------------------------------------------
+// SimulatorClient::setEstimatedRobotPosition
+// ----------------------------------------------------------------------------
+// Defini la position estimee du robot
+// ----------------------------------------------------------------------------
+void SimulatorClient::setEstimatedRobotPosition(Position const& pos) 
+{
+    if (!socket_) return;
+    char* buf = (char*)setBufferHeader(SIMU_REQ_SET_ESTIMATED_POS,  sizeof(Position));
     memcpy(buf, &pos, sizeof(Position));
     sendBuffer();
 }
@@ -174,15 +187,17 @@ void SimulatorClient::setRobotModel(RobotModel model)
 // Valeurs de coefficient concernant les codeurs, la taille des roues, 
 // l'entre 2 roues ...
 // ----------------------------------------------------------------------------
-void SimulatorClient::setRobotMotorCoef(Millimeter D, Millimeter K, double speed)
+void SimulatorClient::setRobotMotorCoef(Millimeter D, Millimeter K, 
+                                        double speedL, double speedR)
 {
     if (!socket_) return;
     unsigned char* buf = setBufferHeader(SIMU_REQ_SET_MOTOR_COEF,  
                                          2*sizeof(Millimeter)
-                                         +sizeof(double));
+                                         +2*sizeof(double));
     memcpy(buf, &D, sizeof(Millimeter)); buf += sizeof(Millimeter);
     memcpy(buf, &K, sizeof(Millimeter)); buf += sizeof(Millimeter);
-    memcpy(buf, &speed, sizeof(double));
+    memcpy(buf, &speedL, sizeof(double)); buf += sizeof(double);
+    memcpy(buf, &speedR, sizeof(double));
     sendBuffer();
 }
 
@@ -193,17 +208,19 @@ void SimulatorClient::setRobotMotorCoef(Millimeter D, Millimeter K, double speed
 // cylindriques + coefficient 1pas=>distance en mm
   // ----------------------------------------------------------------------------
    
-void SimulatorClient::setRobotOdomCoef(Millimeter D, Radian R, Millimeter K, double speed)
+void SimulatorClient::setRobotOdomCoef(Millimeter D, Radian R, Millimeter K, 
+                                       double speedL, double speedR)
 {
     if (!socket_) return;
     unsigned char* buf = setBufferHeader(SIMU_REQ_SET_ODOM_COEF,  
                                          2*sizeof(Millimeter)
                                          +sizeof(Radian)
-                                         +sizeof(double));
+                                         +2*sizeof(double));
     memcpy(buf, &D, sizeof(Millimeter)); buf += sizeof(Millimeter);
     memcpy(buf, &R, sizeof(Millimeter)); buf += sizeof(Radian);
     memcpy(buf, &K, sizeof(Millimeter)); buf += sizeof(Radian);
-    memcpy(buf, &speed, sizeof(double));
+    memcpy(buf, &speedL, sizeof(double)); buf += sizeof(double);
+    memcpy(buf, &speedR, sizeof(double));
     sendBuffer();
 }
 

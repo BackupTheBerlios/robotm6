@@ -13,7 +13,7 @@
 SimulatorRobot::SimulatorRobot() : 
     RobotBase("Simulated robot", CLASS_SIMULATOR),
     name_("NoName"), weight_(SIMU_WEIGHT_MEDIUM), model_(ROBOT_MODEL_ATTACK),
-    brick_(false), D_(300), K_(0.0001), 
+    brick_(false), D_(300), motorK_(0.004), 
     jackin_(false), emergencyStop_(false), lcdBtnYes_(false), lcdBtnNo_(false),
     lcdMessage_("Booting\nPlease wait..."), 
     realPos_(), estimatedPos_(),
@@ -24,9 +24,8 @@ SimulatorRobot::SimulatorRobot() :
     matchStatus_(SIMU_STATUS_WAIT_START),
     motorLeftOld_(0), motorRightOld_(0),
     realPosOld_(), 
-    odomK_(1), odomSpeed_(1), odomLeft_(0), odomRight_(0),
-    simuSpeed_(20.), 
-    simuCoderSignRight_(1.), simuCoderSignLeft_(-1.),
+    odomK_(1), odomSpeedL_(1),  odomSpeedR_(1), odomLeft_(0), odomRight_(0),
+    motorSpeedL_(-1), motorSpeedR_(-1), 
     simuMotorNoise_(false), simuPosFirst_(true), isValid_(true), isDead_(0)
 {
     setBorderRobotAttack();
@@ -40,7 +39,7 @@ SimulatorRobot::~SimulatorRobot()
 void SimulatorRobot::updateOdometer()
 {
     if (dist(realPosOld_.center, realPos_.center) < 100) {
-        double simuSpeed = odomSpeed_*SimulatorCL::instance()->getSimulationSpeed();
+        double simuSpeed = SimulatorCL::instance()->getSimulationSpeed();
         Point odoLeftOld=odomLeftPt_, odoLeft=odomLeftPt_;
         Point odoRightOld=odomRightPt_, odoRight=odomRightPt_;
         Geometry2D::convertToOrthogonalCoord(realPos_.center, realPos_.direction, 
@@ -51,8 +50,8 @@ void SimulatorRobot::updateOdometer()
                                              odoLeftOld);
         Geometry2D::convertToOrthogonalCoord(realPosOld_.center, realPosOld_.direction, 
                                              odoRightOld);
-        odomLeft_ += (CoderPosition)(simuSpeed*dist(odoLeft, odoLeftOld)/odomK_*(((na2PI(dir(odoLeftOld, odoLeft)-realPos_.direction,-M_PI/2))<(M_PI/2))?1:-1)); 
-        odomRight_ += (CoderPosition)(simuSpeed*dist(odoRight, odoRightOld)/odomK_*(((na2PI(dir(odoRightOld, odoRight)-realPos_.direction,-M_PI/2))<(M_PI/2))?1:-1));
+        odomLeft_ += (CoderPosition)(odomSpeedL_*simuSpeed*dist(odoLeft, odoLeftOld)/odomK_*(((na2PI(dir(odoLeftOld, odoLeft)-realPos_.direction,-M_PI/2))<(M_PI/2))?1:-1)); 
+        odomRight_ += (CoderPosition)(odomSpeedR_*simuSpeed*dist(odoRight, odoRightOld)/odomK_*(((na2PI(dir(odoRightOld, odoRight)-realPos_.direction,-M_PI/2))<(M_PI/2))?1:-1));
         if (odomLeft_<SHRT_MIN) odomLeft_+=USHRT_MAX;
         if (odomLeft_>SHRT_MAX) odomLeft_-=USHRT_MAX;
         if (odomRight_<SHRT_MIN) odomRight_+=USHRT_MAX;
@@ -74,15 +73,15 @@ void SimulatorRobot::updatePosition()
     motorRightOld_ = motorRight_;
 
     // calcul variation des deplacements des moteurs
-    motorRight_+= (int)((simuCoderSignRight_*simuSpeed*speedRight_
+    motorRight_+= (int)((simuSpeed*motorSpeedR_*speedRight_
 					  +(simuMotorNoise_?(10*rand()/(RAND_MAX+1.0)):0)));
-    motorLeft_ += (int)((simuCoderSignLeft_*simuSpeed*speedLeft_
+    motorLeft_ += (int)((simuSpeed*motorSpeedL_*speedLeft_
 					  +(simuMotorNoise_?(10*rand()/(RAND_MAX+1.0)):0)));
 
     double deltaRight=0, deltaLeft=0;
     double deltaTheta=0, deltaSum=0;
-    double KRight = simuCoderSignRight_*K_*motorRight_;
-    double KLeft  = simuCoderSignLeft_*K_*motorLeft_;
+    double KRight = sign(motorSpeedR_)*motorK_*motorRight_;
+    double KLeft  = sign(motorSpeedL_)*motorK_*motorLeft_;
     if (simuPosFirst_) {
         motorRightOld_ = motorRight_;
         motorLeftOld_  = motorLeft_;
@@ -99,8 +98,8 @@ void SimulatorRobot::updatePosition()
             motorRightOld_ -= USHRT_MAX;
         } 
     }
-    deltaRight = simuSpeed_*(KRight - simuCoderSignRight_*K_*motorRightOld_);
-    deltaLeft  = simuSpeed_*(KLeft  - simuCoderSignLeft_*K_*motorLeftOld_);
+    deltaRight = (KRight - sign(motorSpeedR_)*motorK_*motorRightOld_);
+    deltaLeft  = (KLeft  - sign(motorSpeedL_)*motorK_*motorLeftOld_);
     deltaSum   = (deltaRight + deltaLeft)/2.;
     
     // calcul position reelle
@@ -123,23 +122,6 @@ void SimulatorRobot::updatePosition()
                     deltaRight, realPos_.center.x);
     */
 
-/*
-    // calcul position estimee
-    Radian oldEDir = estimatedPos_.direction;
-    deltaTheta = (deltaRight-deltaLeft)/(D_);
-    estimatedPos_.direction += deltaTheta;
-  
-    if (fabs(deltaTheta) > 0.0001) {
-	estimatedPos_.center.x += deltaSum *
-	    (sin(estimatedPos_.direction)-sin(oldEDir))/deltaTheta;
-	estimatedPos_.center.y += -deltaSum *
-	    (cos(estimatedPos_.direction)-cos(oldEDir))/deltaTheta;
-    } else {
-	deltaTheta = (estimatedPos_.direction +oldEDir)/2.;
-	estimatedPos_.center.x += deltaSum * cos(deltaTheta);  
-	estimatedPos_.center.y += deltaSum * sin(deltaTheta);
-    }
-*/
     isValid_=true;
     setRealPos(realPos_);
 }
@@ -154,8 +136,8 @@ void SimulatorRobot::setNewPositionValid()
         pwmLeft_=(MotorPWM)(1.5*pwmLeft_);
         pwmRight_=(MotorPWM)(1.5*pwmRight_);     
     } else {
-        pwmLeft_ =(MotorPWM)(100*speedLeft_ /max(0.2, (double)fabs(motorLeft_  - motorLeftOld_ )/K_));
-        pwmRight_=(MotorPWM)(100*speedRight_/max(0.2, (double)fabs(motorRight_ - motorRightOld_)/K_));
+        pwmLeft_ =(MotorPWM)(100*speedLeft_ /max(0.2, (double)fabs(motorLeft_  - motorLeftOld_ )/motorK_));
+        pwmRight_=(MotorPWM)(100*speedRight_/max(0.2, (double)fabs(motorRight_ - motorRightOld_)/motorK_));
     }
     if (pwmLeft_>SIMU_PWM_LIMIT) pwmLeft_=SIMU_PWM_LIMIT;
     else if (pwmLeft_<-SIMU_PWM_LIMIT) pwmLeft_=-SIMU_PWM_LIMIT;

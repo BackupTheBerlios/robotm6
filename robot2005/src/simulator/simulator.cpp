@@ -89,6 +89,7 @@ SimulatorCL::SimulatorCL() :
     server_ = new SimulatorServer();
     if (server_) server_->startReceiver();
     Viewer3D->createWindows(true, true);
+    Viewer3D->enableDisplayEstimatedPos(true);
     registerViewerBtnCB();
     reset(); 
     
@@ -555,6 +556,8 @@ void SimulatorCL::draw()
 		Position pos;
 		robot->getRobotRealPosition(pos.center, pos.direction);
 		Viewer3D->setRobotPosition(i, pos);
+                robot->getRobotEstimatedPosition(pos.center, pos.direction);
+		Viewer3D->setRobotEstimatedPosition(i, pos);
 		if (robot->needSendDisplayInfo()) {
 		    Viewer3D->setRobotModel(i, 
 					    robot->getRobotName(), 

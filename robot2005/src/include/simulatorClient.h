@@ -61,12 +61,12 @@ class SimulatorClient : public RobotBase {
      * @brief Valeurs de coefficient concernant les codeurs des moteurs
      * l'entre 2 roues, coef pas codeur/distance, vitesse de simulation=1...
      */
-    void setRobotMotorCoef(Millimeter D, Millimeter K, double speed);
+    void setRobotMotorCoef(Millimeter D, Millimeter K, double speedL, double speedR);
     /** 
      * @brief Valeurs de coefficient concernant les odometres position en coordonnees
      * cylindriques + coefficient 1pas=>distance en mm, speed donne le signe des codeurs=1 ou -1
      */
-    void setRobotOdomCoef(Millimeter D, Radian R, Millimeter K, double speed);
+    void setRobotOdomCoef(Millimeter D, Radian R, Millimeter K, double speedL, double speedR);
 
     /** @brief le robot est considere comme une brique: il peut se deplacer 
         partout, sa position n'est pas inversee quand il change d'equipe */
@@ -75,8 +75,11 @@ class SimulatorClient : public RobotBase {
     // ------------------------------------------------------------------------
     // Ordres envoyes au robot
     // ------------------------------------------------------------------------
-    /** @brief Met a jour la position du robot */
+    /** @brief Met a jour la position reelle du robot */
     void setRobotPosition(Position const& pos);
+    /** @brief Met a jour la position estimee du robot (celle calculee 
+        par move/robotPosition) */
+    void setEstimatedRobotPosition(Position const& pos);
     /** @brief Renvoie l'etat du match */
     SimuMatchStatus getMatchStatus();
     /** @brief renvoie vrai si la jack de depart est inseree */
