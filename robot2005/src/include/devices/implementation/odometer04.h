@@ -11,13 +11,12 @@
  * pour calculer la position du robot
  */
 
-#ifndef __ODOMETER_04_H__
-#define __ODOMETER_04_H__
+#pragma once
 
 #include "odometer.h"
 
-class UartBuffer;
-class Uart;
+// forward-declarations
+class IoDevice;
 
 // ===========================================================================
 // class Odometer_04
@@ -53,12 +52,11 @@ class Odometer_04 : public OdometerCL
   
 
  protected:
-  UartBuffer* uart_;
-
-  bool filter(Byte byte);
-  friend bool Odometer04Filter(Byte byte);
+//  bool filter(Byte byte);
+//  friend bool Odometer04Filter(Byte byte);
 
  private:
+  IoDevice* device_;
   CoderPosition left_;
   CoderPosition right_;
   int mode_; // 1 = automatic, 0=manual
@@ -66,7 +64,3 @@ class Odometer_04 : public OdometerCL
   unsigned char bufferPosition_[10];
   bool dataAvailable_;
 };
-
-
-
-#endif // __ODOMETER_H__

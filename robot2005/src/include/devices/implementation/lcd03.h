@@ -12,8 +12,8 @@
 
 #include "lcd.h"
 
-class UartBuffer;
-class Uart;
+// forward-declaration
+class IoDevice;
 
 
 // ===========================================================================
@@ -54,7 +54,7 @@ class Lcd_03 : public LcdCL
   void printMessage(LcdMessage message);
  
  protected:
-  Uart* uart_;
+  IoDevice* device_;
 };
 
 
