@@ -31,7 +31,7 @@ typedef enum MoveType {
 
 typedef double MoveLinearSpeed;
 typedef double MoveRotationSpeed;
-class Move;
+class MoveCL;
 
 // ============================================================================
 // ===============================  const MOVEMENT_  ==========================
@@ -56,7 +56,7 @@ class Movement : public RobotBase
              const char*  name,
              MotorSpeed   maxSpeed,
              MoveGain     gain,
-             Move*        move);
+             MoveCL*      move);
     virtual ~Movement();
 
     virtual void periodicTask()=0; 
@@ -77,7 +77,6 @@ class Movement : public RobotBase
     // protected members
     MotorSpeed   maxSpeed_;
     MoveGain     gain_;
-    RobotPosition*    robotPosition_;
     Point        startingPoint_;
     static bool  endOfMovement_;
     static char  txt_[MOVEMENT_TXT_LENGHT];
@@ -86,7 +85,7 @@ class Movement : public RobotBase
  private:
     // private members
     MoveType   type_;
-    Move*      move_;
+    MoveCL*    move_;
     char       name_[MOVEMENT_NAME_LENGHT];
     Movement * nextMovement_;
     static int countMovementAllocated_;
@@ -105,7 +104,7 @@ class MovementForward : public Movement
  public:
     MovementForward(Millimeter dist,
                     MotorSpeed maxSpeed,
-                    Move*      move);
+                    MoveCL*    move);
     void periodicTask();
     char* txt();
 
@@ -126,7 +125,7 @@ class MovementBackward : public Movement
  public:
     MovementBackward(Millimeter dist,
                      MotorSpeed maxSpeed,
-                     Move*      move);
+                     MoveCL*    move);
     void periodicTask();
     char* txt();
 
@@ -148,7 +147,7 @@ class MovementRotate : public Movement
     MovementRotate(Radian     theta,
                    MoveGain   gain,
                    MotorSpeed maxSpeed,
-                   Move*      move);
+                   MoveCL*    move);
     void periodicTask();
     char* txt();
 
@@ -170,7 +169,7 @@ class MovementRotateFromAngle : public Movement
     MovementRotateFromAngle(Radian     deltaTheta,
                             MoveGain   gain,
                             MotorSpeed maxSpeed,
-                            Move*      move);
+                            MoveCL*    move);
     void periodicTask();
     char* txt();
 
@@ -192,7 +191,7 @@ class MovementGo2Target : public Movement
     MovementGo2Target(Point      target,
                       MoveGain   gain,
                       MotorSpeed maxSpeed,
-                      Move*      move);
+                      MoveCL*    move);
     void periodicTask();
     char* txt();
 
@@ -220,7 +219,7 @@ class MovementTrajectory : public Movement
                        MoveTrajectoryMode  mode,
                        MoveGain            gain,
                        MotorSpeed          maxSpeed,
-                       Move*               move);
+                       MoveCL*             move);
     void periodicTask();
     char* txt();
 

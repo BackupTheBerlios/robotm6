@@ -7,20 +7,20 @@
 #include "robotConfig.h"
 
 
-MovementManager* MovementManager::mvtMgr_=NULL;
+MovementManagerCL* MovementManagerCL::mvtMgr_=NULL;
 
 // ----------------------------------------------------------------------------
-// MovementManager::MovementManager
+// MovementManagerCL::MovementManagerCL
 // ----------------------------------------------------------------------------
-MovementManager::MovementManager() : 
+MovementManagerCL::MovementManagerCL() : 
     RobotComponent("Movement Manager", CLASS_MOVEMENT_MANAGER),
     motor_(NULL), position_(NULL), move_(NULL), 
     periodicCallback_(NULL), needMotorReset_(false), threadStarted_(false), 
     direction_(MOVE_DIRECTION_FORWARD)
 {
     LOG_FUNCTION();
-    position_ = new RobotPosition();
-    move_     = new Move();
+    position_ = new RobotPositionCL();
+    move_     = new MoveCL();
     mvtMgr_   = this;
 
     motorCom_.setAcc=-1;
@@ -32,9 +32,9 @@ MovementManager::MovementManager() :
 }
 
 // ----------------------------------------------------------------------------
-// MovementManager::~MovementManager
+// MovementManagerCL::~MovementManagerCL
 // ----------------------------------------------------------------------------
-MovementManager::~MovementManager()
+MovementManagerCL::~MovementManagerCL()
 {
     LOG_WARNING("Destructing MovementManager\n");
     motorReset();
@@ -46,28 +46,28 @@ MovementManager::~MovementManager()
 }
 
 // ----------------------------------------------------------------------------
-// MovementManager::motorReset
+// MovementManagerCL::motorReset
 // ----------------------------------------------------------------------------
-void MovementManager::motorReset()
+void MovementManagerCL::motorReset()
 {
-  motorCom_.reset = true; // motor must be reseted by the thread
-  int counter=0;
-  if (threadStarted_) while(motorCom_.reset && ++counter<100) usleep(1000);
-  if (counter >= 100) LOG_ERROR("Cannot reset the motors\n");
+    motorCom_.reset = true; // motor must be reseted by the thread
+    int counter=0;
+    if (threadStarted_) while(motorCom_.reset && ++counter<100) usleep(1000);
+    if (counter >= 100) LOG_ERROR("Cannot reset the motors\n");
 }
 
 // ----------------------------------------------------------------------------
-// MovementManager::resetPwmAlert
+// MovementManagerCL::resetPwmAlert
 // ----------------------------------------------------------------------------
-void MovementManager::resetPwmAlert()
+void MovementManagerCL::resetPwmAlert()
 {
     motorCom_.resetPwmAlert = true;
 }
 
 // ----------------------------------------------------------------------------
-// MovementManager::reset
+// MovementManagerCL::reset
 // ----------------------------------------------------------------------------
-bool MovementManager::reset()
+bool MovementManagerCL::reset()
 {
     init_=threadStarted_;
     motorReset();
@@ -84,9 +84,9 @@ bool MovementManager::reset()
 }
     
 // ----------------------------------------------------------------------------
-// MovementManager::validate
+// MovementManagerCL::validate
 // ----------------------------------------------------------------------------
-bool MovementManager::validate()
+bool MovementManagerCL::validate()
 {
   return (position_->validate() 
 	  && move_->validate());
@@ -100,7 +100,7 @@ static const int MOVEMENT_MANAGER_THREAD_PERIOD=1000;
 
 static void* movementManagerThreadBody(void* data)
 {
-    MovementManager* mvtMgr = MovementManager::instance();
+    MovementManagerCL* mvtMgr = MovementManagerCL::instance();
     while (true) {
         mvtMgr->periodicTask();
         usleep(MOVEMENT_MANAGER_THREAD_PERIOD);
@@ -109,9 +109,9 @@ static void* movementManagerThreadBody(void* data)
 }
 
 // ----------------------------------------------------------------------------
-// MovementManager::startThread
+// MovementManagerCL::startThread
 // ----------------------------------------------------------------------------
-void MovementManager::startThread()
+void MovementManagerCL::startThread()
 {
     threadStarted_= (MTHREAD_CREATE("MvtMgr Thread",
 			   &thread_, 
@@ -126,9 +126,9 @@ void MovementManager::startThread()
 }
 
 // ----------------------------------------------------------------------------
-// MovementManager::periodicTask
+// MovementManagerCL::periodicTask
 // ----------------------------------------------------------------------------
-void MovementManager::periodicTask()
+void MovementManagerCL::periodicTask()
 {
     if (!motor_) {
 	if (RobotConfig->motorSimu) {
@@ -173,53 +173,53 @@ void MovementManager::periodicTask()
 }
 
 /** Defini la constante d'acceleration des moteurs */
-void MovementManager::setAcceleration(MotorAcceleration acceleration)
+void MovementManagerCL::setAcceleration(MotorAcceleration acceleration)
 {
-  motorCom_.setAcc  = acceleration;
+    motorCom_.setAcc  = acceleration;
 }
 
 // ----------------------------------------------------------------------------
-// MovementManager::setSpeed
+// MovementManagerCL::setSpeed
 // ----------------------------------------------------------------------------
-void MovementManager::setSpeed(MotorSpeed  left,
+void MovementManagerCL::setSpeed(MotorSpeed  left,
 			       MotorSpeed  right)
 {
-  motorCom_.speedLeft  = left;
-  motorCom_.speedRight = right; 
+    motorCom_.speedLeft  = left;
+    motorCom_.speedRight = right; 
 }
 
 // ----------------------------------------------------------------------------
-// MovementManager::getCoderPosition
+// MovementManagerCL::getCoderPosition
 // ----------------------------------------------------------------------------
-void MovementManager::getCoderPosition(CoderPosition& left, 
+void MovementManagerCL::getCoderPosition(CoderPosition& left, 
 				       CoderPosition& right)
 {
-  left  = (CoderPosition)motorCom_.posLeft;
-  right = (CoderPosition)motorCom_.posRight;
+    left  = (CoderPosition)motorCom_.posLeft;
+    right = (CoderPosition)motorCom_.posRight;
 }
 
 // ----------------------------------------------------------------------------
-// MovementManager::getPWM
+// MovementManagerCL::getPWM
 // ----------------------------------------------------------------------------
-void MovementManager::getPWM(MotorPWM& left, 
+void MovementManagerCL::getPWM(MotorPWM& left, 
 			     MotorPWM& right)
 {
-  left  = motorCom_.pwmLeft;
-  right = motorCom_.pwmRight;
+    left  = motorCom_.pwmLeft;
+    right = motorCom_.pwmRight;
 }
 
 // ----------------------------------------------------------------------------
-// MovementManager::getPWM
+// MovementManagerCL::getPWM
 // ----------------------------------------------------------------------------
-void MovementManager::enableAutomaticReset(bool enable)
+void MovementManagerCL::enableAutomaticReset(bool enable)
 {
-  if (motor_) motor_->enableAutomaticReset(enable);
+    if (motor_) motor_->enableAutomaticReset(enable);
 }
 
 // ----------------------------------------------------------------------------
-// MovementManager::setRobotDirection
+// MovementManagerCL::setRobotDirection
 // ----------------------------------------------------------------------------
-void MovementManager::setRobotDirection(MoveDirection direction)
+void MovementManagerCL::setRobotDirection(MoveDirection direction)
 {
     LOG_WARNING("MovementManager::setRobotDirection(%s)\n",
                 direction==MOVE_DIRECTION_FORWARD?
@@ -228,9 +228,9 @@ void MovementManager::setRobotDirection(MoveDirection direction)
 }
 
 // ----------------------------------------------------------------------------
-// MovementManager::getMotorDirection
+// MovementManagerCL::getMotorDirection
 // ----------------------------------------------------------------------------
-MotorDirection MovementManager::getMotorDirection()
+MotorDirection MovementManagerCL::getMotorDirection()
 {
     MotorSpeed  speedLeft=0;
     MotorSpeed  speedRight=0;

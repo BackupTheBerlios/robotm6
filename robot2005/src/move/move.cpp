@@ -27,12 +27,12 @@ namespace {
 // ----------------------------------------------------------------------------
 // Static members
 // ----------------------------------------------------------------------------
-Move* Move::move_=NULL;
+MoveCL* MoveCL::move_=NULL;
 
 // ----------------------------------------------------------------------------
-// Move::Move
+// MoveCL::MoveCL
 // ----------------------------------------------------------------------------
-Move::Move() : 
+MoveCL::MoveCL() : 
     RobotComponent("Move", CLASS_MOVE), currentMovement_(NULL),
     enableAccelerationController_(false), userAbort_(false),
     defaultRotationGain_(MOVE_GAIN_DEFAULT),
@@ -49,29 +49,30 @@ Move::Move() :
 }
 
 // ----------------------------------------------------------------------------
-// Move::~Move
+// MoveCL::~MoveCL
 // ----------------------------------------------------------------------------
-Move::~Move()
+MoveCL::~MoveCL()
 {
     if (currentMovement_) {
         delete currentMovement_;
         currentMovement_ = NULL;
     }
+    move_ = NULL;
 }
 
 // ----------------------------------------------------------------------------
-// Move::instance
+// MoveCL::instance
 // ----------------------------------------------------------------------------
-Move* Move::instance()
+MoveCL* MoveCL::instance()
 {
     assert(move_);
     return move_;
 }
 
 // ----------------------------------------------------------------------------
-// Move::periodicTask
+// MoveCL::periodicTask
 // ----------------------------------------------------------------------------
-void Move::periodicTask(Millisecond time)
+void MoveCL::periodicTask(Millisecond time)
 {   
     LOG_DEBUG("Periodic Task WAIT LOCK\n");
     Lock localLock(&repositoryLock);
@@ -87,9 +88,9 @@ void Move::periodicTask(Millisecond time)
 }
 
 // ----------------------------------------------------------------------------
-// Move::reset
+// MoveCL::reset
 // ----------------------------------------------------------------------------
-bool Move::reset()
+bool MoveCL::reset()
 {
     LOG_FUNCTION();
 
@@ -112,21 +113,22 @@ bool Move::reset()
 }
 
 // ----------------------------------------------------------------------------
-// Move::validate
+// MoveCL::validate
 // ----------------------------------------------------------------------------
-bool Move::validate()
+bool MoveCL::validate()
 {
     return true;
 }
 
 // ----------------------------------------------------------------------------
-// Move::calibrate
+// MoveCL::calibrate
 // ----------------------------------------------------------------------------
-void Move::calibrate()
+void MoveCL::calibrate()
 {
 #if 0
+/*
     int c = 0;
-    Position* robotPosition = Position::get();
+    RobotPosition* robotPosition = Position::get();
     Millisecond time=0;
 
     printf("Pressez la touche 'entree' pour que le robot avance de 2 m\n");
@@ -184,27 +186,28 @@ void Move::calibrate()
            (float)POSITION_ROBOT_D);
 
     printf("Corrigez les valeurs dans position.h, recompiler et recommencer...\n");
+*/
 #endif
 }
 
 // ----------------------------------------------------------------------------
-// Move::enableAccelerationController
+// MoveCL::enableAccelerationController
 // ----------------------------------------------------------------------------
-void Move::enableAccelerationController(bool enable)
+void MoveCL::enableAccelerationController(bool enable)
 {
     enableAccelerationController_ = enable;
 }
 
 // ----------------------------------------------------------------------------
-// Move::setSpeed
+// MoveCL::setSpeed
 // ----------------------------------------------------------------------------
-MotorSpeed Move::lastSpeedLeft_ =0;
-MotorSpeed Move::lastSpeedRight_=0;
-MotorSpeed Move::lastSpeedReqLeft_ =0;
-MotorSpeed Move::lastSpeedReqRight_=0;
+MotorSpeed MoveCL::lastSpeedLeft_ =0;
+MotorSpeed MoveCL::lastSpeedRight_=0;
+MotorSpeed MoveCL::lastSpeedReqLeft_ =0;
+MotorSpeed MoveCL::lastSpeedReqRight_=0;
 
-void Move::setSpeed(MotorSpeed  speedLeft,
-                    MotorSpeed  speedRight)
+void MoveCL::setSpeed(MotorSpeed  speedLeft,
+                      MotorSpeed  speedRight)
 {
     lastSpeedReqLeft_ =speedLeft;
     lastSpeedReqRight_=speedRight;
@@ -221,28 +224,28 @@ void Move::setSpeed(MotorSpeed  speedLeft,
         }
     }
    
-    MVTMGR->setSpeed(speedLeft, speedRight);
+    MvtMgr->setSpeed(speedLeft, speedRight);
     lastSpeedLeft_  = speedLeft;
     lastSpeedRight_ = speedRight;
 }
 
 // ----------------------------------------------------------------------------
-// Move::emergencyStop
+// MoveCL::emergencyStop
 // ----------------------------------------------------------------------------
-void Move::emergencyStop()
+void MoveCL::emergencyStop()
 {
     stop();
     lastSpeedLeft_    = 0;
     lastSpeedRight_   = 0;
     lastSpeedReqLeft_ = 0;
     lastSpeedReqRight_= 0;
-    MVTMGR->setSpeed(0, 0);
+    MvtMgr->setSpeed(0, 0);
 }
 
 // ----------------------------------------------------------------------------
-// Move::setCurrentMovement
+// MoveCL::setCurrentMovement
 // ----------------------------------------------------------------------------
-void Move::setCurrentMovement(Movement* mvt, bool needLock)
+void MoveCL::setCurrentMovement(Movement* mvt, bool needLock)
 {
     if (userAbort_) return;
     Lock* localLock=NULL;
@@ -278,9 +281,9 @@ void Move::setCurrentMovement(Movement* mvt, bool needLock)
 }
 
 // ----------------------------------------------------------------------------
-// Move::stop
+// MoveCL::stop
 // ----------------------------------------------------------------------------
-void Move::stop()
+void MoveCL::stop()
 {
     Lock localLock(&repositoryLock);
     LOG_DEBUG("%s LOCK\n", __FUNCTION__);
@@ -298,9 +301,9 @@ void Move::stop()
 }
 
 // ----------------------------------------------------------------------------
-// Move::forward
+// MoveCL::forward
 // ----------------------------------------------------------------------------
-void Move::forward(Millimeter  dist, 
+void MoveCL::forward(Millimeter  dist, 
                    MotorSpeed  maxSpeed)
 {
     stop();
@@ -313,9 +316,9 @@ void Move::forward(Millimeter  dist,
 }
 
 // ----------------------------------------------------------------------------
-// Move::backward
+// MoveCL::backward
 // ----------------------------------------------------------------------------
-void Move::backward(Millimeter  dist, 
+void MoveCL::backward(Millimeter  dist, 
                     MotorSpeed  maxSpeed)
 {
     stop();
@@ -330,7 +333,7 @@ void Move::backward(Millimeter  dist,
 // ----------------------------------------------------------------------------
 // Move::rotate
 // ----------------------------------------------------------------------------
-void Move::rotate(Radian      finalDir,
+void MoveCL::rotate(Radian      finalDir,
                   MoveGain    gain,
                   MotorSpeed  maxSpeed)
 {
@@ -347,9 +350,9 @@ void Move::rotate(Radian      finalDir,
 }
 
 // ----------------------------------------------------------------------------
-// Move::rotateFromAngle
+// MoveCL::rotateFromAngle
 // ----------------------------------------------------------------------------
-void Move::rotateFromAngle(Radian      deltaTheta,
+void MoveCL::rotateFromAngle(Radian      deltaTheta,
                            MoveGain    gain,
                            MotorSpeed  maxSpeed)
 {
@@ -368,7 +371,7 @@ void Move::rotateFromAngle(Radian      deltaTheta,
 // ----------------------------------------------------------------------------
 // Move::go2Target
 // ----------------------------------------------------------------------------
-void Move::go2Target(Millimeter  x, 
+void MoveCL::go2Target(Millimeter  x, 
                      Millimeter  y,
                      MoveGain    gain, 
                      MotorSpeed  maxSpeed)
@@ -377,15 +380,15 @@ void Move::go2Target(Millimeter  x,
 }
 
 // ----------------------------------------------------------------------------
-// Move::go2Target
+// MoveCL::go2Target
 // ----------------------------------------------------------------------------
-void Move::go2Target(Point       pt, 
+void MoveCL::go2Target(Point       pt, 
                      MoveGain    gain, 
                      MotorSpeed  maxSpeed)
 {
     stop();
     // rotation dans la bonne direction, puis asservissement sur un point final !
-    Radian finalDir = dir(ROBOT_POS->pt(), 
+    Radian finalDir = dir(RobotPos->pt(), 
                           pt);
     MoveGain newGain=gain;
     MotorSpeed newMaxSpeed = maxSpeed/2;
@@ -415,16 +418,16 @@ void Move::go2Target(Point       pt,
     mvtRotation->registerNextMovement(mvtGotoTarget);
 
     Trajectory t;
-    t.push_back(ROBOT_POS->pt());
+    t.push_back(RobotPos->pt());
     t.push_back(pt);
     Log->trajectory(t);
     setCurrentMovement(mvtRotation);
 }
 
 // ----------------------------------------------------------------------------
-// Move::followTrajectory
+// MoveCL::followTrajectory
 // ----------------------------------------------------------------------------
-void Move::followTrajectory(Trajectory const&   trajectory2, 
+void MoveCL::followTrajectory(Trajectory const&   trajectory2, 
                             MoveTrajectoryMode  mode,
                             MoveGain            gain, 
                             MotorSpeed          maxSpeed,
@@ -436,9 +439,9 @@ void Move::followTrajectory(Trajectory const&   trajectory2,
     Trajectory trajectory3;
     if (trajectory2.empty()) {
         trajectory3.clear();
-        trajectory3.push_back(ROBOT_POS->pt());
-        trajectory3.push_back(ROBOT_POS->pt()+200.*Point(cos(ROBOT_POS->theta()),
-                                                         sin(ROBOT_POS->theta()) ));
+        trajectory3.push_back(RobotPos->pt());
+        trajectory3.push_back(RobotPos->pt()+200.*Point(cos(RobotPos->theta()),
+                                                         sin(RobotPos->theta()) ));
         trajectory=&trajectory3;
     } else {
         trajectory=const_cast<Trajectory*>(&trajectory2);
@@ -447,7 +450,7 @@ void Move::followTrajectory(Trajectory const&   trajectory2,
     if (mode==TRAJECTORY_BASIC) {
       Movement* last=NULL;
       Trajectory::const_iterator it=trajectory->begin();
-      Point previousPt=ROBOT_POS->pt();
+      Point previousPt=RobotPos->pt();
       for(;it!=trajectory->end();it++) {
 	 Radian finalDir = dir(previousPt, (*it));
 	 Movement* current; 
@@ -486,9 +489,9 @@ void Move::followTrajectory(Trajectory const&   trajectory2,
     } else {
       Radian finalDir = 0;
       Trajectory t2;
-      if (dist(ROBOT_POS->pt(), (*trajectory)[0]) > 120
+      if (dist(RobotPos->pt(), (*trajectory)[0]) > 120
 	  || trajectory->size() == 1) {
-	  t2.push_back(ROBOT_POS->pt());
+	  t2.push_back(RobotPos->pt());
       }
       Trajectory::const_iterator it= trajectory->begin();
       for(;it != trajectory->end(); it++) {
@@ -506,10 +509,10 @@ void Move::followTrajectory(Trajectory const&   trajectory2,
 	      Geometry2D::rectilinear(t2, rotationIndex, 
 				      rotationTargetPoint);
 	  }
-	  length = Geometry2D::getSquareDistance(ROBOT_POS->pt(), rotationTargetPoint);
+	  length = Geometry2D::getSquareDistance(RobotPos->pt(), rotationTargetPoint);
       }while ((length < MVT_TRAJECTORY_MIN_SQUARE_LENGTH)
 	      && (rotationIndex < t2.size()-1));
-      finalDir = dir(ROBOT_POS->pt(), rotationTargetPoint);
+      finalDir = dir(RobotPos->pt(), rotationTargetPoint);
       /*printf("rotation index=%lf %s %d\n", 
 	rotationIndex, rotationTargetPoint.txt(), r2d(finalDir));*/
       Movement * mvtRotation=NULL;
@@ -551,7 +554,7 @@ void Move::followTrajectory(Trajectory const&   trajectory2,
     }
 
     Trajectory t;
-    t.push_back(ROBOT_POS->pt());
+    t.push_back(RobotPos->pt());
     Trajectory::const_iterator it=trajectory->begin();
     for(;it!=trajectory->end();it++) t.push_back(*it);
 #ifdef LSM_TODO
@@ -563,11 +566,11 @@ void Move::followTrajectory(Trajectory const&   trajectory2,
 }
 
 // ----------------------------------------------------------------------------
-// Move::userAbort
+// MoveCL::userAbort
 // ----------------------------------------------------------------------------
-void Move::userAbort()
+void MoveCL::userAbort()
 {
-  LOG_FUNCTION();
-  emergencyStop();
-  userAbort_ = true;
+    LOG_FUNCTION();
+    emergencyStop();
+    userAbort_ = true;
 }

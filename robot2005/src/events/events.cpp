@@ -12,12 +12,12 @@
 // ----------------------------------------------------------------------------
 // static members
 // ----------------------------------------------------------------------------
-EventsManager* EventsManager::evtMgr_ = NULL;
+EventsManagerCL* EventsManagerCL::evtMgr_ = NULL;
 
 // ----------------------------------------------------------------------------
-// EventsManager::EventsManager
+// EventsManagerCL::EventsManagerCL
 // ----------------------------------------------------------------------------
-EventsManager::EventsManager() : 
+EventsManagerCL::EventsManagerCL() : 
   RobotComponent("Events", CLASS_EVENTS_MANAGER)
 {
     assert(!evtMgr_);
@@ -25,33 +25,33 @@ EventsManager::EventsManager() :
 }
 
 // ----------------------------------------------------------------------------
-// EventsManager::~EventsManager
+// EventsManagerCL::~EventsManagerCL
 // ----------------------------------------------------------------------------
-EventsManager::~EventsManager()
+EventsManagerCL::~EventsManagerCL()
 {
 
 }
 
 // ----------------------------------------------------------------------------
-// EventsManager::validate
+// EventsManagerCL::validate
 // ----------------------------------------------------------------------------
-bool EventsManager::validate()
+bool EventsManagerCL::validate()
 {
     return false;
 }
 
 // ----------------------------------------------------------------------------
-// EventsManager::evtName
+// EventsManagerCL::evtName
 // ----------------------------------------------------------------------------
-const char* EventsManager::evtName(EventsEnum evt)
+const char* EventsManagerCL::evtName(EventsEnum evt)
 {
     return EventsInfo[(int)evt].name;
 }
 
 // ----------------------------------------------------------------------------
-// EventsManager::reset
+// EventsManagerCL::reset
 // ----------------------------------------------------------------------------
-bool EventsManager::reset()
+bool EventsManagerCL::reset()
 {
     LOG_FUNCTION();
     for (int i = 0; i < (int)EVENTS_NBR; ++i) {
@@ -71,9 +71,9 @@ bool EventsManager::reset()
 }
 
 // ----------------------------------------------------------------------------
-// EventsManager::print
+// EventsManagerCL::print
 // ----------------------------------------------------------------------------
-void EventsManager::print(bool displayTrue, bool displayFalse)
+void EventsManagerCL::print(bool displayTrue, bool displayFalse)
 {
     for (int i = 0; i < (int)EVENTS_NBR; ++i) {
 	if (!(evtStatus_[i] ^ displayTrue)) {
@@ -87,18 +87,18 @@ void EventsManager::print(bool displayTrue, bool displayFalse)
 }
 
 // ----------------------------------------------------------------------------
-// EventsManager::enable
+// EventsManagerCL::enable
 // ----------------------------------------------------------------------------
-void EventsManager::enable(EventsEnum evt)
+void EventsManagerCL::enable(EventsEnum evt)
 {
     evtEnables_[(int)evt] = true;
     LOG_INFO("%s, enabled\n", evtName(evt));
 }
 
 // ----------------------------------------------------------------------------
-// EventsManager::disable
+// EventsManagerCL::disable
 // ----------------------------------------------------------------------------
-void EventsManager::disable(EventsEnum evt)
+void EventsManagerCL::disable(EventsEnum evt)
 {
     evtEnables_[(int)evt] = false;
     evtStatus_[(int)evt] = false;
@@ -106,9 +106,9 @@ void EventsManager::disable(EventsEnum evt)
 }
 
 // ----------------------------------------------------------------------------
-// EventsManager::registerCallback
+// EventsManagerCL::registerCallback
 // ----------------------------------------------------------------------------
-void EventsManager::registerCallback(EventsEnum        evt,
+void EventsManagerCL::registerCallback(EventsEnum        evt,
 				     void*             userData,
 				     EventsFunctionPtr evtCallback,
 				     const char*       callBackName)
@@ -121,9 +121,9 @@ void EventsManager::registerCallback(EventsEnum        evt,
 }
 
 // ----------------------------------------------------------------------------
-// EventsManager::registerImmediatCallback
+// EventsManagerCL::registerImmediatCallback
 // ----------------------------------------------------------------------------
-void EventsManager::registerImmediatCallback(EventsEnum        evt,
+void EventsManagerCL::registerImmediatCallback(EventsEnum        evt,
 					     void*             userData,
 					     EventsFunctionPtr evtCallback,
 					     const char*       callBackName)
@@ -136,9 +136,9 @@ void EventsManager::registerImmediatCallback(EventsEnum        evt,
 }
 
 // ----------------------------------------------------------------------------
-// EventsManager::registerNotCallback
+// EventsManagerCL::registerNotCallback
 // ----------------------------------------------------------------------------
-void EventsManager::registerNotCallback(EventsEnum        evt,
+void EventsManagerCL::registerNotCallback(EventsEnum        evt,
 					void*             userData,
 					EventsFunctionPtr evtCallback,
 					const char*       callBackName)
@@ -151,9 +151,9 @@ void EventsManager::registerNotCallback(EventsEnum        evt,
 }
 
 // ----------------------------------------------------------------------------
-// EventsManager::registerNotImmediatCallback
+// EventsManagerCL::registerNotImmediatCallback
 // ----------------------------------------------------------------------------
-void EventsManager::registerNotImmediatCallback(EventsEnum        evt,
+void EventsManagerCL::registerNotImmediatCallback(EventsEnum        evt,
 						void*             userData,
 						EventsFunctionPtr evtCallback,
 						const char*       callBackName)
@@ -168,7 +168,7 @@ void EventsManager::registerNotImmediatCallback(EventsEnum        evt,
 // ----------------------------------------------------------------------------
 // unraiseEventsBumpers
 // ----------------------------------------------------------------------------
-void EventsManager::unraiseEventsBumpers()
+void EventsManagerCL::unraiseEventsBumpers()
 {
     evtStatus_[(int)EVENTS_BUMPER_FC]=false;  // front center
     evtStatus_[(int)EVENTS_BUMPER_FR]=false;  // front right
@@ -189,7 +189,7 @@ void EventsManager::unraiseEventsBumpers()
 // ----------------------------------------------------------------------------
 // unraiseEventsGroups
 // ----------------------------------------------------------------------------
-void EventsManager::unraiseEventsGroups()
+void EventsManagerCL::unraiseEventsGroups()
 {
   evtStatus_[(int)EVENTS_GROUP_NONE]         = false;
   evtStatus_[(int)EVENTS_GROUP_BUMPER]       = false;
@@ -202,9 +202,9 @@ void EventsManager::unraiseEventsGroups()
 }
 
 // ----------------------------------------------------------------------------
-// EventsManager::check
+// EventsManagerCL::check
 // ----------------------------------------------------------------------------
-bool EventsManager::check(EventsFn evtFn)
+bool EventsManagerCL::check(EventsFn evtFn)
 {
     assert(evtFn);
     bool tmpArray[(int)EVENTS_NBR];
@@ -215,26 +215,26 @@ bool EventsManager::check(EventsFn evtFn)
 }
 
 // ----------------------------------------------------------------------------
-// EventsManager::check
+// EventsManagerCL::check
 // ----------------------------------------------------------------------------
-bool EventsManager::check(EventsEnum evt)
+bool EventsManagerCL::check(EventsEnum evt)
 {
     return evtStatus_[(int)evt] && evtEnables_[(int)evt];
 }
 
 // ----------------------------------------------------------------------------
-// EventsManager::isInWaitResult
+// EventsManagerCL::isInWaitResult
 // ----------------------------------------------------------------------------
-bool EventsManager::isInWaitResult(EventsEnum evt)
+bool EventsManagerCL::isInWaitResult(EventsEnum evt)
 {
   return evtWaitStatus_[(int)evt] && evtEnables_[(int)evt];
 }
 
 
 // ----------------------------------------------------------------------------
-// EventsManager::runCallbacks
+// EventsManagerCL::runCallbacks
 // ----------------------------------------------------------------------------
-void EventsManager::runCallbacks()
+void EventsManagerCL::runCallbacks()
 {
   for (int evt = 0; evt < (int)EVENTS_NBR; ++evt) {
     

@@ -10,7 +10,8 @@
 // ----------------------------------------------------------------------------
 // EventsManagerActive::EventsManagerActive
 // ----------------------------------------------------------------------------
-EventsManagerActive::EventsManagerActive()
+EventsManagerActiveCL::EventsManagerActiveCL() : 
+    EventsManagerCL()
 {
     LOG_FUNCTION();
     // reset les events status
@@ -21,7 +22,7 @@ EventsManagerActive::EventsManagerActive()
 // ----------------------------------------------------------------------------
 // EventsManagerActive::~EventsManagerActive
 // ----------------------------------------------------------------------------
-EventsManagerActive::~EventsManagerActive()
+EventsManagerActiveCL::~EventsManagerActiveCL()
 {
 
 }
@@ -29,7 +30,7 @@ EventsManagerActive::~EventsManagerActive()
 // ----------------------------------------------------------------------------
 // EventsManagerActive::raise
 // ----------------------------------------------------------------------------
-void EventsManagerActive::raise(EventsEnum evt)
+void EventsManagerActiveCL::raise(EventsEnum evt)
 {
     if (evtStatus_[(int)evt])   return;
     if (!evtEnables_[(int)evt]) return;
@@ -54,7 +55,7 @@ void EventsManagerActive::raise(EventsEnum evt)
 // ----------------------------------------------------------------------------
 // EventsManagerActive::unraise
 // ----------------------------------------------------------------------------
-void EventsManagerActive::unraise(EventsEnum evt)
+void EventsManagerActiveCL::unraise(EventsEnum evt)
 {
     if (!evtStatus_[(int)evt]) return;
     evtStatus_[(int)evt] = false;
@@ -73,7 +74,7 @@ void EventsManagerActive::unraise(EventsEnum evt)
 // ----------------------------------------------------------------------------
 // EventsManagerActive::wait
 // ----------------------------------------------------------------------------
-void EventsManagerActive::wait(EventsEnum evt)
+void EventsManagerActiveCL::wait(EventsEnum evt)
 {
     unraiseEventsGroups();
     unraiseEventsBumpers();
@@ -89,7 +90,7 @@ void EventsManagerActive::wait(EventsEnum evt)
 // ----------------------------------------------------------------------------
 // EventsManagerActive::waitNot
 // ----------------------------------------------------------------------------
-void EventsManagerActive::waitNot(EventsEnum evt)
+void EventsManagerActiveCL::waitNot(EventsEnum evt)
 {
     unraiseEventsGroups();
     unraiseEventsBumpers();
@@ -106,7 +107,7 @@ void EventsManagerActive::waitNot(EventsEnum evt)
 // ----------------------------------------------------------------------------
 // EventsManagerActive::wait
 // ----------------------------------------------------------------------------
-void EventsManagerActive::wait(EventsFn evtFn)
+void EventsManagerActiveCL::wait(EventsFn evtFn)
 {
     unraiseEventsGroups();
     unraiseEventsBumpers();
@@ -121,7 +122,7 @@ void EventsManagerActive::wait(EventsFn evtFn)
 // ----------------------------------------------------------------------------
 // EventsManagerActive::waitNot
 // ----------------------------------------------------------------------------
-void EventsManagerActive::waitNot(EventsFn evtFn)
+void EventsManagerActiveCL::waitNot(EventsFn evtFn)
 {
     unraiseEventsGroups();
     unraiseEventsBumpers();

@@ -22,8 +22,8 @@ namespace {
 // ----------------------------------------------------------------------------
 // EventsManager::EventsManager
 // ----------------------------------------------------------------------------
-EventsManagerPassive::EventsManagerPassive() : 
-    EventsManager()
+EventsManagerPassiveCL::EventsManagerPassiveCL() : 
+    EventsManagerCL()
 {
     LOG_FUNCTION();
     pthread_mutex_init(&repositoryLock2, NULL);
@@ -44,9 +44,9 @@ EventsManagerPassive::EventsManagerPassive() :
 }
 
 // ----------------------------------------------------------------------------
-// EventsManagerPassive::~EventsManagerPassive
+// EventsManagerPassiveCL::~EventsManagerPassiveCL
 // ----------------------------------------------------------------------------
-EventsManagerPassive::~EventsManagerPassive()
+EventsManagerPassiveCL::~EventsManagerPassiveCL()
 {
 
 }
@@ -54,7 +54,7 @@ EventsManagerPassive::~EventsManagerPassive()
 // ----------------------------------------------------------------------------
 // EventsManager::raise
 // ----------------------------------------------------------------------------
-void EventsManagerPassive::raise(EventsEnum evt)
+void EventsManagerPassiveCL::raise(EventsEnum evt)
 {
     Lock localLock(&repositoryLock2);
     if (evtStatus_[(int)evt]) return;
@@ -86,7 +86,7 @@ void EventsManagerPassive::raise(EventsEnum evt)
 // ----------------------------------------------------------------------------
 // EventsManager::unraise
 // ----------------------------------------------------------------------------
-void EventsManagerPassive::unraise(EventsEnum evt)
+void EventsManagerPassiveCL::unraise(EventsEnum evt)
 {
     Lock localLock(&repositoryLock2);
     if (!evtStatus_[(int)evt]) return;
@@ -113,7 +113,7 @@ void EventsManagerPassive::unraise(EventsEnum evt)
 // ----------------------------------------------------------------------------
 // EventsManager::wait
 // ----------------------------------------------------------------------------
-void EventsManagerPassive::wait(EventsEnum evt)
+void EventsManagerPassiveCL::wait(EventsEnum evt)
 {
     Lock localLock(&repositoryLock2);
     unraiseEventsGroups();
@@ -128,9 +128,9 @@ void EventsManagerPassive::wait(EventsEnum evt)
 }
 
 // ----------------------------------------------------------------------------
-// EventsManagerPassive::waitNot
+// EventsManagerPassiveCL::waitNot
 // ----------------------------------------------------------------------------
-void EventsManagerPassive::waitNot(EventsEnum evt)
+void EventsManagerPassiveCL::waitNot(EventsEnum evt)
 {
     Lock localLock(&repositoryLock2);
     unraiseEventsGroups();
@@ -146,9 +146,9 @@ void EventsManagerPassive::waitNot(EventsEnum evt)
 
 
 // ----------------------------------------------------------------------------
-// EventsManagerPassive::wait
+// EventsManagerPassiveCL::wait
 // ----------------------------------------------------------------------------
-void EventsManagerPassive::wait(EventsFn evtFn)
+void EventsManagerPassiveCL::wait(EventsFn evtFn)
 {
     Lock localLock(&repositoryLock2);
     unraiseEventsGroups();
@@ -162,9 +162,9 @@ void EventsManagerPassive::wait(EventsFn evtFn)
 }
 
 // ----------------------------------------------------------------------------
-// EventsManagerPassive::waitNot
+// EventsManagerPassiveCL::waitNot
 // ----------------------------------------------------------------------------
-void EventsManagerPassive::waitNot(EventsFn evtFn)
+void EventsManagerPassiveCL::waitNot(EventsFn evtFn)
 {
     Lock localLock(&repositoryLock2);
     unraiseEventsGroups();

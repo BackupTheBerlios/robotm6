@@ -63,7 +63,7 @@ bool StrategyCL::waitStart(InitMode mode)
 #ifdef LSM_TODO
       if (!ODOMETER->isSimu()) {
 	ODOMETER->setMode(ODOMETER_AUTOMATIC);
-	ROBOT_POS->setOdometerType(ODOMETER_UART_AUTOMATIC);
+	RobotPos->setOdometerType(ODOMETER_UART_AUTOMATIC);
       }
 #endif
       waitJackout();
@@ -72,7 +72,7 @@ bool StrategyCL::waitStart(InitMode mode)
 #ifdef LSM_TODO
       if (!ODOMETER->isSimu()) {
 	ODOMETER->setMode(ODOMETER_AUTOMATIC);
-	ROBOT_POS->setOdometerType(ODOMETER_UART_AUTOMATIC);
+	RobotPos->setOdometerType(ODOMETER_UART_AUTOMATIC);
       }
 #endif
       // on demare tout de suite
@@ -90,7 +90,7 @@ bool StrategyCL::waitStart(InitMode mode)
 // -------------------------------------------------------------------------
 void StrategyCL::emergencyStop()
 {
-    MOVE->stop();
+    Move->stop();
      if (Timer->time()>TIME_MATCH*0.9) {
 	gameOver();
     } else {
@@ -104,8 +104,8 @@ void StrategyCL::emergencyStop()
 	Events->registerCallback(EVENTS_GAME_OVER, this, NULL, "");
 	Events->registerCallback(EVENTS_TIMER_ALERT, this, NULL, "");
 	
-	MOVE->emergencyStop();
-	MVTMGR->reset();
+	Move->emergencyStop();
+	MvtMgr->reset();
 	IOMGR->emergencyStop();
 	
 	Log->closeLogFile();
@@ -132,13 +132,13 @@ void StrategyCL::emergencyStop()
 // -------------------------------------------------------------------------
 void StrategyCL::gameOver()
 {
-  MOVE->stop();
+  Move->stop();
   LOG_WARNING("GAME is OVER\n");
   LCD->print("GAME OVER");
   LCD->ledPolice();
 
   Log->stopMatch();
-  Position pos = ROBOT_POS->pos();
+  Position pos = RobotPos->pos();
   
   // unregister game over and emergency stop exceptions
   Events->registerCallback(EVENTS_EMERGENCY_STOP, this, NULL, "");
@@ -147,8 +147,8 @@ void StrategyCL::gameOver()
 
   // Action a exectuer en fin de match: on arrete le robot!
   Timer->reset();
-  MOVE->emergencyStop();
-  MVTMGR->reset();
+  Move->emergencyStop();
+  MvtMgr->reset();
   IOMGR->emergencyStop();
   
   Log->closeLogFile();
@@ -162,7 +162,7 @@ void StrategyCL::gameOver()
       if (!Events->check(EVENTS_EMERGENCY_STOP)) {
           ODOMETER->setMode(ODOMETER_AUTOMATIC);
           sleep(1);
-          ROBOT_POS->set(pos.center.x, pos.center.y, pos.direction);
+          RobotPos->set(pos.center.x, pos.center.y, pos.direction);
           happyEnd();
       }
   } else {
@@ -295,7 +295,7 @@ bool StrategyCL::checkCollision(bool &collisionEvt)
 	collisionEvt = false;
         return true;
     }
-    MoveDirection oldDir = MVTMGR->getDirection();
+    MoveDirection oldDir = MvtMgr->getDirection();
     do {
       LOG_COMMAND("Avoid Collision\n");
       collisionEvt = true;
@@ -303,35 +303,35 @@ bool StrategyCL::checkCollision(bool &collisionEvt)
       Obstacle obstacle;
       
       // evitement de collision
-      MVTMGR->setRobotDirection(MOVE_DIRECTION_FORWARD);
+      MvtMgr->setRobotDirection(MOVE_DIRECTION_FORWARD);
       if (Events->isInWaitResult(EVENTS_PWM_ALERT)) {
 //	  SOUND->play(SOUND_ALERT_MOTOR);
 	// motor pwm
 	MotorSpeed  speedLeft;
 	MotorSpeed  speedRight;
-	MVTMGR->getMotorSpeed(speedLeft, speedRight);
+	MvtMgr->getMotorSpeed(speedLeft, speedRight);
 	if (speedLeft+speedRight > 0) {
-            Point detectionPoint=ROBOT_POS->pt() 
-                + ROBOT_RAYON * Point(cos(ROBOT_POS->thetaAbsolute()), 
-                                      sin(ROBOT_POS->thetaAbsolute()));
+            Point detectionPoint=RobotPos->pt() 
+                + ROBOT_RAYON * Point(cos(RobotPos->thetaAbsolute()), 
+                                      sin(RobotPos->thetaAbsolute()));
 	    obstacle=Obstacle(detectionPoint
-                              + 50.*Point(cos(ROBOT_POS->thetaAbsolute()), 
-				    sin(ROBOT_POS->thetaAbsolute())),
+                              + 50.*Point(cos(RobotPos->thetaAbsolute()), 
+				    sin(RobotPos->thetaAbsolute())),
                               detectionPoint,
                               Timer->time()
                               );
-	    MOVE->backward(100);
+	    Move->backward(100);
 	} else {
-	    Point detectionPoint=ROBOT_POS->pt() 
-                - ROBOT_RAYON * Point(cos(ROBOT_POS->thetaAbsolute()), 
-                                      sin(ROBOT_POS->thetaAbsolute()));
+	    Point detectionPoint=RobotPos->pt() 
+                - ROBOT_RAYON * Point(cos(RobotPos->thetaAbsolute()), 
+                                      sin(RobotPos->thetaAbsolute()));
 	    obstacle=Obstacle(detectionPoint
-                              - 50.*Point(cos(ROBOT_POS->thetaAbsolute()), 
-                                       sin(ROBOT_POS->thetaAbsolute())),
+                              - 50.*Point(cos(RobotPos->thetaAbsolute()), 
+                                       sin(RobotPos->thetaAbsolute())),
                               detectionPoint,
                               Timer->time()
                               );
-	    MOVE->forward(100);
+	    Move->forward(100);
 	}
 #ifdef LSM_TODO
 	HLI->setBumpObstacle(obstacle);
@@ -355,16 +355,16 @@ bool StrategyCL::checkCollision(bool &collisionEvt)
 	    if (Events->isInWaitResult(EVENTS_BUMPER_BORDURE_RL)) bump = 11;
 	    if (Events->isInWaitResult(EVENTS_BUMPER_TOP_F)) bump = 12;
 	    if (Events->isInWaitResult(EVENTS_BUMPER_TOP_R)) bump = 13;
-	    Point detectionPoint=ROBOT_POS->pt() 
+	    Point detectionPoint=RobotPos->pt() 
 		+ ((dridaqButtonMapping_[bump].pos.r)
-		   *Point(cos(ROBOT_POS->thetaAbsolute()+
+		   *Point(cos(RobotPos->thetaAbsolute()+
 			      dridaqButtonMapping_[bump].pos.theta), 
-			  sin(ROBOT_POS->thetaAbsolute()+
+			  sin(RobotPos->thetaAbsolute()+
 			      dridaqButtonMapping_[bump].pos.theta)));
 	    obstacle=Obstacle(detectionPoint + (OBSTACLE_RAYON)
-			      *Point(cos(ROBOT_POS->thetaAbsolute()+
+			      *Point(cos(RobotPos->thetaAbsolute()+
 					 dridaqButtonMapping_[bump].pos.theta), 
-				     sin(ROBOT_POS->thetaAbsolute()+
+				     sin(RobotPos->thetaAbsolute()+
 					 dridaqButtonMapping_[bump].pos.theta)),
 			      detectionPoint,
 			      Timer->time());
@@ -374,9 +374,9 @@ bool StrategyCL::checkCollision(bool &collisionEvt)
 		|| Events->isInWaitResult(EVENTS_BUMPER_SRF)
 		|| Events->isInWaitResult(EVENTS_BUMPER_SLF)
 		|| Events->isInWaitResult(EVENTS_BUMPER_TOP_F)) {
-		MOVE->backward(100);
+		Move->backward(100);
 	    } else {
-		MOVE->forward(100);
+		Move->forward(100);
 	    }
 
 	HLI->setBumpObstacle(obstacle);
@@ -388,7 +388,7 @@ bool StrategyCL::checkCollision(bool &collisionEvt)
       if (!checkEvents(tmpEvt)) return false;
     } while (Events->isInWaitResult(EVENTS_GROUP_BUMPER)
 	     || Events->isInWaitResult(EVENTS_PWM_ALERT));
-    MVTMGR->setRobotDirection(oldDir);
+    MvtMgr->setRobotDirection(oldDir);
 #endif
     return true;
 }
@@ -401,10 +401,10 @@ bool StrategyCL::checkCollision(bool &collisionEvt)
 void StrategyCL::setStartingPosition()
 {
     if (RobotConfig->isRobotAttack) {
-        ROBOT_POS->set(ROBOT_A_INIT_X, ROBOT_A_INIT_Y, ROBOT_A_INIT_THETA);
+        RobotPos->set(ROBOT_A_INIT_X, ROBOT_A_INIT_Y, ROBOT_A_INIT_THETA);
     } else {
-        ROBOT_POS->set(ROBOT_D_INIT_X, ROBOT_D_INIT_Y, ROBOT_D_INIT_THETA);
+        RobotPos->set(ROBOT_D_INIT_X, ROBOT_D_INIT_Y, ROBOT_D_INIT_THETA);
     }    
-    Simulator->setRobotPosition(ROBOT_POS->pos());
-    LOG_WARNING("setStartingPosition: %s\n", ROBOT_POS->txt());
+    Simulator->setRobotPosition(RobotPos->pos());
+    LOG_WARNING("setStartingPosition: %s\n", RobotPos->txt());
 }

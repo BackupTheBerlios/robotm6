@@ -110,9 +110,9 @@ class RobotMainFullCL: public RobotMainCL
     virtual void resetAll();
 
  protected:
-    IoManagerCL*     ioMgr_;
-    MovementManager* mvtMgr_;
-    EventsManager*   evtMgr_;
+    IoManagerCL*       ioMgr_;
+    MovementManagerCL* mvtMgr_;
+    EventsManagerCL*   evtMgr_;
 };
 
 #endif // __ROBOT_MAIN_H__

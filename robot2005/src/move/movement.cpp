@@ -56,14 +56,12 @@ Movement::Movement(MoveType    type,
                    const char* Name,
                    MotorSpeed  maxSpeed,
                    MoveGain    gain,
-                   Move*       move):
+                   MoveCL*     move):
     RobotBase("Movement", CLASS_MOVEMENT), 
     maxSpeed_(maxSpeed), gain_(gain),
-    robotPosition_(NULL),  startTime_(TIME_INFINITE),
+    startTime_(TIME_INFINITE),
     type_(type), move_(move), nextMovement_(NULL)
 {
-    robotPosition_=ROBOT_POS;
-    assert(robotPosition_);
     assert(move_);
     if (Name) {
         strncpy(name_, Name, MOVEMENT_NAME_LENGHT);
@@ -134,27 +132,27 @@ bool Movement::moveToPoint(Point target, MoveGain gain,
 {
     MoveGain kl = gain;
     MoveGain kr = 5*gain;
-    bool forward = (MVTMGR->getDirection() == MOVE_DIRECTION_FORWARD);
+    bool forward = (MvtMgr->getDirection() == MOVE_DIRECTION_FORWARD);
     // attractive points coordinates 
-    Point attractivePoint = robotPosition_->pt();
-    attractivePoint.x += MOVE_ATTRACTIVE_DIST*cos(robotPosition_->theta()
+    Point attractivePoint = RobotPos->pt();
+    attractivePoint.x += MOVE_ATTRACTIVE_DIST*cos(RobotPos->theta()
                                                   + (forward?0:M_PI));
-    attractivePoint.y += MOVE_ATTRACTIVE_DIST*sin(robotPosition_->theta()
+    attractivePoint.y += MOVE_ATTRACTIVE_DIST*sin(RobotPos->theta()
                                                   + (forward?0:M_PI));
     
     // end ?= current point=target point 
     // or length from starting point > distance to final point 
     if (dist(attractivePoint, target) < MOVE_XY_EPSILON
-        || (maxDist>0 && (dist(startingPoint, robotPosition_->pt()) > maxDist))) {
+        || (maxDist>0 && (dist(startingPoint, RobotPos->pt()) > maxDist))) {
         return true;
     }
 
     // compute speed to go to the target
-    double linearSpeed    = (- (kl*(attractivePoint.x-target.x))*cos(robotPosition_->theta())
-                             - (kl*(attractivePoint.y-target.y))*sin(robotPosition_->theta()));  
+    double linearSpeed    = (- (kl*(attractivePoint.x-target.x))*cos(RobotPos->theta())
+                             - (kl*(attractivePoint.y-target.y))*sin(RobotPos->theta()));  
     double angularSpeed   =  (kr/POSITION_ROBOT_HCTL_D
-                              * ((  attractivePoint.x-target.x)*sin(robotPosition_->theta())
-                                 - (attractivePoint.y-target.y)*cos(robotPosition_->theta())));
+                              * ((  attractivePoint.x-target.x)*sin(RobotPos->theta())
+                                 - (attractivePoint.y-target.y)*cos(RobotPos->theta())));
 
     // il faut toujours avancer!
     if (linearSpeed < MOVE_MIN_SPEED) {
@@ -199,8 +197,8 @@ void Movement::start()
     LOG_INFO("Start movement %s\n", txt());
     startTime_=Timer->time();
     clearIntegralTerm();
-    startingPoint_ = robotPosition_->pt();
-    MVTMGR->resetPwmAlert();
+    startingPoint_ = RobotPos->pt();
+    MvtMgr->resetPwmAlert();
 }
 
 // ----------------------------------------------------------------------------
@@ -226,7 +224,7 @@ void Movement::stop()
 // ----------------------------------------------------------------------------
 MovementForward::MovementForward(Millimeter dist,
                                  MotorSpeed maxSpeed,
-                                 Move*      move) :
+                                 MoveCL*      move) :
     Movement(MOVE_FORWARD_TYPE, "Forward", maxSpeed, MOVE_GAIN_DEFAULT, move), 
     distance_(dist)
 {
@@ -238,7 +236,7 @@ MovementForward::MovementForward(Millimeter dist,
 // ----------------------------------------------------------------------------
 void MovementForward::periodicTask()
 {
-    Point currentPoint = robotPosition_->pt();
+    Point currentPoint = RobotPos->pt();
     assert(!endOfMovement_);
     Millimeter distToTarget = distance_ - dist(startingPoint_, currentPoint);
     if (distToTarget > 0) {
@@ -246,7 +244,7 @@ void MovementForward::periodicTask()
         if (distToTarget < MOVE_LINEAR_REDUCE_SPEED_DIST) {
             linearSpeed *= distToTarget/MOVE_LINEAR_REDUCE_SPEED_DIST;
         }
-        if (MVTMGR->getDirection() == MOVE_DIRECTION_FORWARD) {
+        if (MvtMgr->getDirection() == MOVE_DIRECTION_FORWARD) {
             setLRSpeed(linearSpeed, 0);
         } else {
             setLRSpeed(-linearSpeed, 0);
@@ -263,11 +261,11 @@ void MovementForward::periodicTask()
 // ----------------------------------------------------------------------------
 char* MovementForward::txt()
 {
-    Millimeter distToTarget = distance_ - dist(startingPoint_, robotPosition_->pt());
+    Millimeter distToTarget = distance_ - dist(startingPoint_, RobotPos->pt());
     snprintf(txt_, MOVEMENT_TXT_LENGHT,
              "%s: robot=%s, dist2target=%d mm",
              name(),
-             robotPosition_->txt(),
+             RobotPos->txt(),
              (int)distToTarget);
     return txt_;
 }
@@ -281,7 +279,7 @@ char* MovementForward::txt()
 // ----------------------------------------------------------------------------
 MovementBackward::MovementBackward(Millimeter dist,
                                    MotorSpeed maxSpeed,
-                                   Move*      move) :
+                                   MoveCL*      move) :
     Movement(MOVE_BACKWARD_TYPE, "Backward", maxSpeed, MOVE_GAIN_DEFAULT, move), 
     distance_(dist)
 {
@@ -292,7 +290,7 @@ MovementBackward::MovementBackward(Millimeter dist,
 // ----------------------------------------------------------------------------
 void MovementBackward::periodicTask()
 {
-    Point currentPoint = robotPosition_->pt();
+    Point currentPoint = RobotPos->pt();
     assert(!endOfMovement_);
     Millimeter distToTarget = distance_ - dist(startingPoint_, currentPoint);
     if (distToTarget > 0) {
@@ -300,7 +298,7 @@ void MovementBackward::periodicTask()
         if (distToTarget < MOVE_LINEAR_REDUCE_SPEED_DIST) {
             linearSpeed *= distToTarget/MOVE_LINEAR_REDUCE_SPEED_DIST;
         }
-        if (MVTMGR->getDirection() == MOVE_DIRECTION_FORWARD) {
+        if (MvtMgr->getDirection() == MOVE_DIRECTION_FORWARD) {
             setLRSpeed(linearSpeed, 0);
         } else {
             setLRSpeed(-linearSpeed, 0);
@@ -317,11 +315,11 @@ void MovementBackward::periodicTask()
 // ----------------------------------------------------------------------------
 char* MovementBackward::txt()
 {
-    Millimeter distToTarget = distance_ - dist(startingPoint_, robotPosition_->pt());
+    Millimeter distToTarget = distance_ - dist(startingPoint_, RobotPos->pt());
     snprintf(txt_, MOVEMENT_TXT_LENGHT,
              "%s: robot=%s, dist2target=%d mm",
              name(),
-             robotPosition_->txt(),
+             RobotPos->txt(),
              (int)distToTarget);
     return txt_;
 }
@@ -336,7 +334,7 @@ char* MovementBackward::txt()
 MovementRotate::MovementRotate(Radian     theta,
                                MoveGain   gain,
                                MotorSpeed maxSpeed,
-                               Move*      move) :
+                               MoveCL*      move) :
     Movement(MOVE_ROTATE_TYPE, "Rotate", 
              max(maxSpeed, MOVE_MAX_ROTATION_SPEED), gain, move), 
     theta_(theta)
@@ -350,7 +348,7 @@ void MovementRotate::periodicTask()
 {
     assert(!endOfMovement_);
     // compute the angle between current direction and target direction 
-    Radian error = theta_ - na2PI(robotPosition_->theta(),
+    Radian error = theta_ - na2PI(RobotPos->theta(),
 				  theta_ - Geometry2D::MM_PI);
     // pour eviter une oscillation si error est proche de MM_PI, -MM_PI... 
     if (fabs(na2PI(error, -Geometry2D::MM_PI))>4.*Geometry2D::MM_PI/5.) {
@@ -380,7 +378,7 @@ char* MovementRotate::txt()
     snprintf(txt_, MOVEMENT_TXT_LENGHT,
              "%s: robot=%s, target=%d deg",
              name(),
-             robotPosition_->txt(),
+             RobotPos->txt(),
              r2d(theta_));
     return txt_;
 }
@@ -395,11 +393,11 @@ char* MovementRotate::txt()
 MovementRotateFromAngle::MovementRotateFromAngle(Radian     deltaTheta,
                                                  MoveGain   gain,
                                                  MotorSpeed maxSpeed,
-                                                 Move*      move) :
+                                                 MoveCL*      move) :
     Movement(MOVE_ROTATE_FROM_ANGLE_TYPE,"RotateDelta", 
              max(maxSpeed, MOVE_MAX_ROTATION_SPEED), gain, move)
 {
-    theta_ = robotPosition_->theta() + deltaTheta;
+    theta_ = RobotPos->theta() + deltaTheta;
 }
     
 // ----------------------------------------------------------------------------
@@ -409,7 +407,7 @@ void MovementRotateFromAngle::periodicTask()
 {
     assert(!endOfMovement_);
     // compute the angle between current direction and target direction 
-    Radian error = theta_ - robotPosition_->theta();
+    Radian error = theta_ - RobotPos->theta();
     // end = current direction == target direction (+/-epsilon)
     if (fabs(error) < MOVE_ROTATION_EPSILON*gain_) {
         stop();
@@ -433,7 +431,7 @@ char* MovementRotateFromAngle::txt()
     snprintf(txt_, MOVEMENT_TXT_LENGHT,
              "%s: robot=%s, target=%d deg",
              name(),
-             robotPosition_->txt(),
+             RobotPos->txt(),
              r2d(theta_));
     return txt_;
 }
@@ -448,7 +446,7 @@ char* MovementRotateFromAngle::txt()
 MovementGo2Target::MovementGo2Target(Point      target,
                                      MoveGain   gain,
                                      MotorSpeed maxSpeed,
-                                     Move*      move) :
+                                     MoveCL*      move) :
     Movement(MOVE_GOTOTARGET_TYPE, "GotoTarget", maxSpeed, gain, move), 
     target_(target), totalLength_(0), totalLengthInit_(false)
 {
@@ -460,7 +458,7 @@ MovementGo2Target::MovementGo2Target(Point      target,
 void MovementGo2Target::periodicTask()
 {
     assert(!endOfMovement_);
-    Millimeter distToTarget = dist(target_, robotPosition_->pt());
+    Millimeter distToTarget = dist(target_, RobotPos->pt());
     Point moveTargetPoint   = target_;
     MoveGain gain           = gain_;
     if (!totalLengthInit_) {
@@ -488,11 +486,11 @@ void MovementGo2Target::periodicTask()
 // ----------------------------------------------------------------------------
 char* MovementGo2Target::txt()
 {
-    Millimeter distToTarget = dist(target_, robotPosition_->pt());
+    Millimeter distToTarget = dist(target_, RobotPos->pt());
     snprintf(txt_, MOVEMENT_TXT_LENGHT,
              "%s: robot=%s, dist2Target=%d mm, currentTarget=%s",
              name(),
-             robotPosition_->txt(),
+             RobotPos->txt(),
              (int)distToTarget,
              target_.txt());
     return txt_; 
@@ -509,7 +507,7 @@ MovementTrajectory::MovementTrajectory(Trajectory const&   trajectory,
                                        MoveTrajectoryMode  mode,
                                        MoveGain            gain,
                                        MotorSpeed          maxSpeed,
-                                       Move*               move) :
+                                       MoveCL*               move) :
     Movement(MOVE_TRAJECTORY_TYPE, "Trajectory", maxSpeed, gain, move), 
     trajectory_(trajectory), trajectoryMode_(mode), 
     currentIndex_(0.), lastIndex_(0), totalLength_(-1), lastLength_(0),
@@ -517,9 +515,9 @@ MovementTrajectory::MovementTrajectory(Trajectory const&   trajectory,
 {
     if (trajectory_.size() <= 1) {
         trajectory_.clear();
-        trajectory_.push_back(ROBOT_POS->pt());
-        trajectory_.push_back(ROBOT_POS->pt()+200.*Point(cos(ROBOT_POS->theta()),
-                                                         sin(ROBOT_POS->theta()) ));
+        trajectory_.push_back(RobotPos->pt());
+        trajectory_.push_back(RobotPos->pt()+200.*Point(cos(RobotPos->theta()),
+                                                        sin(RobotPos->theta()) ));
     }
 }
 
@@ -571,7 +569,7 @@ Millimeter MovementTrajectory::distToVirage(int currentIndex)
 
     Radian alpha=0;
     int indexPremierVirage=max(0, currentIndex-1);
-    Millimeter distance=dist(trajectory_[indexPremierVirage],ROBOT_POS->pt());
+    Millimeter distance=dist(trajectory_[indexPremierVirage], RobotPos->pt());
     
     while((indexPremierVirage<(int)trajectory_.size()-2) 
 	  && fabs(na2PI(alpha, -M_PI))< ANGLE_LIMIT_VIRAGE)
@@ -589,7 +587,7 @@ Millimeter MovementTrajectory::distToVirage(int currentIndex)
 	   trajectory_.size(), 
 	   (int)distance);*/
     if(indexPremierVirage >= (int)trajectory_.size()-2) {
-	return dist(trajectory_[trajectory_.size()-1],ROBOT_POS->pt());
+	return dist(trajectory_[trajectory_.size()-1], RobotPos->pt());
     } else {
 	return distance;
     }
@@ -605,7 +603,7 @@ void MovementTrajectory::periodicTask()
 {
     assert(!endOfMovement_);
     MoveGain gain = gain_;
-    Point moveTargetPoint = robotPosition_->pt();
+    Point moveTargetPoint = RobotPos->pt();
     unsigned int lastIndex = (unsigned int)currentIndex_;
     unsigned int maxIndex = (unsigned int)(trajectory_.size() - 1);
     if (trajectory_.size()<1) return;
@@ -615,7 +613,7 @@ void MovementTrajectory::periodicTask()
     // si on est sur le dernier segment, on ne doit pas depasser le dernier point
     if ((unsigned int)currentIndex_ == maxIndex
        && lastIndex != currentIndex_) {
-         beforeLastPoint_ = robotPosition_->pt();
+         beforeLastPoint_ = RobotPos->pt();
          totalLength_ = dist(beforeLastPoint_, trajectory_[maxIndex]);
     }
     
@@ -641,7 +639,7 @@ char* MovementTrajectory::txt()
     snprintf(txt_, MOVEMENT_TXT_LENGHT,
              "%s: robot=%s, index=%f, currentTarget=%s",
              name(),
-             robotPosition_->txt(),
+             RobotPos->txt(),
              (float)currentIndex_,
              trajectory_[max(1+(int)currentIndex_, (int)(trajectory_.size() - 1))].txt());
     return txt_;       

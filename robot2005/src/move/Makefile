@@ -8,8 +8,8 @@ SRC_ROOT=..
 LIB_NAME=libmove
 OBJS=move.o movement.o robotPosition.o movementManager.o
 
-LIB_NAME_SIMU=${LIB_NAME}Simu
-OBJS_SIMU=moveSimu.o movement.o robotPosition.o movementManagerSimu.o
+LIB_NAME_SIMU=
+OBJS_SIMU=
 
 ## ===========================================================================
 ## Source files used to generate dependencies
@@ -40,17 +40,11 @@ all: lib bin validate
 clean:	default_clean
 	${RM} -f  ${STATIC_LIB_DIR}/${LIB_NAME}.a        \
                   ${DYNAMIC_LIB_DIR}/${LIB_NAME}.so  
-	${RM} -f  $(STATIC_LIB_DIR)/${LIB_NAME_REAL}.a   \
-	${RM} -f  $(STATIC_LIB_DIR)/${LIB_NAME_SIMU}.a   \
-                  ${DYNAMIC_LIB_DIR}/${LIB_NAME_SIMU}.so 
 
 ## ===========================================================================
 ## Main rules : ----- LIB -----
 ## ===========================================================================
 lib: $(STATIC_LIB_DIR)/${LIB_NAME}.a ${DYNAMIC_LIB_DIR}/${LIB_NAME}.so 
-lib: $(STATIC_LIB_DIR)/${LIB_NAME_SIMU}.a ${DYNAMIC_LIB_DIR}/${LIB_NAME_SIMU}.so
-
-
 
 ## ===========================================================================
 ## Main rules : ----- BIN -----
@@ -65,10 +59,7 @@ validate:
 ## ===========================================================================
 ## Specific rules
 ## ===========================================================================
-moveSimu.o: move.cpp move.o ${SRC_DIR}/include/move.h movement.h
-	${CC} -o $@ -c move.cpp ${DEFAULT_CFLAGS} ${DEFAULT_INC_DIR} -DSIMULATED
-movementManagerSimu.o: movementManager.cpp movementManager.o ${SRC_DIR}/include/move.h ${SRC_DIR}/include/robotPosition.h
-	${CC} -o $@ -c movementManager.cpp ${DEFAULT_CFLAGS} ${DEFAULT_INC_DIR} -DSIMULATED
+
 
 
 ## ===========================================================================

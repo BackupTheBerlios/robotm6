@@ -21,9 +21,9 @@ void StrategyCL::unlockEmergencyStop()
 	LOG_WARNING("EMERGENCY_STOP is pressed\n");
 	LCD->print("Unlock \nemergency stop");
 //	SOUND->play(SOUND_RELACHE_ARRET_URGENCE, SND_PRIORITY_URGENT);
-	MVTMGR->motorReset();
+	MvtMgr->motorReset();
 	Events->waitNot(EVENTS_EMERGENCY_STOP);
-	MVTMGR->motorReset();
+	MvtMgr->motorReset();
     }
 }
 

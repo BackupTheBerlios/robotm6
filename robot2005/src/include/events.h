@@ -29,8 +29,8 @@
 
 // TODO: I renamed the Events - enum into EventsEnum (so it's easy to find and
 // replace to give it a better name. [flo]
-#define Events         EventsManager::instance()
-#define EVENTS_MANAGER_DEFAULT EventsManagerActive
+#define Events         EventsManagerCL::instance()
+#define EVENTS_MANAGER_DEFAULT EventsManagerActiveCL
 
 typedef enum EventsEnum {
     EVENTS_GROUP_NONE, 
@@ -184,10 +184,10 @@ typedef struct EventsCallBackStruct {
  * vers le haut niveau et la strategie. Par exemple : collision detectee, 
  * arret d'urgence pressé
  */
-class EventsManager : public RobotComponent 
+class EventsManagerCL : public RobotComponent 
 {
  public:
-    virtual ~EventsManager();
+    virtual ~EventsManagerCL();
     /** Retourne true si le module est valide*/
     bool validate();
     /** Unraise all events and clear disable filter */
@@ -196,7 +196,7 @@ class EventsManager : public RobotComponent
 	       bool displayFalse=false);
 
     /** @brief Retourne un pointeur vers l'instance unique d'eventsManager */
-    static EventsManager* instance();
+    static EventsManagerCL* instance();
 
     /** @brief Déclenche un évenement et l'evenement correspondant au group */
     virtual void raise(EventsEnum evt)=0;
@@ -269,19 +269,19 @@ class EventsManager : public RobotComponent
     bool isEnabled(EventsEnum evt);
 
  protected:
-    static EventsManager* evtMgr_;
-     bool evtStatus_[EVENTS_NBR];
-     bool evtWaitStatus_[EVENTS_NBR]; // copie de evtStatus quand on sort de wait
-     bool evtEnables_[EVENTS_NBR];
-     EventsCallBackStruct evtImmediatCallbacks_[EVENTS_NBR];
-     EventsCallBackStruct evtCallbacks_[EVENTS_NBR];
-     bool evtCallbackMustBeRun_[EVENTS_NBR];
-     EventsCallBackStruct evtNotImmediatCallbacks_[EVENTS_NBR];
-     EventsCallBackStruct evtNotCallbacks_[EVENTS_NBR];
-     bool evtNotCallbackMustBeRun_[EVENTS_NBR];
+    static EventsManagerCL* evtMgr_;
+    bool evtStatus_[EVENTS_NBR];
+    bool evtWaitStatus_[EVENTS_NBR]; // copie de evtStatus quand on sort de wait
+    bool evtEnables_[EVENTS_NBR];
+    EventsCallBackStruct evtImmediatCallbacks_[EVENTS_NBR];
+    EventsCallBackStruct evtCallbacks_[EVENTS_NBR];
+    bool evtCallbackMustBeRun_[EVENTS_NBR];
+    EventsCallBackStruct evtNotImmediatCallbacks_[EVENTS_NBR];
+    EventsCallBackStruct evtNotCallbacks_[EVENTS_NBR];
+    bool evtNotCallbackMustBeRun_[EVENTS_NBR];
 
  public:
-    EventsManager();
+    EventsManagerCL();
  protected:
     void runCallbacks();
 };
@@ -292,11 +292,11 @@ class EventsManager : public RobotComponent
  * Efficace et on est reveille tout le temps tout de suite, mais risque de 
  * deadlock...
  */
-class EventsManagerPassive : public EventsManager
+class EventsManagerPassiveCL : public EventsManagerCL
 {
  public:
-    EventsManagerPassive();
-    virtual ~EventsManagerPassive();
+    EventsManagerPassiveCL();
+    virtual ~EventsManagerPassiveCL();
     
     /** @brief Déclenche un évenement et l'evenement correspondant au group */
     void raise(EventsEnum evt);
@@ -320,11 +320,11 @@ class EventsManagerPassive : public EventsManager
  * Probleme: risque de manquer un evenement qui est raise et unraise trop vite
  * Avantage: pas de risque de deadlock
  */
-class EventsManagerActive : public EventsManager
+class EventsManagerActiveCL : public EventsManagerCL
 {
  public:
-    EventsManagerActive();
-    virtual ~EventsManagerActive();
+    EventsManagerActiveCL();
+    virtual ~EventsManagerActiveCL();
     
     /** @brief Déclenche un évenement et l'evenement correspondant au group */
     void raise(EventsEnum evt);
@@ -346,18 +346,18 @@ class EventsManagerActive : public EventsManager
 // ===========================================================================
 
 // ----------------------------------------------------------------------------
-// EventsManager::instance
+// EventsManagerCL::instance
 // ----------------------------------------------------------------------------
-inline EventsManager* EventsManager::instance()
+inline EventsManagerCL* EventsManagerCL::instance()
 {
     assert(evtMgr_);
     return evtMgr_;
 }
 
 // ----------------------------------------------------------------------------
-// EventsManager::isEnabled
+// EventsManagerCL::isEnabled
 // ----------------------------------------------------------------------------
-inline bool EventsManager::isEnabled(EventsEnum evt)
+inline bool EventsManagerCL::isEnabled(EventsEnum evt)
 {
     return evtEnables_[(int)evt];
 }

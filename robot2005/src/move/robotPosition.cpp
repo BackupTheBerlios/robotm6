@@ -14,19 +14,19 @@
 
 void robotPositionMotorHasBeenReset()
 {
-    ROBOT_POS->resetHctlCoders();
+    RobotPos->resetHctlCoders();
 }
 
 
 // ----------------------------------------------------------------------------
 // Static members
 // ----------------------------------------------------------------------------
-RobotPosition* RobotPosition::position_=NULL;
+RobotPositionCL* RobotPositionCL::position_=NULL;
 
 // ----------------------------------------------------------------------------
 // Position::Position
 // ----------------------------------------------------------------------------
-RobotPosition::RobotPosition():
+RobotPositionCL::RobotPositionCL():
     RobotComponent("Position", CLASS_ROBOT_POSITION), 
     rightHctlOld_(0), leftHctlOld_(0), firstHctl_(true), 
     rightOdomOld_(0), leftOdomOld_(0), firstOdom_(true),
@@ -46,17 +46,17 @@ RobotPosition::RobotPosition():
 }
 
 // ----------------------------------------------------------------------------
-// RobotPosition::~RobotPosition
+// RobotPositionCL::~RobotPositionCL
 // ----------------------------------------------------------------------------
-RobotPosition::~RobotPosition()
+RobotPositionCL::~RobotPositionCL()
 {
     position_=NULL;
 }
 
 // ----------------------------------------------------------------------------
-// RobotPosition::txt
+// RobotPositionCL::txt
 // ----------------------------------------------------------------------------
-char* RobotPosition::txt()
+char* RobotPositionCL::txt()
 {
     if (txtChanged_) {
         snprintf(txt_, POSITION_TEXT_LENGTH, "x=%dmm, y=%d mm, t=%ddeg", 
@@ -67,9 +67,9 @@ char* RobotPosition::txt()
 }
 
 // ----------------------------------------------------------------------------
-// RobotPosition::set
+// RobotPositionCL::set
 // ----------------------------------------------------------------------------
-void RobotPosition::set(Millimeter X, 
+void RobotPositionCL::set(Millimeter X, 
 			Millimeter Y, 
 			Radian T)
 {
@@ -84,18 +84,18 @@ void RobotPosition::set(Millimeter X,
 }
 
 // ----------------------------------------------------------------------------
-// RobotPosition::theta
+// RobotPositionCL::theta
 // ----------------------------------------------------------------------------
-Radian RobotPosition::theta() const
+Radian RobotPositionCL::theta() const
 {
     return pos_.direction 
-        + (MVTMGR->getDirection() == MOVE_DIRECTION_FORWARD?0:M_PI);
+        + (MvtMgr->getDirection() == MOVE_DIRECTION_FORWARD?0:M_PI);
 }
 
 // ----------------------------------------------------------------------------
-// RobotPosition::clearBufferPosition
+// RobotPositionCL::clearBufferPosition
 // ----------------------------------------------------------------------------
-void RobotPosition::clearBufferPosition()
+void RobotPositionCL::clearBufferPosition()
 {
     for(int i=0; i < POS_BUFFER_SIZE; i++) {
 	posBuf_[i]=pos_;
@@ -104,18 +104,18 @@ void RobotPosition::clearBufferPosition()
 }
 
 // ----------------------------------------------------------------------------
-// RobotPosition::addPositionToBuffer
+// RobotPositionCL::addPositionToBuffer
 // ----------------------------------------------------------------------------
-void RobotPosition::addPositionToBuffer()
+void RobotPositionCL::addPositionToBuffer()
 {
     posBuf_[posBufIndex_] = pos_;
     posBufIndex_=(posBufIndex_+1)%POS_BUFFER_SIZE;
 }
 
 // ----------------------------------------------------------------------------
-// RobotPosition::getPosition
+// RobotPositionCL::getPosition
 // ----------------------------------------------------------------------------
-Position RobotPosition::getPosition(Millisecond deltaT)
+Position RobotPositionCL::getPosition(Millisecond deltaT)
 {
     int delta=(int)(deltaT/POS_BUFFER_STEP_TIME);
     int index= (POS_BUFFER_SIZE+posBufIndex_-delta)%POS_BUFFER_SIZE;
@@ -123,11 +123,11 @@ Position RobotPosition::getPosition(Millisecond deltaT)
 }
 
 // ----------------------------------------------------------------------------
-// RobotPosition::setOdometerType
+// RobotPositionCL::setOdometerType
 // ----------------------------------------------------------------------------
 // Definit le type d'odometre a utiliser
 // ----------------------------------------------------------------------------
-void RobotPosition::setOdometerType(OdometerType odometer)
+void RobotPositionCL::setOdometerType(OdometerType odometer)
 {
     odometerType_ = odometer;
     if (odometerType_ == ODOMETER_UART_AUTOMATIC) {
@@ -145,27 +145,27 @@ void RobotPosition::setOdometerType(OdometerType odometer)
 }
     
 // ----------------------------------------------------------------------------
-// RobotPosition::getOdometerType
+// RobotPositionCL::getOdometerType
 // ----------------------------------------------------------------------------
 // Retourne le type d'odometre utilise
 // ----------------------------------------------------------------------------
-OdometerType RobotPosition::getOdometerType() const
+OdometerType RobotPositionCL::getOdometerType() const
 {
     return odometerType_;
 }
 
 // ----------------------------------------------------------------------------
-// RobotPosition::print
+// RobotPositionCL::print
 // ----------------------------------------------------------------------------
-void RobotPosition::print() 
+void RobotPositionCL::print() 
 {
     printf("Robot Position:%s\n", txt());
 }
 
 // ----------------------------------------------------------------------------
-// RobotPosition::reset
+// RobotPositionCL::reset
 // ----------------------------------------------------------------------------
-bool RobotPosition::reset()
+bool RobotPositionCL::reset()
 {
     LOG_FUNCTION();
     resetHctlCoders();
@@ -185,18 +185,18 @@ bool RobotPosition::reset()
 }
 
 // ----------------------------------------------------------------------------
-// RobotPosition::validate
+// RobotPositionCL::validate
 // ----------------------------------------------------------------------------
-bool RobotPosition::validate()
+bool RobotPositionCL::validate()
 {
     // not tested
     return false;
 }
 
 // ----------------------------------------------------------------------------
-// RobotPosition::getPosition
+// RobotPositionCL::getPosition
 // ----------------------------------------------------------------------------
-void RobotPosition::getPosition(Position&      posi,
+void RobotPositionCL::getPosition(Position&      posi,
                                 CoderPosition  leftPos, 
                                 CoderPosition  rightPos,
                                 CoderPosition& leftPosOld, 
@@ -265,12 +265,12 @@ void RobotPosition::getPosition(Position&      posi,
 }
 
 // ----------------------------------------------------------------------------
-// RobotPosition::updateHctlPosition
+// RobotPositionCL::updateHctlPosition
 // ----------------------------------------------------------------------------
-void RobotPosition::updateHctlPosition()
+void RobotPositionCL::updateHctlPosition()
 {
     CoderPosition left=0, right=0;
-    MVTMGR->getCoderPosition(left, right);
+    MvtMgr->getCoderPosition(left, right);
     getPosition(posHctl_,
                 left, 
                 right,
@@ -284,9 +284,9 @@ void RobotPosition::updateHctlPosition()
 }
 
 // ----------------------------------------------------------------------------
-// RobotPosition::isOdometerAlive
+// RobotPositionCL::isOdometerAlive
 // ----------------------------------------------------------------------------
-bool RobotPosition::isOdometerAlive()
+bool RobotPositionCL::isOdometerAlive()
 {
     bool result = (odometerErrorCount_ < ODOMETER_ERROR_MAX);
     odometerErrorCount_++;
@@ -294,9 +294,9 @@ bool RobotPosition::isOdometerAlive()
 }
 
 // ----------------------------------------------------------------------------
-// RobotPosition::setOdometerAliveStatus
+// RobotPositionCL::setOdometerAliveStatus
 // ----------------------------------------------------------------------------
-void RobotPosition::setOdometerAliveStatus(bool alive)
+void RobotPositionCL::setOdometerAliveStatus(bool alive)
 {
     if (alive) {
         odometerErrorCount_ = 0;
@@ -306,9 +306,9 @@ void RobotPosition::setOdometerAliveStatus(bool alive)
 }
 
 // ----------------------------------------------------------------------------
-// RobotPosition::updateOdometerPosition
+// RobotPositionCL::updateOdometerPosition
 // ----------------------------------------------------------------------------
-void RobotPosition::updateOdometerPosition()
+void RobotPositionCL::updateOdometerPosition()
 {
     CoderPosition left=0, right=0;
     //printf("updateOdometerPosition\n");
@@ -342,9 +342,9 @@ void RobotPosition::updateOdometerPosition()
 }
 
 // ----------------------------------------------------------------------------
-// RobotPosition::enableColliDetectionWithOdometer
+// RobotPositionCL::enableColliDetectionWithOdometer
 // ----------------------------------------------------------------------------
-void RobotPosition::enableColliDetectionWithOdometer(bool enable)
+void RobotPositionCL::enableColliDetectionWithOdometer(bool enable)
 {
     enableOdoHtclColliDetec_ = enable;
     resetOdoColliDetection();
@@ -352,9 +352,9 @@ void RobotPosition::enableColliDetectionWithOdometer(bool enable)
 }
 
 // ----------------------------------------------------------------------------
-// RobotPosition::clearOdoColliDetectBuffer
+// RobotPositionCL::clearOdoColliDetectBuffer
 // ----------------------------------------------------------------------------
-void RobotPosition::clearOdoColliDetectBuffer()
+void RobotPositionCL::clearOdoColliDetectBuffer()
 {
     LOG_FUNCTION();
     oldPosHctl_=posHctl_;
@@ -371,19 +371,19 @@ void RobotPosition::clearOdoColliDetectBuffer()
     sumDpHctl_=0;
 }
 
-void RobotPosition::resetOdoColliDetection()
+void RobotPositionCL::resetOdoColliDetection()
 {
     firstSum_=true;
     timeToCheckPatinage_=Timer->time()+300;
 }
 // ----------------------------------------------------------------------------
-// RobotPosition::detectCollision
+// RobotPositionCL::detectCollision
 // ----------------------------------------------------------------------------
 // compare la position des hctl et des odometres et si les odometres ne bougent
 // pas alors que les hctl oui, on envoie le signal EVENTS_PWM qui est
 // interprete comme un probleme de deplacement
 // ----------------------------------------------------------------------------
-void RobotPosition::detectCollision()
+void RobotPositionCL::detectCollision()
 {
     if (odometerType_ == ODOMETER_MOTOR 
        || !enableOdoHtclColliDetec_) return;
@@ -438,9 +438,9 @@ void RobotPosition::detectCollision()
 
 #define DEBUG_ODOMETRE
 // ----------------------------------------------------------------------------
-// RobotPosition::periodicTask
+// RobotPositionCL::periodicTask
 // ----------------------------------------------------------------------------
-void RobotPosition::periodicTask(Millisecond time)
+void RobotPositionCL::periodicTask(Millisecond time)
 {
     switch(odometerType_) {
     case ODOMETER_UART_MANUAL:

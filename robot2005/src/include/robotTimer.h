@@ -56,7 +56,6 @@ class RobotTimerCL : public RobotComponent
 				const char* fnName,
 				void* userData);
 
- protected:
   /** @brief tic inits  a chronometer, identified  by the tv_before that  it is
    * passed
    */

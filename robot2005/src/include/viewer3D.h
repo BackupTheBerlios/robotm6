@@ -242,6 +242,11 @@ struct ViewerRobotData {
     }
     void setPos(Position const& Pos) {
         pos = Pos;
+        Millimeter d=0;
+        if (currentTrajectory.size()==0 ||
+            (d=dist(pos.center, currentTrajectory[currentTrajectory.size()-1])) > 20)
+            if (d>300) currentTrajectory.clear();
+            else currentTrajectory.push_back(pos.center);
     }
     void setEstimatedPos(Position const& Pos) {
         estimatedPos = Pos;
@@ -250,6 +255,11 @@ struct ViewerRobotData {
         pos.center.x  = x;
         pos.center.y  = y;
         pos.direction = t;
+        Millimeter d=0;
+        if (currentTrajectory.size()==0 ||
+            (d=dist(pos.center, currentTrajectory[currentTrajectory.size()-1])) > 20)
+            if (d>300) currentTrajectory.clear();
+            else currentTrajectory.push_back(pos.center);
     }
     void setTrajectory(Trajectory const& T) {
         targetTrajectory = T;

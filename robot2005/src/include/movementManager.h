@@ -23,7 +23,7 @@
 #include "robotBase.h"
 #include "mthread.h"
 
-#define MVTMGR MovementManager::instance()
+#define MvtMgr MovementManagerCL::instance()
 // ============================================================================
 // ==========================  class MovementManager   ========================
 // ============================================================================
@@ -60,20 +60,20 @@ typedef enum MotorDirection {
  * Gere les composants necessaires pour faire bouger le robot. S'occupe de 
  * creer le thread pour les taches periodic de motor, move et position
  */
-class MovementManager : public RobotComponent
+class MovementManagerCL : public RobotComponent
 {
  public:
     /** Le constructeur ne doit etre appele qu'une fois par main. Ensuite, 
         utiliser instance */
-    MovementManager();
-    virtual ~MovementManager();
+    MovementManagerCL();
+    virtual ~MovementManagerCL();
     /** Function réservée au thread!: calcul la nouvelle position et la 
         nouvelle consigne */
     void periodicTask();
 
     /** @brief Retourne le singleton correspondant a la classe 
         MovementManager */
-    static MovementManager* instance();
+    static MovementManagerCL* instance();
 
     /** @brief Redemarre le composant dans son etat initial et vide les 
                buffers... */
@@ -91,8 +91,8 @@ class MovementManager : public RobotComponent
                savoir si le code n'a pas ete boggue */
     bool validate();
 
-    RobotPosition* position(){return position_;}
-    Move*          move()    {return move_;}
+    RobotPositionCL* position(){return position_;}
+    MoveCL*          move()    {return move_;}
 
     /** @brief Reset les moteurs quand on detecte qu'ils sont bloques */
     void enableAutomaticReset(bool enable);
@@ -126,27 +126,27 @@ class MovementManager : public RobotComponent
 			  CoderPosition& right);
     void getPWM(MotorPWM& left, 
 		MotorPWM& right);
-    friend class Move;
-    friend class RobotPosition;
+    friend class MoveCL;
+    friend class RobotPositionCL;
     friend class LogCL;
 
  private:
-    static MovementManager* mvtMgr_;
-    Motor*         motor_;
-    RobotPosition* position_;
-    Move*          move_;
-    FunctionPtr    periodicCallback_;
-    volatile bool  needMotorReset_;
-    bool           threadStarted_;
-    MotorCom       motorCom_;
-    MThreadId      thread_;
-    MoveDirection  direction_;
+    static MovementManagerCL* mvtMgr_;
+    Motor*           motor_;
+    RobotPositionCL* position_;
+    MoveCL*          move_;
+    FunctionPtr      periodicCallback_;
+    volatile bool    needMotorReset_;
+    bool             threadStarted_;
+    MotorCom         motorCom_;
+    MThreadId        thread_;
+    MoveDirection    direction_;
 };
 
 // ----------------------------------------------------------------------------
 // MovementManager::registerPeriodicCallback
 // ----------------------------------------------------------------------------
-inline void MovementManager::registerPeriodicCallback(FunctionPtr fn)
+inline void MovementManagerCL::registerPeriodicCallback(FunctionPtr fn)
 {
     periodicCallback_ = fn;
 }
@@ -154,7 +154,7 @@ inline void MovementManager::registerPeriodicCallback(FunctionPtr fn)
 // ----------------------------------------------------------------------------
 // MovementManager::instance
 // ----------------------------------------------------------------------------
-inline MovementManager* MovementManager::instance()
+inline MovementManagerCL* MovementManagerCL::instance()
 {
     assert(mvtMgr_);
     return mvtMgr_;
@@ -163,7 +163,7 @@ inline MovementManager* MovementManager::instance()
 // ----------------------------------------------------------------------------
 // MovementManager::getDirection
 // ----------------------------------------------------------------------------
-inline MoveDirection MovementManager::getDirection() 
+inline MoveDirection MovementManagerCL::getDirection() 
 {
     return direction_; 
 }
@@ -171,7 +171,7 @@ inline MoveDirection MovementManager::getDirection()
 // ----------------------------------------------------------------------------
 // MovementManager::getMotorSpeed
 // ----------------------------------------------------------------------------
-inline void MovementManager::getMotorSpeed(MotorSpeed  &speedLeft,
+inline void MovementManagerCL::getMotorSpeed(MotorSpeed  &speedLeft,
 					   MotorSpeed  &speedRight)
 {
     speedLeft  = motorCom_.speedLeft;

@@ -10,7 +10,7 @@
 namespace {
   pthread_mutex_t repositoryLock3 = PTHREAD_MUTEX_INITIALIZER;
   extern "C" {
-    struct timeval chronometerTic;
+    struct timeval robotTimerChronometerTic;
   }
   void no_op(...){};
 }
@@ -32,7 +32,7 @@ RobotTimerCL::RobotTimerCL() :
     timer_=this;
     LOG_FUNCTION();
     no_op(repositoryLock3);
-    tic(&chronometerTic);
+    tic(&robotTimerChronometerTic);
     reset();
     setInitialized (MTHREAD_CREATE("Timer Thread",
 			   &thread_, 
@@ -65,7 +65,7 @@ RobotTimerCL::~RobotTimerCL()
 Millisecond RobotTimerCL::time()
 {
     if (instance()->time_ >=0 ) {
-	instance()->time_ = tac(&chronometerTic);
+	instance()->time_ = tac(&robotTimerChronometerTic);
     }
     return instance()->time_;
 }
@@ -78,7 +78,7 @@ Millisecond RobotTimerCL::time()
 void RobotTimerCL::startMatch()
 {
     LOG_FUNCTION();
-    tic(&chronometerTic);
+    tic(&robotTimerChronometerTic);
     instance()->time_=0;
 }
 

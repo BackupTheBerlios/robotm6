@@ -69,6 +69,7 @@ void Viewer3DCL::drawRobots2D()
         drawEstimatedBridges2D((int)i);
     }
 }
+
 // ---------------------------------------------------------------
 // Viewer3DCL::drawRobot2D
 // ---------------------------------------------------------------
@@ -634,7 +635,7 @@ void Viewer3DCL::drawTrajectory2D(Trajectory * t, bool target)
 // ---------------------------------------------------------------
 void Viewer3DCL::drawLegend2D() 
 {
-    int X=0, Y=220;
+    int X=0, Y=220+2*MARGIN;
     int CIRCLE_RAYON=30;
     GLUquadric* quad=gluNewQuadric();
     static ViewerColorST textColorRed(1,0,0,1);
@@ -644,7 +645,14 @@ void Viewer3DCL::drawLegend2D()
                 "x=%3d, y=%3d, t=%3d, time=%d",
                 (int)x/10, (int)y/10, r2d(t)%360, 
                 (int)(time_/1000.));*/
-    
+    X=5;
+    glPushMatrix ();
+    glColor4f(COLOR_BUMPER_OBSTACLE);
+    glTranslatef(X,Y-MARGIN,0);
+    gluDisk(quad, 0, CIRCLE_RAYON*SCALE, 10,5);
+    glPopMatrix();
+    ViewerText::draw(X+20,Y-2, "Bump");
+
     X+=100;
     glPushMatrix ();
     glColor4f(COLOR_ENV_OBSTACLE);
@@ -652,14 +660,6 @@ void Viewer3DCL::drawLegend2D()
     gluDisk(quad, 0, CIRCLE_RAYON*SCALE, 10,5);
     glPopMatrix();
     ViewerText::draw(X+20,Y-3, "env");
-    
-    X=5; Y+=2*MARGIN;
-    glPushMatrix ();
-    glColor4f(COLOR_BUMPER_OBSTACLE);
-    glTranslatef(X,Y-MARGIN,0);
-    gluDisk(quad, 0, CIRCLE_RAYON*SCALE, 10,5);
-    glPopMatrix();
-    ViewerText::draw(X+20,Y-2, "Bump");
     
     X+=100;
     glPushMatrix ();

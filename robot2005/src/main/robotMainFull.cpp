@@ -68,8 +68,8 @@ namespace {
       Log->closeLogFile();
 
       IOMGR->emergencyStop();
-      MOVE->userAbort();
-      MVTMGR->reset();
+      Move->userAbort();
+      MvtMgr->reset();
       
       LOG_WARNING("exit\n");
       if (main) delete main;
@@ -95,13 +95,27 @@ RobotMainFullCL::RobotMainFullCL() :
             if (RobotConfig->isRobotAttack) {
                 Simulator->setRobotName("RobotMain Attack");
                 Simulator->setRobotModel(ROBOT_MODEL_ATTACK);
-                Simulator->setRobotMotorCoef(300, 0.004, -1, -1);
-                Simulator->setRobotOdomCoef(100, M_PI/2, 0.1, 1, 1);
+                Simulator->setRobotMotorCoef(POSITION_ROBOT_HCTL_D*0.9,
+                                             POSITION_ROBOT_HCTL_K, 
+                                             (POSITION_CODER_HCTL_SIGN_LEFT),
+                                             (POSITION_CODER_HCTL_SIGN_RIGHT));
+                Simulator->setRobotOdomCoef(POSITION_ROBOT_ODOM_D/2,
+                                            M_PI/2, 
+                                            POSITION_ROBOT_ODOM_K, 
+                                            POSITION_CODER_ODOM_SIGN_LEFT,
+                                            POSITION_CODER_ODOM_SIGN_RIGHT);
             } else {
                 Simulator->setRobotName("RobotMain Defence");
                 Simulator->setRobotModel(ROBOT_MODEL_DEFENCE);
-                Simulator->setRobotMotorCoef(300, 0.004, -1, -1);
-                Simulator->setRobotOdomCoef(100, M_PI/2, 0.1, 1, 1);
+                Simulator->setRobotMotorCoef(POSITION_ROBOT_HCTL_D,
+                                             POSITION_ROBOT_HCTL_K, 
+                                             POSITION_CODER_HCTL_SIGN_LEFT,
+                                             POSITION_CODER_HCTL_SIGN_RIGHT);
+                Simulator->setRobotOdomCoef(POSITION_ROBOT_ODOM_D/2,
+                                            M_PI/2, 
+                                            POSITION_ROBOT_ODOM_K, 
+                                            POSITION_CODER_ODOM_SIGN_LEFT,
+                                            POSITION_CODER_ODOM_SIGN_RIGHT);
             }
         }
     }
@@ -112,7 +126,7 @@ RobotMainFullCL::RobotMainFullCL() :
     }
     evtMgr_   = new EVENTS_MANAGER_DEFAULT();
     ioMgr_    = new IoManagerCL();
-    mvtMgr_   = new MovementManager(); // simulator doit etre cree avant mvtMgr
+    mvtMgr_   = new MovementManagerCL(); // simulator doit etre cree avant mvtMgr
     
     // enregistre la detection du Ctrl+C et du callback correspondant qui 
     // stoppe le programme immediatement
@@ -187,8 +201,6 @@ void RobotMainFullCL::run(StrategyCL* strategy,
 				  "timerFunctionGameOver",
 				  this,
 				  TIME_MATCH);
-    LCD->setLed(LCD_LED_RED, LCD_LED_OFF);
-    LCD->setLed(LCD_LED_GREEN, LCD_LED_OFF);
     RobotMainCL::run(strategy, argc, argv);
 }
 

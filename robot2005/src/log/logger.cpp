@@ -28,6 +28,13 @@
 int sock_=0;
 File* file_=NULL;
 
+static const int LOG_LIMIT_DEFAULT=40;
+
+char logDirectory_[255];
+int  logLimit_=LOG_LIMIT_DEFAULT;
+static const char* logBaseName_="robot_";
+static const char* logDateName_="robotLog_";
+
 // --------------------------------------------------------------------
 // testDirent
 // --------------------------------------------------------------------
@@ -38,10 +45,6 @@ int testDirent(const struct dirent* p)
   }
   return 1;
 }
-
-static const int LOG_LIMIT=40;
-static const char* logBaseName="robot_";
-static const char* logDateName="robotLog_";
 
 // --------------------------------------------------------------------
 // Cree un fichier qui donne la correpondance fichier de log, date
@@ -54,18 +57,18 @@ void updateCorrepondanceFile(int &num)
     FILE* f2=NULL;
     char configName[255];
     int i=-1;
-    char srcName[LOG_LIMIT][255];
-    char destName[LOG_LIMIT][255];
-    sprintf(configName, "%s/date.txt", LOG_DIRECTORY_NAME);
+    char srcName[LOG_LIMIT_DEFAULT][255];
+    char destName[LOG_LIMIT_DEFAULT][255];
+    sprintf(configName, "%s/date.txt", logDirectory_);
     configFile = fopen(configName, "r");
     if (configFile != NULL) {
 	if (fscanf(configFile, "Last=%d\n", &num) == 1) {
-	    num=(num+1)%LOG_LIMIT;
-	    for(i=0;i<=LOG_LIMIT; i++) {
+	    num=(num+1)%logLimit_;
+	    for(i=0;i<=logLimit_; i++) {
 		if (fscanf(configFile, "%s %s\n", srcName[i], destName[i]) != 2)
 		    break;
 		char filename[255];
-		sprintf(filename, "%s/%s", LOG_DIRECTORY_NAME, srcName[i]);
+		sprintf(filename, "%s/%s", logDirectory_, srcName[i]);
 		if ((f2=fopen(filename,"r"))!=NULL) {
 		    fclose(f2);
 		    int numI=-1;
@@ -87,9 +90,9 @@ void updateCorrepondanceFile(int &num)
     time_t tloc;
     time(&tloc);
     struct tm *ltime=localtime(&tloc);
-    sprintf(srcName[num],"%s%02d.log.gz", logBaseName, num);
+    sprintf(srcName[num],"%s%02d.log.gz", logBaseName_, num);
     sprintf(destName[num], "%s%02d%02d%02d_%02dh%02dm%02ds.gz", 
-            logDateName,
+            logDateName_,
             ltime->tm_year%100,
             ltime->tm_mon+1,
             ltime->tm_mday,
@@ -120,8 +123,8 @@ int initFile(File* file)
 
   updateCorrepondanceFile(num_last);
   sprintf(archiveName,"%s/%s%02d.log", 
-	  LOG_DIRECTORY_NAME, 
-	  logBaseName, 
+	  logDirectory_, 
+	  logBaseName_, 
 	  num_last);
 
   ::printf("Create new log file --> %s.gz\n  mv %s.gz ../log\n", 
@@ -393,26 +396,43 @@ bool processPacket(int sock,
         return false;
     }
 }
-	
+
+// --------------------------------------------------------------------
+// parseArgs
+// --------------------------------------------------------------------
+void parseArgs(int argc, char*argv[])
+{
+    strcpy(logDirectory_, LOG_DIRECTORY_NAME);
+    for(int i=1; i<argc; i++) {
+        if (strcmp(argv[i], "-l")==0 && ++i<argc) logLimit_=atoi(argv[i]);
+        else strcpy(logDirectory_, argv[i]);
+    }
+    if (logLimit_<3) 
+        logLimit_ = 0;
+    else if (logLimit_> LOG_LIMIT_DEFAULT) 
+        logLimit_ =  LOG_LIMIT_DEFAULT;
+    printf("Usage: %s [logDirectory=%s] [-l logLimit(%d)]\n"
+           "  logDirectory: repertoire ou sont stockés les logs\n"
+           "  logLimit: nombre maximum de fichier logs dans logDirectory. "
+           "Si la limite est atteinte, le plus vieux log est efface\n",
+           argv[0], logDirectory_, logLimit_);
+}
+
 // --------------------------------------------------------------------
 // main
 // --------------------------------------------------------------------
 int main(int argc, char*argv[]) 
 {    
-    printf("Usage: %s -d\n"
-           "  -d Means display received logs\n",
-           argv[0]);
+    parseArgs(argc, argv);
+
     struct sigaction a;
     a.sa_handler = traitementInterrupt;      /* fonction à lancer */
     sigemptyset(&a.sa_mask);    /* rien à masquer */
     
     sigaction(SIGTSTP, &a, NULL);       /* pause contrôle-Z */
-    sigaction(SIGINT,  &a, NULL);        /* fin contrôle-C */
+    sigaction(SIGINT,  &a, NULL);       /* fin contrôle-C */
     sigaction(SIGTERM, &a, NULL);       /* arrêt */
     sigaction(SIGSEGV, &a, NULL);       /* segmentation fault ! */
-
-    bool display=(argc>1 && strncmp(argv[1], "-d", 2)==0);
-    printf("display=%s\n", b2s(display));
 
     int sock=0;
     initSocket(sock);
@@ -424,7 +444,7 @@ int main(int argc, char*argv[])
     
     while(1) {
 	bool close=false;
-        processPacket(sock, &file, display, close);
+        processPacket(sock, &file, false, close);
 	if (close) {
 	    file.close();
 	    initFile(&file);

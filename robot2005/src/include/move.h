@@ -20,7 +20,7 @@
 // ================================  Macro   ==================================
 // ============================================================================
 
-#define MOVE Move::instance()
+#define Move MoveCL::instance()
 
 // ============================================================================
 // ===============================  typedef   =================================
@@ -75,7 +75,7 @@ static const Millimeter MOVE_XY_EPSILON              = 10;
 
 static const MoveGain   MOVE_USE_DEFAULT_GAIN  =-1;
 static const MotorSpeed MOVE_USE_DEFAULT_SPEED =-1;
-static const Radian ANGLE_LIMIT_VIRAGE=M_PI/4;
+static const Radian     ANGLE_LIMIT_VIRAGE=M_PI/4;
 static const MotorSpeed VITESSE_MAX_VIRAGE=20;
 
 // ============================================================================
@@ -83,17 +83,17 @@ static const MotorSpeed VITESSE_MAX_VIRAGE=20;
 // ============================================================================
 
 /** 
- * @class Move
+ * @class MoveCL
  * Gestion des deplacements du robot. Elle definie des fonctions haut niveau 
  * de deplacements regules
  */
-class Move : public RobotComponent
+class MoveCL : public RobotComponent
 {
  public: 
     bool reset();
     bool validate();
     void calibrate();
-    static Move* instance();
+    static MoveCL* instance();
  public: 
     /** Stoppe le robot de maniere douce (deceleration progressive) */
     void stop();
@@ -177,18 +177,17 @@ class Move : public RobotComponent
     
  private:
     // disable
-    Move(Move const& move); 
+    MoveCL(MoveCL const& move); 
  public:
     /** @brief Met a jour la vitesse des moteurs */
     void setSpeed(MotorSpeed  speedLeft,
 		  MotorSpeed  speedRight);
  private:
     // members
-    Movement* currentMovement_;
-    Motor*    motor_;
+    Movement*         currentMovement_;
     bool      enableAccelerationController_;
     bool      userAbort_;
-    static Move*      move_;
+    static MoveCL*    move_;
     static MotorSpeed lastSpeedLeft_;
     static MotorSpeed lastSpeedRight_;
     static MotorSpeed lastSpeedReqLeft_;
@@ -206,11 +205,11 @@ class Move : public RobotComponent
     void periodicTask(Millisecond time);
 
     // constructeur
-    Move();
-    ~Move();
+    MoveCL();
+    ~MoveCL();
     
     friend class Movement;
-    friend class MovementManager;
+    friend class MovementManagerCL;
 };
 
 // =======================================================================
@@ -222,7 +221,7 @@ class Move : public RobotComponent
 // -----------------------------------------------------------------------
 // Gain par default en mode rotation 
 // -----------------------------------------------------------------------
-inline void Move::setDefaultRotationGain(MoveGain gain)
+inline void MoveCL::setDefaultRotationGain(MoveGain gain)
 {
     defaultRotationGain_ = gain;
 }
@@ -231,7 +230,7 @@ inline void Move::setDefaultRotationGain(MoveGain gain)
 // -----------------------------------------------------------------------
 // Max speed en mode rotation 
 // -----------------------------------------------------------------------
-inline void Move::setDefaultMaxRotationSpeed(MotorSpeed speed)
+inline void MoveCL::setDefaultMaxRotationSpeed(MotorSpeed speed)
 {
     defaultMaxRotationSpeed_ = speed;
 }
@@ -240,7 +239,7 @@ inline void Move::setDefaultMaxRotationSpeed(MotorSpeed speed)
 // -----------------------------------------------------------------------
 // Gain par default en mode go2target 
 // -----------------------------------------------------------------------
-inline void Move::setDefaulLinearGain(MoveGain gain)
+inline void MoveCL::setDefaulLinearGain(MoveGain gain)
 {
     defaultLinearGain_ = gain;
 }
@@ -249,7 +248,7 @@ inline void Move::setDefaulLinearGain(MoveGain gain)
 // -----------------------------------------------------------------------
 // Max speed en mode go2target 
 // -----------------------------------------------------------------------
-inline void Move::setDefaultMaxLinearSpeed(MotorSpeed speed)
+inline void MoveCL::setDefaultMaxLinearSpeed(MotorSpeed speed)
 {
     defaultMaxLinearSpeed_ = speed;
 }
@@ -258,7 +257,7 @@ inline void Move::setDefaultMaxLinearSpeed(MotorSpeed speed)
 // -----------------------------------------------------------------------
 // Speed en mode forward/backward 
 // -----------------------------------------------------------------------
-inline void Move::setDefaultBasicSpeed(MotorSpeed speed)
+inline void MoveCL::setDefaultBasicSpeed(MotorSpeed speed)
 {
     defaultBasicSpeed_ = speed;
 }

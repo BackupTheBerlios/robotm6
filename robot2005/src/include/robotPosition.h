@@ -16,7 +16,7 @@
 
 #include "robotBase.h"
 
-#define ROBOT_POS RobotPosition::instance()
+#define RobotPos RobotPositionCL::instance()
 
 /** @brief Nombre d'erreurs maximum de communication avec la carte odometre 
     avant de passer en mode hctl */
@@ -88,14 +88,14 @@ void robotPositionMotorHasBeenReset();
  * motrices tournent et pas les roues independantes (le robot est souleve)
  *
  */
-class RobotPosition : public RobotComponent 
+class RobotPositionCL : public RobotComponent 
 {
   public: 
     /** @brief Constructeur (Doit etre appele une seule fois, voir get */
-    RobotPosition();
-    ~RobotPosition();
+    RobotPositionCL();
+    ~RobotPositionCL();
     /** @brief Retourne un pointer vers la classe unique position */
-    static RobotPosition* instance();
+    static RobotPositionCL* instance();
     /** @brief Ne fait rien de particulier */
     bool reset();
     /** @brief Retourne TRUE si le calcul de position est correct */
@@ -175,7 +175,7 @@ class RobotPosition : public RobotComponent
     void clearBufferPosition();
     Position posBuf_[POS_BUFFER_SIZE];
     int posBufIndex_;
-    static RobotPosition*  position_;
+    static RobotPositionCL*  position_;
 
     CoderPosition rightHctlOld_, leftHctlOld_;
     bool firstHctl_;
@@ -231,10 +231,8 @@ class RobotPosition : public RobotComponent
      * informations des codeurs 
      */
     void periodicTask(Millisecond time);
-    friend class MovementManager;
-    friend class Odometer_05;
-    friend class Strategy;
-
+    friend class MovementManagerCL;
+    
     void clearOdoColliDetectBuffer();
     void resetOdoColliDetection();
     void detectCollision();
@@ -243,7 +241,7 @@ class RobotPosition : public RobotComponent
 // ----------------------------------------------------------------------------
 // RobotPosition::instance
 // ----------------------------------------------------------------------------
-inline RobotPosition* RobotPosition::instance()
+inline RobotPositionCL* RobotPositionCL::instance()
 {
     assert(position_ != NULL);
     return position_;
@@ -252,7 +250,7 @@ inline RobotPosition* RobotPosition::instance()
 // ----------------------------------------------------------------------------
 // RobotPosition::x
 // ----------------------------------------------------------------------------
-inline Millimeter RobotPosition::x() const
+inline Millimeter RobotPositionCL::x() const
 {
     return pos_.center.x;
 }
@@ -260,7 +258,7 @@ inline Millimeter RobotPosition::x() const
 // ----------------------------------------------------------------------------
 // RobotPosition::y
 // ----------------------------------------------------------------------------
-inline Millimeter RobotPosition::y() const
+inline Millimeter RobotPositionCL::y() const
 {
     return pos_.center.y;
 }
@@ -268,7 +266,7 @@ inline Millimeter RobotPosition::y() const
 // ----------------------------------------------------------------------------
 // RobotPosition::thetaAbsolute
 // ----------------------------------------------------------------------------
-inline Radian RobotPosition::thetaAbsolute() const
+inline Radian RobotPositionCL::thetaAbsolute() const
 {
     return pos_.direction;
 }
@@ -276,7 +274,7 @@ inline Radian RobotPosition::thetaAbsolute() const
 // ----------------------------------------------------------------------------
 // RobotPosition::pt
 // ----------------------------------------------------------------------------
-inline Point RobotPosition::pt() const
+inline Point RobotPositionCL::pt() const
 {
     return pos_.center;
 }
@@ -284,7 +282,7 @@ inline Point RobotPosition::pt() const
 // ----------------------------------------------------------------------------
 // RobotPosition::pos
 // ----------------------------------------------------------------------------
-inline Position RobotPosition::pos() const
+inline Position RobotPositionCL::pos() const
 {
     return Position(pt(), theta());
 }
@@ -292,7 +290,7 @@ inline Position RobotPosition::pos() const
 // ----------------------------------------------------------------------------
 // RobotPosition::posAbsolute
 // ----------------------------------------------------------------------------
-inline Position RobotPosition::posAbsolute() const
+inline Position RobotPositionCL::posAbsolute() const
 {
     return pos_;
 }
@@ -300,7 +298,7 @@ inline Position RobotPosition::posAbsolute() const
 // ----------------------------------------------------------------------------
 // RobotPosition::getHctlPosition
 // ----------------------------------------------------------------------------
-inline Position RobotPosition::getHctlPosition() const
+inline Position RobotPositionCL::getHctlPosition() const
 {
     return posHctl_;
 }
@@ -308,7 +306,7 @@ inline Position RobotPosition::getHctlPosition() const
 // ----------------------------------------------------------------------------
 // RobotPosition::getOdometerPosition
 // ----------------------------------------------------------------------------
-inline Position RobotPosition::getOdometerPosition() const
+inline Position RobotPositionCL::getOdometerPosition() const
 {
     return posOdom_;
 }
@@ -316,7 +314,7 @@ inline Position RobotPosition::getOdometerPosition() const
 // ----------------------------------------------------------------------------
 // RobotPosition::resetHctlCoders
 // ----------------------------------------------------------------------------
-inline void RobotPosition::resetHctlCoders()
+inline void RobotPositionCL::resetHctlCoders()
 {
     firstHctl_ = true;
     resetOdoColliDetection();
@@ -325,7 +323,7 @@ inline void RobotPosition::resetHctlCoders()
 // ----------------------------------------------------------------------------
 // RobotPosition::resetOdomCoders
 // ----------------------------------------------------------------------------
-inline void RobotPosition::resetOdomCoders()
+inline void RobotPositionCL::resetOdomCoders()
 {
     firstOdom_ = true;
     resetOdoColliDetection();

@@ -144,19 +144,50 @@ void Viewer3DCL::cameraPositionRotate3D(int mode)
     switch(mode) {
     case 0:
         dirR+=M_PI/16.;
+        xEye = xCenter+d*cos(dirR+M_PI);
+        yEye = yCenter+d*sin(dirR+M_PI);
         break;
     case 1:
         dirR-=M_PI/16.;
+        xEye = xCenter+d*cos(dirR+M_PI);
+        yEye = yCenter+d*sin(dirR+M_PI);
         break;
     case 2:
-        d*=1.2;
+        d*=1.1;
+        xEye = xCenter+d*cos(dirR+M_PI);
+        yEye = yCenter+d*sin(dirR+M_PI);
         break;
     case 3:
         d*=0.8;
+        xEye = xCenter+d*cos(dirR+M_PI);
+        yEye = yCenter+d*sin(dirR+M_PI);
         break;
+    case 4:
+        dirR+=M_PI/16.;
+        xCenter = xEye +d*cos(dirR);
+        yCenter = yEye +d*sin(dirR);
+        setCameraTargetPosition3D(xCenter/SCALE3D, yCenter/SCALE3D, zCenter/SCALE3D);
+        break;
+    case 5:
+        dirR-=M_PI/16.;
+        xCenter = xEye +d*cos(dirR);
+        yCenter = yEye +d*sin(dirR);
+        setCameraTargetPosition3D(xCenter/SCALE3D, yCenter/SCALE3D, zCenter/SCALE3D);
+        break;
+    case 6:
+        d*=1.1;
+        xCenter = xEye +d*cos(dirR);
+        yCenter = yEye +d*sin(dirR);
+        setCameraTargetPosition3D(xCenter/SCALE3D, yCenter/SCALE3D, zCenter/SCALE3D);
+        break;
+    case 7:
+        d*=0.8;
+        xCenter = xEye +d*cos(dirR);
+        yCenter = yEye +d*sin(dirR);
+        setCameraTargetPosition3D(xCenter/SCALE3D, yCenter/SCALE3D, zCenter/SCALE3D);
+        break;
+    
     }
-    xEye = xCenter+d*cos(dirR+M_PI);
-    yEye = yCenter+d*sin(dirR+M_PI);
 } // setTargetPosition
 
 // -------------------------------------------------------------------------
@@ -242,25 +273,25 @@ void Viewer3DCL::cameraNearestCorner3D()
 // ---------------------------------------------------------------
 void Viewer3DCL::draw3D()
 {
-    if (cameraModeAuto3D_) {
-	cameraNearestCorner3D(); 
-    }
-    if (targetRobotId3D_<0 || targetRobotId3D_>VIEWER_MAX_ROBOT_NBR) {
-        setCameraTargetPosition3D(TERRAIN_X/2, TERRAIN_Y/2, 0); 
-    } else {
-        if (!isInField(robotData_[targetRobotId3D_].pos.center)) {
-            setCameraTargetPosition3D(TERRAIN_X/2, TERRAIN_Y/2, 0);
+    if (!cameraModeAuto3D_) {
+//	cameraNearestCorner3D(); 
+        if (targetRobotId3D_<0 || targetRobotId3D_>VIEWER_MAX_ROBOT_NBR) {
+            setCameraTargetPosition3D(TERRAIN_X/2, TERRAIN_Y/2, 0); 
         } else {
-	    if (robotData_[targetRobotId3D_].isBrick() || 
-		robotData_[targetRobotId3D_].getTeam() == TEAM_RED) {
-		setCameraTargetPosition3D(robotData_[targetRobotId3D_].pos.center.x,
-					  robotData_[targetRobotId3D_].pos.center.y,
-					  0);
-	    } else {
-		setCameraTargetPosition3D(TERRAIN_X-robotData_[targetRobotId3D_].pos.center.x,
-					  TERRAIN_Y-robotData_[targetRobotId3D_].pos.center.y,
-					  0);
-	    }
+            if (!isInField(robotData_[targetRobotId3D_].pos.center)) {
+                setCameraTargetPosition3D(TERRAIN_X/2, TERRAIN_Y/2, 0);
+            } else {
+                if (robotData_[targetRobotId3D_].isBrick() || 
+                    robotData_[targetRobotId3D_].getTeam() == TEAM_RED) {
+                    setCameraTargetPosition3D(robotData_[targetRobotId3D_].pos.center.x,
+                                              robotData_[targetRobotId3D_].pos.center.y,
+                                              0);
+                } else {
+                    setCameraTargetPosition3D(TERRAIN_X-robotData_[targetRobotId3D_].pos.center.x,
+                                              TERRAIN_Y-robotData_[targetRobotId3D_].pos.center.y,
+                                              0);
+                }
+            }
         }
     }
     glMatrixMode(GL_PROJECTION);
@@ -1329,23 +1360,45 @@ void displayViewerMap3D(void)
 void keyboardViewerMap3D (unsigned char key, int x, int y)
 { 
     switch (key) {
-    case 'd':  // enter
+    case '6':
+    case 'd':  
 	Viewer3D->cameraPositionRotate3D(0);
 	glutPostRedisplay();
 	break;
-    case 'q':  // enter
+    case '4':
+    case 'q':  
 	Viewer3D->cameraPositionRotate3D(1);
 	glutPostRedisplay();
 	break;
-    case 'z':  // enter
-	Viewer3D->cameraPositionRotate3D(2);
-	glutPostRedisplay();
-	break;
-    case 's':  // enter
+    case '8':
+    case '+':
+    case 'z':  
 	Viewer3D->cameraPositionRotate3D(3);
 	glutPostRedisplay();
 	break;
-    case 'c':  // enter
+    case '2':
+    case '-':
+    case 's':  
+	Viewer3D->cameraPositionRotate3D(2);
+	glutPostRedisplay();
+	break;
+    case '1':
+   	Viewer3D->cameraPositionRotate3D(4);
+	glutPostRedisplay();
+	break;
+    case '3':
+   	Viewer3D->cameraPositionRotate3D(5);
+	glutPostRedisplay();
+	break;
+    case '7':
+   	Viewer3D->cameraPositionRotate3D(6);
+	glutPostRedisplay();
+	break;
+    case '9':
+   	Viewer3D->cameraPositionRotate3D(7);
+	glutPostRedisplay();
+	break;
+    case 'c':  
 	Viewer3D->screenShot("viewerMap3d");
 	break;
     default:

@@ -24,6 +24,8 @@
 #include "mthread.h"
 #endif // USE_FTHREAD
 
+#include "robotTimer.h"
+
 SimulatorCL* SimulatorCL::simulator_=NULL;
 #ifdef USE_FTHREAD
 ft_thread_t threadUpdatePos;
@@ -33,6 +35,7 @@ MThreadId threadUpdatePos;
 
 extern "C" {
     struct timeval chronometerTic;
+    struct timeval simultatorTime;
 }
 
 // ===========================================================================
@@ -108,6 +111,8 @@ SimulatorCL::SimulatorCL() :
 		   NULL);
 #endif
     LOG_OK("SimulatorCL started\n");
+
+    RobotTimerCL::tic(&simultatorTime);
 }
 
 // ---------------------------------------------------------------------------
@@ -550,6 +555,8 @@ void SimulatorCL::update()
 void SimulatorCL::draw()
 {
     if (server_) {
+        Millisecond time = RobotTimerCL::tac(&simultatorTime);
+        Viewer3D->setTime(time);
 	for(unsigned int i=0; i<SIMU_PORT_MAX_CONNECTIONS; i++) {
 	    SimulatorRobot* robot = server_->getRobot(i);
 	    if (robot) {
@@ -637,6 +644,7 @@ void mainJackinUnClickedCB(ViewerControlButtonId btnId)
     Viewer3D->setBtnClick(CTRL_BTN_R1_JACK, false);
     Viewer3D->setBtnClick(CTRL_BTN_R2_JACK, false);
     Viewer3D->setBtnClick(CTRL_BTN_R3_JACK, false);
+    RobotTimerCL::tic(&simultatorTime);
 }
 // ---------------------------------------------------------------------------
 // 
