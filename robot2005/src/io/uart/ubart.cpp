@@ -13,6 +13,7 @@ public: // overwritten
     bool isOpen() const;
     bool close();
     bool reset();
+    bool isBlocking() const;
     bool read(IoByte* buf, unsigned int& length);
     bool write(IoByte* buf, unsigned int& length);
     bool writeRead(IoByte* sendBuffer, unsigned int& sendLength,
@@ -64,9 +65,7 @@ private:
 };
 
 Ubart::Ubart(UbartMultiplexer* multiplexer, unsigned int ubartId)
-    // TODO: add CLASS_UBART into classConfig.h
-//    : IoDevice("Ubart", CLASS_UBART),
-    : IoDevice("Ubart", CLASS_DEFAULT),
+    : IoDevice("Ubart", CLASS_UBART),
       multiplexer_(multiplexer),
       isOpen_(false),
       ubartId_(ubartId)
@@ -99,6 +98,11 @@ bool Ubart::close()
 bool Ubart::reset()
 {
     return true;
+}
+
+bool Ubart::isBlocking() const
+{
+    return multiplexer_->isBlocking();
 }
 
 bool Ubart::read(IoByte* buf, unsigned int& length)
@@ -136,35 +140,30 @@ unsigned int Ubart::getUbartId() const
  ************************************************************************/
 
 UbartMultiplexer::UbartMultiplexer(IoDevice* device)
-    // TODO: add id to classConfig.h
-//    : RobotBase("UbartMultiplexer", CLASS_UBART_MULTIPLEXER),
-    : RobotBase("UbartMultiplexer", CLASS_DEFAULT),
+    : RobotBase("UbartMultiplexer", CLASS_UBART_MULTIPLEXER),
       device_(device),
       openedUbarts_(0),
       currentId_(UBART_DEFAULT_ID),
       targetId_(UBART_DEFAULT_ID)
 {
+    pthread_mutex_init(&lock_, NULL);
     for (unsigned int i = 0; i < UBART_MAX_DEVICES; ++i)
 	ubarts_.push_back(new Ubart(this, i));
 }
 
-UbartMultiplexer::~UbartMultiplexer()
-{
+UbartMultiplexer::~UbartMultiplexer() {
     for (unsigned int i = 0; i < foundDevices_.size(); ++i)
 	delete(ubarts_[i]);
     device_->close(); // should not be necessary after deleting all foundDevices
 }
 
-const IoDeviceVector& UbartMultiplexer::listPorts()
-{
+const IoDeviceVector& UbartMultiplexer::listPorts() {
     return ubarts_;
 }
 
-const IoDeviceScanInfoPairVector& UbartMultiplexer::scan()
-{
+const IoDeviceScanInfoPairVector& UbartMultiplexer::scan() {
     foundDevices_.clear();
-    for (unsigned int i = 0; i < ubarts_.size(); ++i)
-    {
+    for (unsigned int i = 0; i < ubarts_.size(); ++i) {
 	switchToUbart(static_cast<Ubart*>(ubarts_[i]));
 	IoByte scanAnswer;
 	if (doIoDeviceScan(ubarts_[i], &scanAnswer))
@@ -173,49 +172,43 @@ const IoDeviceScanInfoPairVector& UbartMultiplexer::scan()
     return foundDevices_;
 }
 
-void UbartMultiplexer::lock()
-{
+void UbartMultiplexer::lock() {
+    pthread_mutex_lock(&lock_);
 }
 
-void UbartMultiplexer::unlock()
-{
+void UbartMultiplexer::unlock() {
+    pthread_mutex_unlock(&lock_);
 }
 
-void UbartMultiplexer::switchToUbart(Ubart* ubart)
-{
+void UbartMultiplexer::switchToUbart(Ubart* ubart) {
     targetId_ = ubart->getUbartId();
 }
 
-bool UbartMultiplexer::openUbart()
-{
-    if (openedUbarts_ > 0 || device_->isOpen())
-    {
+bool UbartMultiplexer::openUbart() {
+    if (openedUbarts_ > 0 || device_->isOpen()) {
 	openedUbarts_++;
 	return true;
-    }
-    else
-    {
-	if (device_->open())
-	{
+    } else {
+	if (device_->open()) {
 	    openedUbarts_++;
 	    return true;
-	}
-	else
+	} else
 	    return false;
     }
 }
 
-bool UbartMultiplexer::closeUbart()
-{
+bool UbartMultiplexer::closeUbart() {
     if (--openedUbarts_ == 0) {
 	return device_->close();
-    }
-    else
+    } else
 	return true;
 }
-	
-bool UbartMultiplexer::write(IoByte* buf, unsigned int& length)
-{
+
+bool UbartMultiplexer::isBlocking() const {
+    return device_->isBlocking();
+}
+
+bool UbartMultiplexer::write(IoByte* buf, unsigned int& length) {
     // TODO: get Ubart-protocol [flo]
     currentId_ = targetId_;
     return device_->write(static_cast<unsigned char>(targetId_) << 5
@@ -223,10 +216,8 @@ bool UbartMultiplexer::write(IoByte* buf, unsigned int& length)
 	&& device_->write(buf, length);
 }
 
-bool UbartMultiplexer::read(IoByte* buf, unsigned int& length)
-{
-    if (currentId_ != targetId_)
-    {
+bool UbartMultiplexer::read(IoByte* buf, unsigned int& length) {
+    if (currentId_ != targetId_) {
 	// TODO: protocol [flo]
 	device_->write(static_cast<unsigned char>(targetId_) << 5);
     }
