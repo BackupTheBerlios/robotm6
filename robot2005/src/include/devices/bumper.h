@@ -14,7 +14,7 @@
 
 enum BridgeCaptorStatus {
     BRIDGE_NO=0,
-    BRIDGE_DECTECTED=1
+    BRIDGE_DETECTED=1
 };
 
 enum BridgeCaptors {

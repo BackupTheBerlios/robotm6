@@ -2,6 +2,7 @@
 #define __STRATEGY_ATTACK_H__
  
 #include "strategy2005.h"
+#include "devices/bumper.h"
 
 /** @class StrategyAttackCL
  * Strategy du robot d'attaque
@@ -22,27 +23,12 @@ class StrategyAttackCL : public Strategy2005CL
     void fireCatapults();
 
     // ================ Detection et traversee du pont ==================
-
     /** @brief va a l'endroit ou on detecte les pont par capteurs sharps */
     bool gotoBridgeDetection();
-    /** @brief met a jour la variable bridge_ en fonction de ce que disent les 
-        sharps */
-    bool getBridgePosBySharp();
-    /** @brief se place en face du pont ou on peut utiliser les bumpers pour 
-        savoir si le pont est bien la. La variable bridge doit deja etre mise 
-        a jour */
-    bool gotoBridgeEntry();
-    bool gotoBridgeEntry(Millimeter y, 
-			 bool rotateLeft=false, 
-			 bool rotateRight=false);
-    /** @brief verifie que le pont est bien la ! */
-    bool getBridgePosByBumper();
-    /** @brief traverse le pont : detection de collisions...*/
-    bool crossBridge();
-    /** @brief va jusq'a l'aute pont et change l'etat de la variable
-        useLeftBridge_ */
-    bool gotoOtherBridge();
-
+    /** @brief cherche le pont et le traverse. quitte la fonction que si on 
+        a reussi a traverser ou que c'est la fn du match */
+    bool findAndCrossBridge();
+    
     // ================ Exploration de la zone ennemie ==================
 
     /** @brief explore juste les zone ou il peut y avoir des quilles 
@@ -56,6 +42,35 @@ class StrategyAttackCL : public Strategy2005CL
     bool killCenterSkittles();
 
  private:
+    /** @brief met a jour la variable bridge_ en fonction de ce que disent les 
+        sharps */
+    bool getBridgePosBySharp();
+    /** @brief se place en face du pont ou on peut utiliser les bumpers pour 
+        savoir si le pont est bien la. La variable bridge doit deja etre mise 
+        a jour */
+
+    bool gotoBridgeEntry();
+    /** @brief verifie que le pont est bien la ! renvoie false si les 
+        bumpers ne repondent pas */
+    bool getBridgePosByBumper(bool& bridgeInFront);
+    /** @brief traverse le pont : detection de collisions...*/
+    bool crossBridge();
+    /** @brief va jusq'a l'aute pont et change l'etat de la variable
+        useLeftBridge_ */
+    bool gotoOtherBridge(); 
+    unsigned char getBridgeBit();
+    unsigned char getPosBit();
+    bool hasCrossedBridge();
+    void getNearestBridgeEntry();
+    bool gotoBridgeEntry(Millimeter y, 
+			 bool rotateLeft=false, 
+			 bool rotateRight=false);
+    bool getBridgePosBySharpFromLeft(BridgeCaptorStatus captors[BRIDGE_CAPTORS_NBR]);
+    bool getBridgePosBySharpFromCenter(BridgeCaptorStatus captors[BRIDGE_CAPTORS_NBR]);
+    bool getBridgeCaptors(BridgeCaptorStatus captors[BRIDGE_CAPTORS_NBR],
+                          bool checkSharps);
+
+ private:
     /** mask qui dit ou le peut etre (4 possibilites a tester) quand il n'y est
         pas on passe le bit a 0 */
     unsigned char  bridgeAvailibility_;
@@ -64,6 +79,23 @@ class StrategyAttackCL : public Strategy2005CL
     bool           useLeftBridge_; 
     /** utilise le pont du mileu pour essayer de traverser */
     bool           bridgeDetectionByCenter_;
+
+    
 };
 
+static const Millimeter BRIDGE_DETECT_SHARP_X = 1300;
+static const Millimeter BRIDGE_DETECT_BUMP_X  = 1470;
+static const Millimeter BRIDGE_CROSS_BRIDGE_X  = 2200;
+static const Millimeter BRIDGE_CROSS_BRIDGE_X_MARGIN  = 50;
+
+static const Millimeter BRIDGE_ENTRY_SIOUX_Y          = 1300; // passe par le pont du milieu
+static const Millimeter BRIDGE_ENTRY_CENTER_Y         = 1425;
+static const Millimeter BRIDGE_ENTRY_MIDDLE_CENTER_Y  = 1575;
+static const Millimeter BRIDGE_ENTRY_MIDDLE_BORDURE_Y = 1725;
+static const Millimeter BRIDGE_ENTRY_BORDURE_Y        = 1875;
+static const Millimeter BRIDGE_ENTRY_MARGIN           = 50;
+
+// temps d'attente entre le demarage des servo et le debut du deplacement
+static const Millisecond CATAPULT_AWAIT_DELAY         = 500;
+    
 #endif // __STRATEGY_ATTACK_H__

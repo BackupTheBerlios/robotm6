@@ -52,7 +52,32 @@ void Bumper05::disableCaptor(unsigned int captorId)
 
 bool Bumper05::getBridgeCaptors(BridgeCaptorStatus captors[BRIDGE_CAPTORS_NBR])
 {
-    
+    unsigned int id=0;
+    id = BRIDG_SHARP_LEFT;
+    captors[BRIDGE_SHARP_LEFT] = getValue(BumpersMapping[id].byte,
+                                          BumpersMapping[id].bit,
+                                          BumpersMapping[id].reversed)?
+        BRIDGE_DETECTED:BRIDGE_NO;
+    id = BRIDG_SHARP_CENTER;
+    captors[BRIDGE_SHARP_CENTER] =  getValue(BumpersMapping[id].byte,
+                                             BumpersMapping[id].bit,
+                                             BumpersMapping[id].reversed)?
+        BRIDGE_DETECTED:BRIDGE_NO;
+    id = BRIDG_SHARP_RIGHT;
+    captors[BRIDGE_SHARP_RIGHT] =  getValue(BumpersMapping[id].byte,
+                                            BumpersMapping[id].bit,
+                                            BumpersMapping[id].reversed)?
+        BRIDGE_DETECTED:BRIDGE_NO;
+    id = BRIDG_BUMP_LEFT;
+    captors[BRIDGE_BUMPER_LEFT] =  getValue(BumpersMapping[id].byte,
+                                            BumpersMapping[id].bit,
+                                            !BumpersMapping[id].reversed)?
+        BRIDGE_DETECTED:BRIDGE_NO;
+    id = BRIDG_BUMP_RIGHT;
+    captors[BRIDGE_BUMPER_RIGHT] =  getValue(BumpersMapping[id].byte,
+                                             BumpersMapping[id].bit,
+                                             !BumpersMapping[id].reversed)?
+        BRIDGE_DETECTED:BRIDGE_NO;
     return true;
 }
 

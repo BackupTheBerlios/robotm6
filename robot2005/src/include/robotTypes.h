@@ -158,6 +158,18 @@ typedef enum BridgePosition {
     BRIDGE_POS_CENTER=4
 } BridgePosition;
 
+#ifndef BridgePosTxt
+#define BridgePosTxt(b) \
+    ((b)==BRIDGE_POS_UNKNOWN?"BridgeNotFound":         \
+        ((b)==BRIDGE_POS_BORDURE?"BridgePosBrodure":   \
+           ((b)==BRIDGE_POS_MIDDLE_BORDURE?"BridgePosMiddleBrodure":  \
+              ((b)==BRIDGE_POS_MIDDLE_CENTER?"BridgePosMiddleCenter": \
+                  "BridgePosCenter" \
+              ) \
+           )    \
+        )       \
+    )
+#endif
 // ============================================================================
 // ============================  enum RobotColor    ===========================
 // ============================================================================
