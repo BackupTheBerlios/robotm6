@@ -37,18 +37,34 @@ class RobotConfig2005CL : public RobotConfigCL
     // --------------------------------------------
     /**  @brief utilse le motorReal ou motorSimu */
     bool motorSimu;
+    bool hasMotor;
       /** @brief simule le lcd ou envoie les messages sur l'uart */
     bool lcdSimu;
+    bool hasLcd;
     /** @brief simule la carte odometre */
     bool odometerSimu;
+    bool hasOdometer;
     /** @brief simule la carte odometre */
     bool soundSimu;
+    bool hasSound;
     /** @brief simule la carte bumper */
     bool bumperSimu;
+    bool hasBumper;
     /** @brief simule la carte detecteur d'environement */
     bool envSimu;
+    bool hasEnv;
     /** @brief simule la carte servo moteur */
     bool servoSimu;
+    bool hasServo;
+    /** @brief simule la carte grue electro aimant */
+    bool craneSimu;
+    bool hasCrane;
+    /** @brief simule la carte rateau detection de grille */
+    bool skittleDetectorSimu;
+    bool hasSkittleDetector;
+    /** @brief simule la carte electro aimant */
+    bool teslaSimu;
+    bool hasTesla;
 };
 
 // ----------------------------------------------------------------------------
@@ -61,12 +77,25 @@ inline RobotConfig2005CL::RobotConfig2005CL(const char* Name,
     useCatapult(true),
 
     motorSimu(simulated),
+    hasMotor(true),
     lcdSimu(simulated),
+    hasLcd(true),
     odometerSimu(simulated),
+    hasOdometer(true),
     soundSimu(simulated),
+    hasSound(true),
     bumperSimu(simulated),
+    hasBumper(true),
     envSimu(simulated),
-    servoSimu(simulated)
+    hasEnv(true),
+    servoSimu(simulated),
+    hasServo(true),
+    craneSimu(simulated),
+    hasCrane(true),
+    skittleDetectorSimu(simulated),
+    hasSkittleDetector(true),
+    teslaSimu(simulated),
+    hasTesla(true)
 {
 
 }

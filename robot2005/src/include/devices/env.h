@@ -35,8 +35,10 @@ class EnvDetectorCL : public RobotDeviceCL {
   virtual bool reset()  { return true; }
   virtual bool exists() const { return false; }
 
-  //... todo
-  virtual bool getEnvDetector(int envId, 
+  // disbale the events raised by a captor
+  virtual void disableCaptor(unsigned int envId){}
+  // return trhe captor distance
+  virtual bool getEnvDetector(unsigned int envId, 
                               EnvDetectorDist& status) const { return false; }
 
   /** @brief function that read all captors and run the corresponding events */

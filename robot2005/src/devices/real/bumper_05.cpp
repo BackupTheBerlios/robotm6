@@ -5,17 +5,15 @@
 #include "bumperMapping.h"
 #include "events.h"
 
-//#define LOG_DEBUG_ON
+#ifdef TEST_MAIN
+#define LOG_DEBUG_ON
+#endif
+
 #include "log.h"
 
 /** @brief Constructeur */
 Bumper05::Bumper05() : device_(NULL), firstRead_(true)
 {
-    // check bumper ids
-    for(unsigned int i=0; i < BUMPERS_NBR; i++) {
-      assert((BumperId)i == BumpersMapping[i].id);
-    }
-
     device_ = IoManager->getIoDevice(IO_ID_BUMPER_05);
     if (device_ != NULL) {
 	if (device_->open()) {
@@ -36,8 +34,20 @@ Bumper05::~Bumper05()
 
 bool Bumper05::reset()
 {
-  firstRead_ = true;
-  return BumperCL::reset();
+    // check bumper ids
+    for(unsigned int i=0; i < BUMPERS_NBR; i++) {
+        assert((BumperId)i == BumpersMapping[i].id);
+        skipCaptor_[i] = BumpersMapping[i].enableAtReset;
+    }
+    
+    firstRead_ = true;
+    return BumperCL::reset();
+}
+
+void Bumper05::disableCaptor(unsigned int captorId) 
+{
+    skipCaptor_[captorId] = true;
+    Events->unraise(BumpersMapping[captorId].evt);
 }
 
 bool Bumper05::getBridgeCaptors(BridgeCaptorStatus captors[BRIDGE_CAPTORS_NBR])
@@ -91,25 +101,26 @@ bool Bumper05::getRebootSwitch(bool& reboot)
 /** @brief function that read all captors and run the corresponding events */
 void Bumper05::periodicTask()
 {
-  unsigned char newData[BUMPER_DATA_NBR];
-  if (getAllCaptors(newData)) {
-    for(unsigned int i=0; i < BUMPERS_NBR; i++) {
-      unsigned char bit = (1<<BumpersMapping[i].bit);
-      unsigned char byte = BumpersMapping[i].byte;
-      if (BumpersMapping[i].evt != EVENTS_GROUP_NONE) {
-	if (firstRead_ || 
-	    ((data_[byte]&(bit)) != (newData[byte]&(bit)))) {
-	  if ((newData[byte]&(bit)) ^ BumpersMapping[i].reversed) {
-	    Events->raise(BumpersMapping[i].evt);
-	  } else {
-	    Events->unraise(BumpersMapping[i].evt);
-	  }
-	}
-      }
+    unsigned char newData[BUMPER_DATA_NBR];
+    if (getAllCaptors(newData)) {
+        for(unsigned int i=0; i < BUMPERS_NBR; i++) {
+            if (skipCaptor_[i]) continue;
+            unsigned char bit = (1<<BumpersMapping[i].bit);
+            unsigned char byte = BumpersMapping[i].byte;
+            if (BumpersMapping[i].evt != EVENTS_GROUP_NONE) {
+                if (firstRead_ || 
+                    ((data_[byte]&(bit)) != (newData[byte]&(bit)))) {
+                    if ((newData[byte]&(bit)) ^ BumpersMapping[i].reversed) {
+                        Events->raise(BumpersMapping[i].evt);
+                    } else {
+                        Events->unraise(BumpersMapping[i].evt);
+                    }
+                }
+            }
+        }
+        memcpy(data_, newData, BUMPER_DATA_NBR);
+        firstRead_ = false;
     }
-    memcpy(data_, newData, BUMPER_DATA_NBR);
-    firstRead_ = false;
-  }
 }
 
 /** @brief read all captors status: do this before other get functions */
@@ -138,4 +149,25 @@ bool Bumper05::getAllCaptors(unsigned char data[BUMPER_DATA_NBR])
   return status;
 }
 
- 
+////////////////////////////////////////////////////////////////////////////////////
+
+#ifdef TEST_MAIN
+
+#include "io/serialPort.h"
+int main(int argc, char* argv[]) 
+{
+    IoManager->submitIoHost(new SerialPort(0, false));
+    IoManager->submitIoHost(new SerialPort(1, false));
+    EventsManagerCL* evtMgr = new EVENTS_MANAGER_DEFAULT();
+
+    Bumper05 bumper;
+    while(true) {
+        bumper.periodicTask();
+        usleep(100000);
+    }
+
+    delete evtMgr;
+    return 0;
+}
+
+#endif

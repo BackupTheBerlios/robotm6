@@ -10,6 +10,8 @@
 
 #include "devices/bumper.h"
 #include "bumperCom_05.h"
+#include "bumperMapping.h"
+
 class IoDevice;
 
 class Bumper05: public BumperCL {
@@ -20,7 +22,8 @@ class Bumper05: public BumperCL {
 
   bool reset();
   bool exists() const { return true; }
-  
+
+  void disableCaptor(unsigned int bumperId);
   bool getBridgeCaptors(BridgeCaptorStatus captors[BRIDGE_CAPTORS_NBR]);
   bool getEmergencyStop(bool& emergencyStop);
   bool getJackin(bool& jackin);
@@ -39,6 +42,7 @@ class Bumper05: public BumperCL {
   unsigned char data_[BUMPER_DATA_NBR]; 
   IoDevice* device_;
   bool      firstRead_;
+  bool      skipCaptor_[BUMPERS_NBR];
 };
 
 #endif // __BUMPER_05_H__

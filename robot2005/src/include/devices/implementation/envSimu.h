@@ -10,7 +10,7 @@ class EnvDetectorSimu : public EnvDetectorCL {
   EnvDetectorSimu();
   bool exists() const { return true; }
 
-  bool getEnvDetector(int envId, 
+  bool getEnvDetector(unsigned int envId, 
                       EnvDetectorDist& status) const;
 
   /** @brief function that read all captors and run the corresponding events */

@@ -171,7 +171,10 @@ void EventsManagerCL::registerNotImmediatCallback(EventsEnum        evt,
 void EventsManagerCL::unraiseEventsBumpers()
 {
     evtStatus_[(int)EVENTS_BRIDGE_BUMP_LEFT]=false;  // front center
-    evtStatus_[(int)EVENTS_BRIDGE_BUMP_RIGHT]=false;  // front right
+    evtStatus_[(int)EVENTS_BRIDGE_BUMP_RIGHT]=false;  // front right 
+
+    evtStatus_[(int)EVENTS_SKITTLE_DETECTED]=false;
+    evtStatus_[(int)EVENTS_SKITTLE_ATTACHED]=false;
     
     evtStatus_[(int)EVENTS_BUMPER_FC]=false;  // front center
     evtStatus_[(int)EVENTS_BUMPER_FR]=false;  // front right

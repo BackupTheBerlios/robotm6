@@ -3,7 +3,7 @@
 EnvDetectorSimu::EnvDetectorSimu() {}
 
 
-bool EnvDetectorSimu::getEnvDetector(int envId, 
+bool EnvDetectorSimu::getEnvDetector(unsigned int envId, 
                                      EnvDetectorDist& status) const
 {
     return false;
