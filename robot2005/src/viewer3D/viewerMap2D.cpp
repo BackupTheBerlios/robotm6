@@ -96,13 +96,13 @@ void Viewer3DCL::drawRobot2D(int robotId, bool estimated)
     switch(robotData_[robotId].model) {
     case ROBOT_MODEL_ATTACK:
 	glBegin(GL_LINE_STRIP);
-	glVertex2d(-60*SCALE, 170*SCALE);
-	glVertex2d(80*SCALE, 170*SCALE);
-	glVertex2d(140*SCALE, 140*SCALE);
-	glVertex2d(140*SCALE, -140*SCALE);
-	glVertex2d(80*SCALE, -170*SCALE);
-	glVertex2d(-60*SCALE, -170*SCALE);
-	glVertex2d(-60*SCALE, 170*SCALE);
+	glVertex2d(-50*SCALE, 175*SCALE);
+	glVertex2d(80*SCALE, 175*SCALE);
+	glVertex2d(110*SCALE, 140*SCALE);
+	glVertex2d(110*SCALE, -140*SCALE);
+	glVertex2d(70*SCALE, -175*SCALE);
+	glVertex2d(-50*SCALE, -175*SCALE);
+	glVertex2d(-50*SCALE, 175*SCALE);
 	glEnd();
 	glBegin(GL_LINE_STRIP);
 	glVertex2d(140*SCALE, 0*SCALE);

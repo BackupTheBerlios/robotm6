@@ -38,22 +38,30 @@ typedef enum SoundId {
   SOUND_15,
   SOUND_16,
 
-  SOUND_ALERT_1,
-  SOUND_ALERT_2,
+//  SOUND_ALERT_1,
+//  SOUND_ALERT_2,
   SOUND_ALERT_MOTOR,
-  SOUND_ALERT_HUSTON,
-  SOUND_ALERT_RED,
+//  SOUND_ALERT_HUSTON,
+//  SOUND_ALERT_RED,
   SOUND_BANG,
-  SOUND_POLICE,
-
+//  SOUND_POLICE,
+  SOUND_BONJOUR,
 
   SOUND_GAGNE,
   SOUND_PERDU,
   SOUND_HOMOLOGUE,
-  SOUND_VICTORY,
-  SOUND_HAKA,
   SOUND_TIMER_ALERT,
 
+  SOUND_RELACHE_ARRET_URGENCE,
+  SOUND_WAIT_JACKIN,
+  SOUND_WAIT_JACKOUT,
+  SOUND_WAIT_REBOOT_SWITCH,
+  SOUND_GO_FOR_LAUNCH,
+  SOUND_ANORMAL_EMERGENCY_STOP,
+  SOUND_C_FAIT,
+  
+/*
+  SOUND_VICTORY,
   SOUND_START_PROGRAMMATION,
   SOUND_START_INIT,
   SOUND_START_CALIBRATION,
@@ -62,14 +70,9 @@ typedef enum SoundId {
   SOUND_RELACHE_ARRET_URGENCE,
   SOUND_AUTO_CHECK_DONE,
   SOUND_AUTODESTRUCTION,
-  SOUND_WAIT_JACKIN,
-  SOUND_WAIT_JACKOUT,
-  SOUND_WAIT_REBOOT_SWITCH,
   SOUND_ON_Y_GO,
-  SOUND_GO_FOR_LAUNCH,
   SOUND_BATTERY_LOW,
   SOUND_ODOMETER_ALERT,
-  SOUND_ANORMAL_EMERGENCY_STOP,
   SOUND_BUMPER,
   SOUND_COLOR,
   SOUND_ENV_DETECTOR,
@@ -134,7 +137,7 @@ typedef enum SoundId {
   SOUND_CAFE_2,
   SOUND_HEUREUX,
   SOUND_PERDU_STAND,
-  SOUND_C_FAIT,
+  
   SOUND_DONNE_MOI_CHOCOLAT,
   SOUND_MIAM_MIAM,
   SOUND_CADEAU,
@@ -190,7 +193,7 @@ typedef enum SoundId {
   SOUND_UNAUTHORIZED,
   SOUND_TOP_LA,
   SOUND_BIEN_JOUE,
-
+*/
   // add new sound ids before this line
   SOUND_NBR,
 
@@ -231,21 +234,31 @@ SoundStruct soundList[SOUND_NBR] = {
   { SOUND_15, "15.mp3" },
   { SOUND_16, "16.mp3" },
 
-  { SOUND_ALERT_1, "alert_1.mp3" },
-  { SOUND_ALERT_2, "alert_2.mp3" },
+//  { SOUND_ALERT_1, "alert_1.mp3" },
+//  { SOUND_ALERT_2, "alert_2.mp3" },
   { SOUND_ALERT_MOTOR, "alert_incider.mp3" },
-  { SOUND_ALERT_HUSTON, "alert_problem.mp3" },
-  { SOUND_ALERT_RED, "alert_red.mp3" },
+//  { SOUND_ALERT_HUSTON, "alert_problem.mp3" },
+//  { SOUND_ALERT_RED, "alert_red.mp3" },
   { SOUND_BANG, "bang_ow.mp3" },
-  { SOUND_POLICE, "police.mp3" },
+//  { SOUND_POLICE, "police.mp3" },
 
   { SOUND_GAGNE, "gagne.mp3" },
   { SOUND_PERDU, "garcimore.mp3" },
   { SOUND_HOMOLOGUE, "homologue.mp3" },
-  { SOUND_VICTORY, "victory.mp3" },
-  { SOUND_HAKA, "haka.mp3" },
   { SOUND_TIMER_ALERT, "police.mp3"},
+  { SOUND_BONJOUR, "bonjour.mp3" },
+  
 
+  { SOUND_RELACHE_ARRET_URGENCE, "arretdurgence.mp3" },
+  { SOUND_WAIT_JACKIN, "jackin.mp3" },
+  { SOUND_WAIT_JACKOUT, "jackoff0.mp3" },
+  { SOUND_WAIT_REBOOT_SWITCH, "switchReboot.mp3" },
+  { SOUND_GO_FOR_LAUNCH, "go_for_launch.mp3" }, 
+  { SOUND_ANORMAL_EMERGENCY_STOP, "pasidiot.mp3" },
+  { SOUND_C_FAIT, "c_est_fait_f1.mp3" },
+  
+/*  
+  { SOUND_VICTORY, "victory.mp3" },
   { SOUND_START_PROGRAMMATION, "programmation.mp3" },
   { SOUND_START_INIT, "start_init.mp3" },
   { SOUND_START_CALIBRATION, "start_calibration.mp3" },
@@ -254,14 +267,10 @@ SoundStruct soundList[SOUND_NBR] = {
   { SOUND_RELACHE_ARRET_URGENCE, "arretdurgence.mp3" },
   { SOUND_AUTO_CHECK_DONE, "autocheck_done.mp3" },
   { SOUND_AUTODESTRUCTION, "autodestruction.mp3" },
-  { SOUND_WAIT_JACKIN, "jackin.mp3" },
-  { SOUND_WAIT_JACKOUT, "jackoff0.mp3" },
-  { SOUND_WAIT_REBOOT_SWITCH, "switchReboot.mp3" },
   { SOUND_ON_Y_GO, "on_y_go.mp3" },
   { SOUND_GO_FOR_LAUNCH, "go_for_launch.mp3" },
   { SOUND_BATTERY_LOW, "batterie_faible.mp3" },
   { SOUND_ODOMETER_ALERT, "alert_red.mp3" },
-  { SOUND_ANORMAL_EMERGENCY_STOP, "pasidiot.mp3" },
   { SOUND_BUMPER, "bumper.mp3" },
   { SOUND_COLOR, "color.mp3" },
   { SOUND_ENV_DETECTOR, "detecenv.mp3" },
@@ -317,7 +326,6 @@ SoundStruct soundList[SOUND_NBR] = {
   { SOUND_ECOLE_EK, "eucalyptus.mp3" },
 
   { SOUND_BYE, "a_plus_tard.mp3" },
-  { SOUND_BONJOUR, "bonjour.mp3" },
   { SOUND_BONJOUR_MAC, "bonjour_mac.mp3" },
   { SOUND_BONJOUR_ARBITRE, "bonjour_arbitre.mp3" },
   { SOUND_MERCI, "merci.mp3" },
@@ -326,7 +334,6 @@ SoundStruct soundList[SOUND_NBR] = {
   { SOUND_CAFE_2, "cafe2.mp3" },
   { SOUND_HEUREUX, "heureux.mp3" },
   { SOUND_PERDU_STAND, "perdu_stand.mp3" },
-  { SOUND_C_FAIT, "c_est_fait_f1.mp3" },
   { SOUND_DONNE_MOI_CHOCOLAT, "rhum.mp3" },
   { SOUND_MIAM_MIAM, "miamiam.mp3" },
   { SOUND_CADEAU, "cadeau.mp3" },
@@ -382,6 +389,8 @@ SoundStruct soundList[SOUND_NBR] = {
   { SOUND_UNAUTHORIZED, "cote_obscure.mp3"},
   { SOUND_TOP_LA, "topla.mp3"},
   { SOUND_BIEN_JOUE, "bienjoue.mp3"}
+
+*/
 };
 
 #ifdef SOUND_SHM_INFO

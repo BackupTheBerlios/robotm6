@@ -1,10 +1,16 @@
-#include "strategy.h"
+#include "strategy2005.h"
 #include "robotMain.h"
 #define LOG_CLASSID CLASS_DEFAULT
 #include "log.h"
 #include "motor.h"
 #include "odometer.h"
 #include "robot2005.h"
+#include "robotMain2005.h"
+#include "events.h"
+#include "robotPosition.h"
+#include "move.h"
+#include "movementManager.h"
+
 // ----------------------------------------------------------------------------
 // evtEndMove
 // ----------------------------------------------------------------------------
@@ -20,17 +26,17 @@ inline bool evtEndMove(bool evt[])
 /** @class TestMoveStrategy
  * Teste les déplacements du robot (MovementManager et Move)
  */
-class TestMoveStrategy1CL : public StrategyCL
+class TestMoveStrategy1CL : public Strategy2005CL
 {
  public :
   TestMoveStrategy1CL(RobotMainCL* main): 
-    StrategyCL("TestMove", "testMove1", CLASS_STRATEGY, main){}
+    Strategy2005CL("TestMove", "testMove1", CLASS_STRATEGY, main){}
   virtual void run(int argc, char*argv[]);
 };
 
 void TestMoveStrategy1CL::run(int argc, char* argv[])
 {
-    LCD->print("SophiaTeam");
+    Lcd->print("SophiaTeam");
     RobotPos->setOdometerType(ODOMETER_MOTOR);
     //RobotPos->setOdometerType(ODOMETER_UART_MANUAL);
     setStartingPosition();
@@ -67,17 +73,17 @@ void TestMoveStrategy1CL::run(int argc, char* argv[])
 /** @class TestMoveStrategy2CL
  * Teste les déplacements du robot (MovementManager et Move)
  */
-class TestMoveStrategy2CL : public StrategyCL
+class TestMoveStrategy2CL : public Strategy2005CL
 {
  public :
   TestMoveStrategy2CL(RobotMainCL* main): 
-    StrategyCL("TestMove", "testMove2", CLASS_STRATEGY, main){}
+    Strategy2005CL("TestMove", "testMove2", CLASS_STRATEGY, main){}
   virtual void run(int argc, char*argv[]);
 };
 
 void TestMoveStrategy2CL::run(int argc, char* argv[])
 {
-    LCD->print("SophiaTeam");
+    Lcd->print("SophiaTeam");
     RobotPos->setOdometerType(ODOMETER_MOTOR);
     //RobotPos->setOdometerType(ODOMETER_UART_MANUAL);
     setStartingPosition();
@@ -146,7 +152,7 @@ LOG_INFO("SIMULATED\n");
   config = new RobotConfigAttack2005CL(SIMULATED);
 #endif
 
-  robotMain = new RobotMainFullCL();
+  robotMain = new RobotMain2005CL();
   strategy1 = new TestMoveStrategy1CL(robotMain);
   strategy2 = new TestMoveStrategy2CL(robotMain);
 

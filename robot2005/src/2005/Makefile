@@ -1,18 +1,18 @@
 SRC_ROOT=..
 
+COMPILE_FIRST_DIRS=base
 ## ===========================================================================
 ## LIB_NAME and .o files for making libraries .a and .so
 ## ===========================================================================
 ## For standard directory you only need to set these values
 ## ===========================================================================
-LIB_NAME=libtools
-OBJS=robotCommon.o geometry2D.o mthread.o robotFThread.o robotString.o \
-     robotTimer.o shm.o network.o serialPort.o image.o
+LIB_NAME=
+OBJS=
 
 ## ===========================================================================
 ## Source files used to generate dependencies
 ## ===========================================================================
-SRCS=*.cpp
+SRCS=
 
 ## ===========================================================================
 ## Additionnal flags for this directory. See makefile.include for common flags
@@ -35,34 +35,28 @@ all: lib bin validate
 ## ===========================================================================
 ## Main rules : ----- CLEAN -----
 ## ===========================================================================
-clean:	default_clean
-	${RM} -f  ${VALIDATE_DIR}/geometry2D ${VALIDATE_DIR}/serialPort
-	${RM} -f  ${STATIC_LIB_DIR}/${LIB_NAME}.a        \
-                  ${DYNAMIC_LIB_DIR}/${LIB_NAME}.so  
+clean:	default_clean default_clean_dirs
 
 ## ===========================================================================
 ## Main rules : ----- LIB -----
 ## ===========================================================================
-lib: $(STATIC_LIB_DIR)/${LIB_NAME}.a ${DYNAMIC_LIB_DIR}/${LIB_NAME}.so 
+lib: default_lib_dirs
 
 ## ===========================================================================
 ## Main rules : ----- BIN -----
 ## ===========================================================================
-bin: 
+bin: default_bin_dirs
 
 ## ===========================================================================
 ## Main rules : ----- VALIDATE -----
 ## ===========================================================================
-validate: ${VALIDATE_DIR}/geometry2D ${VALIDATE_DIR}/serialPort
+validate: default_validate_dirs
+
 ## ===========================================================================
 ## Specific rules
 ## ===========================================================================
 
-${VALIDATE_DIR}/geometry2D: geometry2D.cpp geometry2D.o ${SRC_DIR}/include/geometry2D.h
-	${CC} -o $@  geometry2D.cpp ${DEFAULT_CFLAGS} ${DEFAULT_INC_DIR} -DTEST_MAIN -lm -l$(LIB_STDCPP)
 
-${VALIDATE_DIR}/serialPort: serialPort.cpp serialPort.o robotCommon.o ${SRC_DIR}/include/serialPort.h
-	${CC} -o $@ ${DEFAULT_CFLAGS} serialPort.cpp robotCommon.o ${DEFAULT_INC_DIR} ${STATIC_LIB_DIR}/liblogBasic.a -DSERIAL_MAIN -lm -l$(LIB_STDCPP)
 
 ## ===========================================================================
 ## DO NOT ADD ANYTHING BELOW THIS LINE -- IT WILL BE ERASED BY MAKE DEPEND

@@ -17,14 +17,13 @@
 // =========================================================================
 bool lcd04Filter(UartByte data)
 {
-    return ((Lcd_04*)LCD)->filter(data);
+    return ((Lcd_04*)Lcd)->filter(data);
 }
 
 // ---------------------------------------------------------------------------
 // Lcd_04::Lcd_04
 // ---------------------------------------------------------------------------
-Lcd_04::Lcd_04() : 
-    Lcd(), uart_(NULL)
+Lcd_04::Lcd_04() : uart_(NULL)
 {
     UartManagerCL* uartMgr = UartManagerCL::instanceNoCheck();
     if (!uartMgr) {

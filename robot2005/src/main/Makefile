@@ -6,7 +6,7 @@ SRC_ROOT=..
 ## For standard directory you only need to set these values
 ## ===========================================================================
 LIB_NAME=librobotMain
-OBJS=robotMain.o strategy.o strategyInit.o robotMainFull.o
+OBJS=robotMain.o strategy.o
 
 ## ===========================================================================
 ## Source files used to generate dependencies

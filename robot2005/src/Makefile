@@ -1,6 +1,6 @@
 SRC_ROOT=.
 ## list of directories to compile and their orders
-COMPILE_DIR_ORDER=ftv1.2 log tools soundPlayer viewer3D simulator move events io main
+COMPILE_DIR_ORDER=ftv1.2 log tools soundPlayer viewer3D simulator move events io main 2005
 #modules
 
 SRCS=*.cpp

@@ -24,6 +24,9 @@ class RobotMainCL;
 class RobotMainFullCL;
 class LogCL;
 class RobotTimerCL;
+class IoManagerCL;
+class MovementManagerCL;
+class EventsManagerCL;
 
 typedef struct MainMenuItem {
     char      text[35];
@@ -62,6 +65,8 @@ class RobotMainCL : public RobotBase
     virtual void run(StrategyCL* strategy, int argc, char* argv[]);
     /** Verifie que tous les composants sont initialisez correctement */
     bool checkInitDone(); 
+    /** Fonction qui arrete le robot quand on envoie un CTRL+C */
+    void robotMainUserAbortCB();
     /** Met à zero le chronometre */
     virtual void startMatch();
  protected:
@@ -72,47 +77,14 @@ class RobotMainCL : public RobotBase
 //    RobotComponentList* robotComponents_;
     LogCL*              log_;
     RobotTimerCL*       timer_;
+    IoManagerCL*       ioMgr_;
+    MovementManagerCL* mvtMgr_;
+    EventsManagerCL*   evtMgr_;
     MainMenuList        menu_;
 
     friend class StrategyCL;
     static RobotMainCL* main_;
 };
 
-// ============================================================================
-// ===========================  class RobotMainFull   =========================
-// ============================================================================
-
-#include "events.h"
-#include "movementManager.h"
-#include "ioManager.h"
-
-/**
- * @class RobotMainFull
- * Classe de depart permettant de configurer le robot et de lancer des 
- * strategies pour les matchs
- */
-class RobotMainFullCL: public RobotMainCL
-{
- public:
-    RobotMainFullCL();
-    ~RobotMainFullCL();
-
-    /** Met à zero le chronometre */
-    virtual void startMatch();
-    /** Menu de strategies utilisant l'afficheur LCD */
-    virtual void menu(int argc, char* argv[]);
-    /** Lancer une seule strategy, c'est une alternative a "menu" */
-    virtual void run(StrategyCL* strategy, int argc, char* argv[]);
-
-
- protected:
-    /** Reset tous les composants de RobotMain */
-    virtual void resetAll();
-
- protected:
-    IoManagerCL*       ioMgr_;
-    MovementManagerCL* mvtMgr_;
-    EventsManagerCL*   evtMgr_;
-};
 
 #endif // __ROBOT_MAIN_H__

@@ -416,20 +416,20 @@ void SimulatorRobot::setBorderRobotAttack()
     wheelPts_[2] = Point(90, 140);
     wheelPts_[3] = Point(90, -140);
     
-    borderPts_[0] = Point(140, 170);
-    borderPts_[1] = Point(-60, 170);
-    borderPts_[2] = Point(-60, 120);
+    borderPts_[0] = Point(110, 175);
+    borderPts_[1] = Point(-50, 175);
+    borderPts_[2] = Point(-50, 120);
     borderPts_[3] = Point(90, 120);
 
-    borderPts_[4] = Point(140, -170);
-    borderPts_[5] = Point(-60, -170);
-    borderPts_[6] = Point(-60, -120);
+    borderPts_[4] = Point(110, -175);
+    borderPts_[5] = Point(-50, -175);
+    borderPts_[6] = Point(-50, -120);
     borderPts_[7] = Point(90, -120);
 
-    borderPts_[8]  = Point(140, -170);
-    borderPts_[9]  = Point(-60, -170);
-    borderPts_[10] = Point(-60, 170);
-    borderPts_[11] = Point(140, 170);
+    borderPts_[8]  = Point(110, -175);
+    borderPts_[9]  = Point(-50, -175);
+    borderPts_[10] = Point(-50, 175);
+    borderPts_[11] = Point(110, 175);
 
     // passage des coordonnees en mode cylyndrique
     convertBorderToCylindric(Point(0,0));

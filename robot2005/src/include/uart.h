@@ -298,7 +298,7 @@ class UartBuffer : public Uart {
 // ============================================================================
 // =============================  class UartManager   =========================
 // ============================================================================
-class Lcd;
+class LcdCL;
 class OdometerCL;
 
 /** 
@@ -398,7 +398,7 @@ class UartManagerCL : public RobotComponent
  private:
     // liste des composant initialise par le uartManager et qui se connectent 
     // sur un uart
-    Lcd*         lcd_;
+    LcdCL*         lcd_;
     OdometerCL*    odometer_;
 };
 

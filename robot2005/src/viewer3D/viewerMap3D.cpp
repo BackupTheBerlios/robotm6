@@ -388,9 +388,9 @@ void Viewer3DCL::drawRobot3D(int robotId)
 }
 void Viewer3DCL::drawRobot3DAttack(ViewerColorST& color)
 {
-    Millimeter L=170, L2=140;
-    Millimeter HR=-60, HF=80, HFF=140;
-    Millimeter Z=400;
+    Millimeter L=175, L2=140; // L= demui largeur arriere, L2=demi largeur avant
+    Millimeter HR=-50, HF=70, HFF=110; // hr = distance arriere, centre roues, HFF=distance roues avant
+    Millimeter Z=400; // hauteur du robot
 
      glColor4f(1,1,1,1);
         Texture->apply(TEX_ATTACK_SIDE_R1);
@@ -453,6 +453,7 @@ void Viewer3DCL::drawRobot3DAttack(ViewerColorST& color)
     glPopMatrix(); 
     
     if (useTexture_) {
+        // ombre
         glPushMatrix();
 	glEnable(GL_ALPHA_TEST);
         glEnable(GL_DEPTH_TEST);

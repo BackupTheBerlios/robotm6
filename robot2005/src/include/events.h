@@ -363,17 +363,6 @@ inline bool EventsManagerCL::isEnabled(EventsEnum evt)
 }
 
 // ----------------------------------------------------------------------------
-// evtDialogButtonFilter
-// ----------------------------------------------------------------------------
-// Cette fonction est un EventsFn qui permet d'attendre que l'utilisateur 
-// appuie sur les boutons yes ou no
-// ----------------------------------------------------------------------------
-inline bool evtDialogButtonFilter(bool evt[])
-{
-    return evt[EVENTS_BUTTON_YES] || evt[EVENTS_BUTTON_NO];
-}
-
-// ----------------------------------------------------------------------------
 // evtExceptions
 // ----------------------------------------------------------------------------
 // Cette fonction est un EventsFn qui permet d'attendre les evenements lancant

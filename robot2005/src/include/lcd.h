@@ -12,7 +12,7 @@
 
 #include "robotBase.h"
 
-#define LCD Lcd::instance()
+#define Lcd LcdCL::instance()
 
 typedef unsigned int LcdMessage;
 static const unsigned int LCD_CHAR_PER_LINE = 16;
@@ -42,11 +42,11 @@ class Uart;
  * Interface avec l'afficheur LCD
  */
 
-class Lcd : public RobotIODevice
+class LcdCL : public RobotIODevice
 {
  public:
-  static Lcd* instance();
-  virtual ~Lcd();
+  static LcdCL* instance();
+  virtual ~LcdCL();
 
   /**
    * @brief Test the device
@@ -92,10 +92,10 @@ class Lcd : public RobotIODevice
     virtual void ledPolice()=0;
 
  private:
-  Lcd(const Lcd& lcd); // disabled
+  LcdCL(const LcdCL& lcd); // disabled
  protected:
-  Lcd();
-  static Lcd* lcd_; // singleton
+  LcdCL();
+  static LcdCL* lcd_; // singleton
 };
 
 // ===========================================================================
@@ -107,7 +107,7 @@ class Lcd : public RobotIODevice
  * Implementation des fonctions de class Lcd dans le cas d'un afficheur lcd 
  * sur uart
  */
-class LcdSimu : public Lcd
+class LcdSimu : public LcdCL
 {
  public:
   virtual ~LcdSimu();
@@ -168,7 +168,7 @@ class LcdSimu : public Lcd
  * Implementation des fonctions de class Lcd dans le cas d'un afficheur lcd 
  * sur uart. Protocole de communication adapte a la carte 2003
  */
-class Lcd_03 : public Lcd
+class Lcd_03 : public LcdCL
 {
  public:
   ~Lcd_03();
@@ -233,7 +233,7 @@ class Lcd_03 : public Lcd
  * Implementation des fonctions de class Lcd dans le cas d'un afficheur lcd 
  * sur uart. Protocole de communication adapte a la carte 2003
  */
-class Lcd_04 : public Lcd
+class Lcd_04 : public LcdCL
 {
  public:
   ~Lcd_04();
@@ -306,9 +306,9 @@ protected:
 // ===========================================================================
 
 // ---------------------------------------------------------------------------
-// Lcd::instance
+// LcdCL::instance
 // ---------------------------------------------------------------------------
-inline Lcd* Lcd::instance()
+inline LcdCL* LcdCL::instance()
 {
   assert(lcd_!=NULL); // lcd must have been initialized by IoManager
   return lcd_;
