@@ -213,11 +213,11 @@ void Move::setSpeed(MotorSpeed  speedLeft,
         double deltaLeft  = speedLeft - lastSpeedLeft_;
         if (fabs(deltaLeft) > MOVE_MAX_DELTA_SPEED) {
             
-            speedLeft = lastSpeedLeft_ + sign(deltaLeft) * MOVE_MAX_DELTA_SPEED;
+            speedLeft = (MotorSpeed)(lastSpeedLeft_ + sign(deltaLeft) * MOVE_MAX_DELTA_SPEED);
         }
         double deltaRight = speedRight - lastSpeedRight_;
         if (fabs(deltaRight) > MOVE_MAX_DELTA_SPEED) {
-            speedRight = lastSpeedRight_ + sign(deltaRight) * MOVE_MAX_DELTA_SPEED;
+            speedRight = (MotorSpeed)(lastSpeedRight_ + sign(deltaRight) * MOVE_MAX_DELTA_SPEED);
         }
     }
    
@@ -554,9 +554,11 @@ void Move::followTrajectory(Trajectory const&   trajectory2,
     t.push_back(ROBOT_POS->pt());
     Trajectory::const_iterator it=trajectory->begin();
     for(;it!=trajectory->end();it++) t.push_back(*it);
+#ifdef LSM_TODO
     Trajectory t2;
     TrajecGen::reniceTrajectory2(t, t2);
     Log->trajectory(t2);
+#endif
     setCurrentMovement(firstMvt);
 }
 

@@ -6,6 +6,7 @@
 #include "log.h"
 #include "robotTimer.h"
 #include "mthread.h"
+#include "simulatorClient.h"
 
 // ============================================================================
 // =============================  class RobotMainFullCL   =======================
@@ -85,10 +86,25 @@ namespace {
 RobotMainFullCL::RobotMainFullCL() : 
     RobotMainCL(),
     ioMgr_(NULL), mvtMgr_(NULL), evtMgr_(NULL)
-{
+{ 
+    if (RobotConfig->needSimulator()) {
+        if (!Simulator->connectToServer()) {
+            LOG_ERROR("Cannot connect to SIMULATOR server\n");
+        } else {
+            if (RobotConfig->isRobotAttack) {
+                Simulator->setRobotName("RobotMain Attack");
+                Simulator->setRobotModel(ROBOT_MODEL_ATTACK);
+                Simulator->setRobotMotorCoef(300, 0.001, 1);
+            } else {
+                Simulator->setRobotName("RobotMain Defence");
+                Simulator->setRobotModel(ROBOT_MODEL_DEFENCE);
+                Simulator->setRobotMotorCoef(300, 0.001, 1);
+            }
+        }
+    }
     evtMgr_   = new EVENTS_MANAGER_DEFAULT();
-    mvtMgr_   = new MovementManager(); // simulator doit etre cree avant mvtMgr
     ioMgr_    = new IoManagerCL();
+    mvtMgr_   = new MovementManager(); // simulator doit etre cree avant mvtMgr
     
     // enregistre la detection du Ctrl+C et du callback correspondant qui 
     // stoppe le programme immediatement
@@ -152,7 +168,9 @@ void RobotMainFullCL::menu(int   argc,
 // -------------------------------------------------------------------------
 // RobotMainFullCL::run
 // -------------------------------------------------------------------------
-void RobotMainFullCL::run(StrategyCL* strategy, int argc, char* argv[])
+void RobotMainFullCL::run(StrategyCL* strategy, 
+                          int argc, 
+                          char* argv[])
 {
     
     timer_->registerTimerFunction(timerFunctionGameOver,
@@ -180,8 +198,8 @@ void RobotMainFullCL::resetAll()
 {
     if (timer_)    { timer_->reset();    }
     if (evtMgr_)   { evtMgr_->reset();   }
-    if (mvtMgr_)   { mvtMgr_->reset();   }
     if (ioMgr_)    { ioMgr_->reset();    }
+    if (mvtMgr_)   { mvtMgr_->reset();   }
     if (!checkInitDone()) {
 	LOG_ERROR("Tous les composants ne sont pas resetés correctement !\n");
     }
@@ -191,4 +209,12 @@ void RobotMainFullCL::resetAll()
     Events->registerImmediatCallback(EVENTS_USER_ABORT, this, 
 				     robotMainFullUserAbortCB, 
 				     "robotMainFullUserAbortCB");
+}
+
+// -------------------------------------------------------------------------
+// RobotMainFullCL::startMatch
+// -------------------------------------------------------------------------
+void RobotMainFullCL::startMatch() 
+{
+    RobotMainCL::startMatch(); 
 }

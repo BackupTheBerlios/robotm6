@@ -70,6 +70,8 @@ class RobotConfigCL
        c'est sur port serie */
    bool isMotorISA;
 
+   bool needSimulator() const;
+
    private:
     static RobotConfigCL* lastInstance_;
 };
@@ -115,6 +117,14 @@ inline RobotConfigCL::RobotConfigCL() :
 {
     lastInstance_ = this;
     reset();
+}
+
+// ----------------------------------------------------------------------------
+// RobotConfig::needSimulator() const
+// ----------------------------------------------------------------------------
+inline bool RobotConfigCL::needSimulator() const
+{
+    return lcdSimu || odometerSimu || !motorReal;
 }
 
 // ----------------------------------------------------------------------------

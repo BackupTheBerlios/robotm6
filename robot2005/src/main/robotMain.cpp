@@ -19,7 +19,7 @@ RobotMainCL::RobotMainCL() :
 {
     main_   = this;
     log_    = new LogCL();
-    timer_  = RobotTimerCL::instance();
+    timer_  = RobotTimerCL::instance(); 
   //  robotComponents_ = RobotComponent::getComponentsList();
     RString::bPrintfInit(); // enable printf(%b)
     LOG_WARNING("Program was compiled on %s at %s by %s in %s on %s\n", 

@@ -16,12 +16,13 @@ all:    lib
 
 lib:
 	cd src; $(MAKE) all
-	cp src/libfthread.a ../../lib
-	cp src/fthread.h ../include
+	\cp src/libfthread.a ../../lib
+	\cp src/fthread.h ../include
 
 bin:
 
 depend:
+	\cp src/fthread.h ../include
 
 validate:
 

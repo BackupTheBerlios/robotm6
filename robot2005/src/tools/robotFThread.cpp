@@ -9,7 +9,9 @@ namespace ftThread {
     // ----------------------------------------------------------------------
     ft_scheduler_t init()
     {
+#ifdef USE_FTHREAD
 	if (!scheduler_) scheduler_ = ft_scheduler_create();
+#endif
 	return scheduler_;
     }
     // ----------------------------------------------------------------------
@@ -29,6 +31,8 @@ namespace ftThread {
     // ----------------------------------------------------------------------
     void cleanup()
     {
+#ifdef USE_FTHREAD
 	ft_exit();
+#endif
     }
 };

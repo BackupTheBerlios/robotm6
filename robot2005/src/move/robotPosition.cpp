@@ -9,6 +9,7 @@
 #include "robotTimer.h"
 #include "events.h"
 #include "geometry2D.h"
+#include "simulatorClient.h"
 
 // ----------------------------------------------------------------------------
 // Static members
@@ -73,7 +74,8 @@ void RobotPosition::set(Millimeter X,
     clearOdoColliDetectBuffer();
     txtChanged_    = true;
     clearBufferPosition();
-} 
+    Simulator->setRobotPosition(pos_);
+}
 
 // ----------------------------------------------------------------------------
 // RobotPosition::theta

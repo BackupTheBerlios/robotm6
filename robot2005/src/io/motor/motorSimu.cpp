@@ -27,21 +27,21 @@ void MotorSimu::setSpeed(MotorSpeed left,
 			 MotorSpeed right)
 {
   LOG_DEBUG("set speed(%d, %d)\n", (int)left, (int)right);
-  //Simulator::instance()->setSpeed(left, right);
+  Simulator->setSpeed(left, right);
 }
 
 /** Retourne la position des codeurs */
 void MotorSimu::getPosition(MotorPosition &left,
                             MotorPosition &right)
 {
-  //Simulator::instance()->getMotorPosition(left, right);
+  Simulator->getMotorPosition(left, right);
 }
 
 /** Retourne la consigne reellement envoyee au moteurs */
 void MotorSimu::getPWM(MotorPWM &left,
 		       MotorPWM &right)
 {
-  //Simulator::instance()->getPwm(left, right);
+  Simulator->getPwm(left, right);
 }
 
 /** desasserrvit les moteurs */

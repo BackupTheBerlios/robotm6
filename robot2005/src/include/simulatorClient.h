@@ -22,15 +22,6 @@ class Socket;
  * table et leur interaction
  */
 class SimulatorClient : public RobotBase {
- protected:
-    SimulatorClient();
-    
-    bool connectTryAllPorts(const char* hostName);
-    unsigned char* setBufferHeader(SimuRequestType type, 
-                                   int dataLength);
-    void SimulatorClient::sendBuffer();
-    unsigned char* SimulatorClient::recvBuffer(SimuRequestType type);
-
  public:
     static SimulatorClient* instance();
     virtual ~SimulatorClient();
@@ -136,7 +127,15 @@ class SimulatorClient : public RobotBase {
     Millimeter getGroundDistance(Millimeter rPosCaptor, 
                                  Radian dirPosCaptor,
                                  Millimeter zPosCaptor);
+ protected:
+    SimulatorClient();
     
+    bool connectTryAllPorts(const char* hostName);
+    unsigned char* setBufferHeader(SimuRequestType type, 
+                                   int dataLength);
+    void SimulatorClient::sendBuffer();
+    unsigned char* SimulatorClient::recvBuffer(SimuRequestType type);
+
  private:
     static SimulatorClient* simulatorClient_;
     Socket* socket_;

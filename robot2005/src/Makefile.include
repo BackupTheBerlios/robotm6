@@ -76,7 +76,7 @@ export DEFAULT_INC_DIR
 
 ALL_STATIC_LIB=
 
-ALL_DYNAMIC_LIB= -lsimulator -llog -ltools -lm -lpthread -l$(LIB_STDCPP) -lz
+ALL_DYNAMIC_LIB= -lrobotMain -levents -lmove -llcd -lmotor -lodometer -luart -lsimulator -llog -ltools -lm -lpthread -l$(LIB_STDCPP) -lz $(SRC_ROOT)/../lib/libfthread.a 
 
 
 
