@@ -10,7 +10,14 @@
 #ifndef __SOUND_LIST_H__
 #define __SOUND_LIST_H__
 
-
+typedef enum SoundPriority {
+  /* @brief le son sera joue quand les autres qui ont ete ajoutes avant 
+   * lui seront termines */
+  SND_PRIORITY_PUSH_BACK,
+  /** @brief efface la liste des sons, stop le son courant et joue ce 
+   * nouveau son immediatement */
+  SND_PRIORITY_URGENT
+} SoundPriority;
 
 typedef enum SoundId {
   SOUND_0=0,

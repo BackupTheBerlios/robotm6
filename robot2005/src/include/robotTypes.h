@@ -507,10 +507,6 @@ inline void concat(Trajectory &target,
     }
 }
 
-
-#endif // __cplusplus
-
-
 #include <sys/time.h>
 // ----------------------------------------------------------------------------
 // initialise un generateur de nombre aleatoires
@@ -578,5 +574,6 @@ template<typename T> T sign(const T a) { return a>=0? (T)1 : (T)(-1); }
       printf("[%s:%d] Warning, validation failed (%d failures)!\n", __FILE__, __LINE__, lsm_test_result);                           \
     return (lsm_test_result==0)					     
 
+#endif // __cplusplus
 
 #endif // __ROBOT_TYPES_H__

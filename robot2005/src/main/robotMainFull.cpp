@@ -7,6 +7,7 @@
 #include "robotTimer.h"
 #include "mthread.h"
 #include "simulatorClient.h"
+#include "sound.h"
 
 // ============================================================================
 // =============================  class RobotMainFullCL   =======================
@@ -119,6 +120,8 @@ RobotMainFullCL::RobotMainFullCL() :
     Events->registerImmediatCallback(EVENTS_USER_ABORT, this, 
 				     robotMainFullUserAbortCB, 
 				     "robotMainFullUserAbortCB");
+
+    Sound->play(SOUND_BONJOUR);
 }
 
 // -------------------------------------------------------------------------

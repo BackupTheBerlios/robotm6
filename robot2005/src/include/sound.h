@@ -16,23 +16,10 @@
 
 #define Sound SoundCL::instance()
 
-typedef enum SoundPriority {
-  /* @brief le son sera joue quand les autres qui ont ete ajoutes avant 
-   * lui seront termines */
-  SND_PRIORITY_PUSH_BACK,
-  /** @brief efface la liste des sons, stop le son courant et joue ce 
-   * nouveau son immediatement */
-  SND_PRIORITY_URGENT
-} SoundPriority;
-
 /**
- * @class Sound
+ * @class SoundCL
  * Classe permettant de jouer des sons. La liste des sons a jouer est envoyee
- * au player de son (un autre programme) par l'intermediaire d'une shared 
- * memory.
- * Le player de sons est un aute programme car comme il peut etre sensible
- * (risque de blocages ou de crashs et qu'il n'est pas indispensable, mieux
- *  vaux qu'il ne fasse pas parti du programme principal du robot
+ * a la carte lecteur MP3
  */
 
 class SoundCL: public RobotComponent {
@@ -55,26 +42,11 @@ class SoundCL: public RobotComponent {
   virtual void play(SoundId sound, 
                     SoundPriority priority=SND_PRIORITY_PUSH_BACK){}
   
-  /**
-   * @brief Dit la valeur d'un chiffre a virgule
-   */
-  virtual void sayNumber(double number){}
-
-  /**
-   * @brief Joue une musique de musicList
-   */
-  virtual void playMusic(int musicId){}
-
   /** 
    * @brief Attend que la liste de sons soit jouee et lance des 
    * musiques mp3 dans un ordre aleatoire
    */
   virtual void startMusic(){}
-  /** 
-   * @brief Attend que la liste de sons soit jouee et lance des 
-   * musiques tahitiennes mp3 dans un ordre aleatoire
-   */
-  virtual void startMusicYukulele(){}
   /** 
    * @brief Arrete la musique
    * @see startMusic
@@ -94,17 +66,9 @@ class SoundSimuCL: public SoundCL {
  public:
   /** @brief Constructeur */
   SoundSimuCL();
-  
-  /** 
-   * @brief Envoie un son dans la shared memory pour qu'il soit joue
-   * @param priority SND_PRIORITY_PUSH_BACK: le son sera joue quand les 
-   *        autres qui ont ete ajoutes avant lui seront termines\n
-   *        SND_PRIORITY_URGENT: efface la liste des sons, stop le son
-   *        courant et joue ce nouveau son immediatement
-   */
   void play(SoundId sound, 
             SoundPriority priority=SND_PRIORITY_PUSH_BACK);
- 
+  void clearStack();
 };
 
 class Sound05CL: public SoundCL {
