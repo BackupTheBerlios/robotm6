@@ -248,14 +248,11 @@ bool Strategy2005CL::waitJackout()
 
     setStartingPosition();
 
-    Lcd->setLed(LCD_LED_GREEN, LCD_LED_ON);
     LOG_COMMAND("WAIT START\n");
     Lcd->print("Ready to start\nWait jack out");
     Sound->play(SOUND_GO_FOR_LAUNCH, SND_PRIORITY_URGENT);
     Events->waitNot(EVENTS_JACKIN);
    
-    Lcd->setLed(LCD_LED_GREEN, LCD_LED_OFF);
-    Lcd->setLed(LCD_LED_RED, LCD_LED_OFF);
     Lcd->print("Go, go, go...");
     LOG_WARNING("Go, go, go...\n");
     return true;

@@ -12,7 +12,7 @@
 
 #include "robotBase.h"
 #include "soundList.h"
-#include "robotConfig.h"
+#include "robotConfig2005.h"
 
 #define Sound SoundCL::instance()
 
@@ -94,7 +94,7 @@ class Sound05CL: public SoundCL {
 inline SoundCL* SoundCL::instance()
 {
     if (!sound_) {
-        if (RobotConfig->soundSimu) sound_ = new SoundSimuCL();
+        if (RobotConfig2005->soundSimu) sound_ = new SoundSimuCL();
         else sound_ = new Sound05CL();
     }
     return sound_;

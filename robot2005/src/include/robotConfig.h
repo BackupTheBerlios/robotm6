@@ -39,7 +39,7 @@ class RobotConfigCL
     virtual void reset(){};
     
     /** @brief Renvoie true si l'un des composant du robot est simule */
-    bool needSimulator() const;
+    virtual bool needSimulator() const;
 
 
  public:
@@ -48,25 +48,12 @@ class RobotConfigCL
     bool disableUartAnswerRequest;
     /** @brief Est ce aue ioManager alloue les classes des cartes electroniques */
     bool ioManagerAlloc;
-    // --------------------------------------------
-    // --- E N T R E E S    /   S O R T I E S   ---
-    // --------------------------------------------
-    /**  @brief utilse le motorReal ou motorSimu */
-    bool motorSimu;
-    /** @brief simule le lcd ou envoie les messages sur l'uart */
-    bool lcdSimu;
-    /** @brief simule la carte odometre */
-    bool odometerSimu;
-    /** @brief simule la carte odometre */
-    bool soundSimu;
-    
+ 
     // --------------------------------------------
     // --- description du robot                 ---
     // --------------------------------------------  
     /** nom de la config */
     char name[64];
-    /** @brief True si c'est le robot d'attack, false sinon */
-    bool isRobotAttack;
     /** @brief True si la carte des moteurs est sur port isa, false si
         c'est sur port serie */
     bool isMotorISA;
@@ -74,7 +61,9 @@ class RobotConfigCL
     Position startingPos;
     /** @brief moment de la derniere action du match */
     Millisecond timeAlertBeforeEnd;
-    
+    /** @brief le robot a reboote en match */
+    bool hasRebooted;
+
     // --------------------------------------------
     // --- constantes des odometres             ---
     // --------------------------------------------
@@ -106,7 +95,7 @@ class RobotConfigCL
     double getMotorKRight() const { return motorSignRight*motorK*motorCr; }
     double getMotorD()      const { return motorD; }
     
- private:
+ protected:
     static RobotConfigCL* lastInstance_;
 };
 
@@ -119,15 +108,10 @@ inline RobotConfigCL::RobotConfigCL(const char* Name,
     disableUartAnswerRequest(false),
     ioManagerAlloc(true),
 
-    motorSimu(simulated),
-    lcdSimu(simulated),
-    odometerSimu(simulated),
-    soundSimu(simulated),
-
-    isRobotAttack(true),
     isMotorISA(true),
     startingPos(),
     timeAlertBeforeEnd(TIME_MATCH),
+    hasRebooted(false),
 
     odometerK(0.1),
     odometerD(313),
@@ -158,7 +142,7 @@ inline RobotConfigCL::RobotConfigCL(const char* Name,
 // ----------------------------------------------------------------------------
 inline bool RobotConfigCL::needSimulator() const
 {
-    return lcdSimu || odometerSimu || motorSimu; 
+    return false; 
     // soundSimu n'a pas besoin du simulateur !
 }
 
@@ -170,7 +154,7 @@ inline RobotConfigCL::~RobotConfigCL()
     lastInstance_ = NULL;
 }
 // ----------------------------------------------------------------------------
-// RobotConfig::getClassConfig
+// RobotConfig::instance
 // ----------------------------------------------------------------------------
 inline RobotConfigCL* RobotConfigCL::instance()
 {

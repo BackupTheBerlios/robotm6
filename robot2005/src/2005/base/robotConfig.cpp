@@ -1,4 +1,4 @@
-#include "robot2005.h"
+#include "robotConfig2005.h"
 
 // ----------------------------------------------------------------------------
 // class RobotConfigAttack2005CL 
@@ -8,7 +8,7 @@
  * Configuration du robot d'attaque 2005
  */
 RobotConfigAttack2005CL::RobotConfigAttack2005CL(bool simulated)
-    : RobotConfigCL("Robot attack", simulated)
+    : RobotConfig2005CL("Robot attack", simulated)
 {
     isRobotAttack=(true);
     isMotorISA=(true);
@@ -41,7 +41,7 @@ RobotConfigAttack2005CL::RobotConfigAttack2005CL(bool simulated)
  * Configuration du robot de defence 2005
  */
 RobotConfigDefence2005CL::RobotConfigDefence2005CL(bool simulated)
-    : RobotConfigCL("Robot defence", simulated)
+    : RobotConfig2005CL("Robot defence", simulated)
 {
     isRobotAttack=(false);
     isMotorISA=(true);

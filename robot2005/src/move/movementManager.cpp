@@ -4,7 +4,7 @@
  #include "mthread.h"
  #include "log.h"
  #include "robotTimer.h"
- #include "robotConfig.h"
+ #include "robotConfig2005.h"
 
 
  MovementManagerCL* MovementManagerCL::mvtMgr_=NULL;
@@ -131,7 +131,7 @@
  void MovementManagerCL::periodicTask()
  {
      if (!motor_) {
-	 if (RobotConfig->motorSimu) {
+	 if (RobotConfig2005->motorSimu) {
 	     motor_ = new MotorSimu(RobotConfig->automaticMotorReset);
 	 } else {
 	     motor_ = new MotorReal(RobotConfig->automaticMotorReset);

@@ -3,7 +3,7 @@
 #include "sound.h"
 #include "log.h"
 #include "sound.h"
-#include "robotConfig.h"
+#include "robotConfig2005.h"
 
 // -------------------------------------------------------------------------
 // RobotMain2005CL::RobotMain2005CL
@@ -17,7 +17,7 @@ RobotMain2005CL::RobotMain2005CL() :
             LOG_ERROR("Cannot connect to SIMULATOR server\n");
         } else {
             Simulator->setRobotName(RobotConfig->name);
-            if (RobotConfig->isRobotAttack) {
+            if (RobotConfig2005->isRobotAttack) {
                 Simulator->setRobotModel(ROBOT_MODEL_ATTACK);
             } else {
                 Simulator->setRobotModel(ROBOT_MODEL_DEFENCE);  
@@ -33,7 +33,7 @@ RobotMain2005CL::RobotMain2005CL() :
                                         RobotConfig->odometerSignRight);
         }
     }
-    if (RobotConfig->isRobotAttack) {
+    if (RobotConfig2005->isRobotAttack) {
         Log->robotModel(ROBOT_MODEL_ATTACK);
     } else {
         Log->robotModel(ROBOT_MODEL_DEFENCE);

@@ -93,7 +93,7 @@ class MovementManagerCL : public RobotComponent
 
     RobotPositionCL* position(){return position_;}
     MoveCL*          move()    {return move_;}
-
+    bool             isMotorSimu() { return motor_?motor_->isSimu():false; }
     /** @brief Reset les moteurs quand on detecte qu'ils sont bloques */
     void enableAutomaticReset(bool enable);
    

@@ -1,6 +1,6 @@
 ## ===========================================================================
 ## Common rules for all makefiles of robot 2004
-## Author: Laurent Saint-Marcel (2004), 
+## Author: Laurent Saint-Marcel (2004 - 2005), 
 ##         Alexis Nikichine (2003), 
 ##         Gerald Garcia (2002) 
 ## ---------------------------------------------------------------------------
@@ -76,7 +76,7 @@ export DEFAULT_INC_DIR
 
 ALL_STATIC_LIB=
 
-ALL_DYNAMIC_LIB= -lrobotMain -lbase2005 -lrobotMain -lsoundPlayer -levents -lmove -lsound -llcd -lbuttons -lmotor -lodometer -luart -lsimulator -llog -ltools -lm -lpthread -l$(LIB_STDCPP) -lz
+ALL_DYNAMIC_LIB= -lrobotMain -lstrategy2005 -lbase2005 -lrobotMain -lsoundPlayer -levents -lmove -lsound -llcd -lbuttons -lmotor -lodometer -luart -lsimulator -llog -ltools -lm -lpthread -l$(LIB_STDCPP) -lz
 
 IO_STATIC_LIB=${SRC_ROOT}/../lib/libevents.a  ${SRC_ROOT}/../lib/libuart.a ${SRC_ROOT}/../lib/liblcd.a ${SRC_ROOT}/../lib/libsound.a ${SRC_ROOT}/../lib/libsoundPlayer.a ${SRC_ROOT}/../lib/libbuttons.a ${SRC_ROOT}/../lib/libsimulator.a ${SRC_ROOT}/../lib/libodometer.a ${SRC_ROOT}/../lib/libevents.a  ${SRC_ROOT}/../lib/libuart.a ${SRC_ROOT}/../lib/libtools.a ${SRC_ROOT}/../lib/liblog.a -lm -lz -l$(LIB_STDCPP) -lpthread
 

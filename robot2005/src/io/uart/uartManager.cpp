@@ -2,7 +2,7 @@
 #include "log.h"
 #include "robotTimer.h"
 #include "ioManager.h"
-#include "robotConfig.h"
+#include "robotConfig2005.h"
 
 #include "lcd.h"
 #include "odometer.h"
@@ -213,7 +213,7 @@ void UartManagerCL::allocLcd()
     LOG_FUNCTION();
     if (!lcd_ || lcd_->isSimu()) {
         if (lcd_) { delete lcd_; lcd_ = NULL; }
-        if (RobotConfig->lcdSimu) {
+        if (RobotConfig2005->lcdSimu) {
             lcd_   = new LcdSimu();
         } else {
             if (getUartById(UART_LCD_04) != NULL) {;
@@ -241,7 +241,7 @@ void UartManagerCL::allocOdometer()
     LOG_FUNCTION();
     if (!odometer_ || odometer_->isSimu()) {
         if (odometer_) {delete odometer_; odometer_ = NULL; }
-        if (RobotConfig->odometerSimu) {
+        if (RobotConfig2005->odometerSimu) {
             odometer_   = new OdometerSimu();
         } else {
             if (getUartById(UART_ODOMETER_04) != NULL) {

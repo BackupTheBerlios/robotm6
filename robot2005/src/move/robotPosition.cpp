@@ -10,6 +10,7 @@
 #include "geometry2D.h"
 #include "robotConfig.h"
 #include "simulatorClient.h"
+#include "motor.h"
 
 void robotPositionMotorHasBeenReset()
 {
@@ -76,11 +77,11 @@ void RobotPositionCL::set(Millimeter X,
     pos_.center.y  = Y;
     pos_.direction = T;
     posOdom_       = pos_;
-    if (RobotConfig->odometerSimu) {
+    if (Odometer->isSimu()) {
         Simulator->setRobotPosition(pos_);
     }
     posHctl_       = pos_;
-    if (RobotConfig->motorSimu) {
+    if (MvtMgr->isMotorSimu()) {
         Simulator->setEstimatedRobotPosition(pos_);
     }
     clearOdoColliDetectBuffer();
@@ -273,7 +274,7 @@ void RobotPositionCL::getPosition(Position&      posi,
 // ----------------------------------------------------------------------------
 void RobotPositionCL::updateHctlPosition()
 {
-    if (RobotConfig->motorSimu) {
+    if (MvtMgr->isMotorSimu()) { 
         Simulator->getRobotEstimatedPosition(posHctl_.center, posHctl_.direction);
     } else {
         CoderPosition left=0, right=0;
@@ -318,7 +319,7 @@ void RobotPositionCL::setOdometerAliveStatus(bool alive)
 // ----------------------------------------------------------------------------
 void RobotPositionCL::updateOdometerPosition()
 {
-    if (RobotConfig->odometerSimu) {
+    if (Odometer->isSimu()) {
         Simulator->getRobotRealPosition(posOdom_.center, posOdom_.direction);
     } else {
         CoderPosition left=0, right=0;

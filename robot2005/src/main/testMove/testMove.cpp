@@ -1,10 +1,9 @@
 #include "strategy2005.h"
-#include "robotMain.h"
 #define LOG_CLASSID CLASS_DEFAULT
 #include "log.h"
 #include "motor.h"
 #include "odometer.h"
-#include "robot2005.h"
+#include "robotConfig2005.h"
 #include "robotMain2005.h"
 #include "events.h"
 #include "robotPosition.h"
