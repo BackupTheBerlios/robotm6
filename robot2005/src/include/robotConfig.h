@@ -60,7 +60,9 @@ class RobotConfigCL
     bool odometerSimu;
      /** @brief affiche la position estimee du robot toutes les secondes */
     bool displayOdomPos;
-
+    /** @brief simule la carte odometre */
+    bool soundSimu;
+    
     // --------------------------------------------
     // --- description du robot   ---
     // --------------------------------------------
@@ -112,6 +114,7 @@ inline RobotConfigCL::RobotConfigCL() :
     lcdSimu(false),
     odometerSimu(false),
     displayOdomPos(true),
+    soundSimu(false),
     isRobotAttack(true),
     isMotorISA(true)
 {
@@ -152,7 +155,8 @@ inline RobotConfigSimuCL::RobotConfigSimuCL() : RobotConfigCL()
     motorSimu=true;
     lcdSimu=true;
     odometerSimu=true;
- 
+    soundSimu=true;
+
     reset();
 }
 

@@ -1,18 +1,34 @@
-SRC_ROOT=..
+SRC_ROOT=../..
 
-COMPILE_FIRST_DIRS=uart lcd odometer button motor sound
 ## ===========================================================================
 ## LIB_NAME and .o files for making libraries .a and .so
 ## ===========================================================================
 ## For standard directory you only need to set these values
 ## ===========================================================================
-LIB_NAME=
-OBJS=
+FILE=sound
+LIB_NAME=lib${FILE}
+OBJS=${FILE}.o ${FILE}Simu.o ${FILE}_05.o 
+
+BIN_NAME=${FILE}Test_05
+BIN_OBJS=${FILE}05Main.o ${FILE}Simu.o ${FILE}.o
+BIN_LIBS=${SRC_ROOT}/../lib/libevents.a  ${SRC_ROOT}/../lib/libuart.a ${SRC_ROOT}/../lib/liblcd.a ${SRC_ROOT}/../lib/libsimulator.a ${SRC_ROOT}/../lib/libodometer.a ${SRC_ROOT}/../lib/libevents.a  ${SRC_ROOT}/../lib/libuart.a ${SRC_ROOT}/../lib/libtools.a ${SRC_ROOT}/../lib/liblog.a -lm -lz -l$(LIB_STDCPP) -lpthread
+BIN_LIBS_LOCATION=
+BIN_FLAGS=
+BIN_SIMU_OBJS=
+BIN_SIMU_LIBS=
+BIN_SIMU_LIBS_LOCATION=$(BIN_LIBS_LOCATION)
+BIN_SIMU_FLAGS=-DSIMULATED
+
+VALIDATE_NAME=
+VALIDATE_OBJS=
+VALIDATE_LIBS=
+VALIDATE_LIBS_LOCATION=
+VALIDATE_FLAGS=
 
 ## ===========================================================================
 ## Source files used to generate dependencies
 ## ===========================================================================
-SRCS=
+SRCS=${FILE}.cpp ${FILE}_05.cpp ${FILE}Simu.cpp
 
 ## ===========================================================================
 ## Additionnal flags for this directory. See makefile.include for common flags
@@ -35,27 +51,34 @@ all: lib bin validate
 ## ===========================================================================
 ## Main rules : ----- CLEAN -----
 ## ===========================================================================
-clean:	default_clean default_clean_dirs
+clean:	default_clean
+	${RM} -f  ${STATIC_LIB_DIR}/${LIB_NAME}.a        \
+                  ${DYNAMIC_LIB_DIR}/${LIB_NAME}.so  
+	${RM} -f  ${BIN_DIR}/${BIN_NAME}            
+
 
 ## ===========================================================================
 ## Main rules : ----- LIB -----
 ## ===========================================================================
-lib: default_lib_dirs
+lib: $(STATIC_LIB_DIR)/${LIB_NAME}.a ${DYNAMIC_LIB_DIR}/${LIB_NAME}.so 
 
 ## ===========================================================================
 ## Main rules : ----- BIN -----
 ## ===========================================================================
-bin: default_bin_dirs
+bin: 
+#${BIN_DIR}/${BIN_NAME}
 
 ## ===========================================================================
 ## Main rules : ----- VALIDATE -----
 ## ===========================================================================
-validate: default_validate_dirs
+validate:
 
 ## ===========================================================================
 ## Specific rules
 ## ===========================================================================
 
+${FILE}04Main.o: ${FILE}_05.cpp ${FILE}_05.o ${SRC_DIR}/include/${FILE}.h
+	${CC} -c ${DEFAULT_CFLAGS} -DMAKE_MAIN -o $@ ${FILE}_05.cpp ${DEFAULT_INC_DIR}
 
 
 ## ===========================================================================
