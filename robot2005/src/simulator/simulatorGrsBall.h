@@ -17,6 +17,7 @@
 class SimulatorGrsBall;
 class SimulatorSkittle;
 class SimulatorRobot;
+class Segment;
 
 /**
  * @class SimulatorSkittle
@@ -47,7 +48,10 @@ class SimulatorGrsBall : public RobotBase {
     //void checkPosAndOtherRobot(SimulatorRobot* other);
     void checkPosAndGRSBall(SimulatorGrsBall* ball);
     void checkPosAndSkittle(SimulatorSkittle* skittle);
-
+    bool getIntersection(Point const&   captor, 
+                         Segment const& captorVision, 
+                         Millimeter     zPosCaptor, 
+                         Point&         intersectionPt);
     // -------------------------------------------------------------------
     // private members
     // -------------------------------------------------------------------

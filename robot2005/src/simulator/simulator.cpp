@@ -14,6 +14,7 @@
 #include "simulatorGrsBall.h"
 #include "simulatorSkittle.h"
 #include "viewer3D.h"
+#include "geometry2D.h"
 #define LOG_CLASSID CLASS_SIMULATOR
 #include "log.h"
 #ifdef USE_FTHREAD
@@ -141,7 +142,7 @@ SimulatorRobot* SimulatorCL::getRobot(int robotId)
 // ===========================================================================
 // Utilitaires pour les clients pour savoir s'il y a des collisions
 // ===========================================================================
-
+static const Millimeter SIMU_MAX_DIST_DETECT_OBSTACLE=500;
 // ---------------------------------------------------------------------------
 // SimulatorCL::getObstacleDistance
 // ---------------------------------------------------------------------------
@@ -151,7 +152,64 @@ Millimeter SimulatorCL::getObstacleDistance(SimulatorRobot* robot,
                                             Millimeter zPosCaptor,
                                             Radian dirCaptor)
 {
-    return INFINITE_DIST;
+    if (!robot) return INFINITE_DIST;
+    Point captor(rPosCaptor, dirPosCaptor);
+    Position robotPos;
+    robot->getRobotRealPosition(robotPos.center, robotPos.direction);
+    Geometry2D::convertToOrthogonalCoord(robotPos.center, 
+                                         robotPos.direction, 
+                                         captor);
+    Point captorEndPoint=captor;
+    captorEndPoint.x+=SIMU_MAX_DIST_DETECT_OBSTACLE*cos(dirCaptor+robotPos.direction);
+    captorEndPoint.y+=SIMU_MAX_DIST_DETECT_OBSTACLE*sin(dirCaptor+robotPos.direction);
+    Segment captorVision(captor, captorEndPoint);
+ 
+    Millimeter distance=INFINITE_DIST;
+    Point intersectionPt;
+    // detection des murs
+    if (zPosCaptor < TERRAIN_BORDURE_HAUTEUR) {
+        Point* wallPts=getWallPts();
+        for(unsigned int i=0;i!=SIMU_WALL_BORDER_PTS_NBR;i++) {
+            Segment wallBorder(wallPts[i], wallPts[((i+1)%SIMU_WALL_BORDER_PTS_NBR)]);
+            if(Geometry2D::getSegmentsIntersection(wallBorder, captorVision, 
+                                                   intersectionPt)){
+                distance = minDist(distance, dist(intersectionPt, captor));
+            }
+        }
+    }
+    // bordure des ponts
+    if (zPosCaptor < TERRAIN_BORDURE_PONT_HAUTEUR) {
+        Point* bridgePts=SimulatorCL::instance()->getBridgePts();
+        for(unsigned int i=0;i+1<SIMU_BRIDGE_BORDER_PTS_NBR;i+=2) {
+            Segment bridgeBorder(bridgePts[i], bridgePts[i+1]);
+            if(Geometry2D::getSegmentsIntersection(bridgeBorder, captorVision, 
+                                                   intersectionPt)){
+                distance = minDist(distance, dist(intersectionPt, captor));
+            }
+        }
+    }
+    // robots
+    for(unsigned int i=0; i<SIMU_PORT_MAX_CONNECTIONS; i++) {
+        SimulatorRobot* robotIter = server_->getRobot(i);
+        if (robotIter && robotIter != robot) {
+            if (robotIter->getIntersection(captor, captorVision, zPosCaptor, intersectionPt)) {
+                distance = minDist(distance, dist(intersectionPt, captor)); 
+            }
+        }
+    }
+    // balles
+    for(unsigned int i=0;i!=BALLE_GRS_NBR;i++) {
+        if (sgBalls_[i]->getIntersection(captor, captorVision, zPosCaptor, intersectionPt)) {
+            distance = minDist(distance, dist(intersectionPt, captor)); 
+        }
+    }
+    // quilles
+    for(unsigned int i=0;i!=QUILLE_NBR;i++) {
+        if (sskittles_[i]->getIntersection(captor, captorVision, zPosCaptor, intersectionPt)) {
+            distance = minDist(distance, dist(intersectionPt, captor)); 
+        }
+    } 
+    return distance;
 }
 
 // ---------------------------------------------------------------------------
@@ -164,6 +222,63 @@ bool SimulatorCL::isCollision(SimulatorRobot* robot,
                               Radian dirPosCaptorPt2,
                               Millimeter zPosCaptor)
 {
+    if (!robot) return INFINITE_DIST;
+    Position robotPos;
+    robot->getRobotRealPosition(robotPos.center, robotPos.direction);
+    Point captor1(rPosCaptorPt1, dirPosCaptorPt1);
+    Geometry2D::convertToOrthogonalCoord(robotPos.center, 
+                                         robotPos.direction, 
+                                         captor1);
+    Point captor2(rPosCaptorPt2, dirPosCaptorPt2);
+    Geometry2D::convertToOrthogonalCoord(robotPos.center, 
+                                         robotPos.direction, 
+                                         captor2);
+    Segment captorVision(captor1, captor2);
+ 
+    Point intersectionPt;
+    // detection des murs
+    if (zPosCaptor < TERRAIN_BORDURE_HAUTEUR) {
+        Point* wallPts=getWallPts();
+        for(unsigned int i=0;i!=SIMU_WALL_BORDER_PTS_NBR;i++) {
+            Segment wallBorder(wallPts[i], wallPts[((i+1)%SIMU_WALL_BORDER_PTS_NBR)]);
+            if(Geometry2D::getSegmentsIntersection(wallBorder, captorVision, 
+                                                   intersectionPt)){
+                return true;
+            }
+        }
+    }
+    // bordure des ponts
+    if (zPosCaptor < TERRAIN_BORDURE_PONT_HAUTEUR) {
+        Point* bridgePts=SimulatorCL::instance()->getBridgePts();
+        for(unsigned int i=0;i+1<SIMU_BRIDGE_BORDER_PTS_NBR;i+=2) {
+            Segment bridgeBorder(bridgePts[i], bridgePts[i+1]);
+            if(Geometry2D::getSegmentsIntersection(bridgeBorder, captorVision, 
+                                                   intersectionPt)){
+                return true;
+            }
+        }
+    }
+    // robots
+    for(unsigned int i=0; i<SIMU_PORT_MAX_CONNECTIONS; i++) {
+        SimulatorRobot* robotIter = server_->getRobot(i);
+        if (robotIter && robotIter != robot) {
+            if (robotIter->getIntersection(captor1, captorVision, zPosCaptor, intersectionPt)) {
+                return true;
+            }
+        }
+    }
+    // balles
+    for(unsigned int i=0;i!=BALLE_GRS_NBR;i++) {
+        if (sgBalls_[i]->getIntersection(captor1, captorVision, zPosCaptor, intersectionPt)) {
+            return true;
+        }
+    }
+    // quilles
+    for(unsigned int i=0;i!=QUILLE_NBR;i++) {
+        if (sskittles_[i]->getIntersection(captor1, captorVision, zPosCaptor, intersectionPt)) {
+            return true;
+        }
+    } 
     return false;
 }
 
@@ -175,7 +290,14 @@ Millimeter SimulatorCL::getGroundDistance(SimulatorRobot* robot,
 					  Radian dirPosCaptor,
 					  Millimeter zPosCaptor)
 {
-    return 0;
+    if (!robot) return 0;
+    Point captor(rPosCaptor, dirPosCaptor);
+    Position robotPos;
+    robot->getRobotRealPosition(robotPos.center, robotPos.direction);
+    Geometry2D::convertToOrthogonalCoord(robotPos.center, 
+                                         robotPos.direction, 
+                                         captor);
+    return (isInRiver(captor)?TERRAIN_RIVIERE_PROFONDEUR:0) + zPosCaptor;
 }
   
 // ===========================================================================
@@ -426,7 +548,8 @@ void SimulatorCL::draw()
 		    Viewer3D->setRobotModel(i, 
 					    robot->getRobotName(), 
 					    robot->getRobotModel(),
-                                            robot->isModeBrick());
+                                            robot->isModeBrick(),
+                                            robot->isDead());
 		    Viewer3D->setRobotLcd(i, robot->getLcdMessage());
 		    robot->displayInfoSent();
 		}
@@ -602,17 +725,51 @@ void SimulatorCL::registerViewerBtnCB()
     }
 }
 
+bool SimulatorCL::isInRiver(Point const& pt) 
+{
+    if (pt.x < TERRAIN_X/2-TERRAIN_PONT_LONGUEUR/2 || 
+        pt.x > TERRAIN_X/2+TERRAIN_PONT_LONGUEUR/2)
+        return false;
+    if (pt.y < TERRAIN_Y/2+TERRAIN_CASE_LARGEUR/2 &&
+        pt.y > TERRAIN_Y/2-TERRAIN_CASE_LARGEUR/2)
+        return false;
+
+    switch(bridge_) {
+    case BRIDGE_POS_UNKNOWN:
+        return true;
+    case BRIDGE_POS_BORDURE: 
+        return (pt.y > TERRAIN_PONT_LARGEUR &&
+                pt.y < TERRAIN_Y - TERRAIN_PONT_LARGEUR);  
+    case BRIDGE_POS_MIDDLE_BORDURE: 
+        return (pt.y < (TERRAIN_CASE_LARGEUR*0.5) ||
+            pt.y > (TERRAIN_Y - TERRAIN_CASE_LARGEUR*0.5) ||
+            (pt.y > (TERRAIN_PONT_LARGEUR + TERRAIN_CASE_LARGEUR*0.5) &&
+             pt.y < (TERRAIN_Y - TERRAIN_PONT_LARGEUR - TERRAIN_CASE_LARGEUR*0.5))
+                );
+    case BRIDGE_POS_MIDDLE_CENTER: 
+       return (pt.y < (TERRAIN_CASE_LARGEUR) ||
+               pt.y > (TERRAIN_Y - TERRAIN_CASE_LARGEUR) ||
+               (pt.y > (TERRAIN_PONT_LARGEUR + TERRAIN_CASE_LARGEUR) &&
+                pt.y < (TERRAIN_Y - TERRAIN_PONT_LARGEUR - TERRAIN_CASE_LARGEUR))
+               ); 
+    case BRIDGE_POS_CENTER:
+        return (pt.y > (TERRAIN_Y -TERRAIN_CASE_LARGEUR*1.5) ||
+                pt.y < (TERRAIN_CASE_LARGEUR*1.5));  
+    }
+    return false;
+}
+
 void SimulatorCL::setBridgeBorder()
 {
     Millimeter x1=(TERRAIN_X-TERRAIN_PONT_LONGUEUR)/2;
     Millimeter x2=(TERRAIN_X+TERRAIN_PONT_LONGUEUR)/2;
     // pont du milieu
     bridgeXPts_[0]=Point(x1, TERRAIN_Y/2-TERRAIN_CASE_LARGEUR/2);
-    bridgeXPts_[1]=Point(x2, bridgeXPts_[1].y);
+    bridgeXPts_[1]=Point(x2, bridgeXPts_[0].y);
     bridgeXPts_[2]=Point(x1,TERRAIN_Y/2);
-    bridgeXPts_[3]=Point(x2, bridgeXPts_[3].y);
+    bridgeXPts_[3]=Point(x2, bridgeXPts_[2].y);
     bridgeXPts_[4]=Point(x1,TERRAIN_Y/2+TERRAIN_CASE_LARGEUR/2);
-    bridgeXPts_[5]=Point(x2, bridgeXPts_[5].y);
+    bridgeXPts_[5]=Point(x2, bridgeXPts_[4].y);
     // pont du haut
     switch(bridge_) {
     case BRIDGE_POS_UNKNOWN:
@@ -628,7 +785,7 @@ void SimulatorCL::setBridgeBorder()
         break;
     case BRIDGE_POS_BORDURE: 
         bridgeXPts_[6]=Point(x1,0); // out of terrain
-        riverYPts_[0]=Point(x1, TERRAIN_PONT_LARGEUR);
+        riverYPts_[0]=Point(x1, TERRAIN_CASE_LARGEUR*1.5);
         riverYPts_[1]=Point(x1, TERRAIN_Y/2-TERRAIN_CASE_LARGEUR/2);
         riverYPts_[2]=Point(x1, TERRAIN_Y-riverYPts_[0].y);
         riverYPts_[3]=Point(x1, TERRAIN_Y-riverYPts_[1].y);
@@ -638,12 +795,12 @@ void SimulatorCL::setBridgeBorder()
         riverYPts_[7]=Point(x1, 5*TERRAIN_Y);
         break;  
     case BRIDGE_POS_MIDDLE_BORDURE: 
-        bridgeXPts_[6]=Point(x1,TERRAIN_PONT_LARGEUR*0.5); // out of terrain
-        riverYPts_[0]=Point(x1, TERRAIN_PONT_LARGEUR+bridgeXPts_[6].y);
+        bridgeXPts_[6]=Point(x1,TERRAIN_CASE_LARGEUR*0.5); // out of terrain
+        riverYPts_[0]=Point(x1, TERRAIN_CASE_LARGEUR*1.5+bridgeXPts_[6].y);
         riverYPts_[1]=Point(x1, TERRAIN_Y/2-TERRAIN_CASE_LARGEUR/2);
         riverYPts_[2]=Point(x1, TERRAIN_Y-riverYPts_[0].y);
         riverYPts_[3]=Point(x1, TERRAIN_Y-riverYPts_[1].y);
-        riverYPts_[4]=Point(x1, 0);// out of terrain
+        riverYPts_[4]=Point(x1, 0);
         riverYPts_[5]=Point(x1, bridgeXPts_[6].y);
         riverYPts_[6]=Point(x1, TERRAIN_Y-riverYPts_[4].y);
         riverYPts_[7]=Point(x1, TERRAIN_Y-riverYPts_[5].y);
@@ -654,14 +811,14 @@ void SimulatorCL::setBridgeBorder()
         riverYPts_[1]=Point(x1, TERRAIN_Y/2-TERRAIN_CASE_LARGEUR/2);
         riverYPts_[2]=Point(x1, TERRAIN_Y-riverYPts_[0].y);
         riverYPts_[3]=Point(x1, TERRAIN_Y-riverYPts_[1].y);
-        riverYPts_[4]=Point(x1, 0);// out of terrain
+        riverYPts_[4]=Point(x1, 0);
         riverYPts_[5]=Point(x1, bridgeXPts_[6].y);
         riverYPts_[6]=Point(x1, TERRAIN_Y-riverYPts_[4].y);
         riverYPts_[7]=Point(x1, TERRAIN_Y-riverYPts_[5].y);
         break;  
     case BRIDGE_POS_CENTER:
-        bridgeXPts_[6]=Point(x1,TERRAIN_PONT_LARGEUR*1.5); // out of terrain
-        riverYPts_[0]=Point(x1, TERRAIN_PONT_LARGEUR*1.5);
+        bridgeXPts_[6]=Point(x1,TERRAIN_CASE_LARGEUR*1.5); // out of terrain
+        riverYPts_[0]=Point(x1, TERRAIN_CASE_LARGEUR*1.5);
         riverYPts_[1]=Point(x1, 0);
         riverYPts_[2]=Point(x1, TERRAIN_Y-riverYPts_[0].y);
         riverYPts_[3]=Point(x1, TERRAIN_Y-riverYPts_[1].y);
@@ -677,10 +834,13 @@ void SimulatorCL::setBridgeBorder()
     bridgeXPts_[7]=Point(x2, bridgeXPts_[6].y);
     bridgeXPts_[8]=Point(x1, TERRAIN_Y-bridgeXPts_[6].y);
     bridgeXPts_[9]=Point(x2, TERRAIN_Y-bridgeXPts_[6].y);
-    bridgeXPts_[10]=Point(x1, bridgeXPts_[6].y+TERRAIN_PONT_LARGEUR);
+    bridgeXPts_[10]=Point(x1, bridgeXPts_[6].y+TERRAIN_CASE_LARGEUR*1.5);
     bridgeXPts_[11]=Point(x2, bridgeXPts_[10].y);
     bridgeXPts_[12]=Point(x1, TERRAIN_Y-bridgeXPts_[10].y);
     bridgeXPts_[13]=Point(x2, TERRAIN_Y-bridgeXPts_[10].y);
+    for(unsigned int i=0;i<14;i++) {
+        bridgeXPts_[i].print();
+    }
 }   
 void SimulatorCL::setWallBorder()
 {

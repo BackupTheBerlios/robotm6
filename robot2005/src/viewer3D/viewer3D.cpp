@@ -113,11 +113,12 @@ void Viewer3DCL::enableDisplayRobots(bool enable)
 void Viewer3DCL::setRobotModel(int                  robotId,
                                std::string const&   name,
                                RobotModel           model,
-                               bool                 brick)
+                               bool                 brick,
+                               int                  isDead)
 {
 #ifndef VIEWER_DISACTIVATED 
     if (robotId >= 0 && robotId < VIEWER_MAX_ROBOT_NBR) {
-        robotData_[robotId].set(robotId, name, model, brick);
+        robotData_[robotId].set(robotId, name, model, brick, isDead);
     }
 #endif // VIEWER_DISACTIVATED 
 }

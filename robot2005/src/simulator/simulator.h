@@ -85,7 +85,7 @@ class SimulatorCL : public RobotBase {
     Point* getWallPts()   { return wallBorderPts_; }
     Point* getBridgePts() { return bridgeXPts_; }
     Point* getRiverPts()  { return riverYPts_; }
-
+    bool isInRiver(Point const& pt);
  protected:
     void registerViewerBtnCB();
     void createSkittlePacket(Skittle* skittles,

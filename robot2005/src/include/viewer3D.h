@@ -132,18 +132,20 @@ struct ViewerRobotData {
     ListOfObstacles  obstacles_[OBSTACLE_TYPE_NBR];
     bool             exist;
     bool             brick;
+    int              dead;
     TeamColor        teamColor;
 
     ViewerRobotData() :
 	id(-1), name(""), lcd("Booting..."), model(ROBOT_MODEL_ATTACK), 
-	 color(1,0,0,1), pos(-100,0,0), exist(false), brick(false), 
+        color(1,0,0,1), pos(-100,0,0), exist(false), brick(false), dead(0), 
          teamColor(TEAM_RED) {}
-    void set(int Id, std::string Name, RobotModel Model, bool isBrick) {
-        id = Id;
-        name = Name;
+    void set(int Id, std::string Name, RobotModel Model, bool isBrick, int isDead) {
+        id    = Id;
+        name  = Name;
         model = Model;
 	exist = true;
         brick = isBrick;
+        dead  = isDead;
     } 
     void remove() {
 	exist = false;
@@ -235,7 +237,8 @@ class Viewer3DCL: public RobotBase
         void setRobotModel(int                  robotId,
                            std::string const&   name,
                            RobotModel           model,
-                           bool                 isBrick);
+                           bool                 isBrick,
+                           int                  isDead=0);
         /** @brief Definit la couleur du robot */
         void setRobotColor(int                  robotId,
 			   ViewerColorST const& color);

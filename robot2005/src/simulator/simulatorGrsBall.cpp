@@ -33,3 +33,10 @@ void SimulatorGrsBall::checkPosAndSkittle(SimulatorSkittle* skittle)
 {
 }
 
+bool SimulatorGrsBall::getIntersection(Point const&   captor, 
+                                     Segment const& captorVision, 
+                                     Millimeter     zPosCaptor, 
+                                     Point&         intersectionPt)
+{
+    return false;
+}

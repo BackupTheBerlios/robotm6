@@ -26,7 +26,7 @@ SimulatorRobot::SimulatorRobot() :
     motorLeftOld_(0), motorRightOld_(0),
     realPosOld_(), simuSpeed_(20.), 
     simuCoderSignRight_(1.), simuCoderSignLeft_(-1.),
-    simuMotorNoise_(false), simuPosFirst_(true), isValid_(true)
+    simuMotorNoise_(false), simuPosFirst_(true), isValid_(true), isDead_(0)
 {
     setBorderRobotAttack();
 }
@@ -38,6 +38,7 @@ SimulatorRobot::~SimulatorRobot()
 
 void SimulatorRobot::updatePosition()
 {
+    if (isDead_) return;
     if (brick_) return;
     // sauve l'etat courant au cas ou la nouvelle position soit invalide
     realPosOld_    = realPos_;
@@ -103,6 +104,7 @@ void SimulatorRobot::updatePosition()
 #define SIMU_PWM_LIMIT 116
 void SimulatorRobot::setNewPositionValid()
 {
+    if (isDead_) return;
     if (brick_) return;
     if (!isValid_) {
         realPos_    = realPosOld_;
@@ -125,6 +127,7 @@ void SimulatorRobot::setRealPos(Position const& pos) {
 
 void SimulatorRobot::checkPosAndWall() 
 {
+    if (isDead_) return;
     Polygon gameArea(SimulatorCL::instance()->getWallPts(), SIMU_WALL_BORDER_PTS_NBR);
     if (!Geometry2D::isPointInPolygon(gameArea, realPos_.center)) {
         isValid_ = false;
@@ -145,7 +148,41 @@ void SimulatorRobot::checkPosAndWall()
 
 void SimulatorRobot::checkPosAndBridge(BridgePosition const& bridge)
 {
+    if (isDead_) return;
+    // si on est dans la riviere on est mort!
+    if (SimulatorCL::instance()->isInRiver(wheelRealPts_[0]) ||
+        SimulatorCL::instance()->isInRiver(wheelRealPts_[1]) ||
+        (SimulatorCL::instance()->isInRiver(wheelRealPts_[2]) &&
+         SimulatorCL::instance()->isInRiver(wheelRealPts_[3]))) {
+        isValid_ = false;
+        if (SimulatorCL::instance()->isInRiver(wheelRealPts_[0])) {
+            isDead_=1;
+        } else if (SimulatorCL::instance()->isInRiver(wheelRealPts_[1])) {
+            isDead_=2;
+        } else isDead_=3;
+        needSendDisplayInfo_=true;
+        setRealPos(realPosOld_);
+        return;
+    }
+
+    // collision avec les murs
     if (!isValid_) return;
+    Point intersection;
+    Point* bridgePts=SimulatorCL::instance()->getBridgePts();
+    for(unsigned int i=0;i+1<SIMU_BRIDGE_BORDER_PTS_NBR;i+=2) {
+        Segment bridgeBorder(bridgePts[i], bridgePts[i+1]);
+        if(checkSegmentIntersectionWithRobot(bridgeBorder, 30, intersection)){
+            printf("Intersection:"); 
+            intersection.print();
+            bridgePts[i].print();
+            bridgePts[i+1].print();
+
+            isValid_ = false;
+            setRealPos(realPosOld_);
+            return;
+        }
+    }
+    // pas besoin de detecter la collision avec les murs riviere car ils sont trop bas
 }
 
 void SimulatorRobot::checkPosAndOtherRobot(SimulatorRobot* other)
@@ -162,7 +199,49 @@ void SimulatorRobot::checkPosAndSkittle(SimulatorSkittle* skittle)
 {
 
 }
-
+bool SimulatorRobot::getIntersection(Point const&   captor, 
+                                     Segment const& captorVision, 
+                                     Millimeter     zPosCaptor, 
+                                     Point&         intersectionPt)
+{
+    Point inter;
+    Millimeter minDistance=INFINITE_DIST;
+    if (zPosCaptor>70) {
+        for(unsigned int i=0;i!=4;i++) {
+            Segment robotBorder(borderRealPts_[8+i], borderRealPts_[8+((i+1)%4)]);
+            if(Geometry2D::getSegmentsIntersection(robotBorder, captorVision, inter)) {
+                Millimeter distance=dist(inter, captor);
+                if (minDistance<0 || minDistance>distance) {
+                    minDistance = distance;
+                    intersectionPt = inter;
+                } 
+            }
+        }
+    } else {
+        for(unsigned int i=0;i!=4;i++) {
+            Segment robotBorder(borderRealPts_[i], borderRealPts_[(i+1)%4]);
+            if(Geometry2D::getSegmentsIntersection(robotBorder, captorVision, inter)) {
+                Millimeter distance=dist(inter, captor);
+                if (minDistance<0 || minDistance>distance) {
+                    minDistance = distance;
+                    intersectionPt = inter;
+                } 
+            }
+        }
+        for(unsigned int i=0;i!=4;i++) {
+            Segment robotBorder(borderRealPts_[4+i], borderRealPts_[4+((i+1)%4)]);
+            if(Geometry2D::getSegmentsIntersection(robotBorder, captorVision, inter)) {
+                Millimeter distance=dist(inter, captor);
+                if (minDistance<0 || minDistance>distance) {
+                    minDistance = distance;
+                    intersectionPt = inter;
+                } 
+            }
+        }
+    }
+    
+    return (minDistance>0);  
+}
 bool SimulatorRobot::checkSegmentIntersectionWithRobot(Segment const& seg,
                                                        Millimeter z,
                                                        Point& intersectionPt) 
@@ -174,17 +253,11 @@ bool SimulatorRobot::checkSegmentIntersectionWithRobot(Segment const& seg,
         }
     } else {
         for(unsigned int i=0;i!=4;i++) {
-         /*   if (i==0) {
-                printf("(%d %d) (%d %d) - (%d %d) (%d %d)\n", 
-                       (int)borderRealPts_[i].x, 
-                       (int)borderRealPts_[i].y,
-                       (int)borderRealPts_[(i+1)%4].x, 
-                       (int)borderRealPts_[(i+1)%4].y,
-                       (int)seg.lowerLeft.x,
-                       (int)seg.lowerLeft.y,
-                       (int)seg.upperRight.x,
-                       (int)seg.lowerLeft.y);
-            }*/
+       /*     printf("\n");
+            borderRealPts_[i].print();
+            borderRealPts_[(i+1)%4].print();
+            seg.lowerLeft.print();
+            seg.upperRight.print();*/
             Segment robotBorder(borderRealPts_[i], borderRealPts_[(i+1)%4]);
             if(Geometry2D::getSegmentsIntersection(robotBorder, seg, intersectionPt)) return true;
         }
@@ -201,6 +274,9 @@ void SimulatorRobot::convertBorderToCylindric(Point const& center)
     for(unsigned int i=0;i<SIMU_ROBOT_PTS_NBR;i++) {
         Geometry2D::convertToCylindricCoord(center, borderPts_[i]);
     }
+    for(unsigned int i=0;i<SIMU_ROBOT_WHEEL_PTS_NBR;i++) {
+        Geometry2D::convertToCylindricCoord(center, wheelPts_[i]);
+    }
 }
 
 void SimulatorRobot::convertBorderToOrthogonal(Position const& pos)
@@ -211,6 +287,12 @@ void SimulatorRobot::convertBorderToOrthogonal(Position const& pos)
                                             pos.direction, 
                                             borderRealPts_[i]);
     }
+    for(unsigned int i=0;i<SIMU_ROBOT_WHEEL_PTS_NBR;i++) {
+        wheelRealPts_[i] = wheelPts_[i];
+        Geometry2D::convertToOrthogonalCoord(pos.center, 
+                                             pos.direction, 
+                                             wheelRealPts_[i]);
+    }
     borderPol_[0] = Polygon(borderRealPts_, 4);
     borderPol_[1] = Polygon(&(borderRealPts_[4]), 4);
     borderPol_[2] = Polygon(&(borderRealPts_[8]), 4);
@@ -218,21 +300,26 @@ void SimulatorRobot::convertBorderToOrthogonal(Position const& pos)
 
 void SimulatorRobot::setBorderRobotAttack()
 {
-    // points en coordonnees relatives
-    borderPts_[0] = Point(170, 140);
-    borderPts_[1] = Point(170, -60);
-    borderPts_[2] = Point(120, -60);
-    borderPts_[3] = Point(120, 90);
+    // points en coordonnees relatives 
+    wheelPts_[0] = Point(0, 160);
+    wheelPts_[1] = Point(0, -160);
+    wheelPts_[2] = Point(90, 140);
+    wheelPts_[3] = Point(90, -140);
+    
+    borderPts_[0] = Point(140, 170);
+    borderPts_[1] = Point(-60, 170);
+    borderPts_[2] = Point(-60, 120);
+    borderPts_[3] = Point(90, 120);
 
-    borderPts_[4] = Point(-170, 140);
-    borderPts_[5] = Point(-170, -60);
-    borderPts_[6] = Point(-120, -60);
-    borderPts_[7] = Point(-120, 90);
+    borderPts_[4] = Point(140, -170);
+    borderPts_[5] = Point(-60, -170);
+    borderPts_[6] = Point(-60, -120);
+    borderPts_[7] = Point(90, -120);
 
-    borderPts_[8]  = Point(-170, 140);
-    borderPts_[9]  = Point(-170, -60);
-    borderPts_[10] = Point(170, -60);
-    borderPts_[11] = Point(170, 140);
+    borderPts_[8]  = Point(140, -170);
+    borderPts_[9]  = Point(-60, -170);
+    borderPts_[10] = Point(-60, 170);
+    borderPts_[11] = Point(140, 170);
 
     // passage des coordonnees en mode cylyndrique
     convertBorderToCylindric(Point(0,0));
@@ -241,20 +328,26 @@ void SimulatorRobot::setBorderRobotAttack()
 void SimulatorRobot::setBorderRobotDefence()
 {
     // points en coordonnees relatives
-    borderPts_[0] = Point(170, 140);
-    borderPts_[1] = Point(170, -60);
-    borderPts_[2] = Point(120, -60);
-    borderPts_[3] = Point(120, 90);
+    wheelPts_[0] = Point(0, 160);
+    wheelPts_[1] = Point(0, -160);
+    wheelPts_[2] = Point(90, 140);
+    wheelPts_[3] = Point(90, -140);
+    
+    borderPts_[0] = Point(140, 170);
+    borderPts_[1] = Point(-60, 170);
+    borderPts_[2] = Point(-60, 120);
+    borderPts_[3] = Point(90, 120);
 
-    borderPts_[4] = Point(-170, 140);
-    borderPts_[5] = Point(-170, -60);
-    borderPts_[6] = Point(-120, -60);
-    borderPts_[7] = Point(-120, 90);
+    borderPts_[4] = Point(140, -170);
+    borderPts_[5] = Point(-60, -170);
+    borderPts_[6] = Point(-60, -120);
+    borderPts_[7] = Point(90, -120);
 
-    borderPts_[8]  = Point(-170, 140);
-    borderPts_[9]  = Point(-170, -60);
-    borderPts_[10] = Point(170, -60);
-    borderPts_[11] = Point(170, 140);
+    borderPts_[8]  = Point(140, -170);
+    borderPts_[9]  = Point(-60, -170);
+    borderPts_[10] = Point(-60, 170);
+    borderPts_[11] = Point(140, 170);
+
 
     // passage des coordonnees en mode cylyndrique
     convertBorderToCylindric(Point(0,0));
@@ -263,6 +356,11 @@ void SimulatorRobot::setBorderRobotDefence()
 void SimulatorRobot::setBorderRobotBrick()
 {
  // points en coordonnees relatives
+    wheelPts_[0] = Point(0, 140);
+    wheelPts_[1] = Point(0, -140);
+    wheelPts_[2] = Point(140, 0);
+    wheelPts_[3] = Point(-140, 0);
+
     borderPts_[0]  = Point(-150, -150);
     borderPts_[1]  = Point(-150,  150);
     borderPts_[2]  = Point(150,   150);

@@ -335,7 +335,16 @@ void Viewer3DCL::drawRobot3D(int robotId)
 		  1);
     }
     glScalef(SCALE3D, SCALE3D, SCALE3D);
-    
+    if (robotData_[robotId].dead) {
+        // le robot est tombe dans la riviere
+        if(robotData_[robotId].dead == 1) {
+            glRotatef(-15, 1, 0, 0);
+        } else if(robotData_[robotId].dead == 2) {
+            glRotatef(15, 1, 0, 0);
+        } else {
+            glRotatef(24, 0, 1, 0);
+        } 
+    }
     switch(robotData_[robotId].model) {
     case ROBOT_MODEL_ATTACK:
 	drawRobot3DAttack(robotData_[robotId].color);

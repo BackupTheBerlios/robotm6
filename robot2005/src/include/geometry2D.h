@@ -383,4 +383,10 @@ inline bool isZeroAngle(Radian angle, Radian margin) {
     return (fabs(na2PI(angle, -M_PI)) < fabs(margin));
 }
 
+inline Millimeter minDist(Millimeter a, Millimeter b) {
+    if (a < 0) return b; // INFINITE_DIST
+    else if (b < 0) return a;
+    else return (a<b) ? a:b;
+}
+
 #endif // __GEOMETRY_2D_H__

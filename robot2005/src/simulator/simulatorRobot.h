@@ -33,7 +33,9 @@ class SimulatorRobot : public RobotBase {
     // ------------------------------------------------------------------------   
     void setRobotPos(Position const& pos)   { estimatedPos_ = pos; 
                                               realPos_ = pos; 
-                                              simuPosFirst_ = true;}
+                                              simuPosFirst_ = true;
+                                              isDead_=0;
+                                              needSendDisplayInfo_=true;}
     void setRobotName(const char* name)     { name_ = std::string(name); 
                                               needSendDisplayInfo_=true;}
     void setRobotWeight(SimuWeight weight)  { weight_ = weight; }
@@ -68,6 +70,9 @@ class SimulatorRobot : public RobotBase {
     }
     bool isJackin() const { 
         return jackin_;
+    }
+    int isDead() const { 
+        return isDead_;
     }
     bool isEmergencyStop() const { 
         return emergencyStop_; 
@@ -132,7 +137,10 @@ class SimulatorRobot : public RobotBase {
     void checkPosAndOtherRobot(SimulatorRobot* other);
     void checkPosAndGRSBall(SimulatorGrsBall* ball);
     void checkPosAndSkittle(SimulatorSkittle* skittle);
-
+    bool getIntersection(Point const&   captor, 
+                         Segment const& captorVision, 
+                         Millimeter     zPosCaptor, 
+                         Point&         intersectionPt);
  protected:
     void setRealPos(Position const& pos);
     bool checkSegmentIntersectionWithRobot(Segment const& seg,
@@ -174,9 +182,13 @@ class SimulatorRobot : public RobotBase {
     bool   simuMotorNoise_;
     bool   simuPosFirst_;
     bool   isValid_;
+    int    isDead_; // 0=not dead
        
 #define SIMU_ROBOT_PTS_NBR     12
 #define SIMU_ROBOT_POLYGON_NBR 3
+#define SIMU_ROBOT_WHEEL_PTS_NBR 4
+    Point    wheelPts_[SIMU_ROBOT_WHEEL_PTS_NBR];
+    Point    wheelRealPts_[SIMU_ROBOT_WHEEL_PTS_NBR];
     Point    borderPts_[SIMU_ROBOT_PTS_NBR];
     Point    borderRealPts_[SIMU_ROBOT_PTS_NBR];
     Polygon  borderPol_[SIMU_ROBOT_POLYGON_NBR]; // 2 polygon au niveau bas moins de 70mm et 1 au dessus

@@ -30,3 +30,10 @@ void SimulatorSkittle::checkPosAndSkittle(SimulatorSkittle* skittle)
 {
 }
 
+bool SimulatorSkittle::getIntersection(Point const&   captor, 
+                                     Segment const& captorVision, 
+                                     Millimeter     zPosCaptor, 
+                                     Point&         intersectionPt)
+{
+    return false;
+}
