@@ -25,7 +25,7 @@
 
 class SerialDevice : public IoDevice {
 public: // constructor/destructor
-    SerialDevice(int ttyNbr, bool isBlocking);
+    SerialDevice(int ttyNbr, bool isBlocking, unsigned int maxRetries);
     ~SerialDevice();
 
 public: // overwritten IoDevice methods
@@ -36,25 +36,29 @@ public: // overwritten IoDevice methods
 
     bool read(IoByte* buf, unsigned int& length);
     bool write(IoByte* buf, unsigned int& length);
+    bool isBlocking() const;
 
     bool canListen() const;
     void startListening();
     void stopListening();
 
     void pollerTask(int fd);
+
+    int getTttyNbr() const { return ttyNbr_; }
+    int getFileDescriptor() const {return fd_; }
     
 private:
     int ttyNbr_;
     bool isBlocking_;
     int fd_;
+    unsigned int maxRetries_;
     struct termios oldtio_;
 };
 
-SerialDevice::SerialDevice(int ttyNbr, bool isBlocking)
-    : // TODO: shouldn't be CLASS_SERIAL_PORT but CLASS_SERIAL_DEVICE [flo]
-      IoDevice("SerialDevice", CLASS_SERIAL_PORT),
+SerialDevice::SerialDevice(int ttyNbr, bool isBlocking, unsigned int maxRetries)
+    : IoDevice("SerialDevice", CLASS_SERIAL_DEVICE),
       ttyNbr_(ttyNbr), isBlocking_(isBlocking),
-      fd_(-1)
+      fd_(-1), maxRetries_(maxRetries)
 {
 }
 
@@ -141,7 +145,7 @@ bool SerialDevice::reset()
 
 bool SerialDevice::read(IoByte* buf, unsigned int& length) //, unsigned int retry)
 {
-    unsigned int retry = 3; // TODO: hardcode value here is definitely not good... [flo]
+    unsigned int retry = maxRetries_;
     unsigned int k=0, res=0;
     unsigned int N=length;
     length = 0; // nothing received yet.
@@ -179,6 +183,11 @@ bool SerialDevice::write(IoByte* buf, unsigned int& length)
 	//printf("length: %d\n", length);
     } while (length > 0);
     return true;
+}
+
+bool SerialDevice::isBlocking() const
+{
+    return isBlocking_;
 }
 
 bool SerialDevice::canListen() const
@@ -226,10 +235,26 @@ void SerialDevice::stopListening()
     FileDescriptorPoller->unregisterFileDescriptor(fd_);
 }
 
+
+//=============================================================================
+//=============================================================================
+
 SerialPort::SerialPort(int ttyNbr, bool isBlocking)
     : RobotBase("SerialPort", CLASS_SERIAL_PORT)
 {
-    device_.push_back(new SerialDevice(ttyNbr, isBlocking));
+    unsigned int retries;
+    if (isBlocking)
+	retries = 0;
+    else
+	retries = DEFAULT_READ_RETRIES;
+    
+    device_.push_back(new SerialDevice(ttyNbr, isBlocking, retries));
+}
+
+SerialPort::SerialPort(int ttyNbr, unsigned int retries)
+    : RobotBase("SerialPort", CLASS_SERIAL_PORT)
+{
+    device_.push_back(new SerialDevice(ttyNbr, false, retries));
 }
 
 SerialPort::~SerialPort()
@@ -244,59 +269,15 @@ const IoDeviceVector& SerialPort::listPorts()
 
 const IoDeviceScanInfoPairVector& SerialPort::scan()
 {
+    // TODO: we could implement a scan for blocking-devices using select. [flo]
     LOG_INFO("Scanning serial port\n");
-    IoDevice* device = device_[0];
-
-    IoDeviceOpenerCloser openerCloser(device);
+    IoByte scanAnswer;
     scannedDevice_.clear(); // new scan...
-
-    // TODO: get this const from somewhere else [flo]
-    const IoByte SCAN_REQ = 0xAA;
-    if (!device->write(SCAN_REQ))  // TODO: not uartPingReq_, but ScanReq...
-      {
-	LOG_ERROR("couldn't write to device.\n");
-        return scannedDevice_;
-      }
-    LOG_INFO("scan written\n");
-    if (device->isOpen()) {
-      LOG_INFO("sleeping\n");
-	usleep(100000);
-    }
-    // Pour les cartes qui peuvent etre maitre, la requete ping stoppe l'envoi
-    // des donnees, puis la carte envoie son identifiant. Mais on peut avoir 
-    // des donnees dans le buffer donc si la carte repond au ping, son 
-    // identifiant est le dernier octet envoyé.
-    bool doesAnswer = false;
-    IoByte scanAnswer = 0x00; // will be overwritten, or not used.
-    static const unsigned int SCAN_BUF_SIZE=16;
-    static IoByte buf[SCAN_BUF_SIZE];
-    unsigned int length=SCAN_BUF_SIZE;
-    // TODO: if non-blocking use commented code [flo]
-    // HACK: small workaround...
-    if (device->canListen())
-    {
-	do {
-	    device->read(buf, length);
-	    
-	    if (length > 0) {
-		scanAnswer = buf[length-1];
-		doesAnswer = true;
-		LOG_INFO("answer received\n");
-	    }
-	} while (length == SCAN_BUF_SIZE);
-    } else {
-	doesAnswer = device->read(buf);
-	scanAnswer = buf[0];
-	LOG_INFO("answer received\n");
-    }
-    if (doesAnswer) {
+    if (IoHost::doIoDeviceScan(device_[0], &scanAnswer)) {
 	IoDeviceScanInfoPair info;
-	info.device = device;
+	info.device = device_[0];
 	info.scanInfo = scanAnswer;
 	scannedDevice_.push_back(info);
-    } else {
-	LOG_INFO("no answer.\n");
     }
-    
     return scannedDevice_;
 }
