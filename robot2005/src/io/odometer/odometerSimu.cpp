@@ -27,11 +27,11 @@ OdometerSimu::~OdometerSimu()
 // -------------------------------------------------------------------------
 // OdometerSimu::getCoderPosition
 // -------------------------------------------------------------------------
-// Met a jour la position des 2 codeurs (sans conversion) 
-// En mode automatique la carte envoie toute seule des donnees et 
-//   getCoderPosition retourne true si la carte a mise a jour la 
+// Met a jour la position des 2 codeurs (sans conversion)
+// En mode automatique la carte envoie toute seule des donnees et
+//   getCoderPosition retourne true si la carte a mise a jour la
 //   position des codeurs depuis la derniere requete getCoderPosition
-// En mode manuel getCoderPosition va directement lire la valeur 
+// En mode manuel getCoderPosition va directement lire la valeur
 //   des codeurs et retourne true si la communication s'est bien passee.
 // -------------------------------------------------------------------------
 bool OdometerSimu::getCoderPosition(CoderPosition &left,
@@ -45,10 +45,10 @@ bool OdometerSimu::getCoderPosition(CoderPosition &left,
 // OdometerSimu::setMode
 // -------------------------------------------------------------------------
 //  Definit le mode de communication avec la carte
-//  En mode automatique la carte envoie toute seule des donnees et 
-//    getCoderPosition retourne true si la carte a mise a jour la 
+//  En mode automatique la carte envoie toute seule des donnees et
+//    getCoderPosition retourne true si la carte a mise a jour la
 //    position des codeurs depuis la derniere requete getCoderPosition
-//  En mode manuel getCoderPosition va directement lire la valeur 
+//  En mode manuel getCoderPosition va directement lire la valeur
 //    des codeurs et retourne true si la communication s'est bien passee.
 //  By default it is manual
 // Retourne FALSE en cas d'erreur de communication avec la carte

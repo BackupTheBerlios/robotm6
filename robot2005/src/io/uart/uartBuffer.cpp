@@ -98,7 +98,7 @@ bool UartBuffer::read(UartByte* buf,  unsigned int &length)
     do {
         while (maxCounter++<100
 	       && length2 < length 
-                && buffer_ 
+                && buffer_
                 && !buffer_->empty()) {
             Lock localLock(&mutex_);
             buf[length2] = buffer_->front();
@@ -167,13 +167,12 @@ void UartBuffer::fileDescriptorTask(int fd)
       }
       for (unsigned int i=0; i<lread; i++) {
 	if (!filterFn_ || !filterFn_(buf[i])) {
-            Lock localLock(&mutex_);           
+            Lock localLock(&mutex_);
             buffer_->push_back(buf[i]);
 	}
       }
       if (lread != UARTBUFFER_SIZE) break;
     } while(1);
-    
 }
 
 // -------------------------------------------------------------------------

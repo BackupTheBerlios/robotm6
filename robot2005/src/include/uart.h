@@ -57,7 +57,7 @@ typedef enum UartId {
     UART_SERVO_03,
     UART_ENV_DETECTOR_03,
 
-    UART_LCD_04,     
+    UART_LCD_04,
     UART_ODOMETER_04,
     UART_SERVO_04,
     UART_VOLTAGE_04,
@@ -66,7 +66,7 @@ typedef enum UartId {
     UART_GONIO_04,  
     UART_CATAPULT_04,
     UART_K2000_04,
-    
+
     UART_NBR
 } UartId;
 
@@ -188,7 +188,7 @@ class Uart : public RobotBase {
      */
     virtual bool setReadTimeout(Millisecond timeout);
     /**
-     * Retourne le nom de la carte retournée ou UART_NONE si la carte n'a 
+     * Retourne le nom de la carte retournée ou UART_NONE si la carte n'a
      * pas ete identifiée par une requete ping
      */
     const char* name();
@@ -337,8 +337,8 @@ class UartManagerCL : public RobotComponent
 
     /** 
      * Scan les port qui sont encore libres et alloue le device correpondant
-     * Utilie pendant l'auto-verification du robot. Si un composant est en 
-     * mode simule, c'est qu'il n'a pas ete detecte donc on peut appeler 
+     * Utilise pendant l'auto-verification du robot. Si un composant est en
+     * mode simule, c'est qu'il n'a pas ete detecte donc on peut appeler
      * cette fonction pour essayer de le detecter
      */
     void scanAndAlloc();
@@ -357,7 +357,7 @@ class UartManagerCL : public RobotComponent
  protected:
     /**
      * Scanne tous les port, rempli uartListByPort_ & uartListById_ avec la 
-     * liste des cartes detectees et laisse la connection ouverte pour de 
+     * liste des cartes detectees et laisse la connection ouverte pour de
      * futurs acces
      */
     int  searchAndOpen();

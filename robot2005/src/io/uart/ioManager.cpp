@@ -35,7 +35,7 @@ IoManagerCL::IoManagerCL() :
         uartMgr_ = new UartManagerCL();
     } else {
     }
-    // start the thread which check for new messages on registered file 
+    // start the thread which checks for new messages on registered file
     // descriptors
     init_= (MTHREAD_CREATE("IoManager Thread",
                            &thread_, 
@@ -106,7 +106,7 @@ void IoManagerCL::periodicTask()
         LOG_WARNING("Listening to=%d file descriptors (maxFd_=%d)\n", cbList_.size(), maxFd_);   
         first = 2;
     }
-    
+
     Lock localLock(&repositoryLock4);
 #if 1
     pollfd fds[8];

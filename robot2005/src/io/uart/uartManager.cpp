@@ -39,7 +39,7 @@ UartManagerCL::UartManagerCL(bool dontScan) :
   RobotComponent("uartManager", CLASS_UART_MANAGER), 
   lcd_(NULL), odometer_(NULL)
 {
-    // verifie que les conposants de base existent
+    // verifie que les composants de base existent
     RobotTimerCL::instance(); // construit le robotimer si necessaire
     IoManagerCL* ioManager = IoManagerCL::instanceNoCheck();
     if (!ioManager) {
@@ -190,10 +190,11 @@ int  UartManagerCL::searchAndOpen()
      UartInfo infos[UART_PORT_NBR];
 
      scan(infos);
-    
+
     int found = 0;
     for(int i=0; i<UART_PORT_NBR; i++) {
         if (infos[i].id != UART_NONE) {
+	    found++;
 	    uartListByPort_[i] = uartListById_[infos[i].id];
 	    uartListById_[infos[i].id]->open((UartPort)i, infos[i]);
         } 
@@ -245,7 +246,7 @@ void UartManagerCL::allocOdometer()
         } else {
             if (getUartById(UART_ODOMETER_04) != NULL) {
                 odometer_   = new Odometer_04();
-            } else { 
+            } else {
                 odometer_   = new OdometerSimu();
             }
         }
@@ -262,7 +263,6 @@ void UartManagerCL::allocOdometer()
 void UartManagerCL::allocDevices() 
 {
     if (RobotConfig->ioManagerAlloc) {
-        
         LOG_FUNCTION();
         allocLcd();
         allocOdometer();
@@ -313,7 +313,7 @@ int main(int argc, char* argv[])
     ClassConfig::find(CLASS_UART_MANAGER)->setVerboseLevel(VERBOSE_DEBUG);
     UartManagerCL mgr(true);
     UartInfo infos[UART_PORT_NBR];
-    
+
     mgr.scan(infos);
     return 0;
 }

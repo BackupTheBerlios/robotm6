@@ -120,18 +120,20 @@ bool Uart::ping()
    UartPingId pingId=UART_NONE;
    if (requestPingId(pingId)) {
        if (info_.id == UART_NONE) {
-	   info_ = getUartInfo(pingId);  
+	   info_ = getUartInfo(pingId);
 	   if (info_.id == UART_NONE) {
 	       LOG_ERROR("Unknown device pinging (0x%x)\n", pingId);
 	   } else {
 	     LOG_OK("%s pinging\n", name());
+	     // TODO: IMO following line should be inserted. [flo]
+	     return true;
 	   }
        } else {
 	   if (pingId == info_.pingId) {
 	       LOG_OK("%s pinging\n", name());
 	       return true;
 	   } else {
-	       LOG_ERROR("%s pinging but bad id: 0x%x (instead of 0x%x)\n", 
+	       LOG_ERROR("%s pinging but bad id: 0x%x (instead of 0x%x)\n",
 			 name(), pingId, info_.pingId);
 	       return false;
 	   }

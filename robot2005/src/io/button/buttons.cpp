@@ -30,7 +30,7 @@ ButtonCL::ButtonCL(const char*   name,
 // buttonPinChangeCallBack
 // ----------------------------------------------------------------------------
 void buttonPinChangeCallBack(void*          userData,
-                             unsigned char  pin, 
+                             unsigned char  pin,
                              bool           pinValue)
 {
     ((ButtonCL*)userData)->pinChangeCallBack(pin, pinValue);
