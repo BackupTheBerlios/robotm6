@@ -14,6 +14,8 @@ Lcd_03::Lcd_03() :  device_(NULL)
 {
     device_ = IoManager->getIoDevice(IO_ID_LCD_03);
     if (device_ != NULL) {
+	// TODO: check device-opening for errors [flo]
+	device_->open();
 	LOG_OK("Initialization Done\n");
     } else {
 	LOG_ERROR("Lcd device not found!\n");
@@ -22,6 +24,7 @@ Lcd_03::Lcd_03() :  device_(NULL)
 
 Lcd_03::~Lcd_03()
 {
+    device_->close();
 }
 
 // ---------------------------------------------------------------------------
