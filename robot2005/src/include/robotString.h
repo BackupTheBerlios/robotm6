@@ -24,9 +24,10 @@ namespace RString {
      *
      * @return 0 on success, or -1 on failure.
      */
-    
+#ifndef GUMSTIX
     int bPrintfInit() ;
-
+#endif
+    
     /**
      * the function that emulates Perl's chop (remove the last \n)
      */

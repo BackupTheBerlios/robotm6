@@ -26,6 +26,7 @@
 
 #include <string.h>
 
+#ifndef GUMSTIX
 #ifdef linux
 #include <printf.h>
 
@@ -136,6 +137,7 @@ int RString::bPrintfInit()
   return 0;
   
 }
+#endif // GUMSTIX
 
 // -------------------------------------------------------------------------
 // RString::chop
