@@ -12,8 +12,7 @@
 #include "robotBase.h"
 #include "ioHost.h"
 
-static const bool SERIAL_NON_BLOCKING = false;
-static const bool SERIAL_BLOCKING = true;
+static const unsigned int DEFAULT_READ_RETRIES = 3;
 
 /** 
  * @class SerialPort
@@ -24,6 +23,8 @@ class SerialPort : public IoHost, public RobotBase
 {
 public:
     SerialPort(int ttyNbr, bool isBlocking);
+    // retries implies non-blocking.
+    SerialPort(int ttyNbr, unsigned int readRetries = DEFAULT_READ_RETRIES);
     virtual ~SerialPort();
 
 public: // overwritten methods from IoHost
