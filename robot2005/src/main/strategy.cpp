@@ -136,7 +136,6 @@ void StrategyCL::gameOver()
   LCD->print("GAME OVER");
   LCD->ledPolice();
 
-  // vide le robot (que si on n'est pas dans notre camp)!
   Log->stopMatch();
   Position pos = ROBOT_POS->pos();
   
