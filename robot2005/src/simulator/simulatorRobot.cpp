@@ -7,8 +7,8 @@
  */
 #include "simulator.h"
 #include "simulatorRobot.h"
-#include "simulatorRobot.h"
 #include "simulatorGrsBall.h"
+#include "simulatorSkittle.h"
 
 SimulatorRobot::SimulatorRobot() : 
     RobotBase("Simulated robot", CLASS_SIMULATOR),
@@ -196,14 +196,33 @@ void SimulatorRobot::checkPosAndGRSBall(SimulatorGrsBall* ball)
     Circle circle(ball->ball_->center, BALLE_GRS_RAYON);
     Point intersection;
     if (checkCircleIntersectionWithRobot(circle, BALLE_GRS_RAYON, intersection)) {
-        Point newCenter = ball->ball_->center+(ball->ball_->center-intersection)* BALLE_GRS_RAYON/dist(ball->ball_->center,intersection);
-        ball->setRobotCollision(newCenter);
+        Point newCenter = intersection+(ball->ball_->center-intersection)* BALLE_GRS_RAYON/dist(ball->ball_->center,intersection);
+        ball->centerAfterCollision(newCenter);
     }
 }
 
 void SimulatorRobot::checkPosAndSkittle(SimulatorSkittle* skittle)
 {
+    if (!skittle || !skittle->skittle_ || realPos_.center.x < 10) return;
+    // meme si la quille est tombee on la gere comme si elle etait ronde, c'est plus facile!
+    Circle circle(skittle->skittle_->center, QUILLE_RAYON);
+    if (skittle->skittle_->status == SKITTLE_DOWN) {
+        circle.radius=2*QUILLE_RAYON;
+    } 
+/*
+    Point intersection;
+    if (checkCircleIntersectionWithRobot(circle, 80, intersection)) {
+        Point newCenter = intersection+(skittle->newPos_.center-intersection)* QUILLE_RAYON/dist(skittle->newPos_.center,intersection);
+        skittle->centerAfterCollision(newCenter);
+    } 
+*/
+    if (Geometry2D:: isCircleInPolygon(borderPol_[0], circle) ||
+        Geometry2D:: isCircleInPolygon(borderPol_[1], circle) ||
+        Geometry2D:: isCircleInPolygon(borderPol_[2], circle)) {
+        Point newCenter =  realPos_.center+(skittle->newPos_.center-realPos_.center)*400./dist(skittle->newPos_.center, realPos_.center);
+        skittle->centerAfterCollision(newCenter);
 
+    }
 }
 bool SimulatorRobot::getIntersection(Point const&   captor, 
                                      Segment const& captorVision, 

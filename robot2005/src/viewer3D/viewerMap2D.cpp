@@ -264,7 +264,7 @@ void Viewer3DCL::drawSkittle2D(Skittle* skittle)
         glPushMatrix ();
         glTranslatef(MARGIN+skittle->center.x*SCALE, 
                      MARGIN+(TERRAIN_Y-skittle->center.y)*SCALE,0); 
-        glRotatef(r2d(skittle->direction),0,0,1);
+        glRotatef(-r2d(skittle->direction)-90,0,0,1);
         glBegin(GL_QUADS);
         glVertex2d(-(TERRAIN_SUPPORT_QUILLE_HAUTEUR/2)*SCALE, 
                    -(TERRAIN_SUPPORT_QUILLE_RAYON)*SCALE);

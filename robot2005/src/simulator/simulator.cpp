@@ -79,6 +79,7 @@ SimulatorCL::SimulatorCL() :
     }
     setBridgeBorder();
     setWallBorder();
+    changeSupport();
     server_ = new SimulatorServer();
     if (server_) server_->startReceiver();
     Viewer3D->createWindows(true, true);
@@ -471,7 +472,7 @@ void SimulatorCL::update()
     for(unsigned int i=0; i<SIMU_PORT_MAX_CONNECTIONS; i++) {
       SimulatorRobot* robot1 = server_->getRobot(i);
       if (robot1) {
-	for(unsigned int j=i; j<SIMU_PORT_MAX_CONNECTIONS; j++) {
+	for(unsigned int j=i+1; j<SIMU_PORT_MAX_CONNECTIONS; j++) {
 	  SimulatorRobot* robot2 = server_->getRobot(j);
 	  if (robot2) {
 	    robot1->checkPosAndOtherRobot(robot2);
@@ -489,7 +490,7 @@ void SimulatorCL::update()
       }
     }
     for(unsigned int i=0;i!=BALLE_GRS_NBR;i++) {
-      for(unsigned int j=0;j!=BALLE_GRS_NBR;j++) {
+      for(unsigned int j=i+1;j!=BALLE_GRS_NBR;j++) {
 	sgBalls_[i]->checkPosAndGRSBall(sgBalls_[j]);
       }
     }
@@ -497,8 +498,8 @@ void SimulatorCL::update()
     for(unsigned int i=0; i<SIMU_PORT_MAX_CONNECTIONS; i++) {
       SimulatorRobot* robot = server_->getRobot(i);
       if (robot) {
-	for(unsigned int i=0;i!=QUILLE_NBR;i++) {
-	  robot->checkPosAndSkittle(sskittles_[i]);
+	for(unsigned int j=0;j!=QUILLE_NBR;j++) {
+	  robot->checkPosAndSkittle(sskittles_[j]);
 	}
       }
     }
@@ -508,7 +509,7 @@ void SimulatorCL::update()
       }
     }
     for(unsigned int i=0;i!=QUILLE_NBR;i++) {
-      for(unsigned int j=0;j!=QUILLE_NBR;j++) {
+      for(unsigned int j=i+1;j!=QUILLE_NBR;j++) {
 	sskittles_[i]->checkPosAndSkittle(sskittles_[j]);
       }
     }

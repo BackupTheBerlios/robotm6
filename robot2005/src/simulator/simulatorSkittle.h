@@ -1,5 +1,5 @@
 /**
- * @file simulatorGrsBall.h
+ * @file simulatorSkittle.h
  *
  * @author Laurent Saint-Marcel
  *
@@ -52,7 +52,7 @@ class SimulatorSkittle : public RobotBase {
                          Segment const& captorVision, 
                          Millimeter     zPosCaptor, 
                          Point&         intersectionPt);
-    void collisionWithRobot(Point& newCenter);
+    void centerAfterCollision(Point& newCenter);
     // -------------------------------------------------------------------
     // private members
     // -------------------------------------------------------------------
@@ -64,6 +64,7 @@ class SimulatorSkittle : public RobotBase {
     bool       hasMoved_;
     Position   newPos_;
     friend     class SimulatorRobot;
+    friend     class SimulatorGrsBall;
 };
 
 #endif // __SIMULATOR_SKITTLE_H__

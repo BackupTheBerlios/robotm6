@@ -877,11 +877,11 @@ void Viewer3DCL::drawSkittle3D(Skittle* skittle)
 	glScalef(1, 1, -1);
 	break;
     case SKITTLE_DOWN:
-	glRotatef(90, 0, 1, 0);
 	glRotatef(r2d(skittle->direction), 
 		  0, 
 		  0,
 		  1);
+        glRotatef(90, 0, 1, 0);
 	break;
     }
     if (useTexture_) {

@@ -159,15 +159,41 @@ void SimulatorGrsBall::checkPosAndBridge(BridgePosition const& bridge)
 //bool checkPosAndOtherRobot(SimulatorRobot* other);
 void SimulatorGrsBall::checkPosAndGRSBall(SimulatorGrsBall* other)
 { 
+    if (!ball_ || !other || !other->ball_ || other==this) return;
+    // meme si la quille est tombee on la gere comme si elle etait ronde, c'est plus facile!
+    Point intersection;
+    if (dist(other->newPos_.center, newPos_.center) < 2*BALLE_GRS_RAYON) {
+        Point newCenter = newPos_.center+(other->newPos_.center-newPos_.center)* (2*BALLE_GRS_RAYON)/dist(other->newPos_.center,newPos_.center);
+        other->centerAfterCollision(newCenter);
+    }
 }
 void SimulatorGrsBall::checkPosAndSkittle(SimulatorSkittle* skittle)
-{
+{ 
+    if (!skittle || !skittle->skittle_) return;
+    // meme si la quille est tombee on la gere comme si elle etait ronde, c'est plus facile!
+    Millimeter radius=(skittle->skittle_->status == SKITTLE_DOWN)?2*QUILLE_RAYON:QUILLE_RAYON;
+   
+    Point intersection;
+    if (dist(skittle->newPos_.center, newPos_.center) < BALLE_GRS_RAYON+radius) {
+        Point newCenter = newPos_.center+(skittle->newPos_.center-newPos_.center)* (BALLE_GRS_RAYON+radius)/dist(skittle->newPos_.center, newPos_.center);
+        skittle->centerAfterCollision(newCenter);
+    }
 }
-void SimulatorGrsBall::setRobotCollision(Point& newPoint)
+void SimulatorGrsBall::centerAfterCollision(Point& newPoint)
 {
     newPos_.center = newPoint;
-    speedX_=(newPos_.center.x-ball_->center.x)/30.;
-    speedY_=(newPos_.center.y-ball_->center.y)/30.;
+    speedX_=(newPos_.center.x-ball_->center.x)/5.;
+    speedY_=(newPos_.center.y-ball_->center.y)/5.;
+    Millimeter S = sqrt(speedX_*speedX_+speedY_*speedY_);
+    if (S==0) return;
+    if (S<0.2) {
+        speedX_*=0.2/S;
+        speedY_*=0.2/S;
+    };
+    if (S >0.6) {
+        speedX_*=0.6/S;
+        speedY_*=0.6/S;
+    }
 }
 
 bool SimulatorGrsBall::getIntersection(Point const&   captor, 
