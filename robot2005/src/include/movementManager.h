@@ -116,12 +116,11 @@ class MovementManagerCL : public RobotComponent
     /** @brief Renvoie le type de consigne envoyee aux moteurs: avancer, 
 	reculer, tourner gauche, tourner droite */
     MotorDirection getMotorDirection();
-
+    void setSpeed(MotorSpeed  speedLeft,
+		  MotorSpeed  speedRight);
  protected:
     Motor* motor() { return motor_; }
     void startThread();
-    void setSpeed(MotorSpeed  speedLeft,
-		  MotorSpeed  speedRight);
     void getCoderPosition(CoderPosition& left, 
 			  CoderPosition& right);
     void getPWM(MotorPWM& left, 

@@ -202,7 +202,8 @@ void EventsManagerCL::unraiseEventsGroups()
   evtStatus_[(int)EVENTS_GROUP_MOTOR]        = false;
   evtStatus_[(int)EVENTS_GROUP_MATCH]        = false;
 
-  evtStatus_[(int)EVENTS_PWM_ALERT]           = false;
+  evtStatus_[(int)EVENTS_PWM_ALERT_LEFT]     = false;
+  evtStatus_[(int)EVENTS_PWM_ALERT_RIGHT]    = false;
 }
 
 // ----------------------------------------------------------------------------

@@ -164,8 +164,8 @@ bool getKeyboardOrder()
       break;
   }
   checkMotorOrder();
-  printf("hctlSetMotorSpeed(%d, %d)\n", order.speedLeft, order.speedRight);
-  hctlSetMotorSpeed(order.speedLeft, order.speedRight);
+  printf("hctlSetMotorSpeed(%d, %d)\n", order.speedRight, order.speedLeft);
+  hctlSetMotorSpeed(order.speedRight, order.speedLeft);
   return true;
 }
 

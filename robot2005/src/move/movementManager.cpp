@@ -19,6 +19,7 @@
      direction_(MOVE_DIRECTION_FORWARD)
  {
      LOG_FUNCTION();
+     mvtMgr_   = this;
      position_ = new RobotPositionCL();
      move_     = new MoveCL();
      mvtMgr_   = this;
@@ -182,7 +183,7 @@ void MovementManagerCL::setAcceleration(MotorAcceleration acceleration)
 // MovementManagerCL::setSpeed
 // ----------------------------------------------------------------------------
 void MovementManagerCL::setSpeed(MotorSpeed  left,
-			       MotorSpeed  right)
+				 MotorSpeed  right)
 {
     motorCom_.speedLeft  = left;
     motorCom_.speedRight = right; 

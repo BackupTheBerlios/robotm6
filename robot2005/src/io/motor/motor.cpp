@@ -92,9 +92,12 @@ void Motor::checkMotorEvents()
       (lastLeft<-110 && left<-110)) {
     if (counterLeft_++ > MOTOR_PWM_TIME_ALERT) {
 #ifndef TELECOMMAND_MAIN
-      LOG_ERROR("La roue gauche est bloquée\n");
+      LOG_ERROR("La roue gauche est bloquée r=%d l=%d\n", right, left);
 #endif
       alert=true;
+#ifndef TELECOMMAND_MAIN
+      Events->raise(EVENTS_PWM_ALERT_LEFT);
+#endif
     }
   } else {
     counterLeft_=0;
@@ -104,9 +107,12 @@ void Motor::checkMotorEvents()
       (lastRight<-110 && right<-110)) {
     if (counterRight_++ > MOTOR_PWM_TIME_ALERT) {
 #ifndef TELECOMMAND_MAIN
-      LOG_ERROR("La roue droite est bloquée\n");
+      LOG_ERROR("La roue droite est bloquée r=%d l=%d, cr=%d, cl=%d\n", right, left, counterRight_, counterLeft_);
 #endif
       alert=true;
+#ifndef TELECOMMAND_MAIN
+      Events->raise(EVENTS_PWM_ALERT_RIGHT);
+#endif
     }
   } else {
     counterRight_=0;
@@ -120,9 +126,6 @@ void Motor::checkMotorEvents()
     if (enableAutomaticReset_) {
       reset();
     }
-#ifndef TELECOMMAND_MAIN
-    Events->raise(EVENTS_PWM_ALERT);
-#endif
     if (alertFunction_) {
       alertFunction_(left, right);
     }

@@ -3,12 +3,19 @@
 #include "log.h"
 #include "motor.h"
 #include "odometer.h"
+//
+//Gestion d'un fichier d'entree de commande
+//
+#include <stdio.h>
+//
+//
 #include "robotConfig2005.h"
 #include "robotMain2005.h"
 #include "events.h"
 #include "robotPosition.h"
 #include "move.h"
 #include "movementManager.h"
+
 
 // ----------------------------------------------------------------------------
 // evtEndMove
@@ -35,6 +42,7 @@ class TestMoveStrategy1CL : public Strategy2005CL
 
 void TestMoveStrategy1CL::run(int argc, char* argv[])
 {
+
     Lcd->print("SophiaTeam");
     RobotPos->setOdometerType(ODOMETER_MOTOR);
     //RobotPos->setOdometerType(ODOMETER_UART_MANUAL);
@@ -48,11 +56,192 @@ void TestMoveStrategy1CL::run(int argc, char* argv[])
     // ====================    
     // HERE ICI HERE ICI HERE ICI
     // ====================    
+    
+    LOG_INFO("Debut de la sequence Gibs\n");
 
-    RobotPos->set(0,0,0);
-    Move->rotateFromAngle(d2r(720));
+    //
+    //Gestion d'un fichier d'entree de commande
+    //
+    FILE *fco;
+    FILE *fcos;
+    char *comm=NULL;
+    size_t tailleLigne=0;
+    fco=fopen("commande.gib","r");
+    fcos=fco;
+     if(fco==NULL){
+      LOG_ERROR("pas de fichier de commande\n");
+     }
+     else{
+       LOG_INFO("EXECUTION DU FICHIER DE COMMANDE GIB\n");
+      //description du fichier de commande;
+       while(getline(&comm,&tailleLigne,fco)!=-1){
+	   //->enregistrer la ligne et la traiter.
+	   LOG_INFO(comm);
+	   //
+	   //Evaluation de la chaine
+	   if(*(comm)=='-')//commentaire-> non interprete
+	     {
+	       //LOG_INFO("commentaire");
+	     }
+	   else if(*comm=='T'){//Zone de Message:Titre
+	     LOG_INFO(comm+1);//evite le premier caractere
+	   }
+	   //Pour des actions:
+	   //posRob;
+	   //avance;
+	   //recule;
+	   //avancR;//regule
+	   //reculR;//regule
+	   //tourne;
+	   //tournR;//regule
+	   //vaAuPt;//regule
+	   //trajec;//regule abs/ord abs/ord ...
+	   
+	   else if(strncmp(comm,"avance",6)==0){//verifie la commande
+	     int l;
+	     comm+=6;
+	     sscanf(comm," %d",&l);
+	     Move->forward(l);
+	     
+	     Events->wait(evtEndMove);
+	     
+	   }
+	   else if(strncmp(comm,"recule",6)==0){//verifie la commande
+	     int l;
+	     comm+=6;
+	     sscanf(comm," %d",&l);
+	     Move->forward(-l);
+	     
+	     Events->wait(evtEndMove);
+	   }
+
+
+
+
+	   else if(strncmp(comm,"avancR",6)==0){//verifie la commande Regule
+	     // LOG_INFO("avancR demandee\n");
+
+	     int l;
+	     comm+=6;
+	     sscanf(comm," %d",&l);
+	     
+	     RobotPos->set(0, 0, 0);
+	     MvtMgr->setRobotDirection(MOVE_DIRECTION_FORWARD);
+    	     Move->go2Target(Point(l, 0));
+
+	     Events->wait(evtEndMove);
+	   }
+	   else if(strncmp(comm,"reculR",6)==0){//verifie la commande Regule
+	     int l;
+	     comm+=6;
+	     sscanf(comm," %d",&l);
+	     
+	     RobotPos->set(0, 0, 0);
+	     MvtMgr->setRobotDirection(MOVE_DIRECTION_BACKWARD);
+	     Move->go2Target(Point(l, 0));
+
+	     Events->wait(evtEndMove);
+	     
+	   }
+
+
+	   else if(strncmp(comm,"posRob",6)==0){//verifie la commande
+	     int x,y,angl;
+	     comm+=6;//passage de l'ordre
+	     sscanf(comm," %d",&x);//abscisse(longueuer)
+	     sscanf(comm," %d",&y);//ordonnee(largeur)
+	     sscanf(comm," %d",&angl);//angle
+	     
+	     RobotPos->set(x, y, angl);
+ 
+	   }
+
+	   else if(strncmp(comm,"tourne",6)==0){//verifie la commande
+	     int angl;
+	     comm+=6;
+	     sscanf(comm," %d",&angl);
+	     Move->rotate(d2r(angl));
+
+	     Events->wait(evtEndMove);
+	   }
+	   else if(strncmp(comm,"tournR",6)==0){//verifie la commande Regule
+	     int angl;
+	     comm+=6;
+	     sscanf(comm," %d",&angl);
+	     RobotPos->set(0,0,0);
+	     Move->rotateFromAngle(d2r(angl));
+	     
+	     Events->wait(evtEndMove);
+	   }
+	   else if(strncmp(comm,"vaAuPt",6)==0){//verifie la commande
+	     int x,y;
+	     comm+=6;//passage de l'ordre
+	     sscanf(comm," %d",&x);//abscisse(longueuer)
+	     sscanf(comm," %d",&y);//ordonnee(largeur)
+	     
+	     Move->go2Target(Point(x,y));
+	     Events->wait(evtEndMove);
+	   }
+	   //
+	   //La position du robot devant etre initialise avant
+	   //
+	   else if(strncmp(comm,"trajec",6)==0){//verifie la commande
+	     LOG_INFO("TRAJECTOIRE\n");
+	     Trajectory t;
+	     t.push_back(Point(RobotPos->x(), RobotPos->y()));
+	     
+	     int x,y;
+	     comm+=6;//passage de l'ordre
+	     
+	     while(1){//tant que pas fin de fichier(chaine de char)
+	       // s'arret si il y a un pb
+	       if(sscanf(comm," %d:%d",&x,&y)!=2)break;//abscisse(longueuer)
+	       t.push_back(Point(x,y));
+	       LOG_INFO("1 PT de plus\n");
+	       //
+	       //Avancee du pointeur
+	       comm++;
+	       while((*comm)!=' ' && *comm!='\0')comm++;
+	       if(comm=='\0')break;
+	       //Sinon on retourne pour prendre le prochain point
+	       //
+	       //
+	     }
+	     
+	     Move->followTrajectory(t/*, TRAJECTORY_SPLINE*/);
+	     Events->wait(evtEndMove);
+
+
+
+	     
+	   }
+	   else{
+	     LOG_ERROR("Erreur dans l'ecriture du fichier de commande");
+
+	     break;//Probleme dans l'ecriture des lignes de commandes
+	   }
+	   //
+	   //
+
+
+
+	   
+       }
+       if(comm)
+	 free(comm);
+       LOG_INFO("Fin Fichier Commande Gibs");
+     }
+
+
+    //
+    //
+
+
+
+    //RobotPos->set(0,0,0);
+    //Move->rotateFromAngle(d2r(720));
     //Move->go2Target(Point(1500, 0));
-    Events->wait(evtEndMove);
+     //    Events->wait(evtEndMove);
     
     /*
     Move->rotate(d2r(-90)); // tourne de 90degre a droite
@@ -79,6 +268,8 @@ class TestMoveStrategy2CL : public Strategy2005CL
     Strategy2005CL("TestMove", "testMove2", CLASS_STRATEGY, main){}
   virtual void run(int argc, char*argv[]);
 };
+
+
 
 void TestMoveStrategy2CL::run(int argc, char* argv[])
 {
@@ -129,12 +320,83 @@ void TestMoveStrategy2CL::run(int argc, char* argv[])
     return;
 }
 
+inline bool evtEndMovePwm(bool evt[])
+{
+  return evt[EVENTS_MOVE_END] || 
+    evt[EVENTS_PWM_ALERT_LEFT] ||
+    evt[EVENTS_PWM_ALERT_RIGHT];
+}
+
+/** @class TestMoveStrategy3CL
+ * Teste les déplacements du robot (MovementManager et Move)
+ */
+class TestMoveStrategy3CL : public Strategy2005CL
+{
+ public :
+  TestMoveStrategy3CL(RobotMainCL* main): 
+    Strategy2005CL("TestMove", "testMove3", CLASS_STRATEGY, main){}
+  virtual void run(int argc, char*argv[]);
+};
+
+void TestMoveStrategy3CL::run(int argc, char* argv[])
+{
+    Lcd->print("SophiaTeam");
+    RobotPos->setOdometerType(ODOMETER_MOTOR);
+    //RobotPos->setOdometerType(ODOMETER_UART_MANUAL);
+    setStartingPosition();
+    waitStart(INIT_NONE);
+    Move->enableAccelerationController(false);
+    MvtMgr->enableAutomaticReset(false);
+
+    RobotPos->set(0,0,0);
+    Move->go2Target(Point(1000,0));
+    Events->wait(evtEndMovePwm);
+    if (Events->check(EVENTS_PWM_ALERT_LEFT)) {
+      LOG_INFO ("Left\n"); 
+      Move->stop();
+      MvtMgr->motorReset();
+      sleep(2);
+      MvtMgr->setSpeed(-20, 20);
+      usleep(1000000);
+      MvtMgr->setSpeed(0, 0);
+    } else if (Events->check(EVENTS_PWM_ALERT_RIGHT)) {
+      LOG_INFO ("Rightt\n");
+      Move->stop();
+      MvtMgr->motorReset();
+      sleep(2);
+      MvtMgr->setSpeed(20, -20);
+      sleep(2);
+      usleep(1000000);
+      MvtMgr->setSpeed(0, 0);
+    } else {
+      LOG_INFO ("Normal\n");
+    }
+    
+    Move->forward(300);
+    Events->wait(evtEndMovePwm);
+/*
+    Move->go2Target(Point(1000,0));
+    Events->wait(evtEndMove);
+    
+    Move->go2Target(Point(1000,750));
+    Events->wait(evtEndMove);
+   */
+    Move->stop();
+    RobotPos->print();
+    sleep(2);
+    // detection du pont
+    RobotPos->print();
+    Log->emergencyStopPressed(true);
+    sleep(5);
+    return;
+}
 int main(int argc, char* argv[])
 {
   RobotConfigCL*  config;
   RobotMainCL*    robotMain=NULL;
   StrategyCL*     strategy1=NULL;
   StrategyCL*     strategy2=NULL;
+  StrategyCL*     strategy3=NULL;
 
 #ifndef SIMULATED
 #define SIMULATED false
@@ -154,11 +416,13 @@ LOG_INFO("SIMULATED\n");
   robotMain = new RobotMain2005CL();
   strategy1 = new TestMoveStrategy1CL(robotMain);
   strategy2 = new TestMoveStrategy2CL(robotMain);
+  strategy3 = new TestMoveStrategy3CL(robotMain);
 
   //ClassConfig::find(CLASS_MOVE)->setVerboseLevel(VERBOSE_DEBUG);
   //// ICI ICI ICI => strategy2 = traverse le pont
-  robotMain->run(strategy2, argc, argv); // traverse le pont
-  //robotMain->run(strategy1, argc, argv); // test des deplacements
+  //robotMain->run(strategy2, argc, argv); // traverse le pont
+  //robotMain->run(strategy1, argc, argv); //deplacement fichier  test des deplacements
+  robotMain->run(strategy3, argc, argv); //deplacement fichier  test des deplacements
 
   while(1) {sleep(1);}
   delete strategy2;

@@ -50,7 +50,7 @@ void MotorReal::setSpeed(MotorSpeed left,
     // on a change les moteurs et les codeurs, maintenant ca va 2 fois
     // moins vite. Pour pas changer les gains qu'on a teste, on change 
     // juste la consigne envoyee aux moteurs. A corrige en 2005 ;)
-  hctlSetMotorSpeed(2*left, 2*right);
+  hctlSetMotorSpeed( 2*right, 2*left);
 }
 
 /** Retourne la position des codeurs */

@@ -40,7 +40,7 @@ void hctlSetMotorSpeed(int rightSpeed, int leftSpeed)
     if (rightSpeed < -127) rightSpeed = -127;
     if (leftSpeed < -127)  leftSpeed  = -127;
   
-    set_speed((int)leftSpeed, (int)rightSpeed);
+    set_speed((int)rightSpeed, (int)leftSpeed);
 }
 
 
@@ -177,14 +177,14 @@ void hctlIdle()
 char hctlGetRightPWM()
 {
     unsigned char res;
-    read_pwm(2,&res);
+    read_pwm(1,&res);
     return (signed char)res;
 }
 
 char hctlGetLeftPWM()
 {
     unsigned char res;
-    read_pwm(1,&res);
+    read_pwm(2,&res);
     return (signed char)res;
 }
 

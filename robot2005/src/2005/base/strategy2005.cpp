@@ -213,7 +213,8 @@ bool evtEndMove(bool evt[])
 {
     return evtEndMoveNoCollision(evt)
         || evt[EVENTS_GROUP_BUMPER]
-	|| evt[EVENTS_PWM_ALERT];
+	|| evt[EVENTS_PWM_ALERT_LEFT]
+	|| evt[EVENTS_PWM_ALERT_RIGHT];
 }
 
 // ----------------------------------------------------------------------------

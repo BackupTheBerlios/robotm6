@@ -425,14 +425,14 @@ void RobotPositionCL::detectCollision()
     if (sumDrOdom_ + POSITION_ODOM_ALERT_LEVEL_DR < sumDrHctl_) {
 	LOG_ERROR("Les hctls tournent dans le vide (rotation) Odo=%d Hct=%d\n",
 		  r2d(sumDrOdom_), r2d(sumDrHctl_));
-	Events->raise(EVENTS_PWM_ALERT);
+	Events->raise(EVENTS_PWM_ALERT_LEFT);
 	resetOdoColliDetection();
 	return;
     }
     if (sumDpOdom_ + POSITION_ODOM_ALERT_LEVEL_DP < sumDpHctl_) {
 	LOG_ERROR("Les hctls tournent dans le vide (lineaire) Odo=%d Hct=%d\n",
 		  (int)(sumDpOdom_), (int)(sumDpHctl_));
-	Events->raise(EVENTS_PWM_ALERT);
+	Events->raise(EVENTS_PWM_ALERT_LEFT);
 	resetOdoColliDetection();
 	return;
     }

@@ -42,7 +42,8 @@ typedef enum EventsEnum {
     EVENTS_GROUP_MATCH,
     
     EVENTS_MOVE_END,       // fin de trajectoire
-    EVENTS_PWM_ALERT,      // moteurs bloques
+    EVENTS_PWM_ALERT_LEFT, // moteurs bloques
+    EVENTS_PWM_ALERT_RIGHT,// moteurs bloques
   
     EVENTS_JACKIN,         //jack de depart
     EVENTS_EMERGENCY_STOP, // arret d'urgence
@@ -112,7 +113,8 @@ static EventsInfoStruct EventsInfo[EVENTS_NBR] = {
     { EVENTS_GROUP_MATCH,  "EVT_GROUP_MATCH", EVENTS_GROUP_NONE},
    
     { EVENTS_MOVE_END,       "EVT_MOVE_END",  EVENTS_GROUP_MOTOR },  
-    { EVENTS_PWM_ALERT,      "EVT_PWM_ALERT", EVENTS_GROUP_MOTOR  },
+    { EVENTS_PWM_ALERT_LEFT, "EVT_PWM_ALERT_LEFT", EVENTS_GROUP_MOTOR  },
+    { EVENTS_PWM_ALERT_RIGHT,"EVT_PWM_ALERT_RIGHT", EVENTS_GROUP_MOTOR  },
 
     { EVENTS_JACKIN,         "EVT_JACKIN",          EVENTS_GROUP_USER },    
     { EVENTS_EMERGENCY_STOP, "EVT_EMERGENCY_STOP",  EVENTS_GROUP_USER  },
