@@ -1,18 +1,17 @@
 SRC_ROOT=..
 
-COMPILE_FIRST_DIRS=uart lcd odometer button motor sound
+## ===========================================================================
+## Source files used to generate dependencies
+## ===========================================================================
+SRCS=ioDevice.cpp ioManager.cpp ioHost.cpp
+
 ## ===========================================================================
 ## LIB_NAME and .o files for making libraries .a and .so
 ## ===========================================================================
 ## For standard directory you only need to set these values
 ## ===========================================================================
-LIB_NAME=
-OBJS=
-
-## ===========================================================================
-## Source files used to generate dependencies
-## ===========================================================================
-SRCS=
+LIB_NAME=libio
+OBJS=$(SRCS:.cpp=.o)
 
 ## ===========================================================================
 ## Additionnal flags for this directory. See makefile.include for common flags
@@ -36,10 +35,13 @@ all: lib bin validate
 ## Main rules : ----- CLEAN -----
 ## ===========================================================================
 clean:	default_clean default_clean_dirs
+	${RM} -f  ${STATIC_LIB_DIR}/${LIB_NAME}.a        \
+                  ${DYNAMIC_LIB_DIR}/${LIB_NAME}.so  
 
 ## ===========================================================================
 ## Main rules : ----- LIB -----
 ## ===========================================================================
+lib: $(STATIC_LIB_DIR)/${LIB_NAME}.a ${DYNAMIC_LIB_DIR}/${LIB_NAME}.so 
 lib: default_lib_dirs
 
 ## ===========================================================================
