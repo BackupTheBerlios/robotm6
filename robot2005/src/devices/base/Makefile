@@ -3,7 +3,7 @@ SRC_ROOT=../..
 ## ===========================================================================
 ## Source files used to generate dependencies
 ## ===========================================================================
-SRCS=motor.cpp lcd.cpp odometer.cpp sound.cpp bumper.cpp env.cpp servo.cpp alim.cpp
+SRCS=motor.cpp lcd.cpp odometer.cpp sound.cpp bumper.cpp env.cpp servo.cpp alim.cpp skittleDetector.cpp tesla.cpp crane.cpp
 
 ## ===========================================================================
 ## LIB_NAME and .o files for making libraries .a and .so

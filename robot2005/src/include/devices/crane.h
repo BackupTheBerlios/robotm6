@@ -27,10 +27,10 @@ class CraneCL : public RobotDeviceCL {
   virtual bool exists() const { return false; }
   virtual void emergencyStop() { disableMotors(); }
   // envoie la grue a une certaine position
-  virtual void setPosition(CranePositionX x, 
-                           CranePositionZ z){}
+  virtual bool setPosition(CranePositionX x, 
+                           CranePositionZ z){ return false; }
   // arrete les moteurs
-  virtual bool disableMotors() const { return false; }
+  virtual bool disableMotors() { return false; }
  private:
   static CraneCL*   crane_;
 };

@@ -28,7 +28,7 @@ class SkittleDetectorCL : public RobotDeviceCL {
   // envoie la grue a une certaine position, retourne la derniere
   // position detectee de quille, meme si la quille n'est plus detectee
   // actuellement il y a l'ancienne valeur
-  virtual bool getValue(SkittlePosition& pos){ false; }
+  virtual bool getValue(SkittlePosition& pos){ return false; }
   // active l'evenement de detection de la quille // par defaut a true
   virtual void enableDetection() {}
   // desactive l'evenement de detection de la quille
@@ -37,11 +37,11 @@ class SkittleDetectorCL : public RobotDeviceCL {
   virtual void periodicTask() {}
 
  private:
-  static SkittleDetectorCL*   skittleDetector_;
+  static SkittleDetectorCL*   skittle_;
 };
 
 inline SkittleDetectorCL* SkittleDetectorCL::instance()
 {
-    assert(skittleDetector_);
-    return skittleDetector_;
+    assert(skittle_);
+    return skittle_;
 }

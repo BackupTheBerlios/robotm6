@@ -3,7 +3,7 @@ SRC_ROOT=../..
 ## ===========================================================================
 ## Source files used to generate dependencies
 ## ===========================================================================
-SRCS=lcdSimu.cpp motorSimu.cpp odometerSimu.cpp soundSimu.cpp bumperSimu.cpp envSimu.cpp alimSimu.cpp servoSimu.cpp
+SRCS=lcdSimu.cpp motorSimu.cpp odometerSimu.cpp soundSimu.cpp bumperSimu.cpp envSimu.cpp alimSimu.cpp servoSimu.cpp craneSimu.cpp teslaSimu.cpp skittleDetectorSimu.cpp
 
 ## ===========================================================================
 ## LIB_NAME and .o files for making libraries .a and .so

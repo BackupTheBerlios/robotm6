@@ -1,17 +1,12 @@
-/**
- * @file crane.h
- *
- * @author Laurent Saint-Marcel
- *
- */
 
-// grue de l'electro aimant
+// gestion de l'electroaimant
 
 #pragma once
 
 #include "robotDevice.h"
 
 #define BigTesla BigTeslaCL::instance()
+#define Tesla    BigTeslaCL::instance()
 
 enum TeslaMode {
     TESLA_MODE_5V, // envoie du petit sur l'electro aimant
@@ -47,11 +42,11 @@ class BigTeslaCL : public RobotDeviceCL {
   virtual void periodicTask() {}
 
  private:
-  static CLBigTeslaCL*   bigTesla_;
+  static BigTeslaCL*   tesla_;
 };
 
 inline BigTeslaCL* BigTeslaCL::instance()
 {
-    assert(bigTesla_);
-    return bigTesla_;
+    assert(tesla_);
+    return tesla_;
 }

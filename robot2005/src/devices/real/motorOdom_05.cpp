@@ -42,18 +42,19 @@ bool MotorOdom05::reset()
 bool MotorOdom05::idle()
 {
     if (!device_) return false;
-    bool status=false;
-    // TODO
-    return status;
+    LOG_FUNCTION();
+    return device_->write(MOTOR_ODOM_REQ_RESET);
 }
 
 /** Defini la constante d'acceleration des moteurs */
 bool MotorOdom05::setAcceleration(MotorAcceleration acceleration)
 {
     if (!device_) return false; 
-    bool status=false;
-    // TODO
-    return status;
+    unsigned char buf[2];
+    unsigned int l=2;
+    buf[0] = MOTOR_ODOM_REQ_SET_ACCELERATION;
+    buf[1] = acceleration;
+    return device_->write(buf, l);
 }
 
 /** Specifie un consigne en vitesse pour les moteurs */
@@ -61,9 +62,12 @@ bool MotorOdom05::setSpeed(MotorSpeed left,
                            MotorSpeed right)
 {
     if (!device_) return false;
-    bool status=false;
-    // TODO
-    return status;
+    static unsigned char buf[3];
+    unsigned int l=3;
+    buf[0] = MOTOR_ODOM_REQ_SET_SPEED;
+    buf[1] = left;
+    buf[2] = right;
+    return device_->write(buf, l);
 }
 
 /** Retourne la position des codeurs */
@@ -71,9 +75,15 @@ bool MotorOdom05::getMotorPosition(MotorPosition &left,
                                    MotorPosition &right)
 {
     if (!device_) return false;
-    bool status=false;
-    // TODO
-    return status;
+    static unsigned char buf[8];
+    unsigned int l=6;
+    if (device_->writeRead(MOTOR_ODOM_REQ_GET_HCTL_CODER, buf, l)) {
+        left  = (((int)buf[0])<<16)+(((int)buf[1])<<8)+(int)buf[2];
+        right = (((int)buf[3])<<16)+(((int)buf[4])<<8)+(int)buf[5];
+        return true;
+    } else {
+        return false;
+    }
 }
 
 /** Retourne la position des codeurs */
@@ -81,9 +91,15 @@ bool MotorOdom05::getOdomPosition(CoderPosition &left,
                                   CoderPosition &right)
 {
     if (!device_) return false;
-    bool status=false;
-    // TODO
-    return status;
+    static unsigned char buf[8];
+    unsigned int l=4;
+    if (device_->writeRead(MOTOR_ODOM_REQ_GET_ODOM_CODER, buf, l)) {
+        left  = (((int)buf[0])<<8)+(int)buf[1];
+        right = (((int)buf[2])<<8)+(int)buf[3];
+        return true;
+    } else {
+        return false;
+    }
 }
 
 /** Retourne la consigne reellement envoyee au moteurs */
@@ -91,18 +107,41 @@ bool MotorOdom05::getMotorPwm(MotorPWM &left,
                               MotorPWM &right)
 {
     if (!device_) return false;
-    bool status=false;
-    // TODO
-    return status;
+    static unsigned char buf[8];
+    unsigned int l=2;
+    if (device_->writeRead(MOTOR_ODOM_GET_PWM, buf, l)) {
+        left  = buf[0];
+        right = buf[1];
+        return true;
+    } else {
+        return false;
+    }
 }
 
 bool MotorOdom05::setSpeedAndCachePosition(MotorSpeed left, 
                                            MotorSpeed right)
 {
     if (!device_) return false;
-    bool status=false;
-    // TODO
-    return status;
+    static unsigned char buf[8];
+    unsigned int l=3;
+    buf[0] = MOTOR_ODOM_REQ_SET_SPEED_AND_GET_POS;
+    buf[1] = left;
+    buf[2] = right;
+
+    static unsigned char buf2[20];
+    unsigned int l2=12;
+    if (device_->writeRead(buf, l, buf2, l2)) {
+        odomPosLeft_   = (((int)buf2[0])<<8)+(int)buf2[1];
+        odomPosRight_  = (((int)buf2[1])<<8)+(int)buf2[3];
+        motorPosLeft_  = (((int)buf2[4])<<16)+(((int)buf2[5])<<8)+(int)buf2[6];
+        motorPosRight_ = (((int)buf2[7])<<16)+(((int)buf2[8])<<8)+(int)buf2[9];
+        motorPwmLeft_  = buf2[10];
+        motorPwmRight_ = buf2[11];
+        return true;
+    } else {
+        LOG_ERROR("Com Error send%d/3, received:%d/12\n", l, l2);
+        return false;
+    }
 }
 
 void MotorOdom05::getCacheMotorPosition(MotorPosition &mLeft,

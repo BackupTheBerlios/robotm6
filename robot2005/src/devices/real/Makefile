@@ -9,9 +9,12 @@ LCD_SRCS=lcd_03.cpp lcd_05.cpp
 SOUND_SRCS=sound_05.cpp
 SERVO_SRCS=servo_05.cpp
 BUMPER_SRCS=bumper_05.cpp
-ENV_SERCS=env_05.cpp
+ENV_SRCS=env_05.cpp
+TESLA_SRCS=tesla_05.cpp
+SKITTLE_DETECTOR_SRCS=skittleDetector_05.cpp
+CRANE_SRCS=crane_05.cpp
 ALIM_SRCS=alim_05.cpp
-SRCS=$(ODOMETER_SRCS) $(MOTOR_SRCS) $(LCD_SRCS) $(SOUND_SRCS) $(SERVO_SRCS) $(BUMPER_SRCS) $(ENV_SERCS) $(ALIM_SRCS) 
+SRCS=$(ODOMETER_SRCS) $(MOTOR_SRCS) $(LCD_SRCS) $(SOUND_SRCS) $(SERVO_SRCS) $(BUMPER_SRCS) $(ENV_SRCS) $(ALIM_SRCS) $(TESLA_SRCS) $(SKITTLE_DETECTOR_SRCS) $(CRANE_SRCS)
 
 ## ===========================================================================
 ## LIB_NAME and .o files for making libraries .a and .so
@@ -68,6 +71,9 @@ clean:	default_clean
 		   ${BIN_DIR}/testEnv         \
 		   ${BIN_DIR}/testServo       \
 		   ${BIN_DIR}/testLcd         \
+                   ${BIN_DIR}/testCrane       \
+		   ${BIN_DIR}/testSkittle     \
+		   ${BIN_DIR}/testTesla       \
                    ${BIN_DIR}/telecommandIsa  \
                    ${BIN_DIR}/telecommand05
 #	${RM} -f  ${BIN_DIR}/${BIN_NAME}                 
@@ -82,7 +88,7 @@ lib: $(STATIC_LIB_DIR)/${LIB_NAME}.a ${DYNAMIC_LIB_DIR}/${LIB_NAME}.so
 ## Main rules : ----- BIN -----
 ## ===========================================================================
 #bin: ${BIN_DIR}/${BIN_NAME}
-bin: ${BIN_DIR}/testServo ${BIN_DIR}/testBumper ${BIN_DIR}/testEnv ${BIN_DIR}/telecommandIsa ${BIN_DIR}/telecommand05 ${BIN_DIR}/lcdPrint05 ${BIN_DIR}/testLcd ${BIN_DIR}/getButton05
+bin: ${BIN_DIR}/testServo ${BIN_DIR}/testBumper ${BIN_DIR}/testEnv ${BIN_DIR}/telecommandIsa ${BIN_DIR}/telecommand05 ${BIN_DIR}/lcdPrint05 ${BIN_DIR}/testLcd ${BIN_DIR}/getButton05 ${BIN_DIR}/testCrane ${BIN_DIR}/testTesla ${BIN_DIR}/testSkittle 
 ## ===========================================================================
 ## Main rules : ----- VALIDATE -----
 ## ===========================================================================
@@ -103,11 +109,20 @@ ${BIN_DIR}/testLcd: lcd_05.cpp
 ${BIN_DIR}/testServo: servo_05.cpp
 	${CC} -o $@ $^ ../base/servo.o $(DEFAULT_CFLAGS) ${INC_DIR} ${DEFAULT_INC_DIR} -DTEST_MAIN $(IO_STATIC_LIB)
 
+${BIN_DIR}/testCrane: crane_05.cpp
+	${CC} -o $@ $^ ../base/crane.o $(DEFAULT_CFLAGS) ${INC_DIR} ${DEFAULT_INC_DIR} -DTEST_MAIN $(IO_STATIC_LIB)
+
 ${BIN_DIR}/testBumper: bumper_05.cpp
 	${CC} -o $@ $^ ../base/bumper.o $(DEFAULT_CFLAGS) ${INC_DIR} ${DEFAULT_INC_DIR} -DTEST_MAIN $(STATIC_LIB_DIR)/libevents.a $(IO_STATIC_LIB)
 
 ${BIN_DIR}/testEnv: env_05.cpp
 	${CC} -o $@ $^ ../base/env.o $(DEFAULT_CFLAGS) ${INC_DIR} ${DEFAULT_INC_DIR} -DTEST_MAIN $(STATIC_LIB_DIR)/libevents.a $(IO_STATIC_LIB)
+
+${BIN_DIR}/testTesla: tesla_05.cpp
+	${CC} -o $@ $^ ../base/tesla.o $(DEFAULT_CFLAGS) ${INC_DIR} ${DEFAULT_INC_DIR} -DTEST_MAIN $(STATIC_LIB_DIR)/libevents.a $(IO_STATIC_LIB)
+
+${BIN_DIR}/testSkittle: skittleDetector_05.cpp
+	${CC} -o $@ $^ ../base/skittleDetector.o $(DEFAULT_CFLAGS) ${INC_DIR} ${DEFAULT_INC_DIR} -DTEST_MAIN $(STATIC_LIB_DIR)/libevents.a $(IO_STATIC_LIB)
 
 ${BIN_DIR}/telecommandIsa: motorIsa_05.cpp HCTLControl.o hct.o
 	${CC} -o $@ $^ ../base/motor.o $(DEFAULT_CFLAGS) ${INC_DIR} ${DEFAULT_INC_DIR} -DTEST_MAIN $(STATIC_LIB_DIR)/libevents.a $(IO_STATIC_LIB)

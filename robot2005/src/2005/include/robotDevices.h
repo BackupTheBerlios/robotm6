@@ -11,6 +11,11 @@
 #include "devices/sound.h"
 #include "devices/servo.h"
 #include "devices/env.h"
+#include "devices/crane.h"
+#include "devices/skittleDetector.h"
+#include "devices/tesla.h"
+
+class MotorOdom05;
 
 /** @brief Initialisation des cartes electroniques */
 class RobotDevicesCL : public RobotBase {
@@ -34,6 +39,9 @@ class RobotDevicesCL : public RobotBase {
     SoundCL*    getSound() const    { return sound_; }
     EnvDetectorCL*getEnv() const    { return env_; }
     ServoCL*    getServo() const    { return servo_; }
+    CraneCL*    getCrane() const    { return crane_; }
+    BigTeslaCL* getTesla() const    { return tesla_; }
+    SkittleDetectorCL* getSkittle() const    { return skittle_; }
 
 protected: // periodic
     friend void* RobotDevicesThreadBody(void*);
@@ -46,8 +54,21 @@ protected: // periodic fields
     pthread_t thread_;
     typedef std::set<RobotDeviceCL*> RobotDevicesSet;
     RobotDevicesSet watchedDevices_;
-    
+
+    void allocMotorOdom();
+    void allocMotor();
+    void allocOdometer();
+    void allocLcd();
+    void allocSound();
+    void allocBumper();
+    void allocEnv();
+    void allocServo();
+    void allocCrane();
+    void allocSkittle();
+    void allocTesla();
+
 private:
+    MotorOdom05*   motorOdom_;
     MotorCL*       motor_;
     OdometerCL*    odometer_;
     LcdCL*         lcd_;
@@ -55,6 +76,9 @@ private:
     SoundCL*       sound_;
     EnvDetectorCL* env_;
     ServoCL*       servo_;
+    CraneCL*       crane_;
+    BigTeslaCL*    tesla_;
+    SkittleDetectorCL* skittle_;
 };
 
 #endif
