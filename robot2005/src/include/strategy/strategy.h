@@ -48,7 +48,7 @@ class StrategyCL : public RobotBase
     const char* menuName() const;
     /** @brief Configure the robot and wait for the startJack */
     bool waitStart(InitMode mode);
-    /** @brief Fonctiopn qui libere les dernieres balles contenues dans 
+    /** @brief Fonction qui libere les dernieres balles contenues dans 
      * le robot puis attend la fin du match */
     virtual bool timerAlert();
     /** @brief Function lancee au bout d'1min30 */

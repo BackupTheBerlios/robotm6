@@ -43,7 +43,7 @@ class RobotConfigCL
     // ---          M O T E U R S              ---
     // -------------------------------------------
     /**  @brief utilse le motorReal ou motorSimu */
-    bool motorReal;
+    bool motorSimu;
     /** @brief reset automatiquement les moteurs quand on detecte que la 
 	consigne envoyée aux moteurs sature */
     bool automaticMotorReset; 
@@ -105,7 +105,7 @@ inline void RobotConfigCL::reset()
 inline RobotConfigCL::RobotConfigCL() : 
     uartPortMask(0xFFFF),
    
-    motorReal(true), 
+    motorSimu(true), 
     automaticMotorReset(true), 
     disableUartAnswerRequest(false), 
     ioManagerAlloc(true),
@@ -124,7 +124,7 @@ inline RobotConfigCL::RobotConfigCL() :
 // ----------------------------------------------------------------------------
 inline bool RobotConfigCL::needSimulator() const
 {
-    return lcdSimu || odometerSimu || !motorReal;
+    return lcdSimu || odometerSimu || motorSimu;
 }
 
 // ----------------------------------------------------------------------------
@@ -149,7 +149,7 @@ inline RobotConfigCL* RobotConfigCL::instance()
 inline RobotConfigSimuCL::RobotConfigSimuCL() : RobotConfigCL()
 {
     uartPortMask=0x00;
-    motorReal=false;
+    motorSimu=true;
     lcdSimu=true;
     odometerSimu=true;
  

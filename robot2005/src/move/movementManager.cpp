@@ -4,6 +4,7 @@
 #include "mthread.h"
 #include "log.h"
 #include "robotTimer.h"
+#include "robotConfig.h"
 
 
 MovementManager* MovementManager::mvtMgr_=NULL;
@@ -131,16 +132,11 @@ void MovementManager::periodicTask()
 {
     if (!motor_) {
 	// TODO: getClassConfig doesn't contain motorReal and no automaticMotorReset [flo]
-	/*
-        if (getClassConfig()->motorReal) {
-	motor_ = new MotorReal(getClassConfig()->automaticMotorReset);
+        if (RobotConfig->motorSimu) {
+	    motor_ = new MotorSimu(RobotConfig->automaticMotorReset);
         } else {
-#ifdef SIMULATED
-	motor_ = new MotorSimu(getClassConfig()->automaticMotorReset);
-#else
-	motor_ = new MotorReal(getClassConfig()->automaticMotorReset);
-#endif // SIMULATED
-      }*/
+	    motor_ = new MotorReal(RobotConfig->automaticMotorReset);
+	}
     }
     if (motorCom_.reset && motor_) {
         motor_->reset();
