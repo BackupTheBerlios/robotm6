@@ -41,6 +41,7 @@ static const double SCALE3D=0.1;
 
 class ControlButton;
 
+
 typedef struct ViewerColorST {
   float r;
   float g;
@@ -64,6 +65,8 @@ typedef enum ViewerScreenEN {
   
   VIEWER_SCREEN_NBR
 } ViewerScreenEN;
+
+typedef void (*ViewerKeyboardFn)(ViewerScreenEN screen, unsigned int key, int x, int y);
 
 typedef enum ViewerControlButtonId{
     CTRL_BTN_PREVIOUS=0,       // besoin seulement de clickCB 
@@ -363,20 +366,7 @@ class Viewer3DCL: public RobotBase
 	void setEstimatedSupportPosition(int robotId, 
                                          Point const& pt1, 
                                          Point const& pt2);
-	/** @brief enregistre des callbacks sur les boutons du player */
-	void registerBtnCallback(ViewerControlButtonId btnId,
-				 clickBtnCB clickCB,
-				 clickBtnCB unclickCB=NULL);
-        void setBtnTexture(ViewerControlButtonId btnId, 
-                           TextureId tunclick, 
-                           TextureId tclick);
-        void setBtnEnable(ViewerControlButtonId btnId, 
-                           bool enable);
-	/** @brief Pour mettre a jour l'etat des boutons (pour que le
-	    simulateur puisse changer les etats de AU et jackin. Les callbacks
-	    ne sont pas appeles quand on change l'etat d'un bouton avec cette
-	    fonction */
-	void setBtnClick(ViewerControlButtonId btnId, bool click);
+
 	bool reset();
         // ---------------------------------------------------------------
         // Mettre a jour la position des objets sur le terrains
@@ -436,9 +426,37 @@ class Viewer3DCL: public RobotBase
                               bool incCounter=true);
 	
 	// ---------------------------------------------------------------
-        // Callbacks des boutons du menu
+        // Callbacks du clavier
         // ---------------------------------------------------------------
-        
+        /** @brief enregistre un callback appele quand on appuie sur une 
+            touche dans la fenetre Map2D, les coordonnees renvoyees correspondent
+            a la positionde la souris sur le terrain */
+        void registerKeyboardMap2D(ViewerKeyboardFn cb);
+        /** @brief enregistre un callback appele quand on appuie sur une 
+            touche dans la fenetre View 3D */
+        void registerKeyboardMap3D(ViewerKeyboardFn cb);
+        /** @brief enregistre un callback appele quand on appuie sur une 
+            touche dans la fenetre Player */
+        void registerKeyboardPlayer(ViewerKeyboardFn cb);
+
+        // ---------------------------------------------------------------
+        // Callbacks des boutons et menu
+        // ---------------------------------------------------------------
+        /** @brief enregistre des callbacks sur les boutons du player */
+	void registerBtnCallback(ViewerControlButtonId btnId,
+				 clickBtnCB clickCB,
+				 clickBtnCB unclickCB=NULL);
+        void setBtnTexture(ViewerControlButtonId btnId, 
+                           TextureId tunclick, 
+                           TextureId tclick);
+        void setBtnEnable(ViewerControlButtonId btnId, 
+                           bool enable);
+	/** @brief Pour mettre a jour l'etat des boutons (pour que le
+	    simulateur puisse changer les etats de AU et jackin. Les callbacks
+	    ne sont pas appeles quand on change l'etat d'un bouton avec cette
+	    fonction */
+	void setBtnClick(ViewerControlButtonId btnId, bool click);
+ 
  protected:
         /** @brief constructeur accessible uniquement par la fonction 
             instance() */
@@ -508,6 +526,9 @@ class Viewer3DCL: public RobotBase
 	/** @brief Renvoie la hauteur du sol au point donne (fosse=-30, normal=0) */
 	Millimeter getGroundLevel(Point const& pt);
 
+        void keyboardMap3D(unsigned char key, int x, int y);
+
+        friend void menuRobotMap3D(int value);
         friend void keyboardViewerMap3D(unsigned char key, int x, int y);
         friend void menuViewerMap3D(int value);
 	friend void displayViewerMap3D(void);
@@ -558,9 +579,9 @@ class Viewer3DCL: public RobotBase
         void drawEstimatedBridges2D(int robotId);
         /** @brief Dessine un pont virtuel dont la position est estimee par un robot */
         void drawEstimatedBridges2D(Millimeter y);
+        void keyboardMap2D(unsigned char key, int x, int y);
 
 	friend void menuRobotMap2D(int value);
-	friend void menuRobotMap3D(int value);
 	friend void keyboardViewerMap2D(unsigned char key, int x, int y);
 
 	// ---------------------------------------------------------------
@@ -573,12 +594,15 @@ class Viewer3DCL: public RobotBase
 	void drawPlayerRobotInfo(int robotId);
 	void mousePlayerControl(int button, int state, int x, int y);
 	void setRobotTeam(int robotId, TeamColor team);
+        void keyboardPlayer(unsigned char key, int x, int y);
 
 	friend void checkRobotColor(int from);
 	friend void clickColorBtn(ViewerControlButtonId btnId);
 	friend void unclickColorBtn(ViewerControlButtonId btnId);
 	friend void mousePlayerControl(int button, int state, int x, int y);
 	friend void displayPlayerControl(); 
+        friend void keyboardPlayerControl(unsigned char key, int x, int y);
+        
         // ---------------------------------------------------------------
         // Films et screen shot
         // ---------------------------------------------------------------
@@ -605,6 +629,10 @@ class Viewer3DCL: public RobotBase
 	bool useTexture_;
 	bool createThread_;
 	ControlButton*  btn_[CTRL_BTN_NBR];
+
+        ViewerKeyboardFn map3DKeyBoardCB_;
+        ViewerKeyboardFn map2DKeyBoardCB_;
+        ViewerKeyboardFn playerKeyBoardCB_;
 
  protected:
         // 3D options

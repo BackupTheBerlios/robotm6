@@ -113,6 +113,21 @@ void Viewer3DCL::drawPlayerRobotInfo(int robotId)
     }
 }
 
+// ---------------------------------------------------------------
+// Viewer3DCL::keyboardPlayer
+// ---------------------------------------------------------------
+void Viewer3DCL::keyboardPlayer(unsigned char key, int x, int y)
+{
+    if (playerKeyBoardCB_) playerKeyBoardCB_(VIEWER_SCREEN_PLAYER, key, x, y);
+}
+
+// ---------------------------------------------------------------
+// Viewer3DCL::registerKeyboardPlayer
+// ---------------------------------------------------------------
+void Viewer3DCL::registerKeyboardPlayer(ViewerKeyboardFn cb) {
+    playerKeyBoardCB_ = cb;
+}
+
 // --------------------------------------------------------------------
 // keyboardPlayerControl
 // --------------------------------------------------------------------
@@ -122,6 +137,7 @@ void keyboardPlayerControl(unsigned char key, int x, int y)
   default:
     break;
   }
+  Viewer3D->keyboardPlayer(key, x, y);
 }
 
 // --------------------------------------------------------------------

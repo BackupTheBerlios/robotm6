@@ -329,6 +329,26 @@ void SimulatorCL::changeBridge()
     Viewer3D->setBridgePosition(bridge_);
     setBridgeBorder();
 }
+// ---------------------------------------------------------------------------
+// SimulatorCL::checkSupportPositionIsValid
+// ---------------------------------------------------------------------------
+bool SimulatorCL::checkSupportPositionIsValid(Point & pt) 
+{
+    int x = (((int)pt.x)/300)*300+150;
+    int y = (((int)pt.y)/300)*300+150;
+    if (x>1800) {
+        x = (int)TERRAIN_X - x;
+        y = (int)TERRAIN_Y - y;
+    }
+    pt.x=x; pt.y=y;
+    
+    if (x<300 || x>=1200) return false;
+    if (y<300 || y >=1800) return false;
+    if (x<600 && y<1500) return true;
+    if (x<900 && y<1200) return true;
+    if (x<1200 && y<900) return true;
+    return false;
+}
 
 // ---------------------------------------------------------------------------
 // SimulatorCL::changeSupport
@@ -367,7 +387,14 @@ void SimulatorCL::changeSupport()
         ok = (x1!=x3 || y1!=y3) && (x2!=x3 || y2!=y3);
     } while(!ok);
     supportPosition3_ = Point(450+x3*300, 450+y3*300);
+    updateAndDisplaySkittles();
+}
 
+// ---------------------------------------------------------------------------
+// SimulatorCL::updateAndDisplaySkittles
+// ---------------------------------------------------------------------------
+void SimulatorCL::updateAndDisplaySkittles()
+{
     // support de quilles
     Viewer3D->setSupportPosition(supportPosition1_, supportPosition2_);
     
@@ -724,10 +751,55 @@ void robotBtnUnClickedCB(ViewerControlButtonId btnId)
 }
 
 // ---------------------------------------------------------------------------
+// SimulatorCL::simulatorKeyBoard
+// ---------------------------------------------------------------------------
+void SimulatorCL::simulatorKeyBoard(ViewerScreenEN screen, 
+                                    unsigned int key, 
+                                    int x, int y)
+{
+    if (screen == VIEWER_SCREEN_MAP) {
+        Point pt(x,y);
+        switch(key) {
+        case '1':
+            if (checkSupportPositionIsValid(pt))
+                supportPosition1_ = pt;
+            updateAndDisplaySkittles();
+            break;
+        case '2':
+            if (checkSupportPositionIsValid(pt))
+                supportPosition2_ = pt;
+            updateAndDisplaySkittles();
+            break;
+        case '3':
+            if (checkSupportPositionIsValid(pt))
+                supportPosition3_ = pt;
+            updateAndDisplaySkittles();
+            break;
+        case '0':
+            changeBridge();
+        default:
+            break;
+        }
+    }
+}
+
+// ---------------------------------------------------------------------------
+// simulatorKeyBoard
+// ---------------------------------------------------------------------------
+void simulatorKeyBoard(ViewerScreenEN screen, unsigned int key, int x, int y)
+{
+    SimulatorCL::instance()->simulatorKeyBoard(screen, key, x, y);
+}
+
+// ---------------------------------------------------------------------------
 // SimulatorCL::registerViewerBtnCB
 // ---------------------------------------------------------------------------
 void SimulatorCL::registerViewerBtnCB()
 {
+    Viewer3D->registerKeyboardMap2D(::simulatorKeyBoard);
+    Viewer3D->registerKeyboardMap3D(::simulatorKeyBoard);
+    Viewer3D->registerKeyboardPlayer(::simulatorKeyBoard);
+    
     Viewer3D->registerBtnCallback(CTRL_BTN_ROBOTS_JACK,
 				mainJackinClickedCB,
 				mainJackinUnClickedCB);

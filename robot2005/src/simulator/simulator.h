@@ -11,6 +11,7 @@
 
 #include "robotBase.h"
 #include "simulatorBase.h"
+#include "viewer3D.h"
 
 class SimulatorServer;
 class SimulatorConnection;
@@ -79,13 +80,19 @@ class SimulatorCL : public RobotBase {
     void changeBridge();
     /** @brief change la position des supports de quilles */
     void changeSupport();
+    /** @brief l'utilisateur vient d'appuyer sur le clavier dans le viewer3D */
+    void simulatorKeyBoard(ViewerScreenEN screen,
+                           unsigned int key,
+                           int x, 
+                           int y);
+
 #define SIMU_WALL_BORDER_PTS_NBR   4
 #define SIMU_BRIDGE_BORDER_PTS_NBR 14
 #define SIMU_RIVER_BORDER_PTS_NBR  18
     Point* getWallPts()   { return wallBorderPts_; }
     Point* getBridgePts() { return bridgeXPts_; }
     Point* getRiverPts()  { return riverYPts_; }
-    bool isInRiver(Point const& pt); 
+    bool   isInRiver(Point const& pt); 
     double getSimulationSpeed() { return simulationSpeed_; }
  protected:
     void registerViewerBtnCB();
@@ -94,9 +101,12 @@ class SimulatorCL : public RobotBase {
                              Millimeter altitude, 
                              bool four,
                              bool red);
+    void updateAndDisplaySkittles();
+    bool checkSupportPositionIsValid(Point & pt);
     void setBridgeBorder();
     void setWallBorder();
     void computeSimulationSpeed();
+    
  private:
     static SimulatorCL* simulator_;
     SimulatorServer* server_;

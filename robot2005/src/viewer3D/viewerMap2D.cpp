@@ -680,6 +680,21 @@ void Viewer3DCL::drawLegend2D()
     gluDeleteQuadric(quad);
 }
 
+// ---------------------------------------------------------------
+// Viewer3DCL::keyboardMap2D
+// ---------------------------------------------------------------
+void Viewer3DCL::keyboardMap2D(unsigned char key, int x, int y)
+{
+    if (map2DKeyBoardCB_) map2DKeyBoardCB_(VIEWER_SCREEN_MAP, key, x, y);
+}
+// ---------------------------------------------------------------
+// Viewer3DCL::registerKeyboardMap2D
+// ---------------------------------------------------------------
+void Viewer3DCL::registerKeyboardMap2D(ViewerKeyboardFn cb) 
+{
+    map2DKeyBoardCB_ = cb;
+}
+
 // ====================================================================
 // C API for openGL
 // ====================================================================
@@ -747,7 +762,9 @@ void keyboardViewerMap2D(unsigned char key, int x, int y)
     default:
 	break;
     }
+    Viewer3D->keyboardMap2D(key, (int)pt.x, (int)pt.y);
 }
+
 
 // --------------------------------------------------------------------
 // menuViewerMap2D

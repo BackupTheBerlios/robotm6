@@ -599,6 +599,7 @@ Viewer3DCL::Viewer3DCL() :
     bridge_(BRIDGE_POS_UNKNOWN), support1_(-10,0), support2_(-10,0),
     enableEstimatedDisplay_(false), enableObjectDisplay_(false), useTexture_(true), 
     createThread_(true),
+    map3DKeyBoardCB_(NULL), map2DKeyBoardCB_(NULL), playerKeyBoardCB_(NULL),
     cameraModeAuto3D_(false), useTexture3D_(true), targetRobotId3D_(0)
 {
     assert(!viewer_);

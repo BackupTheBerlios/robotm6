@@ -1302,7 +1302,20 @@ void Viewer3DCL::drawLegend3D()
  
 }
 
-
+// ---------------------------------------------------------------
+// Viewer3DCL::keyboardMap3D
+// ---------------------------------------------------------------
+void Viewer3DCL::keyboardMap3D(unsigned char key, int x, int y)
+{
+    if (map3DKeyBoardCB_) map3DKeyBoardCB_(VIEWER_SCREEN_3D, key, x, y);
+}
+// ---------------------------------------------------------------
+// Viewer3DCL::registerKeyboardMap3D
+// ---------------------------------------------------------------
+void Viewer3DCL::registerKeyboardMap3D(ViewerKeyboardFn cb) 
+{
+    map3DKeyBoardCB_ = cb;
+}
 
 
 // =========================================================================
@@ -1404,6 +1417,7 @@ void keyboardViewerMap3D (unsigned char key, int x, int y)
     default:
 	break;
     }
+    Viewer3D->keyboardMap3D(key, x, y);
 }
 
 // -------------------------------------------------------------------------
