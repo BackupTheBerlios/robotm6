@@ -59,10 +59,10 @@ validate: ${VALIDATE_DIR}/geometry2D ${VALIDATE_DIR}/serialPort
 ## ===========================================================================
 
 ${VALIDATE_DIR}/geometry2D: geometry2D.cpp geometry2D.o ${SRC_DIR}/include/geometry2D.h
-	${CC} -o $@  geometry2D.cpp ${DEFAULT_CFLAGS} ${DEFAULT_INC_DIR} -DTEST_MAIN -lm -lstdc++-3-libc6.2-2-2.10.0
+	${CC} -o $@  geometry2D.cpp ${DEFAULT_CFLAGS} ${DEFAULT_INC_DIR} -DTEST_MAIN -lm -l$(LIB_STDCPP)
 
 ${VALIDATE_DIR}/serialPort: serialPort.cpp serialPort.o robotCommon.o ${SRC_DIR}/include/serialPort.h
-	${CC} -o $@ ${DEFAULT_CFLAGS} serialPort.cpp robotCommon.o ${DEFAULT_INC_DIR} ${STATIC_LIB_DIR}/liblogBasic.a -DSERIAL_MAIN -lm -lstdc++-3-libc6.2-2-2.10.0
+	${CC} -o $@ ${DEFAULT_CFLAGS} serialPort.cpp robotCommon.o ${DEFAULT_INC_DIR} ${STATIC_LIB_DIR}/liblogBasic.a -DSERIAL_MAIN -lm -l$(LIB_STDCPP)
 
 ## ===========================================================================
 ## DO NOT ADD ANYTHING BELOW THIS LINE -- IT WILL BE ERASED BY MAKE DEPEND

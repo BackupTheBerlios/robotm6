@@ -61,10 +61,10 @@ validate:
 ## ===========================================================================
 
 ${BIN_DIR}/logger: logger.o ${SRC_DIR}/include/log.h
-	${CC} -o $@ logger.o ${DEFAULT_INC_DIR} -I/usr/include ${DEFAULT_CFLAGS} $(STATIC_LIB_DIR)/libtools.a -lz -lstdc++-3-libc6.2-2-2.10.0
+	${CC} -o $@ logger.o ${DEFAULT_INC_DIR} -I/usr/include ${DEFAULT_CFLAGS} $(STATIC_LIB_DIR)/libtools.a -lz -l$(LIB_STDCPP)
 
 ${BIN_DIR}/log2html: log2html.o ${SRC_DIR}/include/log.h
-	${CC} -o $@ log2html.o ${DEFAULT_INC_DIR} -I/usr/include ${DEFAULT_CFLAGS} $(STATIC_LIB_DIR)/libtools.a -lz -lstdc++-3-libc6.2-2-2.10.0
+	${CC} -o $@ log2html.o ${DEFAULT_INC_DIR} -I/usr/include ${DEFAULT_CFLAGS} $(STATIC_LIB_DIR)/libtools.a -lz -l$(LIB_STDCPP)
 
 ${BIN_DIR}/logViewer: logViewer.o ${SRC_DIR}/include/log.h
 	${CC} -o $@ logViewer.o ${DEFAULT_INC_DIR} -I/usr/include ${DEFAULT_CFLAGS} -L${DYNAMIC_LIB_DIR} ${ALL_DYNAMIC_LIB_SIMU}

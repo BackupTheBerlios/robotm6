@@ -14,13 +14,14 @@ USE_GCC33=1
 ## Programs 
 ## ===========================================================================
 
-#fdef USE_GCC33
+#ifdef USE_GCC33
 
-CC=g++
+CC=gcc-3.4
 RM=rm
 AR=ar
 LD=${CC}
-
+LIB_STDCPP=stdc++
+#stdc++-3-libc6.2-2-2.10.0
 #else
 
 #CC=cc

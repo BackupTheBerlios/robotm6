@@ -2,6 +2,9 @@ ifndef "$(BASE_DIR)"
    BASE_DIR = ../..
 endif
 
+SRC_ROOT=../..
+include $(SRC_ROOT)/Makefile.include
+
 include ../config
 
 #############################################################

@@ -54,9 +54,9 @@ lib: ${STATIC_LIB_DIR}/${LIB_NAME}.a ${DYNAMIC_LIB_DIR}/${LIB_NAME}.so
 ## ===========================================================================
 bin: $(OBJS_SERVER)
 	${CC} -o ${BIN_DIR}/${BIN_NAME} ${DEFAULT_INC_DIR} ${DEFAULT_CFLAGS} \
-           ${OBJS_SERVER} ${STATIC_LIB_DIR}/libviewer3D.a ${STATIC_LIB_DIR}/liblogBasic.a ${STATIC_LIB_DIR}/libtools.a ${STATIC_LIB_DIR}/libfthread.a -lglut ${STATIC_LIB_DIR}/libviewer3D.a -lGLU -lGL -lm -lpthread -lstdc++-3-libc6.2-2-2.10.0 -lz
+           ${OBJS_SERVER} ${STATIC_LIB_DIR}/libviewer3D.a ${STATIC_LIB_DIR}/liblogBasic.a ${STATIC_LIB_DIR}/libtools.a ${STATIC_LIB_DIR}/libfthread.a -lglut ${STATIC_LIB_DIR}/libviewer3D.a -lGLU -lGL -lm -lpthread -l$(LIB_STDCPP) -lz
 	${CC} -o ${BIN_DIR}/testSimulatorClient ${DEFAULT_INC_DIR} ${DEFAULT_CFLAGS} \
-           testClient.cpp ${STATIC_LIB_DIR}/libsimulator.a ${STATIC_LIB_DIR}/liblogBasic.a ${STATIC_LIB_DIR}/libtools.a ${STATIC_LIB_DIR}/libfthread.a -lm -lpthread -lstdc++-3-libc6.2-2-2.10.0 -lz
+           testClient.cpp ${STATIC_LIB_DIR}/libsimulator.a ${STATIC_LIB_DIR}/liblogBasic.a ${STATIC_LIB_DIR}/libtools.a ${STATIC_LIB_DIR}/libfthread.a -lm -lpthread -l$(LIB_STDCPP) -lz
 
 
 ## ===========================================================================

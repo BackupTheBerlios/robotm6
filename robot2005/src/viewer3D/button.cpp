@@ -58,7 +58,7 @@ void ControlButton::draw()
 }
 
 void ControlButton::registerCB(clickBtnCB ClickCB,
-			       clickBtnCB UnClickCB=NULL)
+			       clickBtnCB UnClickCB)
 {
     clickCB   = ClickCB;
     unClickCB = UnClickCB;

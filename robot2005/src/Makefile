@@ -1,9 +1,11 @@
 SRC_ROOT=.
 ## list of directories to compile and their orders
-COMPILE_DIR_ORDER=log tools viewer3D simulator
+COMPILE_DIR_ORDER=ftv1.2 log tools viewer3D simulator
 #modules
 
 SRCS=*.cpp
+
+all:
 
 include $(SRC_ROOT)/Makefile.include
 

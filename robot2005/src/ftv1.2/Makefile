@@ -2,6 +2,9 @@ ifndef "$(BASE_DIR)"
    BASE_DIR = `pwd`
 endif
 
+SRC_ROOT=..
+include $(SRC_ROOT)/Makefile.include
+
 include config
 include identity
 
@@ -9,8 +12,18 @@ include identity
 MK = $(MAKE) BASE_DIR=$(BASE_DIR)
 
 ###############################################
-all:
-	$(MK) -C src
+all:    lib
+
+lib:
+	cd src; $(MAKE) all
+	cp src/libfthread.a ../../lib
+	cp src/fthread.h ../include
+
+bin:
+
+depend:
+
+validate:
 
 info:
 	@ echo "**** for cleaning: make clean"
@@ -35,6 +48,8 @@ clean:
 	- $(MK) -C examples clean
 	- $(MK) -C test_dir clean
 	rm -f *~
+	rm ../../lib/libfthread.a
+	rm ../include/fthread.h
 
 ###############################################
 # Tests
