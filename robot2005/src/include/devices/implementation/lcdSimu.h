@@ -10,7 +10,7 @@
 #ifndef __LCD_SIMU_H__
 #define __LCD_SIMU_H__
 
-#include "lcd.h"
+#include "devices/lcd.h"
 
 // ===========================================================================
 // class LcdSimu

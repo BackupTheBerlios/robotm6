@@ -14,7 +14,7 @@
 #ifndef __ODOMETER_SIMU_H__
 #define __ODOMETER_SIMU_H__
 
-#include "odometer.h"
+#include "devices/odometer.h"
 
 
 // ===========================================================================
