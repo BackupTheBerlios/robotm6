@@ -36,22 +36,25 @@ void TestMoveStrategy1CL::run(int argc, char* argv[])
     MOVE->enableAccelerationController(false);
     MVTMGR->enableAutomaticReset(false);
 
+    Log->emergencyStopPressed(false);
+    sleep(2);
+    Log->jackIn(true);
+    sleep(3);
+    Log->jackIn(false);
     //ROBOT_POS->set(0,0,0);
 
-    MOVE->go2Target(Point(1000, 1800)); // le robot tourne sur lui meme et va au point (1000, 1800)
+    MOVE->go2Target(Point(1000, 1500)); // le robot tourne sur lui meme et va au point (1000, 1800)
     Events->wait(evtEndMove);
     
     MOVE->rotate(d2r(-90)); // tourne de 90degre a droite
     Events->wait(evtEndMove);
 
-    MOVE->forward(200); // avance de 20cm (pas de regulation)
+    MOVE->forward(400); // avance de 20cm (pas de regulation)
     Events->wait(evtEndMove);
 
-    
-    
     ROBOT_POS->print();
     MOVE->stop();
-
+    Log->emergencyStopPressed(true);
     sleep(5);
     return;
 }

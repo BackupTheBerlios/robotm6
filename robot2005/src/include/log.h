@@ -127,8 +127,15 @@ typedef struct LogPacketMotorInfo {
 
 typedef struct LogPacketLcd {
     char txt[35];
-    LogPacketLcd(const char* msg) { strncpy(txt,msg,34); txt[34]=0; }
-    LogPacketLcd(LogPacketLcd const& l2) { strcpy(txt, l2.txt); }
+    LogPacketLcd(const char* msg) {
+        if (strlen(msg)>0) strncpy(txt,msg,34); 
+        else txt[0] = 0;
+        txt[34]=0; 
+    }
+    LogPacketLcd(LogPacketLcd const& l2) { 
+        if (strlen(l2.txt)>0) strcpy(txt, l2.txt); 
+        else txt[0] = 0;
+    }
 } LogPacketLcd;
 
 typedef struct LogPacketBoolean {

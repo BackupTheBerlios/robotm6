@@ -36,7 +36,7 @@ static const char* COLOR_FUNCTION = "CC00FF";
 static const char* COLOR_INFO     = "55AAFF";
 static const char* COLOR_START    = "FFFF00";
 static const char* COLOR_HLI      = "CCFFFF";
-static const char* COLOR_LCD      = "CCFFCC";
+static const char* COLOR_LCD      = "0000FF";
 static const char* COLOR_PERIODIC = "FF00FF";
 
 // ---------------------------------------------------------------------------
@@ -541,7 +541,7 @@ void packetToHtml(FILE* htmlFile,
             htmlLine(htmlFile,
                      packetHeader.timeStamp-packetTime,
                      packetHeader.timeStamp-packetTimeFromStartMatch,
-                     COLOR_HLI, // type color
+                     COLOR_START, // type color
                      "HLI",
                      "_",
                      0, 
@@ -553,7 +553,7 @@ void packetToHtml(FILE* htmlFile,
             htmlLine(htmlFile,
                      packetHeader.timeStamp-packetTime,
                      packetHeader.timeStamp-packetTimeFromStartMatch,
-                     COLOR_HLI, // type color
+                     COLOR_START, // type color
                      "HLI",
                      "_",
                      0, 
@@ -567,9 +567,9 @@ void packetToHtml(FILE* htmlFile,
                      packetHeader.timeStamp-packetTimeFromStartMatch,
                      COLOR_LCD, // type color
                      "LCD",
-                     "_",
+                     "lcd.cpp",
                      0, 
-                     lcd->txt);
+                     strlen(lcd->txt)>0?lcd->txt:"<i>lcdClear()</i>");
         }
     default:
         break;		

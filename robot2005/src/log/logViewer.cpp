@@ -230,6 +230,154 @@ bool restorePacket(File*            file,
     return true;
 }
 
+// -------------------------------------------------------------------------
+// Config
+// -------------------------------------------------------------------------
+
+char logFilenames_[1250];
+static char *const logFilename_[VIEWER_MAX_ROBOT_NBR]= {
+    logFilenames_,
+    logFilenames_+250,
+    logFilenames_+500,
+    logFilenames_+750
+};
+static char *const logConfigFilename_=logFilenames_+1000;
+
+// ---------------------------------------------------------------------------
+// parseArgs
+// ---------------------------------------------------------------------------
+bool parseArgs(int argc, char*argv[])
+{
+    if (argc<2) {
+        printf("Usage: %s logFileName1 (logFileName2)  (logFileName1) (logFileName2) "
+               "(-c=configFileName)\n", argv[0]);
+        return false;
+    }
+    logConfigFilename_[0]=0;
+    int i=0;
+    for(i=0; i<VIEWER_MAX_ROBOT_NBR; i++) {
+        logFilename_[i][0] = 0;
+    }
+    for(i=0; i<VIEWER_MAX_ROBOT_NBR+1 && nbrLogs_<VIEWER_MAX_ROBOT_NBR ; i++) {
+        if (argc<i+2) break;
+        if (strncmp(argv[i+1], "-c=", 3) == 0) {
+            strcpy(logConfigFilename_, (argv[i+1]+3)); 
+        } else {
+            strcpy(logFilename_[nbrLogs_++], (argv[i+1])); 
+        }
+    }
+    return true;
+}
+
+// ---------------------------------------------------------------------------
+// createSkittlePacket
+// ---------------------------------------------------------------------------
+Skittle logSkittles_[QUILLE_NBR];
+void createSkittlePacket(Skittle* skittles,
+                         Point center, 
+                         Millimeter altitude, 
+                         bool four,
+                         bool red)
+{
+    if (four) {
+	skittles[3].center = center;
+	skittles[3].altitude = altitude+QUILLE_HAUTEUR;
+	skittles[3].status=SKITTLE_UP;
+        skittles[3].color = red?COLOR_RED:COLOR_GREEN;
+    }
+    Radian deltaTheta = robotRand(0,10)*M_PI/5.;
+    for(int i=0;i<3;i++) {
+	skittles[i].center.x = center.x+40*cos(i*2.*M_PI/3.+deltaTheta);
+	skittles[i].center.y = center.y+40*sin(i*2.*M_PI/3.+deltaTheta);
+	skittles[i].altitude = altitude;
+	skittles[i].color = red?COLOR_RED:COLOR_GREEN;
+	skittles[i].status=SKITTLE_UP;
+    }
+}
+
+// ---------------------------------------------------------------------------
+// loadConfigFile
+// ---------------------------------------------------------------------------
+void loadConfigFile(const char* filename)
+{
+    if (!filename) return;
+    FILE* fptr=fopen(filename, "r");
+    if (!fptr) return;
+    char c;
+    while((c=fgetc(fptr)) != EOF) {
+        switch(c) {
+        case 'b':
+        case 'B':
+        case 'p':
+        case 'P':
+            while((c=fgetc(fptr)) != EOF && c !='=' && c !='\n');
+            if (c == EOF || c =='\n') {
+                LOG_ERROR("ConfigFile: invalid bridge (\"pont=1\")\n");
+                continue;
+            }
+            c=fgetc(fptr);
+            if (c>='0' && c < '5') {
+                Viewer3D->setBridgePosition((BridgePosition)(c-'0'));
+                LOG_INFO("ConfigFile: bridge=%d\n", (c-'0'));
+            } else {
+                LOG_ERROR("ConfigFile: invalid bridge id=%d (\"pont:1\")\n", (c-'0'));
+            }
+            break;
+        case 's':
+            {
+                int x1=0, y1=0, x2=0, y2=0;
+                if (fscanf(fptr,"upport=(%d,%d) (%d,%d)\n", &x1, &y1, &x2, &y2) != 4) {
+                    LOG_ERROR("ConfigFile: invalid support definition \"support=(0,0)(1,2)\"\n");
+                    continue;
+                }
+                Point pt1(150+x1*300, 150+y1*300);
+                Point pt2(150+x2*300, 150+y2*300);
+                Viewer3D->setSupportPosition(pt1, pt2);
+                createSkittlePacket(logSkittles_, pt1, 
+                                    TERRAIN_SUPPORT_QUILLE_HAUTEUR, true, true);
+                createSkittlePacket(logSkittles_+4, pt2, 
+                                    TERRAIN_SUPPORT_QUILLE_HAUTEUR, true, true);
+                createSkittlePacket(logSkittles_+8, Point(TERRAIN_X, TERRAIN_Y) - pt1, 
+                                    TERRAIN_SUPPORT_QUILLE_HAUTEUR, true, false);
+                createSkittlePacket(logSkittles_+12, Point(TERRAIN_X, TERRAIN_Y) - pt2,
+                                    TERRAIN_SUPPORT_QUILLE_HAUTEUR, true, false);
+                LOG_INFO("ConfigFile: support (%d %d) (%d %d)\n",x1, y1, x2, y2); 
+            }
+            break;
+        case 'q':
+            {
+                int x1=0, y1=0;
+                if (fscanf(fptr,"uille=(%d,%d)", &x1, &y1) != 2) {
+                    LOG_ERROR("ConfigFile: invalid quille definition \"quille=(0,0)\"\n");
+                    continue;
+                }
+                Point pt1(150+x1*300, 150+y1*300);
+                createSkittlePacket(logSkittles_+16, pt1, 
+                                    TERRAIN_SUPPORT_QUILLE_HAUTEUR, true, true);
+                createSkittlePacket(logSkittles_+20, Point(TERRAIN_X, TERRAIN_Y) - pt1, 
+                                    TERRAIN_SUPPORT_QUILLE_HAUTEUR, true, false);
+                LOG_INFO("ConfigFile: quille (%d %d)\n",x1, y1);
+            }
+            break;
+        case '\n':
+            continue;
+        case '/':   
+        default: 
+            while((c=fgetc(fptr)) != EOF && c !='\n');
+            continue;
+        }
+            
+    }
+    fclose(fptr);
+    Point pt1(1522, 1050-75);
+    createSkittlePacket(logSkittles_+24, pt1, 
+                        TERRAIN_SUPPORT_QUILLE_HAUTEUR, false, true);
+    createSkittlePacket(logSkittles_+27, Point(TERRAIN_X, TERRAIN_Y) - pt1, 
+                        TERRAIN_SUPPORT_QUILLE_HAUTEUR, false, false);
+    Viewer3D->setSkittlePosition(logSkittles_);
+    LOG_OK("ConfigFile loaded\n");
+}
+
 // ---------------------------------------------------------------------------
 // loadLog
 // ---------------------------------------------------------------------------
@@ -332,20 +480,19 @@ void loadLog(int id, const char* filename)
 // getNearestBefore
 // ---------------------------------------------------------------------------
 template<typename T>
-bool getNearestBefore(LogTime t, multimap<LogTime, T> data, T& result)
+bool getNearestBefore(LogTime t, multimap<LogTime, T> const& data, T& result)
 {
-    typename multimap<LogTime, T>::iterator it;
+    bool status = false;
+    typename multimap<LogTime, T>::const_iterator it;
     for(it=data.begin(); it!=data.end(); it++) {
 	if ((*it).first > t) {
-	    if ( it != data.begin()) {
-		return true;
-	    } else {
-		return false;
-	    }
-	}
-	result = (*it).second;
+            break;
+	} else {
+            result = (*it).second;
+            status = true;
+        }
     }
-    return false; 
+    return status; 
 }
 
 // ---------------------------------------------------------------------------
@@ -492,8 +639,8 @@ void getLcd(int robotId,
     if (!getNearestBefore(fromTime, data_[robotId].lcd, bv)) {
         txt[0]=0;
     } else {
-        strcpy(txt, bv.txt);
-        printf("lcd mesage found\n");
+        if (strlen(bv.txt)>0) strcpy(txt, bv.txt);
+        else txt[0]=0;
     }
 }
 
@@ -619,12 +766,14 @@ void btnPlay(ViewerControlButtonId btnId)
     } else {
 	Viewer3D->setBtnTexture(CTRL_BTN_PLAY, TEX_BTN_PLAY_0, TEX_BTN_PLAY_1);
     }
+    updateDisplay();
 }
 
 void btnBack(ViewerControlButtonId btnId)
 {
     play_=false;
     Viewer3D->reset();
+    if (strlen(logConfigFilename_)>0) loadConfigFile(logConfigFilename_);
     for(int id=0; id<nbrLogs_; id++)
         getPreviousMatchBegin(id, realTime_[id], realTime_[id]);
     if (realTime_[0] == 0) {
@@ -632,6 +781,7 @@ void btnBack(ViewerControlButtonId btnId)
         Viewer3D->setBtnEnable(CTRL_BTN_STEP_BACKWARD, false); 
     }
     Viewer3D->setBtnTexture(CTRL_BTN_PLAY, TEX_BTN_PLAY_0, TEX_BTN_PLAY_1);
+    updateDisplay();
 }
 
 void btnForward(ViewerControlButtonId btnId)
@@ -644,6 +794,7 @@ void btnForward(ViewerControlButtonId btnId)
         Viewer3D->setBtnEnable(CTRL_BTN_STEP_BACKWARD, true); 
     }
     Viewer3D->setBtnTexture(CTRL_BTN_PLAY, TEX_BTN_PLAY_0, TEX_BTN_PLAY_1);
+    updateDisplay();
 }
 
 void btnStepForward(ViewerControlButtonId btnId)
@@ -656,6 +807,7 @@ void btnStepForward(ViewerControlButtonId btnId)
         Viewer3D->setBtnEnable(CTRL_BTN_STEP_BACKWARD, true); 
     }
     Viewer3D->setBtnTexture(CTRL_BTN_PLAY, TEX_BTN_PLAY_0, TEX_BTN_PLAY_1);
+    updateDisplay();
 }
 
 void btnStepBackward(ViewerControlButtonId btnId)
@@ -670,6 +822,7 @@ void btnStepBackward(ViewerControlButtonId btnId)
         Viewer3D->setBtnEnable(CTRL_BTN_STEP_BACKWARD, false); 
     }
     Viewer3D->setBtnTexture(CTRL_BTN_PLAY, TEX_BTN_PLAY_0, TEX_BTN_PLAY_1);
+    updateDisplay();
 }
 
 void btnFaster(ViewerControlButtonId btnId)
@@ -680,6 +833,7 @@ void btnFaster(ViewerControlButtonId btnId)
         Viewer3D->setBtnEnable(CTRL_BTN_FASTER, false);
     }
     Viewer3D->setBtnEnable(CTRL_BTN_SLOWER, true);
+    updateDisplay();
 }
 
 void btnSlower(ViewerControlButtonId btnId)
@@ -690,6 +844,7 @@ void btnSlower(ViewerControlButtonId btnId)
         Viewer3D->setBtnEnable(CTRL_BTN_SLOWER, false);
     }
     Viewer3D->setBtnEnable(CTRL_BTN_FASTER, true);
+    updateDisplay();
 }
 
 
@@ -712,6 +867,7 @@ void btnRecordMovie(ViewerControlButtonId btnId)
 	filename[strlen(filename)-5]=0;
 	endSSMMFile(filename);
     }
+    updateDisplay();
 }
 
 extern void (*viewer3DDisplayCB)();
@@ -743,32 +899,13 @@ void displayCB()
 }
 
 
-bool parseArgs(int argc, char*argv[],  std::string** filename)
-{
-    if (argc<2) {
-        printf("Usage: %s logFileName1 (logFileName2)  (logFileName1) (logFileName2) "
-               "(-c=configFileName)\n", argv[0]);
-        return false;
-    }
-    for(int i=0; i<VIEWER_MAX_ROBOT_NBR+1; i++) {
-        if (argc<i+2) break;
-        if (strncmp(argv[i+1], "-c=", 3) == 0) {
-            *filename[VIEWER_MAX_ROBOT_NBR] = (argv[i+1]+3); 
-        } else {
-            *filename[nbrLogs_++] = (argv[i+1]); 
-        }
-    }
-    return true;
-}
-
 // ---------------------------------------------------------------------------
 // main
 // ---------------------------------------------------------------------------
 int main(int argc, char*argv[]) 
 {   
-    std::string* filenames = new std::string[VIEWER_MAX_ROBOT_NBR+1];
     nbrLogs_ = 0;
-    if (!parseArgs(argc, argv, &filenames)) {
+    if (!parseArgs(argc, argv)) {
         return -1;
     }
 
@@ -791,12 +928,13 @@ int main(int argc, char*argv[])
     // load logs
     for(int i=0; i < nbrLogs_; i++) {
         realTime_[i] = 0;
-        loadLog(i, filenames[i].c_str()); 
+        loadLog(i, logFilename_[i]); 
         Viewer3D->setRobotModel(i,
-                                filenames[i].c_str(),
+                                logFilename_[i],
                                 data_[i].model,
                                 false);
     }
+    if (strlen(logConfigFilename_)>0) loadConfigFile(logConfigFilename_);
     
     Viewer3D->registerBtnCallback(CTRL_BTN_PREVIOUS, btnBack);
     Viewer3D->registerBtnCallback(CTRL_BTN_STEP_BACKWARD, btnStepBackward);
@@ -811,21 +949,25 @@ int main(int argc, char*argv[])
     for(int i=0; i < nbrLogs_; i++) {
         getNextMatchBegin(i, realTime_[i], realTime_[i]);
     }
+    
+    updateDisplay();
+    
     while(1) {
 	sprintf(info_, "Speed x%.1f ", (float)playSpeed_);
 	if (record_) strcat(info_, "Recording... ");
 	else strcat(info_, baseName_);
       
-	updateDisplay();
 	//   if (!record) {
 	// quand on fait une video c'est deja assez lent, pas 
 	// besoin de s'arreter un peu plus...
 	usleep(50000);
 
 	if (play_) {
+            updateDisplay();
 	    if (!record_) {
+                LogTime dt=(LogTime)(playSpeed_*realTimeDeltaT());
 		for(int i=0; i < nbrLogs_; i++) {
-                    realTime_[i]+=(LogTime)(playSpeed_*realTimeDeltaT());
+                    realTime_[i] += dt;
                 }
 	    } else {
 		// ca c'est fait par le displayCallBack

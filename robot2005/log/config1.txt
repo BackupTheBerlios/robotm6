@@ -1,0 +1,6 @@
+// position du pont:1=pres du bord, 4=pres du milieu
+pont=1
+// position des quilles en ombre de case (on commence à 0)
+support=(1,1) (2,3)
+// position du tas de quilles suplementaire
+quille=(4,1)
