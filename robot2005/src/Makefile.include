@@ -76,7 +76,7 @@ export DEFAULT_INC_DIR
 
 ALL_STATIC_LIB=
 
-ALL_DYNAMIC_LIB= -lsimulator -llog -ltools -lm -lpthread -lstdc++-3-libc6.2-2-2.10.0 -lz
+ALL_DYNAMIC_LIB= -lsimulator -llog -ltools -lm -lpthread -l$(LIB_STDCPP) -lz
 
 
 
