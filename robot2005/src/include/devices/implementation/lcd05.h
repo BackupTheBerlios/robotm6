@@ -15,11 +15,6 @@
 class IoDevice;
 
 
-/** 
- * @class Lcd_04
- * Implementation des fonctions de class Lcd dans le cas d'un afficheur lcd 
- * sur uart. Protocole de communication adapte a la carte 2003
- */
 class Lcd_05 : public LcdCL
 {
  public:
@@ -31,7 +26,7 @@ class Lcd_05 : public LcdCL
   /**
    * @brief Reset the lcd uart
    */
-  bool reset();
+  bool reset() { clear(); return true;}
 
   /**
    * @brief This function prints a message on the lcd (2x16). Use it like 
@@ -41,7 +36,7 @@ class Lcd_05 : public LcdCL
   /**
    * @brief This function erase the lcd screen
    */
-  void clear();;
+  void clear();
  private:
   IoDevice* device_;
 };

@@ -5,7 +5,7 @@ SRC_ROOT=../..
 ## ===========================================================================
 ODOMETER_SRCS=odometer_04.cpp
 MOTOR_SRCS=HCTLControl.cpp hct.cpp motorIsa_05.cpp
-LCD_SRCS=lcd_03.cpp
+LCD_SRCS=lcd_03.cpp lcd_05.cpp
 SOUND_SRCS=sound_05.cpp
 SERVO_SRCS=servo_05.cpp
 BUMPER_SRCS=bumper_05.cpp
