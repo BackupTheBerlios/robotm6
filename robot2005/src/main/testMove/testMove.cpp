@@ -15,6 +15,7 @@
 #include "robotPosition.h"
 #include "move.h"
 #include "movementManager.h"
+#include "strategyAttack.h"
 
 
 // ----------------------------------------------------------------------------
@@ -397,6 +398,7 @@ int main(int argc, char* argv[])
   StrategyCL*     strategy1=NULL;
   StrategyCL*     strategy2=NULL;
   StrategyCL*     strategy3=NULL;
+  StrategyCL*     strategyAttack=NULL;
 
 #ifndef SIMULATED
 #define SIMULATED false
@@ -417,15 +419,18 @@ LOG_INFO("SIMULATED\n");
   strategy1 = new TestMoveStrategy1CL(robotMain);
   strategy2 = new TestMoveStrategy2CL(robotMain);
   strategy3 = new TestMoveStrategy3CL(robotMain);
+  strategyAttack = new StrategyAttackCL(robotMain);
 
   //ClassConfig::find(CLASS_MOVE)->setVerboseLevel(VERBOSE_DEBUG);
   //// ICI ICI ICI => strategy2 = traverse le pont
-  robotMain->run(strategy2, argc, argv); // traverse le pont
+  //robotMain->run(strategy2, argc, argv); // traverse le pont
+  robotMain->run(strategyAttack, argc, argv); // traverse le pont
   //robotMain->run(strategy3, argc, argv); // blocage des roues
   //robotMain->run(strategy1, argc, argv); //deplacement fichier  test des deplacements
  
 
   while(1) {sleep(1);}
+  delete strategyAttack;
   delete strategy2;
   delete strategy1;
   delete robotMain;

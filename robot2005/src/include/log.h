@@ -46,6 +46,7 @@ static VerboseLevel verbose() {
 }
 #endif
 
+
 static const unsigned int LOG_FILE_LENGTH = 20;
 static const unsigned int LOG_MESG_LENGTH = 255;
 static const unsigned int LOG_DATA_MAX_LENGTH = 300;
@@ -334,12 +335,19 @@ typedef struct LogPacketTrajectory {
 // --------------------------------------------------------------------------
 // LOG_DEBUG
 // --------------------------------------------------------------------------
+#ifdef LOG_DEBUG_ON
+#define LOG_DEBUG(arg...) 	                                \
+    ::printf("[%15.15s:%4d] %sDebug:%s ", __FILE__, __LINE__,   \
+             KB_DEBUG, KB_RESTORE);                             \
+    ::printf(arg);                                            
+#else
 #define LOG_DEBUG(arg...) 	                                \
   if (verbose() >= VERBOSE_DEBUG) {                             \
     ::printf("[%15.15s:%4d] %sDebug:%s ", __FILE__, __LINE__,   \
              KB_DEBUG, KB_RESTORE);                             \
     ::printf(arg);                                              \
   }
+#endif
   
 #endif // solaris
 

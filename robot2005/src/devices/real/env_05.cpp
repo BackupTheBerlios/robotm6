@@ -2,6 +2,8 @@
 #include "io/ioDevice.h"
 #include "io/ioManager.h"
 #include "driver/envDetectorCom_05.h"
+
+//#define LOG_DEBUG_ON
 #include "log.h"
 
 EnvDetector05::EnvDetector05() : device_(NULL), data_(0)
@@ -56,7 +58,7 @@ bool EnvDetector05::getAllCaptors(unsigned char& data)
   }
   firstError = status;
   if (status) {
-    LOG_INFO("EnvDetector05::getAllCaptors : 0x%2.2x\n", data);
+    LOG_DEBUG("EnvDetector05::getAllCaptors : 0x%2.2x\n", data);
   }
   return false;
 }

@@ -1,5 +1,6 @@
 #include <signal.h>
 #include <stdio.h>
+#define LOG_DEBUG_ON
 #include "log.h"
 //#include "uart.h"
 #include "events.h"
@@ -28,7 +29,7 @@ namespace {
       left = data[1]+256*data[0];
       right  = data[3]+256*data[2];
 #if 1
-         printf("%d %d - %2x %2x %2x %2x\n", 
+      LOG_DEBUG("%d %d - %2x %2x %2x %2x\n", 
 	    (short)right, (short)left, data[0], data[1], data[2], data[3]);
 #endif
   }

@@ -4,6 +4,8 @@
 #include "driver/bumperCom_05.h"
 #include "bumperMapping.h"
 #include "events.h"
+
+//#define LOG_DEBUG_ON
 #include "log.h"
 
 /** @brief Constructeur */
@@ -131,7 +133,7 @@ bool Bumper05::getAllCaptors(unsigned char data[BUMPER_DATA_NBR])
   if (status) {
     // for debug only
     assert(2<BUMPER_DATA_NBR);
-    LOG_INFO("Bumper05: 0x%2.2x 0x%2.2x 0x%2.2x \n", data[0], data[1], data[2]);
+    LOG_DEBUG("Bumper05: 0x%2.2x 0x%2.2x 0x%2.2x \n", data[0], data[1], data[2]);
   }
   return status;
 }
