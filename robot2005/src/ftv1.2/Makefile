@@ -48,8 +48,8 @@ clean:
 	- $(MK) -C examples clean
 	- $(MK) -C test_dir clean
 	rm -f *~
-	rm ../../lib/libfthread.a
-	rm ../include/fthread.h
+	\rm -f ../../lib/libfthread.a
+	\rm -f ../include/fthread.h
 
 ###############################################
 # Tests
