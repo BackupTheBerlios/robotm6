@@ -69,7 +69,7 @@ static const Millisecond TIME_MATCH             = 87000;
 static const Millisecond TIME_ALERT_BEFORE_END  = 75000;
 static const Millisecond TIME_MARGIN            =  2000;
 static const Millisecond TIME_INFINITE          = -1;
-static const Millisecond TIME_NEVER             = TIME_NEVER;
+static const Millisecond TIME_NEVER             = -1;
 
 static const Millimeter TERRAIN_LARGEUR  = 2100; // Y
 static const Millimeter TERRAIN_LONGUEUR = 3644; // X

@@ -143,6 +143,7 @@ void RobotMainCL::menu(int argc,
 // -------------------------------------------------------------------------
 void RobotMainCL::startMatch()
 {
+    LOG_FUNCTION();
     timer_->startMatch();
     log_->startMatch();
 }

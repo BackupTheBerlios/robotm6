@@ -28,12 +28,12 @@ class TestMoveStrategy1CL : public StrategyCL
 
 void TestMoveStrategy1CL::run(int argc, char* argv[])
 {
-    ROBOT_POS->set(0,0,0);
+    ROBOT_POS->set(300,1000,0);
     waitStart(INIT_NONE);
     MOVE->enableAccelerationController(false);
     MVTMGR->enableAutomaticReset(false);
 
-    MOVE->go2Target(Point(1000, 0));
+    MOVE->go2Target(Point(1000, 1000));
     Events->wait(evtEndMove);
     ROBOT_POS->print();
     MOVE->stop();

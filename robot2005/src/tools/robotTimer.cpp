@@ -28,6 +28,8 @@ RobotTimerCL* RobotTimerCL::timer_=NULL;
 RobotTimerCL::RobotTimerCL() : 
   RobotComponent("Timer", CLASS_ROBOT_TIMER), time_(TIME_NEVER)
 {
+    assert(timer_ == NULL);
+    timer_=this;
     LOG_FUNCTION();
     no_op(repositoryLock3);
     tic(&chronometerTic);
@@ -75,6 +77,7 @@ Millisecond RobotTimerCL::time()
 // -------------------------------------------------------------------------
 void RobotTimerCL::startMatch()
 {
+    LOG_FUNCTION();
     tic(&chronometerTic);
     instance()->time_=0;
 }
@@ -104,13 +107,13 @@ void RobotTimerCL::registerTimerFunction(TimerFunction fn,
 					 void* userData,
 					 Millisecond time)
 {
+    LOG_INFO("Register Timer Callback %s\n", fnName);
     assert(time_<0);
     TimerRegisterFunction param;
     param.fn=fn;
     strncpy(param.fnName, fnName, TIMER_FUNCTION_NAME_LENGTH);
     param.userData=userData;
     callbacks_.push_back(std::pair<Millisecond, TimerRegisterFunction>(time, param));
-    LOG_INFO("Register Timer Callback %s\n", fnName);
 }
 
 // -------------------------------------------------------------------------
@@ -122,13 +125,13 @@ void RobotTimerCL::registerPeriodicFunction(TimerFunction fn,
 					    const char* fnName,
 					    void* userData)
 {
+    LOG_INFO("Register Periodic Function %s\n", fnName);
     assert(time_<0);
     TimerRegisterFunction param;
     param.fn=fn;
     strncpy(param.fnName, fnName, TIMER_FUNCTION_NAME_LENGTH);
     param.userData=userData;
     periodicTasks_.push_back(param);
-    LOG_INFO("Register Periodic Function %s\n", fnName);
 }
 
 // -------------------------------------------------------------------------

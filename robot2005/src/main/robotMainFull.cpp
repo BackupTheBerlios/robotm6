@@ -172,20 +172,11 @@ void RobotMainFullCL::run(StrategyCL* strategy,
                           int argc, 
                           char* argv[])
 {
-    
+    LOG_FUNCTION();
     timer_->registerTimerFunction(timerFunctionGameOver,
 				  "timerFunctionGameOver",
 				  this,
 				  TIME_MATCH);
-
-    //  Ce sont les strategies qui gerent seule le timer alert!
-
-    // enregistre la detection du Ctrl+C et du callback correspondant qui 
-    // stoppe le programme immediatement
-    // TODO: isn't this already done in the constructor? [flo]
-    Events->registerCallback(EVENTS_USER_ABORT, this, 
-			     robotMainFullUserAbortCB, 
-			     "robotMainFullUserAbortCB");
     LCD->setLed(LCD_LED_RED, LCD_LED_OFF);
     LCD->setLed(LCD_LED_GREEN, LCD_LED_OFF);
     RobotMainCL::run(strategy, argc, argv);
