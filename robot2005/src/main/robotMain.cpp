@@ -102,7 +102,8 @@ RobotMainCL::RobotMainCL() :
     devices_->allocDevices();
     mvtMgr_   = new MovementManagerCL(devices_->getMotor(), devices_->getOdometer());
 
-    RString::bPrintfInit(); // enable printf(%b)
+    // Gumstix doesn't support %b, and we don't use it anyway [flo]
+    //RString::bPrintfInit(); // enable printf(%b)
     LOG_WARNING("Program was compiled on %s at %s by %s in %s on %s\n", 
                 __COMPILE_DATE__, __COMPILE_TIME__, 
 		__COMPILE_USER__, __COMPILE_DIR__,

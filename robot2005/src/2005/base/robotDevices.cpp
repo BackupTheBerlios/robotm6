@@ -14,7 +14,9 @@
 
 #include "implementation/odometer04.h" // 2004
 #include "implementation/odometer05.h"
+#ifndef GUMSTIX
 #include "implementation/motorIsa.h" // 2004
+#endif
 #include "implementation/motor05.h"
 #include "implementation/motorOdom05.h"
 #include "implementation/lcd05.h"
@@ -117,9 +119,12 @@ void RobotDevicesCL::allocMotor()
         if (RobotConfig2005->motorSimu) {
             motor_ = new MotorSimu(RobotConfig->automaticMotorReset);
         } else {
+#ifndef GUMSTIX
             if (RobotConfig->isMotorISA) {
                 motor_ = new MotorIsa(RobotConfig->automaticMotorReset);
-            } else {
+            } else
+#endif
+	    {
                 if (motorOdom_ != NULL) {
                     motor_ = new Motor05(motorOdom_);
                 } else {

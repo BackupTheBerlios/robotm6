@@ -16,7 +16,15 @@ USE_GCC33=1
 
 #ifdef USE_GCC33
 
+ifdef GUMSTIX
+GUMSTIX_HOME = $(SRC_ROOT)/../../gumstix-buildroot
+endif
+
+ifdef GUMSTIX
+CC=$(GUMSTIX_HOME)/build_arm/staging_dir/bin-ccache/arm-linux-g++
+else
 CC=gcc-3.4
+endif
 RM=rm
 AR=ar
 LD=${CC}
@@ -35,8 +43,13 @@ LIB_STDCPP=stdc++
 ## FLAGS 
 ## ===========================================================================
 MAKEFLAGS=
-DEFAULT_LD_FLAGS=-shared -o 
+ifdef GUMSTIX
+DEFAULT_LD_FLAGS=-shared -o
+DEFAULT_CFLAGS= -O2 -g -Wall -Dlinux -DGUMSTIX -fsigned-char
+else
+DEFAULT_LD_FLAGS=-shared -o
 DEFAULT_CFLAGS= -O2 -g -Wall -Dlinux
+endif
 DEFAULT_AR_FLAGS=-r
 
 #DEFAULT_LD_FLAGS=-z nodefs -o  
@@ -49,22 +62,28 @@ DEFAULT_AR_FLAGS=-r
 SRC_DIR=${SRC_ROOT}
 export SRC_DIR
 
-STATIC_LIB_DIR=${SRC_ROOT}/../lib
+ifdef GUMSTIX
+OUT_DIR = $(SRC_ROOT)/../gumstix
+else
+OUT_DIR = $(SRC_ROOT)/..
+endif
+
+STATIC_LIB_DIR=${OUT_DIR}/lib
 export STATIC_LIB_DIR
 
-DYNAMIC_LIB_DIR=${SRC_ROOT}/../so
+DYNAMIC_LIB_DIR=${OUT_DIR}/so
 export DYNAMIC_LIB_DIR
 
-MODULES_DIR=${SRC_ROOT}/../modules
+MODULES_DIR=${OUT_DIR}/modules
 export MODULES_DIR
 
-BIN_DIR=${SRC_ROOT}/../bin
+BIN_DIR=${OUT_DIR}/bin
 export BIN_DIR
 
-BIN_SIMU_DIR=${SRC_ROOT}/../binsimu
+BIN_SIMU_DIR=${OUT_DIR}/binsimu
 export BIN_SIMU_DIR
 
-VALIDATE_DIR=${SRC_ROOT}/../validate
+VALIDATE_DIR=${OUT_DIR}/validate
 export VALIDATE_DIR
 
 DEFAULT_INC_DIR=-I$(SRC_ROOT)/include -I$(SRC_ROOT)/include/driver -I$(SRC_ROOT)/include/strategy -I$(SRC_ROOT)/2005/include -I$(SRC_ROOT)/include/devices -I.
@@ -211,6 +230,7 @@ default_depend_dirs :
                   $(wildcard */Makefile),                            \
                   $(MAKE) -C `dirname $(dir)` depend;  )
 
+# TODO: do we really need the /usr/include/g++-3 here?? [flo]
 depend: default_depend_dirs
 	${CC} -MM ${INC_DIR} ${DEFAULT_INC_DIR} -I/usr/include/g++-3 \
               ${CFLAGS} ${DEFAULT_CFLAGS} ${SRCS} > .depend 

@@ -6,8 +6,9 @@ SRC_ROOT=..
 ## For standard directory you only need to set these values
 ## ===========================================================================
 LIB_NAME=libtools
-OBJS=robotCommon.o geometry2D.o mthread.o robotFThread.o robotString.o \
+OBJS=robotCommon.o geometry2D.o mthread.o robotString.o \
      robotTimer.o shm.o network.o image.o
+#robotFThread.o
 
 ## ===========================================================================
 ## Source files used to generate dependencies
@@ -36,8 +37,8 @@ all: lib bin validate
 ## Main rules : ----- CLEAN -----
 ## ===========================================================================
 clean:	default_clean
-	${RM} -f  ${VALIDATE_DIR}/geometry2D
-	${RM} -f  ${STATIC_LIB_DIR}/${LIB_NAME}.a        \
+	-${RM} -f  ${VALIDATE_DIR}/geometry2D
+	-${RM} -f  ${STATIC_LIB_DIR}/${LIB_NAME}.a        \
                   ${DYNAMIC_LIB_DIR}/${LIB_NAME}.so  
 
 ## ===========================================================================

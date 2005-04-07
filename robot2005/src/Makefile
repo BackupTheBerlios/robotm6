@@ -1,6 +1,7 @@
 SRC_ROOT=.
 ## list of directories to compile and their orders
-COMPILE_DIR_ORDER=ftv1.2 log tools soundPlayer viewer3D simulator move events io main 2005 devices
+
+COMPILE_DIR_ORDER=log tools soundPlayer viewer3D simulator move events io main 2005 devices #ftv1.2 
 #modules
 
 SRCS=*.cpp
@@ -12,7 +13,12 @@ include $(SRC_ROOT)/Makefile.include
 ## ===========================================================================
 ## Complety recreate the project: Create all libs and binaries
 ## ===========================================================================
+# HACK: should be able to do depend even for gumstix.
+ifdef GUMSTIX
+all: clean fast
+else 
 all: clean depend fast
+endif
 
 ## ===========================================================================
 ## Create all libs and binaries

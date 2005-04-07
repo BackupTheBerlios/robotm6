@@ -4,7 +4,11 @@ SRC_ROOT=../..
 ## Source files used to generate dependencies
 ## ===========================================================================
 ODOMETER_SRCS=odometer_04.cpp odometer_05.cpp
+ifdef GUMSTIX
+MOTOR_SRCS=motorOdom_05.cpp motor_05.cpp
+else
 MOTOR_SRCS=HCTLControl.cpp hct.cpp motorIsa_05.cpp motorOdom_05.cpp motor_05.cpp
+endif
 LCD_SRCS=lcd_03.cpp lcd_05.cpp
 SOUND_SRCS=sound_05.cpp
 SERVO_SRCS=servo_05.cpp
@@ -88,7 +92,11 @@ lib: $(STATIC_LIB_DIR)/${LIB_NAME}.a ${DYNAMIC_LIB_DIR}/${LIB_NAME}.so
 ## Main rules : ----- BIN -----
 ## ===========================================================================
 #bin: ${BIN_DIR}/${BIN_NAME}
+ifdef GUMSTIX
+bin: ${BIN_DIR}/testServo ${BIN_DIR}/testBumper ${BIN_DIR}/testEnv ${BIN_DIR}/telecommand05 ${BIN_DIR}/lcdPrint05 ${BIN_DIR}/testLcd ${BIN_DIR}/getButton05 ${BIN_DIR}/testCrane ${BIN_DIR}/testTesla ${BIN_DIR}/testSkittle 
+else
 bin: ${BIN_DIR}/testServo ${BIN_DIR}/testBumper ${BIN_DIR}/testEnv ${BIN_DIR}/telecommandIsa ${BIN_DIR}/telecommand05 ${BIN_DIR}/lcdPrint05 ${BIN_DIR}/testLcd ${BIN_DIR}/getButton05 ${BIN_DIR}/testCrane ${BIN_DIR}/testTesla ${BIN_DIR}/testSkittle 
+endif
 ## ===========================================================================
 ## Main rules : ----- VALIDATE -----
 ## ===========================================================================
