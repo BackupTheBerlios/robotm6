@@ -55,9 +55,6 @@ class StrategyAttackCL : public Strategy2005CL
     bool getBridgePosByBumper(bool& bridgeInFront);
     /** @brief traverse le pont : detection de collisions...*/
     bool crossBridge();
-    /** @brief va jusq'a l'aute pont et change l'etat de la variable
-        useLeftBridge_ */
-    bool gotoOtherBridge(); 
     unsigned char getBridgeBit();
     unsigned char getPosBit();
     bool hasCrossedBridge();
@@ -69,7 +66,7 @@ class StrategyAttackCL : public Strategy2005CL
     bool getBridgePosBySharpFromCenter(BridgeCaptorStatus captors[BRIDGE_CAPTORS_NBR]);
     bool getBridgeCaptors(BridgeCaptorStatus captors[BRIDGE_CAPTORS_NBR],
                           bool checkSharps);
-
+    void noBridgeHere();
  private:
     /** mask qui dit ou le peut etre (4 possibilites a tester) quand il n'y est
         pas on passe le bit a 0 */
@@ -82,9 +79,9 @@ class StrategyAttackCL : public Strategy2005CL
 
     
 };
-
+static const Millimeter BRIDGE_ENTRY_NAVIGATE_X = 1200;
 static const Millimeter BRIDGE_DETECT_SHARP_X = 1300;
-static const Millimeter BRIDGE_DETECT_BUMP_X  = 1470;
+static const Millimeter BRIDGE_DETECT_BUMP_X  = 1400;
 static const Millimeter BRIDGE_CROSS_BRIDGE_X  = 2200;
 static const Millimeter BRIDGE_CROSS_BRIDGE_X_MARGIN  = 50;
 

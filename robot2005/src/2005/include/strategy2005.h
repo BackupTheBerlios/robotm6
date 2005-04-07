@@ -50,7 +50,7 @@ class Strategy2005CL : public StrategyCL
      * au menu  \n
      * endEvt=true si l'evenement a ete catche
      */
-    virtual bool checkEvents(bool &endEvt);
+    virtual bool checkEndEvents();
     /**
      * @brief Gere les collisions 
      */

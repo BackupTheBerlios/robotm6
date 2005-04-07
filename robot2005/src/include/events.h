@@ -270,7 +270,7 @@ class EventsManagerCL : public RobotComponent
     virtual void waitNot(EventsFn evtFn)=0;
 
     /** @brief Retourne TRUE si l'evenement a permis de sortir du dernier wait
-	ou waitNot. Utilie pour savoir quels evenement on declenché 
+	ou waitNot. Utile pour savoir quels evenement on declenché 
 	l'EventsFunction. A utiliser de preference au check */
     bool isInWaitResult(EventsEnum evt);
 

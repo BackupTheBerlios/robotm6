@@ -31,13 +31,15 @@ void StrategyAttackCL::run(int argc, char* argv[])
 
     // va vers le pont, le cherche et le traverse
     gotoBridgeDetection();
+    if (checkEndEvents()) return; // fin du match
     if (!getBridgePosBySharp()) {
         // les sharps ne marchent pas, on va tout droit pour voir...
         getNearestBridgeEntry();
 
     }
     findAndCrossBridge();
-    
+    if (checkEndEvents()) return; // fin du match
+
     return;
 }
 

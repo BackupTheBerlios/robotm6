@@ -152,32 +152,30 @@ bool Strategy2005CL::timerAlert()
 }
 
 // ----------------------------------------------------------------------------
-// Strategy2005CL::checkEvents
+// Strategy2005CL::checkEndEvents
 // ----------------------------------------------------------------------------
 // Execute les commandes en cas d'arret d'urgence, de fin de match
 // Retourne false si la strategy est terminee et qu'il faut retourner au menu
 // endEvt=true si l'evenement a ete catche
 // ----------------------------------------------------------------------------
-bool Strategy2005CL::checkEvents(bool &endEvt)
+bool Strategy2005CL::checkEndEvents()
 {
-    endEvt = true;
     if (Events->isInWaitResult(EVENTS_EMERGENCY_STOP)
 	|| Events->check(EVENTS_EMERGENCY_STOP)) {
         emergencyStop();
-        return false;
+        return true;
     } else if (Events->isInWaitResult(EVENTS_GAME_OVER)
 	       || Events->check(EVENTS_GAME_OVER)) {
         gameOver();
-        return false;
+        return true;
     } else if (Events->isInWaitResult(EVENTS_TIMER_ALERT)
 	       || Events->check(EVENTS_TIMER_ALERT)) {
         return timerAlert();
     } else if (Events->isInWaitResult(EVENTS_USER_ABORT)
 	       || Events->check(EVENTS_USER_ABORT)) {
-        return false;
+        return true;
     }
-    endEvt = false;
-    return true;
+    return false;
 }
 
 // ----------------------------------------------------------------------------
@@ -203,8 +201,10 @@ bool evtEndMoveNoCollision(bool evt[])
 // ----------------------------------------------------------------------------
 bool evtEndMoveCollision(bool evt[])
 {
-    return evtEndMove(evt);
+    return evtEndMove(evt)
+        || evt[EVENTS_GROUP_BUMPER];
 }
+
 // ----------------------------------------------------------------------------
 // Cette fonction est un EventsFn qui permet d'attendre la fin d'un 
 // mouvement en testant en plus les collisions basees sur les bumper
@@ -212,7 +212,6 @@ bool evtEndMoveCollision(bool evt[])
 bool evtEndMove(bool evt[])
 {
     return evtEndMoveNoCollision(evt)
-        || evt[EVENTS_GROUP_BUMPER]
 	|| evt[EVENTS_PWM_ALERT_LEFT]
 	|| evt[EVENTS_PWM_ALERT_RIGHT];
 }
