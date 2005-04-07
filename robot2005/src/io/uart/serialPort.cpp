@@ -318,6 +318,8 @@ const IoDeviceScanInfoPairVector& SerialPort::scan() {
     }
 
     SerialDevice* device = static_cast<SerialDevice*>(device_[0]);
+    SerialSpeed originalSpeed = device->getSpeed();
+    bool answered = false;
     for (unsigned int i = 0; i < nbSpeeds; ++i) {
 	device->setSpeed(scanSpeeds[i]);
 	LOG_INFO("Scanning device tty %d at speed %d\n", device->getTtyNbr(), scanSpeeds[i]);
@@ -327,8 +329,10 @@ const IoDeviceScanInfoPairVector& SerialPort::scan() {
 	    info.device = device;
 	    info.scanInfo = scanAnswer;
 	    scannedDevice_.push_back(info);
+	    answered = true;
 	    break; // don't continue scanning at other speeds.
 	}
     }
+    if (!answered) device->setSpeed(originalSpeed);
     return scannedDevice_;
 }
