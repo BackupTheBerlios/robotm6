@@ -17,6 +17,7 @@ class BumperSimu: public BumperCL {
   BumperSimu();
 
   bool exists() const { return true; }
+  bool reset() { first_=true; return true; }
   
   bool getBridgeCaptors(BridgeCaptorStatus captors[BRIDGE_CAPTORS_NBR]);
   bool getEmergencyStop(bool& emergencyStop);
@@ -31,6 +32,12 @@ class BumperSimu: public BumperCL {
 
  private:
   unsigned char data_[3];
+  bool oldJack_;
+  bool oldEmergency_;
+  bool oldBtnYes_;
+  bool oldBtnNo_;
+  bool first_;
+  BridgeCaptorStatus oldBridge_[2];
 };
 
 #endif // __BUMPER_SIMU_H__

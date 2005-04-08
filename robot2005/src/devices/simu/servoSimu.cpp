@@ -1,7 +1,10 @@
 #include "devices/implementation/servoSimu.h"
 #include "simulatorClient.h"
+#include "log.h"
 
-ServoSimu::ServoSimu() {}
+ServoSimu::ServoSimu() {
+    LOG_FUNCTION();
+}
 
 
 /** @brief envoie le servo a un position donnee et l'asservi */

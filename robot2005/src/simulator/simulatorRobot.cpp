@@ -413,8 +413,8 @@ void SimulatorRobot::setBorderRobotAttack()
     // points en coordonnees relatives 
     wheelPts_[0] = Point(0, 160);
     wheelPts_[1] = Point(0, -160);
-    wheelPts_[2] = Point(90, 140);
-    wheelPts_[3] = Point(90, -140);
+    wheelPts_[2] = Point(80, 140);
+    wheelPts_[3] = Point(80, -140);
     
     borderPts_[0] = Point(110, 175);
     borderPts_[1] = Point(-50, 175);

@@ -88,12 +88,19 @@ RobotDevicesCL::~RobotDevicesCL()
 void RobotDevicesCL::allocDevices()
 {
     LOG_FUNCTION();
-    //TODO split alloc function
-//    IoManager->submitIoHost(new SerialPort(0, false));
+    IoManager->submitIoHost(new SerialPort(0, false));
     // TODO: keep reference for later deletion of serialPort
     IoManager->submitIoHost(new SerialPort(1, false));
 
     allocMotorOdom();
+    allocLcd();
+    allocSound();
+    allocBumper();
+    allocEnv();
+    allocServo();
+    allocCrane();
+    allocSkittle();
+    allocTesla();
 }
 
 void RobotDevicesCL::allocMotorOdom()
@@ -103,14 +110,6 @@ void RobotDevicesCL::allocMotorOdom()
     }
     allocMotor();
     allocOdometer();
-    allocLcd();
-    allocSound();
-    allocBumper();
-    allocEnv();
-    allocServo();
-    allocCrane();
-    allocSkittle();
-    allocTesla();
 }
 
 void RobotDevicesCL::allocMotor()
@@ -324,15 +323,15 @@ void RobotDevicesCL::periodicTask()
 
 void RobotDevicesCL::startWatching(RobotDeviceCL* device)
 {
-  Lock localLock(&repositoryLock);
-  watchedDevices_.insert(device);
+    Lock localLock(&repositoryLock);
+    watchedDevices_.insert(device);
 }
 
 void RobotDevicesCL::stopWatching(RobotDeviceCL* device)
 {
-  Lock localLock(&repositoryLock);
-  RobotDevicesSet::iterator it = watchedDevices_.find(device);
-  if (it != watchedDevices_.end()) {
-    watchedDevices_.erase(it);
-  }
+    Lock localLock(&repositoryLock);
+    RobotDevicesSet::iterator it = watchedDevices_.find(device);
+    if (it != watchedDevices_.end()) {
+        watchedDevices_.erase(it);
+    }
 }

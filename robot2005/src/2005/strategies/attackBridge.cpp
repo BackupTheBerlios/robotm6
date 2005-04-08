@@ -23,7 +23,7 @@ bool StrategyAttackCL::findAndCrossBridge()
 { 
     while (true) {   
         if (gotoBridgeEntry()) {
-            if (crossBridge() && hasCrossedBridge()) {
+            if (crossBridge()) {
                 Events->disable(EVENTS_NO_BRIDGE_BUMP_LEFT);
                 Events->disable(EVENTS_NO_BRIDGE_BUMP_RIGHT);
                 return true;
@@ -111,25 +111,8 @@ void StrategyAttackCL::getNearestBridgeEntry()
                 LOG_ERROR("On n'aurait jamais du passer la!, char* y sait pas coder!\n");
             }
     }
-    LOG_INFO("Nearest bridge to try: %s\n", BridgePosTxt(bridge_));
+    LOG_INFO("Nearest bridge to try: %s Availibility:0x%2.2x\n", BridgePosTxt(bridge_), bridgeAvailibility_);
     Log->bridge(bridge_);
-}
-
-// renvoie le bit correspondant a la valeur actuelle de bridge_
-unsigned char StrategyAttackCL::getBridgeBit()
-{
-    switch(bridge_) {
-    case BRIDGE_POS_CENTER:
-        return 3;
-    case BRIDGE_POS_MIDDLE_CENTER:
-        return 2;
-    case BRIDGE_POS_MIDDLE_BORDURE:
-        return 1;
-    case BRIDGE_POS_BORDURE:
-        return 0;
-    default:
-        return 4;
-    }
 }
 
 // renvoie le bit du pont en face duquel on est le plus proche
@@ -164,23 +147,10 @@ unsigned char StrategyAttackCL::getPosBit()
 void StrategyAttackCL::noBridgeHere()
 {
     bridgeAvailibility_ &= (~(1<<getPosBit()));
-}
-
-bool StrategyAttackCL::hasCrossedBridge()
-{
-    if (RobotPos->x() > BRIDGE_CROSS_BRIDGE_X - BRIDGE_CROSS_BRIDGE_X_MARGIN) 
-        // on a traverse!!!!!!! Incroyable dixit char*
-        return true;
-    else if (RobotPos->x() > 1500) {
-        // on est bloque au milieu du pont, on passe par l'autre pont
-        LOG_INFO("Je suis coince au milieu du pont... j'essaye de passer par l'aute pont!\n");
-        useLeftBridge_ = !useLeftBridge_;
-    } else {
-        // le pont n'est pas la, on desactive cette position
-        // si on n'etait pas bien en face on n'a pas pu traverser
-        // bridgeAvailibility_ &= (~(1<<getBridgeBit()));
+    if (bridgeDetectionByCenter_ && getPosBit() >= 2) {
+        bridgeAvailibility_ &= 0x03;
     }
-    return false;
+    bridgeDetectionByCenter_ = false; 
 }
 
 // ================ Detection et traversee du pont ==================
@@ -353,8 +323,6 @@ bool StrategyAttackCL::gotoBridgeEntry(Millimeter y,
         LOG_INFO("gotoBridgeEntry Easy:%d\n", (int)y);
         MvtMgr->setRobotDirection(MOVE_DIRECTION_FORWARD);
         Move->go2Target(Point(BRIDGE_DETECT_BUMP_X, y));
-        Events->wait(evtEndMoveBridge);
-
     } else {
         LOG_INFO("gotoBridgeEntry Hard:%d\n", (int)y);
         // se debrouile pour que le robot ne fasse pas un demi tour sur lui meme
@@ -371,7 +339,6 @@ bool StrategyAttackCL::gotoBridgeEntry(Millimeter y,
         Events->disable(EVENTS_NO_BRIDGE_BUMP_RIGHT);
         // on s'eloigne un peu du bord, pour aller en x qui nous permet
         //de nous promener tranquillement le long de la riviere
-        MvtMgr->setRobotDirection(MOVE_DIRECTION_FORWARD);
         Move->go2Target(BRIDGE_ENTRY_NAVIGATE_X, RobotPos->y());
         Events->wait(evtEndMove);
         if (checkEndEvents()) return false;
@@ -383,16 +350,18 @@ bool StrategyAttackCL::gotoBridgeEntry(Millimeter y,
         Trajectory t;
         t.push_back(Point(BRIDGE_ENTRY_NAVIGATE_X, y));
         t.push_back(Point(BRIDGE_DETECT_BUMP_X, y));
+        MvtMgr->setRobotDirection(MOVE_DIRECTION_FORWARD);
         Move->followTrajectory(t);
-        
     }
     // utiliser les bumpers events pour savoir si on tombe dans un trou...
     Events->wait(evtEndMoveBridge);
     if (Events->isInWaitResult(EVENTS_NO_BRIDGE_BUMP_LEFT) ||
         Events->isInWaitResult(EVENTS_NO_BRIDGE_BUMP_RIGHT)) {
-        // le pont n'est pas la!
-        Move->stop();
+        // le pont n'est pas la! Faut vite s'arreter!
+        Move->emergencyStop();
         noBridgeHere();
+        Move->backward(100);
+        Events->wait(evtEndMoveNoCollision);
         return false;
     } 
     if (Events->isInWaitResult(EVENTS_MOVE_END)) return true;
@@ -487,8 +456,10 @@ bool StrategyAttackCL::crossBridge()
         if ((Events->isInWaitResult(EVENTS_NO_BRIDGE_BUMP_LEFT) ||
              Events->isInWaitResult(EVENTS_NO_BRIDGE_BUMP_RIGHT)) && RobotPos->x()<1500) {
             // le pont n'est pas la! c'est un trou!
-            Move->stop();
+            Move->emergencyStop();
             noBridgeHere();
+            Move->backward(100);
+            Events->wait(evtEndMoveNoCollision);
             return false;
         } 
         // on a reussi a traverser?

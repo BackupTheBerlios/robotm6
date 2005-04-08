@@ -1,6 +1,12 @@
 #include "simulatorClient.h"
 #include "network.h"
 #include "log.h"
+#include "mthread.h"
+
+namespace {
+    pthread_mutex_t repositoryLock = PTHREAD_MUTEX_INITIALIZER;
+    void no_op(...){};
+}
 
 static const unsigned int SIMU_HOST_NBR = 3;
 static const char* SIMU_HOSTS[SIMU_HOST_NBR] = { 
@@ -99,6 +105,7 @@ bool SimulatorClient::connectTryAllPorts(const char* hostName)
 // ----------------------------------------------------------------------------
 bool SimulatorClient::connectToServer(const char* hostName)
 {
+    Lock localLock(&repositoryLock);
     if (!socket_) socket_ = new Socket();
     if (connectTryAllPorts(hostName)) {
         return true;
@@ -125,6 +132,8 @@ void SimulatorClient::setRobotName(const char* name)
 {
     if (!socket_) return;
     if (!name) return;
+    Lock localLock(&repositoryLock);
+   
     char* buf = (char*)setBufferHeader(SIMU_REQ_SET_NAME,  strlen(name)+1);
     strcpy(buf, name);
     sendBuffer();
@@ -138,6 +147,7 @@ void SimulatorClient::setRobotName(const char* name)
 void SimulatorClient::setRobotPosition(Position const& pos) 
 {
     if (!socket_) return;
+    Lock localLock(&repositoryLock);
     char* buf = (char*)setBufferHeader(SIMU_REQ_SET_POS,  sizeof(Position));
     memcpy(buf, &pos, sizeof(Position));
     sendBuffer();
@@ -151,6 +161,7 @@ void SimulatorClient::setRobotPosition(Position const& pos)
 void SimulatorClient::setEstimatedRobotPosition(Position const& pos) 
 {
     if (!socket_) return;
+    Lock localLock(&repositoryLock);
     char* buf = (char*)setBufferHeader(SIMU_REQ_SET_ESTIMATED_POS,  sizeof(Position));
     memcpy(buf, &pos, sizeof(Position));
     sendBuffer();
@@ -166,6 +177,7 @@ void SimulatorClient::setEstimatedRobotPosition(Position const& pos)
 void SimulatorClient::setRobotWeight(SimuWeight weight)
 {
     if (!socket_) return;
+    Lock localLock(&repositoryLock);
     unsigned char* buf = setBufferHeader(SIMU_REQ_SET_WEIGHT,  1);
     buf[0] = (int)weight;
     sendBuffer();
@@ -182,6 +194,7 @@ void SimulatorClient::setRobotWeight(SimuWeight weight)
 void SimulatorClient::setRobotModel(RobotModel model)
 {
     if (!socket_) return;
+    Lock localLock(&repositoryLock);
     unsigned char* buf = setBufferHeader(SIMU_REQ_SET_MODEL,  1);
     buf[0] = (int)model;
     sendBuffer();
@@ -197,6 +210,7 @@ void SimulatorClient::setRobotMotorCoef(Millimeter D, Millimeter K,
                                         double speedL, double speedR)
 {
     if (!socket_) return;
+    Lock localLock(&repositoryLock);
     unsigned char* buf = setBufferHeader(SIMU_REQ_SET_MOTOR_COEF,  
                                          2*sizeof(Millimeter)
                                          +2*sizeof(double));
@@ -218,6 +232,7 @@ void SimulatorClient::setRobotOdomCoef(Millimeter D, Radian R, Millimeter K,
                                        double speedL, double speedR)
 {
     if (!socket_) return;
+    Lock localLock(&repositoryLock);
     unsigned char* buf = setBufferHeader(SIMU_REQ_SET_ODOM_COEF,  
                                          2*sizeof(Millimeter)
                                          +sizeof(Radian)
@@ -236,6 +251,7 @@ void SimulatorClient::setRobotOdomCoef(Millimeter D, Radian R, Millimeter K,
 void SimulatorClient::setModeBrick(bool brick)
 {
     if (!socket_) return;
+    Lock localLock(&repositoryLock);
     setBufferHeader(brick?SIMU_REQ_SET_BRICK:SIMU_REQ_SET_NORMAL, 0);
     sendBuffer();
 }
@@ -252,6 +268,7 @@ void SimulatorClient::setModeBrick(bool brick)
 SimuMatchStatus SimulatorClient::getMatchStatus()
 {
     if (!socket_) return SIMU_STATUS_NEED_RESET;
+    Lock localLock(&repositoryLock);
     setBufferHeader(SIMU_REQ_GET_STATUS, 0);
     sendBuffer();
 
@@ -268,6 +285,7 @@ SimuMatchStatus SimulatorClient::getMatchStatus()
 bool SimulatorClient::isJackin()
 {
     if (!socket_) return false;
+    Lock localLock(&repositoryLock);
     setBufferHeader(SIMU_REQ_GET_JACKIN, 0);
     sendBuffer();
 
@@ -284,6 +302,7 @@ bool SimulatorClient::isJackin()
 bool SimulatorClient::isEmergencyStop()
 {
     if (!socket_) return false;
+    Lock localLock(&repositoryLock);
     setBufferHeader(SIMU_REQ_GET_EMERGENCY, 0);
     sendBuffer();
 
@@ -300,6 +319,7 @@ bool SimulatorClient::isEmergencyStop()
 void SimulatorClient::getLcdButtonsState(bool& btnYes, bool& btnNo)
 {
     if (!socket_) return;
+    Lock localLock(&repositoryLock);
     setBufferHeader(SIMU_REQ_GET_LCD_BUTTONS, 0);
     sendBuffer();
 
@@ -318,6 +338,7 @@ void SimulatorClient::getPwm(MotorPWM& left,
                              MotorPWM& right)
 {
     if (!socket_) return;
+    Lock localLock(&repositoryLock);
     setBufferHeader(SIMU_REQ_GET_PWM, 0);
     sendBuffer();
 
@@ -336,6 +357,7 @@ void SimulatorClient::setSpeed(MotorSpeed left,
                                MotorSpeed right)
 {
     if (!socket_) return;
+    Lock localLock(&repositoryLock);
     unsigned char* buf = setBufferHeader(SIMU_REQ_SET_MOTOR_SPEED,  
                                          2*sizeof(MotorSpeed));
     memcpy(buf, &left, sizeof(MotorSpeed)); buf += sizeof(MotorSpeed);
@@ -352,6 +374,7 @@ void SimulatorClient::getMotorPosition(MotorPosition& left,
                                        MotorPosition& right)
 {
     if (!socket_) return;
+    Lock localLock(&repositoryLock);
     setBufferHeader(SIMU_REQ_GET_MOTOR, 0);
     sendBuffer(); 
 
@@ -370,6 +393,7 @@ void SimulatorClient::getOdomPosition(CoderPosition& left,
                                       CoderPosition& right)
 {
     if (!socket_) return;
+    Lock localLock(&repositoryLock);
     setBufferHeader(SIMU_REQ_GET_ODOM, 0);
     sendBuffer(); 
 
@@ -387,6 +411,7 @@ void SimulatorClient::getOdomPosition(CoderPosition& left,
 void SimulatorClient::getRobotEstimatedPosition(Point& pt, Radian& dir)
 {
     if (!socket_) return;
+    Lock localLock(&repositoryLock);
     setBufferHeader(SIMU_REQ_GET_ESTIMATE_POS, 0);
     sendBuffer();
 
@@ -402,6 +427,7 @@ void SimulatorClient::getRobotEstimatedPosition(Point& pt, Radian& dir)
 void SimulatorClient::resetRobotEstimatedPosition()
 {
     if (!socket_) return;
+    Lock localLock(&repositoryLock);
     setBufferHeader(SIMU_REQ_RESET_ESTIMATED_POS, 0);
     sendBuffer();
 }
@@ -431,6 +457,7 @@ void SimulatorClient::getRobotRealPosition(Point& pt, Radian& dir)
 void SimulatorClient::setLCDMessage(const char* message)
 {
     if (!socket_) return;
+    Lock localLock(&repositoryLock);
     char* buf = (char*)setBufferHeader(SIMU_REQ_SET_LCD,  
 				       strlen(message)+1);
     strcpy(buf, message);
@@ -452,6 +479,7 @@ Millimeter SimulatorClient::getObstacleDistance(Millimeter rPosCaptor,
                                                 Radian dirCaptor)
 {
     if (!socket_) return INFINITE_DIST;
+    Lock localLock(&repositoryLock);
     unsigned char* buf=setBufferHeader(SIMU_REQ_GET_OBSTACLE_DIST, 
                                        2*sizeof(Millimeter)+2*sizeof(Radian));
     memcpy(buf, &rPosCaptor, sizeof(Millimeter)); buf+=sizeof(Millimeter);
@@ -480,6 +508,7 @@ bool SimulatorClient::isCollision(Millimeter rPosCaptorPt1,
                                   Millimeter zPosCaptor)
 {
     if (!socket_) return false;
+    Lock localLock(&repositoryLock);
     unsigned char* buf=setBufferHeader(SIMU_REQ_GET_COLLISION, 
                                        3*sizeof(Millimeter)+2*sizeof(Radian));
     memcpy(buf, &rPosCaptorPt1, sizeof(Millimeter)); buf+=sizeof(Millimeter);
@@ -504,6 +533,7 @@ Millimeter SimulatorClient::getGroundDistance(Millimeter rPosCaptor,
                                               Millimeter zPosCaptor)
 {
     if (!socket_) return INFINITE_DIST;
+    Lock localLock(&repositoryLock);
     unsigned char* buf=setBufferHeader(SIMU_REQ_GET_GROUND_DIST, 
                                        2*sizeof(Millimeter)+sizeof(Radian));
     memcpy(buf, &rPosCaptor, sizeof(Millimeter)); buf+=sizeof(Millimeter);
