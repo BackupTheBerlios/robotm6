@@ -4,6 +4,7 @@
 #include "driver/bumperCom_05.h"
 #include "bumperMapping.h"
 #include "events.h"
+#include "mthread.h"
 
 #ifdef TEST_MAIN
 #define LOG_DEBUG_ON
@@ -178,20 +179,66 @@ bool Bumper05::getAllCaptors(unsigned char data[BUMPER_DATA_NBR])
 
 #ifdef TEST_MAIN
 
+void* BumperThreadBody(void* bumper)
+{
+    while(1)
+    {
+	// TODO: remove magic number and replace with constant [flo]
+	usleep(10000);
+	static_cast<Bumper05*>(bumper)->periodicTask();
+    }
+    return NULL;
+}
+
 #include "io/serialPort.h"
 int main(int argc, char* argv[]) 
 {
     IoManager->submitIoHost(new SerialPort(0, false));
     IoManager->submitIoHost(new SerialPort(1, false));
+    IoManager->submitIoHost(new SerialPort(2, false));
+    IoManager->submitIoHost(new SerialPort(3, false));
     EventsManagerCL* evtMgr = new EVENTS_MANAGER_DEFAULT();
 
     Bumper05 bumper;
-    while(true) {
-        bumper.periodicTask();
-        usleep(100000);
+    MThreadId thread = 0;
+    MTHREAD_CREATE("Bumper Thread",
+		   &thread,
+		   NULL,
+		   BumperThreadBody,
+		   &bumper);
+    int choice, i;
+    bool loop=true, myBool=false;
+    BridgeCaptorStatus captors[BRIDGE_CAPTORS_NBR];
+    while(loop) {
+      printf("Menu: 0=bridge status, 1=jack-AU-reboot-match, 2=exit\n>");
+      scanf("%d", &choice);
+      switch(choice) {
+      case 0:
+	bumper.getBridgeCaptors(captors);
+	for(i=0;i<BRIDGE_CAPTORS_NBR;i++) {
+	  printf("bridge[%d]=%s\n", i, captors[i]==BRIDGE_DETECTED?"Pont":"Trou");
+	}
+	break;
+      case 1:
+	myBool = false;
+	bumper.getJackin(myBool);
+	printf("Jackin=%s\n", b2s(myBool));
+	bumper.getEmergencyStop(myBool);
+	printf("emergencyStop=%s\n", b2s(myBool));
+	bumper.getRebootSwitch(myBool);
+	printf("reboot switch =%s\n", b2s(myBool));
+	bumper.getMatchSwitch(myBool);
+	printf("match switch =%s\n", b2s(myBool));
+	break;
+      case 2:
+	loop=false;
+	break;
+      default:
+	break;
+      }
     }
-
     delete evtMgr;
+    printf("Bye\n");
     return 0;
 }
 
