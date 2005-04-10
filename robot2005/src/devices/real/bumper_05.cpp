@@ -25,7 +25,8 @@ Bumper05::Bumper05() : device_(NULL), firstRead_(true)
 	}
     } else {
         LOG_ERROR("Bumper05 device not found!\n");
-    } 
+    }
+    reset();
 }
 
 Bumper05::~Bumper05() 
@@ -38,7 +39,7 @@ bool Bumper05::reset()
     // check bumper ids
     for(unsigned int i=0; i < BUMPERS_NBR; i++) {
         assert((BumperId)i == BumpersMapping[i].id);
-        skipCaptor_[i] = BumpersMapping[i].enableAtReset;
+        skipCaptor_[i] = !(BumpersMapping[i].enableAtReset);
     }
     
     firstRead_ = true;
@@ -136,7 +137,7 @@ void Bumper05::periodicTask()
             if (BumpersMapping[i].evt != EVENTS_GROUP_NONE) {
                 if (firstRead_ || 
                     ((data_[byte]&(bit)) != (newData[byte]&(bit)))) {
-                    if ((newData[byte]&(bit)) ^ BumpersMapping[i].reversed) {
+                    if (((newData[byte]&(bit)) != 0) ^ BumpersMapping[i].reversed) {
                         Events->raise(BumpersMapping[i].evt);
                     } else {
                         Events->unraise(BumpersMapping[i].evt);
@@ -184,7 +185,7 @@ void* BumperThreadBody(void* bumper)
     while(1)
     {
 	// TODO: remove magic number and replace with constant [flo]
-	usleep(10000);
+	usleep(100000);
 	static_cast<Bumper05*>(bumper)->periodicTask();
     }
     return NULL;
@@ -193,10 +194,10 @@ void* BumperThreadBody(void* bumper)
 #include "io/serialPort.h"
 int main(int argc, char* argv[]) 
 {
-    IoManager->submitIoHost(new SerialPort(0, false));
-    IoManager->submitIoHost(new SerialPort(1, false));
-    IoManager->submitIoHost(new SerialPort(2, false));
-    IoManager->submitIoHost(new SerialPort(3, false));
+    //IoManager->submitIoHost(new SerialPort(0, false));
+    //IoManager->submitIoHost(new SerialPort(1, false));
+    IoManager->submitIoHost(new SerialPort(3, DEFAULT_READ_RETRIES, SERIAL_SPEED_38400));
+    //IoManager->submitIoHost(new SerialPort(3, false));
     EventsManagerCL* evtMgr = new EVENTS_MANAGER_DEFAULT();
 
     Bumper05 bumper;
