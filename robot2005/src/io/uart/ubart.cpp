@@ -209,17 +209,23 @@ bool UbartMultiplexer::isBlocking() const {
 }
 
 bool UbartMultiplexer::write(IoByte* buf, unsigned int& length) {
-    // TODO: get Ubart-protocol [flo]
     currentId_ = targetId_;
-    return device_->write(static_cast<unsigned char>(targetId_) << 5
+    // Hardcoded protocol:
+    //   first 4 bits are device-id.
+    //   resting 4 bits are length of request.
+    // TODO: length must be <= 15 !!!
+    return device_->write(static_cast<unsigned char>(targetId_) << 4
 			  | static_cast<unsigned char>(length))
 	&& device_->write(buf, length);
 }
 
 bool UbartMultiplexer::read(IoByte* buf, unsigned int& length) {
     if (currentId_ != targetId_) {
-	// TODO: protocol [flo]
-	device_->write(static_cast<unsigned char>(targetId_) << 5);
+	// Hardcoded protocol:
+	//   first 4 bits are device-id.
+	//   resting 4 bits are length of request.
+	// In this case we just switch the ubart (so length == 0).
+	device_->write(static_cast<unsigned char>(targetId_) << 4);
     }
     return device_->read(buf, length);
 }
