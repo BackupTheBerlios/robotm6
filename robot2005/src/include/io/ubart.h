@@ -20,7 +20,7 @@
 //#include "mthread.h"
 
 static const unsigned int UBART_DEFAULT_ID = 0;
-static const unsigned int UBART_MAX_DEVICES = 8;
+static const unsigned int UBART_MAX_DEVICES = 9;
 
 // forward-declaration
 class Ubart; // exists only in cpp-file.

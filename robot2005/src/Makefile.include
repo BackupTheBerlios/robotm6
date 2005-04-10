@@ -97,7 +97,7 @@ ALL_STATIC_LIB=
 
 ALL_DYNAMIC_LIB= -lrobotMain -lstrategy2005 -lbase2005 -lrobotMain -lmove -lsoundPlayer -levents -lrealdevices -lsimudevices -lbasedevices -luart -lio -lsimulator -llog -ltools -lm -lpthread -l$(LIB_STDCPP) -lz
 
-IO_STATIC_LIB=$(STATIC_LIB_DIR)/libuart.a $(STATIC_LIB_DIR)/libio.a $(STATIC_LIB_DIR)/liblog.a $(STATIC_LIB_DIR)/libtools.a -lpthread -l$(LIB_STDCPP)
+IO_STATIC_LIB=$(STATIC_LIB_DIR)/libio.a $(STATIC_LIB_DIR)/libuart.a $(STATIC_LIB_DIR)/libio.a $(STATIC_LIB_DIR)/liblog.a $(STATIC_LIB_DIR)/libtools.a -lpthread -l$(LIB_STDCPP)
 
 #${SRC_ROOT}/../lib/libevents.a $(SRC_ROOT)/../lib/libio.a ${SRC_ROOT}/../lib/libuart.a $(SRC_ROOT}/../lib/libsoundPlayer.a $(SRC_ROOT)/../lib/librealdevices $(SRC_ROOT)/../lib/simudevices ${SRC_ROOT}/../lib/libsimulator.a ${SRC_ROOT}/../lib/libevents.a ${SRC_ROOT}/../lib/libtools.a ${SRC_ROOT}/../lib/liblog.a -lm -lz -l$(LIB_STDCPP) -lpthread
 

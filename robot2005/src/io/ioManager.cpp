@@ -1,4 +1,5 @@
 #include "io/ioManager.h"
+#include "io/ubart.h"
 #include "log.h"
 
 IoManagerCL* IoManagerCL::instance_ = NULL;
@@ -8,8 +9,15 @@ IoManagerCL::IoManagerCL()
 {
 }
 
-IoManagerCL::~IoManagerCL()
-{
+IoManagerCL::~IoManagerCL() {
+    IoHostVector::iterator it;
+    for (it = autoSubmitted_.begin();
+	 it != autoSubmitted_.end();
+	 ++it)
+    {
+	delete (*it);
+    }
+    autoSubmitted_.clear();
 }
 
 void IoManagerCL::submitIoHost(IoHost* host)
@@ -24,6 +32,7 @@ void IoManagerCL::submitIoHost(IoHost* host)
 	    IoInfo info = ioId2ioInfo(id);
 	    LOG_INFO("%s is connected (scan-info: 0x%x)\n", info.name, scanInfo);
 	    id2deviceMap_[id] = foundDevices[0].device;
+	    if (isIoHost(id)) autoSubmit(id);
 	}
 	else
 	{
@@ -32,6 +41,21 @@ void IoManagerCL::submitIoHost(IoHost* host)
 	}
     }
     ioHosts_.push_back(host);
+}
+
+bool IoManagerCL::isIoHost(IoId id) const {
+    return (id == IO_ID_UBART_05);
+}
+
+void IoManagerCL::autoSubmit(IoId id) {
+    LOG_INFO("Autosubmitting IoHost\n");
+    // *small* hack:
+    // At the moment the id must be IO_ID_UBART_05
+    // -> shortcut...
+    IoDevice* device = getIoDevice(id);
+    IoHost* ubartMulti = new UbartMultiplexer(device);
+    autoSubmitted_.push_back(ubartMulti);
+    submitIoHost(ubartMulti);
 }
 
 IoDevice* IoManagerCL::getIoDevice(IoId id)

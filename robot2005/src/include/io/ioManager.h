@@ -67,6 +67,19 @@ public: // methods
      */
     static const IoInfo& ioId2ioInfo(IoId id);
 
+private: // methods
+    /*
+     * @brief returns true, if the id is recognized as IoHost
+     * by the IoManager.
+     */
+    bool isIoHost(IoId id) const;
+
+    /*
+     * @brief creates the associated IoHost, and submits it
+     * automatically.
+     */
+    void autoSubmit(IoId id);
+    
 private: // fields
     static IoManagerCL* instance_;
 
@@ -76,6 +89,7 @@ private: // fields
     IoId2IoDeviceMap id2deviceMap_;
     IoDeviceSet allocatedIoDevices_; // not yet used.
     IoHostVector ioHosts_; // not sure, if we need this field [flo].
+    IoHostVector autoSubmitted_; // needed for deletion at the end.
 };
 
 inline IoManagerCL* IoManagerCL::instance() {
