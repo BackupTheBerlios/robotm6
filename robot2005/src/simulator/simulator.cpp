@@ -641,6 +641,10 @@ void mainEmergencyStopClickedCB(ViewerControlButtonId btnId)
     Viewer3D->setBtnClick(CTRL_BTN_R1_AU, true);
     Viewer3D->setBtnClick(CTRL_BTN_R2_AU, true);
     Viewer3D->setBtnClick(CTRL_BTN_R3_AU, true);
+    for(unsigned int i=0; i<SIMU_PORT_MAX_CONNECTIONS; i++) {
+        SimulatorRobot* robot = SimulatorCL::instance()->getRobot(i);
+        if (robot) robot->setEmergencyStop(true);
+    }
 }
 // ---------------------------------------------------------------------------
 // 
@@ -651,6 +655,10 @@ void mainEmergencyStopUnClickedCB(ViewerControlButtonId btnId)
     Viewer3D->setBtnClick(CTRL_BTN_R1_AU, false);
     Viewer3D->setBtnClick(CTRL_BTN_R2_AU, false);
     Viewer3D->setBtnClick(CTRL_BTN_R3_AU, false);
+    for(unsigned int i=0; i<SIMU_PORT_MAX_CONNECTIONS; i++) {
+        SimulatorRobot* robot = SimulatorCL::instance()->getRobot(i);
+        if (robot) robot->setEmergencyStop(false);
+    }
 }
 // ---------------------------------------------------------------------------
 // 
@@ -661,6 +669,10 @@ void mainJackinClickedCB(ViewerControlButtonId btnId)
     Viewer3D->setBtnClick(CTRL_BTN_R1_JACK, true);
     Viewer3D->setBtnClick(CTRL_BTN_R2_JACK, true);
     Viewer3D->setBtnClick(CTRL_BTN_R3_JACK, true);
+    for(unsigned int i=0; i<SIMU_PORT_MAX_CONNECTIONS; i++) {
+        SimulatorRobot* robot = SimulatorCL::instance()->getRobot(i);
+        if (robot) robot->setJackin(true);
+    }
 }
 // ---------------------------------------------------------------------------
 // 
@@ -671,6 +683,10 @@ void mainJackinUnClickedCB(ViewerControlButtonId btnId)
     Viewer3D->setBtnClick(CTRL_BTN_R1_JACK, false);
     Viewer3D->setBtnClick(CTRL_BTN_R2_JACK, false);
     Viewer3D->setBtnClick(CTRL_BTN_R3_JACK, false);
+    for(unsigned int i=0; i<SIMU_PORT_MAX_CONNECTIONS; i++) {
+        SimulatorRobot* robot = SimulatorCL::instance()->getRobot(i);
+        if (robot) robot->setJackin(false);
+    }
     RobotTimerCL::tic(&simultatorTime);
 }
 // ---------------------------------------------------------------------------
@@ -705,7 +721,7 @@ void robotBtnClickedCB(ViewerControlButtonId btnId)
     case CTRL_BTN_R1_NO:
     case CTRL_BTN_R2_NO:
     case CTRL_BTN_R3_NO:
-	robot->setLcdButtonsYes(false);
+	robot->setLcdButtonsNo(true);
 	break;
     default:
         break;
@@ -743,7 +759,7 @@ void robotBtnUnClickedCB(ViewerControlButtonId btnId)
     case CTRL_BTN_R1_NO:
     case CTRL_BTN_R2_NO:
     case CTRL_BTN_R3_NO:
-	robot->setLcdButtonsYes(false);
+	robot->setLcdButtonsNo(false);
 	break;
     default:
         break;
@@ -814,8 +830,8 @@ void SimulatorCL::registerViewerBtnCB()
                                   playerBtnClickedCB);
     for(int i = CTRL_BTN_R0_JACK; i<CTRL_BTN_R3_NO; i++) {
 	Viewer3D->registerBtnCallback((ViewerControlButtonId)i,
-				    robotBtnClickedCB,
-				    robotBtnUnClickedCB);
+                                      robotBtnClickedCB,
+                                      robotBtnUnClickedCB);
     }
 }
 

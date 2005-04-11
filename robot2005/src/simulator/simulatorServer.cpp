@@ -328,21 +328,21 @@ void SimulatorConnection::parseReceivedData(SimuRequestType type,
     case SIMU_REQ_GET_STATUS:
         {
             buf = setBufferHeader(SIMU_REQ_SET_STATUS, 1);
-            buf[0] = (unsigned char)robot_->getMatchStatus();
+            buf[0] = robot_->getMatchStatus()?1:0;
             sendBuffer();
         }
         break;
     case SIMU_REQ_GET_JACKIN: 
         {
             buf = setBufferHeader(SIMU_REQ_SET_JACKIN, 1);
-            buf[0] = (unsigned char)robot_->isJackin();
+            buf[0] = robot_->isJackin()?1:0;
             sendBuffer();
         }
         break;
     case SIMU_REQ_GET_EMERGENCY:
         {
             buf = setBufferHeader(SIMU_REQ_SET_EMERGENCY, 1);
-            buf[0] = (unsigned char)robot_->isEmergencyStop();
+            buf[0] = robot_->isEmergencyStop()?1:0;
             sendBuffer();
         }
         break;
