@@ -7,17 +7,29 @@
 #include "lcd.h"
 #include "log.h"
 #include "servo.h"
+#include "gridAttack.h"
 
 StrategyAttackCL::StrategyAttackCL(RobotMainCL* main): 
     Strategy2005CL("StrategyAttack", "Robot attack", CLASS_STRATEGY, main),
     bridgeAvailibility_(0xFF), bridge_(BRIDGE_POS_UNKNOWN), 
-    useLeftBridge_(true), bridgeDetectionByCenter_(true)
+    useLeftBridge_(true), bridgeDetectionByCenter_(true), 
+    grid_(NULL), lastExplorationDir_(ATTACK_EXPLORE_COL)
 {
-
+    grid_ = new GridAttack();
 }
+
+StrategyAttackCL::~StrategyAttackCL()
+{
+    if (grid_) delete grid_;
+}
+
 
 void StrategyAttackCL::run(int argc, char* argv[])
 {
+    if (!grid_) {
+        grid_ = new GridAttack();
+    }
+    grid_->reset();
     Lcd->print("SophiaTeam");
     RobotPos->setOdometerType(ODOMETER_MOTOR);
     //RobotPos->setOdometerType(ODOMETER_UART_MANUAL);
@@ -60,10 +72,7 @@ void StrategyAttackCL::fireCatapults()
 
 /** @brief explore juste les zone ou il peut y avoir des quilles 
     d'apres le reglement */
-bool StrategyAttackCL::basicSkittleExploration()
-{
-  return false;
-}
+
 /** @brief se promene sur le terrain adverse en allant voir partout: sur
     les bords et chez l'adversaire */
 bool StrategyAttackCL::extendedSkittleExploration()

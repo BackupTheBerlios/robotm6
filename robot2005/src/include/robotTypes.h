@@ -35,6 +35,8 @@ typedef signed char MotorPWM;
 typedef short MotorAcceleration;
 /** @brief Point pour le robot, on parle en nombre a virgules */
 typedef RobotPoint2D<Millimeter, Radian> Point;
+/** @brief position dans une grille, coordonnees entieres */
+typedef RobotPoint2D<char, char> GridPoint;
 /** @brief Pointeur sur fonction */
 typedef void (*FunctionPtr)(void);
 /** @brief Une position est un point et une direction */
@@ -205,7 +207,7 @@ typedef enum TeamColor {
  * @brief Dangerosité des zones visistees par le robot
  */
 typedef enum DangerLevel {
-    DANGER_NONE,
+    DANGER_NONE=0,
     DANGER_LOW,
     DANGER_MEDIUM,
     DANGER_HIGH

@@ -4,6 +4,13 @@
 #include "strategy2005.h"
 #include "devices/bumper.h"
 
+enum AttackExplorationDirection {
+    ATTACK_EXPLORE_ROW=0,
+    ATTACK_EXPLORE_COL
+};
+
+class GridAttack;
+
 /** @class StrategyAttackCL
  * Strategy du robot d'attaque
  */
@@ -11,6 +18,8 @@ class StrategyAttackCL : public Strategy2005CL
 {
  public :
     StrategyAttackCL(RobotMainCL* main);
+    virtual ~StrategyAttackCL();
+
     void run(int argc, char*argv[]);
  private:
     // le boolean renvoye par les fonctions indique si c'est la fin de la 
@@ -65,6 +74,12 @@ class StrategyAttackCL : public Strategy2005CL
     bool getBridgeCaptors(BridgeCaptorStatus captors[BRIDGE_CAPTORS_NBR],
                           bool checkSharps);
     void noBridgeHere();
+
+    /////////////////////////////////////////////////////////////////////////
+    bool basicSkittleExplorationCol();
+    bool basicSkittleExplorationRow();
+    bool basicSkittleExplorationGrid(GridPoint pt[3]);
+       
  private:
     /** mask qui dit ou le peut etre (4 possibilites a tester) quand il n'y est
         pas on passe le bit a 0 */
@@ -74,6 +89,12 @@ class StrategyAttackCL : public Strategy2005CL
     bool           useLeftBridge_; 
     /** utilise le pont du mileu pour essayer de traverser */
     bool           bridgeDetectionByCenter_;
+    
+    // grille qui permet de savoir ou on est deja passe et ou il faut aller
+    GridAttack* grid_;
+    // derniere direction d'exploration utilisee, la prochaine fois 
+    // on prendra l'autre type
+    AttackExplorationDirection lastExplorationDir_;
 
     
 };
