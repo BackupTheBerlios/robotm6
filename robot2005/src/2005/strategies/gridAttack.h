@@ -30,6 +30,7 @@ class GridAttack
 
     void setObstacleTime(Millisecond time, 
                          Position pos);
+    void setSkittleDetected(Position pos);
     int  scoreRow(GridUnit    row, 
                   GridUnit    col, 
                   bool        dir,
@@ -38,6 +39,8 @@ class GridAttack
                   GridUnit    col, 
                   bool        dir,
                   Millisecond time);
+
+    bool hasNoUnexploredSkittle();
 
     static GPoint getGPoint(Point const& pt);
     static Point  getPoint(GPoint const& gpt);

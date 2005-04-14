@@ -39,7 +39,9 @@ void GridAttack::setVisitTime(Millisecond time,
                               Position pos)
 {
     GPoint pt=getGPoint(pos.center);
-    element(pt).lastVisitTime=time;
+    GridElement& elem=element(pt);
+    elem.lastVisitTime=time; 
+    elem.skittleAtBegining=false;
 }
 
 void GridAttack::setObstacleTime(Millisecond time, 
@@ -47,6 +49,12 @@ void GridAttack::setObstacleTime(Millisecond time,
 {
     GPoint pt=getGPoint(pos.center);
     element(pt).obstacleTime=time;
+}
+
+void GridAttack::setSkittleDetected(Position pos)
+{
+    GPoint pt=getGPoint(pos.center);
+    element(pt).skittleAtBegining=true;
 }
 
 int GridAttack::scoreRow(GridUnit    row, 
@@ -95,4 +103,14 @@ int GridAttack::score(GridUnit    row,
         return ((time - elem.lastVisitTime)/900)/(elem.danger+1);
     else 
         return 90/(elem.danger+1);    
+}
+
+bool GridAttack::hasNoUnexploredSkittle()
+{
+    for(int i=1;i<4;i++) {
+        for(int j=2;j<6;j++) {
+            if (element(i,j).skittleAtBegining) return false;
+        }
+    }
+    return true;
 }

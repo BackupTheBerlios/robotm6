@@ -39,7 +39,8 @@ MoveCL::MoveCL() :
     defaultLinearGain_(MOVE_GAIN_DEFAULT),
     defaultMaxRotationSpeed_(MOVE_MAX_ROTATION_SPEED),
     defaultMaxLinearSpeed_(MOVE_SPEED_DEFAULT),
-    defaultBasicSpeed_(MOVE_SPEED_DEFAULT)
+    defaultBasicSpeed_(MOVE_SPEED_DEFAULT),
+    defaultRealignDist_(MOVE_REALIGN_DIST_DEFAULT)
 {
     pthread_mutex_init(&repositoryLock, NULL);
     assert(move_ == NULL);
@@ -319,7 +320,7 @@ void MoveCL::forward(Millimeter  dist,
 // MoveCL::backward
 // ----------------------------------------------------------------------------
 void MoveCL::backward(Millimeter  dist, 
-                    MotorSpeed  maxSpeed)
+                      MotorSpeed  maxSpeed)
 {
     stop();
     if (maxSpeed == MOVE_USE_DEFAULT_SPEED) {
@@ -334,8 +335,8 @@ void MoveCL::backward(Millimeter  dist,
 // Move::rotate
 // ----------------------------------------------------------------------------
 void MoveCL::rotate(Radian      finalDir,
-                  MoveGain    gain,
-                  MotorSpeed  maxSpeed)
+                    MoveGain    gain,
+                    MotorSpeed  maxSpeed)
 {
     stop();
     if (gain == MOVE_USE_DEFAULT_GAIN) {
@@ -347,6 +348,42 @@ void MoveCL::rotate(Radian      finalDir,
                                           gain, 
                                           maxSpeed,
                                           this));
+}
+
+// ----------------------------------------------------------------------------
+// Move::realign
+// ----------------------------------------------------------------------------
+void MoveCL::realign(Radian      finalDir,
+                     Millimeter  backwardDist,
+                     MoveGain    gain,
+                     MotorSpeed  maxSpeed)
+{
+    stop();
+    if (gain == MOVE_USE_DEFAULT_GAIN) {
+	gain = defaultRotationGain_;
+    }
+    if (maxSpeed == MOVE_USE_DEFAULT_SPEED) {
+	maxSpeed = defaultMaxRotationSpeed_;
+    }
+    if (fabs(backwardDist - MOVE_USE_DEFAULT_DIST)<0.1) {
+	backwardDist = defaultRealignDist_;
+    }
+    bool stopLeftWheel=false;
+    if (na2PI(finalDir - RobotPos->theta(), -M_PI) > 0) {
+        // on tourne vers la gauche: on recule un peu de la roue 
+        // droite et beaucoup de la gauche
+        stopLeftWheel=false;
+    } else { 
+        // on tourne vers la droite: on recule un peu de la roue 
+        // gauche et beaucoup de la droite
+        stopLeftWheel=true;
+    }
+    setCurrentMovement(new MovementRealign(stopLeftWheel,
+                                           backwardDist, 
+                                           finalDir, 
+                                           gain, 
+                                           maxSpeed,
+                                           this));
 }
 
 // ----------------------------------------------------------------------------

@@ -60,7 +60,7 @@ Movement::Movement(MoveType    type,
     RobotBase("Movement", CLASS_MOVEMENT), 
     maxSpeed_(maxSpeed), gain_(gain),
     startTime_(TIME_INFINITE),
-    type_(type), move_(move), nextMovement_(NULL)
+    move_(move), type_(type), nextMovement_(NULL)
 {
     assert(move_);
     if (Name) {
@@ -646,3 +646,175 @@ char* MovementTrajectory::txt()
 }
 
 
+// ============================================================================
+// class MovementRotateOnWheel
+// ============================================================================
+
+// ----------------------------------------------------------------------------
+// MovementRotateOnWheel::MovementRotateOnWheel
+// ----------------------------------------------------------------------------
+MovementRotateOnWheel::MovementRotateOnWheel(bool       stopLeftWheel,
+                                             Radian     theta,
+                                             MoveGain   gain,
+                                             MotorSpeed maxSpeed,
+                                             MoveCL*    move) :
+    Movement(MOVE_ROTATE_ON_WHEEL_TYPE, "RotateOnWheel", 
+             max(maxSpeed, MOVE_MAX_ROTATION_SPEED), gain, move), 
+    theta_(theta), leftWheel_(stopLeftWheel)
+{
+}
+
+// ----------------------------------------------------------------------------
+// MovementRotateOnWheel::periodicTask
+// ----------------------------------------------------------------------------
+void MovementRotateOnWheel::periodicTask()
+{
+    assert(!endOfMovement_);
+    // compute the angle between current direction and target direction 
+    Radian error = theta_ - na2PI(RobotPos->theta(),
+				  theta_ - Geometry2D::MM_PI);
+    // pour eviter une oscillation si error est proche de MM_PI, -MM_PI... 
+    if (fabs(na2PI(error, -Geometry2D::MM_PI))>4.*Geometry2D::MM_PI/5.) {
+	error = 4*Geometry2D::MM_PI/5.;
+    }
+    // end = current direction == target direction (+/-epsilon)
+    if (fabs(error) < MOVE_ROTATION_EPSILON*gain_) {
+        stop();
+        return;
+    }
+   
+    double angularSpeed = (gain_ / 2.5 * error)              // proportional
+      + (MOVE_ROTATION_INTEGRAL_GAIN * getIntegralTerm()); // integral
+   
+    updateIntegralTerm(error);
+    
+    double speedRight=0, speedLeft=0, speed=0;
+    if (!endOfMovement_) {
+        // Convertir (rotationSpeed) en (speedLeft, speedRight)
+        speed =  POSITION_ROBOT_HCTL_D * angularSpeed / 5.;
+        // Augmenter la consigne si elle est trop petite
+        while ((fabs(angularSpeed) > 0) /* consigne non nulle*/
+               && (fabs(speed) < (double)(MOVE_MIN_SPEED) )) {
+            // la vitesse envoyee aux moteurs est trop faible
+            speed *= 1.5;
+        }
+        // limiter la consigne si necessaire
+        if (fabs(speed) > maxSpeed_) {
+            speed = sign(speed) * maxSpeed_;
+        }
+        if (leftWheel_) {
+            // la roue gauche ne doit pas bouger!
+            speedRight =  speed;
+            speedLeft  = 0;
+        } else {
+            // la roue droite ne doit pas bouger!
+            speedRight = 0;
+            speedLeft  = -speed;
+        }
+    }
+    LOG_DEBUG("%d %d\n", (int)speedLeft, (int)speedRight);
+    move_->setSpeed((MotorSpeed)speedLeft, 
+                    (MotorSpeed)speedRight);
+
+    if (Timer->time() > (startTime_+MVT_TIMEOUT))  stop();
+}
+
+// ----------------------------------------------------------------------------
+// MovementRotateOnWheel::txt
+// ----------------------------------------------------------------------------
+char* MovementRotateOnWheel::txt()
+{
+    snprintf(txt_, MOVEMENT_TXT_LENGHT,
+             "%s: robot=%s, target=%d deg",
+             name(),
+             RobotPos->txt(),
+             r2d(theta_));
+    return txt_;
+}
+// ============================================================================
+// class MovementRealign
+// ============================================================================
+
+// ----------------------------------------------------------------------------
+// MovementRealign::MovementRealign
+// ----------------------------------------------------------------------------
+MovementRealign::MovementRealign(bool       stopLeftWheel,
+                                 Millimeter distMaxWheel,
+                                 Radian     theta,
+                                 MoveGain   gain,
+                                 MotorSpeed maxSpeed,
+                                 MoveCL*    move) :
+    Movement(MOVE_REALIGN_TYPE, "MovementRealign", 
+             max(maxSpeed, MOVE_MAX_ROTATION_SPEED), gain, move), 
+    theta_(theta), leftWheel_(stopLeftWheel), distMax_(distMaxWheel)
+{
+}
+
+// ----------------------------------------------------------------------------
+// MovementRealign::periodicTask
+// ----------------------------------------------------------------------------
+void MovementRealign::periodicTask()
+{
+    // TODO
+    assert(!endOfMovement_);
+    // compute the angle between current direction and target direction 
+    Radian error = theta_ - na2PI(RobotPos->theta(),
+				  theta_ - Geometry2D::MM_PI);
+    // pour eviter une oscillation si error est proche de MM_PI, -MM_PI... 
+    if (fabs(na2PI(error, -Geometry2D::MM_PI))>4.*Geometry2D::MM_PI/5.) {
+	error = 4*Geometry2D::MM_PI/5.;
+    }
+    // end = current direction == target direction (+/-epsilon)
+    if (fabs(error) < MOVE_ROTATION_EPSILON*gain_) {
+        stop();
+        return;
+    }
+   
+    double angularSpeed = (gain_ / 2.5 * error)              // proportional
+      + (MOVE_ROTATION_INTEGRAL_GAIN * getIntegralTerm()); // integral
+   
+    updateIntegralTerm(error);
+    
+    double speedRight=0, speedLeft=0, speed=0;
+    if (!endOfMovement_) {
+        // Convertir (rotationSpeed) en (speedLeft, speedRight)
+        speed =  POSITION_ROBOT_HCTL_D * angularSpeed / 5.;
+        // Augmenter la consigne si elle est trop petite
+        while ((fabs(angularSpeed) > 0) /* consigne non nulle*/
+               && (fabs(speed) < (double)(MOVE_MIN_SPEED) )) {
+            // la vitesse envoyee aux moteurs est trop faible
+            speed *= 1.5;
+        }
+        // limiter la consigne si necessaire
+        if (fabs(speed) > maxSpeed_) {
+            speed = sign(speed) * maxSpeed_;
+        }
+        if (leftWheel_) {
+            // la roue gauche ne doit pas bouger!
+            speedRight =  speed;
+            speedLeft  = 0;
+        } else {
+            // la roue droite ne doit pas bouger!
+            speedRight = 0;
+            speedLeft  = -speed;
+        }
+    }
+    LOG_DEBUG("%d %d\n", (int)speedLeft, (int)speedRight);
+    move_->setSpeed((MotorSpeed)speedLeft, 
+                    (MotorSpeed)speedRight);
+
+    if (Timer->time() > (startTime_+MVT_TIMEOUT))  stop();
+}
+
+// ----------------------------------------------------------------------------
+// MovementRealign::txt
+// ----------------------------------------------------------------------------
+char* MovementRealign::txt()
+{
+    snprintf(txt_, MOVEMENT_TXT_LENGHT,
+             "%s: robot=%s, target=%d deg",
+             name(),
+             RobotPos->txt(),
+             r2d(theta_));
+    return txt_;
+}

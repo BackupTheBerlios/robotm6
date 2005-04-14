@@ -73,10 +73,13 @@ static const Millimeter MOVE_NEAR_TARGET_DIST        = MOVE_ATTRACTIVE_DIST*5;
     destination en mode Go2 ou trajectory*/
 static const Millimeter MOVE_XY_EPSILON              = 10; 
 
+static const Millimeter MOVE_REALIGN_DIST_DEFAULT    = 30;
+
 static const MoveGain   MOVE_USE_DEFAULT_GAIN  =-1;
 static const MotorSpeed MOVE_USE_DEFAULT_SPEED =-1;
-static const Radian     ANGLE_LIMIT_VIRAGE=M_PI/4;
-static const MotorSpeed VITESSE_MAX_VIRAGE=20;
+static const Radian     ANGLE_LIMIT_VIRAGE     =M_PI/4;
+static const MotorSpeed VITESSE_MAX_VIRAGE     =20;
+static const Millimeter MOVE_USE_DEFAULT_DIST  =-1;
 
 // ============================================================================
 // =================================  class Move   ============================
@@ -117,6 +120,13 @@ class MoveCL : public RobotComponent
     void backward(Millimeter  dist,
                   MotorSpeed  maxSpeed=MOVE_USE_DEFAULT_SPEED); 
     
+    /** Fait tourner le robot sur lui même vers un angle donné. 
+	cf repère du terrain */
+    void realign(Radian      finalDir,
+                 Millimeter  backwardDist=MOVE_USE_DEFAULT_DIST,
+                 MoveGain    gain=MOVE_USE_DEFAULT_GAIN ,
+                 MotorSpeed  maxSpeed=MOVE_USE_DEFAULT_SPEED);
+
     /** Fait tourner le robot sur lui même vers un angle donné. 
 	cf repère du terrain */
     void rotate(Radian      finalDir,
@@ -198,6 +208,7 @@ class MoveCL : public RobotComponent
     MotorSpeed defaultMaxRotationSpeed_;
     MotorSpeed defaultMaxLinearSpeed_;
     MotorSpeed defaultBasicSpeed_;
+    Millimeter defaultRealignDist_;
 
  protected:
     // functions

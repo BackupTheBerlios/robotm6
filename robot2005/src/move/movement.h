@@ -24,6 +24,8 @@ typedef enum MoveType {
     MOVE_BACKWARD_TYPE,
     MOVE_ROTATE_TYPE,
     MOVE_ROTATE_FROM_ANGLE_TYPE,
+    MOVE_ROTATE_ON_WHEEL_TYPE,
+    MOVE_REALIGN_TYPE,
     MOVE_GOTOTARGET_TYPE,
     MOVE_TRAJECTORY_TYPE,
     MOVE_SERIES_TYPE
@@ -81,11 +83,10 @@ class Movement : public RobotBase
     static bool  endOfMovement_;
     static char  txt_[MOVEMENT_TXT_LENGHT];
     Millisecond  startTime_;
-
+    MoveCL*      move_;
  private:
     // private members
     MoveType   type_;
-    MoveCL*    move_;
     char       name_[MOVEMENT_NAME_LENGHT];
     Movement * nextMovement_;
     static int countMovementAllocated_;
@@ -153,6 +154,57 @@ class MovementRotate : public Movement
 
  protected:
     Radian     theta_;
+};
+
+// -----------------------------------------------------------------
+// class MovementRealign
+// -----------------------------------------------------------------
+
+/**
+ * @class MovementRealign
+ * tourne dans la direction indiquee en bloquand une roue au bout d'une 
+ * certaine distance
+ */
+class MovementRealign : public Movement
+{
+ public:
+    MovementRealign(bool       stopLeftWheel,
+                    Millimeter distMaxWheel,
+                    Radian     theta,
+                    MoveGain   gain,
+                    MotorSpeed maxSpeed,
+                    MoveCL*    move);
+    void periodicTask();
+    char* txt();
+
+ protected:
+    Radian     theta_;
+    bool       leftWheel_;
+    Millimeter distMax_;
+};
+
+// -----------------------------------------------------------------
+// class MovementRotateOnWheel
+// -----------------------------------------------------------------
+
+/**
+ * @class MovementRotateOnWheel
+ * Torune autour d'une roue
+ */
+class MovementRotateOnWheel : public Movement
+{
+ public:
+    MovementRotateOnWheel(bool       stopLeftWheel, // true si tourne autour de roue gauche
+                          Radian     theta,
+                          MoveGain   gain,
+                          MotorSpeed maxSpeed,
+                          MoveCL*    move);
+    void periodicTask();
+    char* txt();
+
+ protected:
+    Radian     theta_;
+    bool       leftWheel_;
 };
 
 // -----------------------------------------------------------------

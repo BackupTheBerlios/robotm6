@@ -26,6 +26,13 @@ bool StrategyAttackCL::findAndCrossBridge()
             if (crossBridge()) {
                 Events->disable(EVENTS_NO_BRIDGE_BUMP_LEFT);
                 Events->disable(EVENTS_NO_BRIDGE_BUMP_RIGHT);
+                if (bridgeDetectionByCenter_ &&
+                    (bridge_ == BRIDGE_POS_CENTER ||
+                     bridge_ == BRIDGE_POS_MIDDLE_CENTER) ) {
+                    // on est passe par le pont du milieu, on fait tomber les 
+                    // quilles qui y etaient
+                    skittleMiddleProcessed_=true;
+                }
                 return true;
             }
         } 
