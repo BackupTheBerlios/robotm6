@@ -179,6 +179,11 @@ void RobotMainCL::run(StrategyCL* strategy,
     checkInitDone();
     if (!strategy) return;
     log_->newStrategy();
+    // declenche l'events GAMEOVER a la fin du temps reglementaire
+    Timer->registerTimerFunction(timerFunctionGameOver,
+                                 "timerFunctionGameOver",
+                                 this, 
+                                 TIME_MATCH);
     if (argc>0) {
       LOG_WARNING("Starting strategy %s:%s\n", argv[0], strategy->name());
     } else {
