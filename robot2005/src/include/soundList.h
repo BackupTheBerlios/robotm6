@@ -38,7 +38,7 @@ typedef enum SoundId {
   SOUND_15,
   SOUND_16,
 
-//  SOUND_ALERT_1,
+  SOUND_ALERT_1,
 //  SOUND_ALERT_2,
   SOUND_ALERT_MOTOR,
 //  SOUND_ALERT_HUSTON,
@@ -59,6 +59,19 @@ typedef enum SoundId {
   SOUND_GO_FOR_LAUNCH,
   SOUND_ANORMAL_EMERGENCY_STOP,
   SOUND_C_FAIT,
+  
+  SOUND_CARTE_ALIM,
+  SOUND_CARTE_LCD,
+  SOUND_CARTE_SERVO, 
+  SOUND_CARTE_BUMPER, 
+  SOUND_CARTE_MOVE,  
+  SOUND_CARTE_ENV_DETECTOR,  
+  SOUND_CARTE_GRUE,
+  SOUND_CARTE_RATEAU, 
+  SOUND_CARTE_ELECTROAIMANT, 
+  
+  SOUND_NE_FONCTIONNE_PAS,
+  SOUND_NE_REPOND_PAS, 
   
 /*
   SOUND_VICTORY,
@@ -234,7 +247,7 @@ SoundStruct soundList[SOUND_NBR] = {
   { SOUND_15, "15.mp3" },
   { SOUND_16, "16.mp3" },
 
-//  { SOUND_ALERT_1, "alert_1.mp3" },
+  { SOUND_ALERT_1, "alert_1.mp3" },
 //  { SOUND_ALERT_2, "alert_2.mp3" },
   { SOUND_ALERT_MOTOR, "alert_incider.mp3" },
 //  { SOUND_ALERT_HUSTON, "alert_problem.mp3" },
@@ -256,7 +269,19 @@ SoundStruct soundList[SOUND_NBR] = {
   { SOUND_GO_FOR_LAUNCH, "go_for_launch.mp3" }, 
   { SOUND_ANORMAL_EMERGENCY_STOP, "pasidiot.mp3" },
   { SOUND_C_FAIT, "c_est_fait_f1.mp3" },
+
+  { SOUND_CARTE_ALIM, "cartealim.mp3" },
+  { SOUND_CARTE_LCD, "cartelcd.mp3" },
+  { SOUND_CARTE_SERVO, "carteservo.mp3" },
+  { SOUND_CARTE_BUMPER,  "cartebumper.mp3" },
+  { SOUND_CARTE_MOVE,   "cartemove.mp3" },
+  { SOUND_CARTE_ENV_DETECTOR, "carteenvdetecor.mp3" },  
+  { SOUND_CARTE_GRUE, "cartegrue.mp3" },
+  { SOUND_CARTE_RATEAU,  "carterateau.mp3" },
+  { SOUND_CARTE_ELECTROAIMANT, "carteelectro.mp3" }, 
   
+  { SOUND_NE_FONCTIONNE_PAS, "fonctionnepas.mp3" },
+  { SOUND_NE_REPOND_PAS, "repondpas.mp3" },
 /*  
   { SOUND_VICTORY, "victory.mp3" },
   { SOUND_START_PROGRAMMATION, "programmation.mp3" },

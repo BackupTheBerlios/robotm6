@@ -960,7 +960,8 @@ void Viewer3DCL::drawSkittle3D(Skittle* skittle)
         else glColor4f(COLOR_SKITTLE_GREEN, 1.0f);
         gluDisk(quad, 0, QUILLE_RAYON, 16,16);
         glPopMatrix();
-        if (useTexture_) {
+
+        if (false && useTexture_) {
             glPushMatrix();
             glEnable(GL_ALPHA_TEST);
             glEnable(GL_DEPTH_TEST);

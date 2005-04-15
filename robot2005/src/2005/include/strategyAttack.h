@@ -32,6 +32,9 @@ class StrategyAttackCL : public Strategy2005CL
     void run(int argc, char*argv[]);
 
     void periodicTask(Millisecond time);
+
+ protected:
+    bool autoCheck();
  private:
     // le boolean renvoye par les fonctions indique si la command a
     // terminee normalement ou non. Si elle n'a pas terminee normalement

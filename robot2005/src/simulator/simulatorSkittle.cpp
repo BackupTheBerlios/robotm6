@@ -29,7 +29,7 @@ void SimulatorSkittle::updatePosition()
     else speedX_ = 0;
     if (fabs(speedY_)>0.05) speedY_/=1.01;
     else speedY_ = 0;
-    if (speedX_!=0 || speedY_!=0) {
+    if (fabs(speedX_)> 0.1 || fabs(speedY_)>0.1) {
         Point pt(speedX_, speedY_);
         skittle_->direction = pt.angle()+M_PI/2;
     }

@@ -62,31 +62,29 @@ class Strategy2005CL : public StrategyCL
     bool testMove_;
 
  protected:
-    /** @brief Verifie que les cartes electroniques repondent bien */
-    bool autoCheck();
-    /** @brief Attend la jack de depart */
+    /** @brief Verifie que les cartes electroniques repondent bien :
+     Overload cette fnction pour rajouter d'autres tests. C'est la
+     fonction qui est appelee quand on fait un waitStart(INIT_COMPLETE) */
+    virtual bool autoCheck();
+    /** @brief Attend la jack de depart. C'est la
+     fonction qui est appelee quand on fait un waitStart(INIT_FAST) */
     bool waitJackout();
-
-    // === test de la communication avec les cartes UART ===
-    /** @brief Verifie que la carte odometre ping */
-    bool checkOdometer();
-    /** @brief Verifie que la carte lcd ping */
-    bool checkLcd();
-    /** @brief Verifie que les bumpers ne sont pas enfonces */
-    bool checkBumper();
-    /** @brief Verifie que l'inter de reboot est mis */
-    bool checkRebootSwitch();
-    /** @brief  Verifie que les cartes UART pinguent */
-    void testUARTCom();
-    /** @brief Fonction lancee si l'arret d'urgence est enfonce pendant 
-     * le match */
+    /** @brief verifie que l'arret d'urgence n'est pas enfonce */
     void unlockEmergencyStop();
-
-    // === Teste et calibre les capteurs ===
-    /** @brief Verifie que les bumpers sont dans le bon etat */
-    void testEnvDetector();
-    /** @brief Test les deplacements du robot */
-    void testMove();
+    /** @brief verifie que toutes les cartes sont connectees */
+    void testDevicesConnection();
+    /** @brief verifie que le bouton reboot a ete enclenche */
+    bool checkRebootSwitch();
+    // === test de la communication avec les cartes UART ===
+    bool checkAlim();
+    bool checkTesla();
+    bool checkSkittleDetector();
+    bool checkCrane();
+    bool checkEnv();
+    bool checkServo();
+    bool checkMove();
+    bool checkBumper();
+    bool checkLcd();
 
     /** @brief change le titre utilise pour le menu lcd pour decrire la 
         strategie */

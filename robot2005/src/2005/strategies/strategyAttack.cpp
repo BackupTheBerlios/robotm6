@@ -40,6 +40,25 @@ StrategyAttackCL::~StrategyAttackCL()
 }
 
 // --------------------------------------------------------------------------
+// Verification que tout va bien dans le robot
+// --------------------------------------------------------------------------
+bool StrategyAttackCL::autoCheck()
+{
+    Strategy2005CL::autoCheck();
+    // est ce qu'on essaye de passer par le pont du milieu ?
+    bridgeDetectionByCenter_ = !menu("Detection pont\nGauche    Milieu");
+    // verifier les capteurs sharps detecteurs de pont
+    // TODO
+    // verifier les bumpers du pont
+    // TODO
+    // verifier les sharps
+    // TODO
+    // verifier l'asservissement
+    // TODO
+    return true;
+    // on est pret au depart
+}
+// --------------------------------------------------------------------------
 // Point d'entree du programme du robot: commande haut niveau du robot
 // --------------------------------------------------------------------------
 void StrategyAttackCL::run(int argc, char* argv[])

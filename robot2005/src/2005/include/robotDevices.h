@@ -14,6 +14,7 @@
 #include "devices/crane.h"
 #include "devices/skittleDetector.h"
 #include "devices/tesla.h"
+#include "devices/alim.h"
 
 class MotorOdom05;
 
@@ -22,6 +23,7 @@ class RobotDevicesCL : public RobotBase {
  public:
     RobotDevicesCL();
     virtual ~RobotDevicesCL();
+    static RobotDevicesCL* lastInstance() { return instance_; }
 
     /** @brief detecte et cree toutes les cartes */
     void allocDevices();
@@ -42,6 +44,7 @@ class RobotDevicesCL : public RobotBase {
     CraneCL*    getCrane() const    { return crane_; }
     BigTeslaCL* getTesla() const    { return tesla_; }
     SkittleDetectorCL* getSkittle() const    { return skittle_; }
+    AlimCL*     getAlim() const    { return alim_; }
 
 protected: // periodic
     friend void* RobotDevicesThreadBody(void*);
@@ -66,6 +69,7 @@ protected: // periodic fields
     void allocCrane();
     void allocSkittle();
     void allocTesla();
+    void allocAlim();
 
 private:
     MotorOdom05*   motorOdom_;
@@ -79,6 +83,9 @@ private:
     CraneCL*       crane_;
     BigTeslaCL*    tesla_;
     SkittleDetectorCL* skittle_;
+    AlimCL*        alim_;
+
+    static RobotDevicesCL* instance_;
 };
 
 #endif

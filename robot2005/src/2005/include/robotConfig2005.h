@@ -65,6 +65,9 @@ class RobotConfig2005CL : public RobotConfigCL
     /** @brief simule la carte electro aimant */
     bool teslaSimu;
     bool hasTesla;
+    /** @brief simule la carte alim */
+    bool alimSimu;
+    bool hasAlim;
 };
 
 // ----------------------------------------------------------------------------
@@ -95,7 +98,9 @@ inline RobotConfig2005CL::RobotConfig2005CL(const char* Name,
     skittleDetectorSimu(simulated),
     hasSkittleDetector(true),
     teslaSimu(simulated),
-    hasTesla(true)
+    hasTesla(true),
+    alimSimu(simulated),
+    hasAlim(true)
 {
 
 }
@@ -136,23 +141,6 @@ class RobotConfigAttack2005CL : public RobotConfig2005CL
     // only the main can create the config
     RobotConfigAttack2005CL(bool simulated=false);
     friend int main(int, char*[]); 
-
- public:
-    // --------------------------------------------
-    // --- E N T R E E S    /   S O R T I E S   ---
-    // --------------------------------------------
-    /**  @brief utilse le motorReal ou motorSimu */
-    bool motorSimu;
-    /** @brief simule le lcd ou envoie les messages sur l'uart */
-    bool lcdSimu;
-    /** @brief simule la carte odometre */
-    bool odometerSimu;
-    /** @brief simule la carte odometre */
-    bool soundSimu;
-    /** @brief simule la carte bumper */
-    bool bumperSimu;
-    /** @brief simule la carte detecteur d'environement */
-    bool envSimu;
 };
 
 // ----------------------------------------------------------------------------

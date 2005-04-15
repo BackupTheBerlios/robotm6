@@ -1,12 +1,21 @@
 #include <assert.h>
 
 #include "strategy2005.h"
+#include "robotConfig2005.h"
 #include "robotMain.h"
 #include "log.h"
 
-#include "odometer.h"
+#include "motor.h"
 #include "lcd.h"
+#include "alim.h"
+#include "crane.h"
+#include "bumper.h"
+#include "env.h"
+#include "skittleDetector.h"
+#include "tesla.h"
 #include "events.h"
+#include "sound.h"
+#include "robotDevices.h"
 #include "movementManager.h"
 
 
@@ -29,57 +38,42 @@ void Strategy2005CL::unlockEmergencyStop()
     }
 }
 
+// ---------------------------------------------------------------------------
+// Strategy2005CL::checkRebootSwitch
+// ---------------------------------------------------------------------------
+bool Strategy2005CL::checkRebootSwitch()
+{
+    LOG_COMMAND("== checkRebootSwitch ==\n");
+    bool reboot;
+    while (true) { 
+        if (!Bumper->getRebootSwitch(reboot)) return true;
+        if (reboot) return true;
+	LOG_WARNING("Reboot switch not set\n");
+	Sound->play(SOUND_WAIT_REBOOT_SWITCH, SND_PRIORITY_URGENT);
+	Lcd->print("Reboot switch\nRetry      Skip");
+	Events->wait(evtRebootSwitch);
+	if (Events->isInWaitResult(EVENTS_BUTTON_YES)){}
+	else if (Events->isInWaitResult(EVENTS_BUTTON_NO)) return true;
+	else if (Events->isInWaitResult(EVENTS_SWITCH_REBOOT)) return true;
+    }
+    return true;
+}
+
 // -------------------------------------------------------------------------
 // Strategy2005CL::checkLcd
 // -------------------------------------------------------------------------
 bool Strategy2005CL::checkLcd()
 {
     LOG_COMMAND("== checkLcd ==\n");
-#ifdef LSM_TODO
-    if (Lcd->isSimu()) {
+    if (!Lcd->exists()) {
         LOG_ERROR("LCD not found\n");
-        //SOUND->play(SOUND_ALERT_1, SND_PRIORITY_URGENT);
-        //SOUND->play(SOUND_CARTE_LCD);
-	//SOUND->play(SOUND_NE_REPOND_PAS);
+        Sound->play(SOUND_ALERT_1, SND_PRIORITY_URGENT);
+        Sound->play(SOUND_CARTE_LCD);
+	Sound->play(SOUND_NE_REPOND_PAS);
         return false;
     } else {
         return true;
     }
-#else 
-    return true;
-#endif
-}
-
-// -------------------------------------------------------------------------
-// Strategy2005CL::checkOdometer
-// -------------------------------------------------------------------------
-bool Strategy2005CL::checkOdometer()
-{
-    LOG_COMMAND("== checkOdometer ==\n");
-    bool retry=true;
-#ifdef LSM_TODO
-    while(retry && ODOMETER->isSimu()) {
-        LOG_ERROR("ODOMETER not found\n");
-        SOUND->play(SOUND_CARTE_ODOMETER, SND_PRIORITY_URGENT);
-	SOUND->play(SOUND_NE_REPOND_PAS);
-        retry = HLI->menu("Odometer ping\nerr  Retry Skip");
-        if (retry) UARTMGR->scanAndAlloc();
-    }
-    if (retry) {
-        // l'odometre ping ! on le passe en mode automatique
-        if (ODOMETER->setMode(ODOMETER_AUTOMATIC)) {
-            ROBOT_POS->setOdometerType(ODOMETER_UART_AUTOMATIC);
-        } else {
-            // on n'a pas reussi a le passer en mode automatique, on 
-            // utilise les hctl
-            ROBOT_POS->setOdometerType(ODOMETER_MOTOR);
-        }
-    } else {
-        // l'odometre ne ping pas, on utilise les hctl a la place
-        ROBOT_POS->setOdometerType(ODOMETER_MOTOR);
-    }
-#endif
-    return retry;
 }
 
 // -------------------------------------------------------------------------
@@ -87,119 +81,174 @@ bool Strategy2005CL::checkOdometer()
 // -------------------------------------------------------------------------
 bool Strategy2005CL::checkBumper()
 {
-#ifdef LSM_TODO
     LOG_COMMAND("== checkBumper ==\n");
-    unsigned int i;
-    for(i=0; i< DRIDAQ_BUMPER_NBR; i++) {
-	if (!EVENTS->isEnabled(dridaqButtonMapping_[i].evt) || 
-	    !dridaqButtonMapping_[i].isActive) continue;
-	bool correctValue=false;
-	// on verifie que le capteur est dans le bon etat
-	bool retry = true;
-	while (retry && 
-	       EVENTS->check(dridaqButtonMapping_[i].evt) != correctValue) {
-	    SOUND->play(SOUND_BUMPER, SND_PRIORITY_URGENT);
-	    if (dridaqButtonMapping_[i].evt 
-		== EVENTS_BUMPER_BORDURE_RR) {
-		SOUND->play(SOUND_REAR_RIGHT);
-	    } else if (dridaqButtonMapping_[i].evt 
-		       == EVENTS_BUMPER_BORDURE_RL) {
-		SOUND->play(SOUND_REAR_LEFT);
-	    } else {
-		SOUND->play((SoundId)(SOUND_0+i));
-	    }
-	    SOUND->play(SOUND_NE_FONCTIONNE_PAS);
-	    char name[32];
-	    strncpy(name, dridaqButtonMapping_[i].name, 16);
-	    name[16]=0;
-	    if (HLI->menu("%s\nerr   Retry Skip", name)) {
-		retry = true;
-	    } else {
-		EVENTS->disable(dridaqButtonMapping_[i].evt);
-		retry = false;
-	    }
-	}
+    if (!Bumper->exists()) {
+        LOG_ERROR("Bumper device not found\n");
+        Sound->play(SOUND_ALERT_1, SND_PRIORITY_URGENT);
+        Sound->play(SOUND_CARTE_BUMPER);
+	Sound->play(SOUND_NE_REPOND_PAS);
+        Lcd->print("Bumper not ping");
+        sleep(5);
+        return false;
+    } else {
+        return true;
     }
-#endif
-    return true;
 }
 
-// ---------------------------------------------------------------------------
-// Strategy2005CL::checkRebootSwitch
-// ---------------------------------------------------------------------------
-bool Strategy2005CL::checkRebootSwitch()
+// -------------------------------------------------------------------------
+// Strategy2005CL::checkMove
+// -------------------------------------------------------------------------
+bool Strategy2005CL::checkMove()
 {
-#ifdef LSM_TODO
-    LOG_COMMAND("== checkRebootSwitch ==\n");
-    bool retry=true;
-    while (!Strategy2005CLDegraded::isMatchSwitchSet() && retry) { 
-	LOG_WARNING("Reboot switch not set\n");
-	SOUND->play(SOUND_WAIT_REBOOT_SWITCH, SND_PRIORITY_URGENT);
-	LCD->print("Reboot switch\nRetry      Skip");
-	EVENTS->wait(evtRebootSwitch);
-	retry = true;
-	if (EVENTS->isInWaitResult(EVENTS_BUTTON_YES)) retry = true;
-	else if (EVENTS->isInWaitResult(EVENTS_BUTTON_NO))  retry = false;
-	else if (EVENTS->isInWaitResult(EVENTS_SWITCH_DEGRADED)) retry = false;
-    }
-#endif
-    return true;
-}
-
-// ---------------------------------------------------------------------------
-// Strategy2005CL::testUARTCom
-// ---------------------------------------------------------------------------
-// Verifie que les cartes UART pinguent
-// ---------------------------------------------------------------------------
-void Strategy2005CL::testUARTCom()
-{
-    checkLcd();
-    checkOdometer();
-    checkBumper();
-    checkRebootSwitch();
-}
-
-// ---------------------------------------------------------------------------
-// Strategy2005CL::testMove
-// ---------------------------------------------------------------------------
-// Test les deplacements du robot
-// ---------------------------------------------------------------------------
-void Strategy2005CL::testMove()
-{
-#ifdef LSM_TODO
-    LOG_COMMAND("== testMove ==\n");
-    if (!ODOMETER->isSimu()) {
-        Position pos = ROBOT_POS->pos();
-    testMoveCmd:
-        ROBOT_POS->set(0,0,0);
-        HLI->menu("Push robot 15cm\nthen press a key");
-        Position posEndHctl = ROBOT_POS->getHctlPosition();
-        Position posEndOdom = ROBOT_POS->getOdometerPosition();
-        checkBumper();
-        LOG_INFO("Odom position: %d %d %d, Hctl position: %d %d %d, "
-		 "theorie:150 0 0\n",
-                 (int)posEndOdom.center.x, (int)posEndOdom.center.y, 
-		      r2d(posEndOdom.direction),
-                 (int)posEndHctl.center.x, (int)posEndHctl.center.y, 
-		      r2d(posEndHctl.direction)
-	    );
-        if (fabs(posEndOdom.center.x) < 100 
-            || fabs(posEndOdom.center.x) > 200
-            || fabs(posEndOdom.center.y) > 50
-            || r2d(fabs(na2PI(posEndOdom.direction, -M_PI))) > 15) {
-            if (HLI->menu("Odometer error\nRetry      Skip")) {
-                goto testMoveCmd;
-            } else {
-                ROBOT_POS->setOdometerType(ODOMETER_MOTOR);
-            }
+    LOG_COMMAND("== checkMove ==\n");
+    RobotDevicesCL* rd=RobotDevicesCL::lastInstance();
+    assert(rd);
+    while(!rd->getMotor()->exists()) {
+        LOG_ERROR("Move device not found\n");
+        Sound->play(SOUND_CARTE_MOVE);
+	Sound->play(SOUND_NE_REPOND_PAS);
+        if(menu("Move not ping\nretry      skip")) {
+            // Flo todo: reping a device...
+        } else {
+            return false;
         }
-        HLI->menu("Move robot back\nthen press a key");
-        ROBOT_POS->set(pos.center.x, pos.center.y, pos.direction);   
-    }
-#endif
+    }      
+    return true;
+}
+
+// -------------------------------------------------------------------------
+// Strategy2005CL::checkServo
+// -------------------------------------------------------------------------
+bool Strategy2005CL::checkServo()
+{
+    LOG_COMMAND("== checkServo ==\n");
+    while(!Servo->exists()) {
+        LOG_ERROR("Servo device not found\n");
+        Sound->play(SOUND_CARTE_SERVO);
+	Sound->play(SOUND_NE_REPOND_PAS);
+        if(menu("Servo not ping\nretry      skip")) {
+            // Flo todo: reping a device...
+        } else {
+            return false;
+        }
+    }      
+    return true;
+}
+
+// -------------------------------------------------------------------------
+// Strategy2005CL::checkEnv
+// -------------------------------------------------------------------------
+bool Strategy2005CL::checkEnv()
+{
+    LOG_COMMAND("== checkEnv ==\n");
+    while(!EnvDetector->exists()) {
+        LOG_ERROR("Env device not found\n");
+        Sound->play(SOUND_CARTE_ENV_DETECTOR);
+	Sound->play(SOUND_NE_REPOND_PAS);
+        if(menu("Env not ping\nretry      skip")) {
+            // Flo todo: reping a device...
+        } else {
+            return false;
+        }
+    }      
+    return true;
+}
+
+// -------------------------------------------------------------------------
+// Strategy2005CL::checkCrane
+// -------------------------------------------------------------------------
+bool Strategy2005CL::checkCrane()
+{
+    LOG_COMMAND("== checkCrane ==\n");
+    while(!Crane->exists()) {
+        LOG_ERROR("Crane device not found\n");
+        Sound->play(SOUND_CARTE_GRUE);
+	Sound->play(SOUND_NE_REPOND_PAS);
+        if(menu("Grue not ping\nretry      skip")) {
+            // Flo todo: reping a device...
+        } else {
+            return false;
+        }
+    }      
+    return true;
+}
+
+// -------------------------------------------------------------------------
+// Strategy2005CL::checkSkittleDetector
+// -------------------------------------------------------------------------
+bool Strategy2005CL::checkSkittleDetector()
+{
+    LOG_COMMAND("== checkSkittleDetector ==\n");
+    while(!SkittleDetector->exists()) {
+        LOG_ERROR("SkittleDetector device not found\n");
+        Sound->play(SOUND_CARTE_RATEAU);
+	Sound->play(SOUND_NE_REPOND_PAS);
+        if(menu("Rateau not ping\nretry      skip")) {
+            // Flo todo: reping a device...
+        } else {
+            return false;
+        }
+    }      
+    return true;
+}
+
+// -------------------------------------------------------------------------
+// Strategy2005CL::checkTesla
+// -------------------------------------------------------------------------
+bool Strategy2005CL::checkTesla()
+{
+    LOG_COMMAND("== checkTesla ==\n");
+    while(!Tesla->exists()) {
+        LOG_ERROR("Tesla device not found\n");
+        Sound->play(SOUND_CARTE_RATEAU);
+	Sound->play(SOUND_NE_REPOND_PAS);
+        if(menu("Aimant not ping\nretry      skip")) {
+            // Flo todo: reping a device...
+        } else {
+            return false;
+        }
+    }      
+    return true;
+}
+
+// -------------------------------------------------------------------------
+// Strategy2005CL::checkAlim
+// -------------------------------------------------------------------------
+bool Strategy2005CL::checkAlim()
+{
+    LOG_COMMAND("== checkAlim ==\n");
+    while(!Alim->exists()) {
+        LOG_ERROR("Alim device not found\n");
+        Sound->play(SOUND_CARTE_ALIM);
+	Sound->play(SOUND_NE_REPOND_PAS);
+        if(menu("Alim not ping\nretry      skip")) {
+            // Flo todo: reping a device...
+        } else {
+            return false;
+        }
+    }      
+    return true;
 }
 
 
+
+// ---------------------------------------------------------------------------
+// Strategy2005CL::testDevicesConnection
+// ---------------------------------------------------------------------------
+// Verifie que les cartes sont connectees
+// ---------------------------------------------------------------------------
+void Strategy2005CL::testDevicesConnection()
+{
+    if (RobotConfig2005->hasLcd)    checkLcd();
+    if (RobotConfig2005->hasBumper) checkBumper();
+    if (RobotConfig2005->hasMotor)  checkMove();
+    if (RobotConfig2005->hasEnv)    checkEnv();
+    if (RobotConfig2005->hasServo)  checkServo();
+    if (RobotConfig2005->hasCrane)  checkCrane();
+    if (RobotConfig2005->hasSkittleDetector)  checkSkittleDetector();
+    if (RobotConfig2005->hasTesla)  checkTesla();
+    if (RobotConfig2005->hasAlim)   checkAlim();
+}
 
 // -------------------------------------------------------------------------
 // Strategy2005CL::autoCheck
@@ -207,16 +256,9 @@ void Strategy2005CL::testMove()
 bool Strategy2005CL::autoCheck()
 {
     LOG_COMMAND("== Auto check begin ==\n");
-
-
-    testUARTCom();
-
-    if (testMove_)        testMove();
-
+    testDevicesConnection();
+    checkRebootSwitch();
     unlockEmergencyStop();
-
-    LOG_OK("== Auto check DONE ==\n");
-
     return true;
 }
 

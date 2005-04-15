@@ -11,7 +11,7 @@
 
 #include "robotDevice.h"
 
-#define Crane CraneCl::instance()
+#define Crane CraneCL::instance()
 
 typedef unsigned char CranePositionX;
 typedef unsigned char CranePositionZ;

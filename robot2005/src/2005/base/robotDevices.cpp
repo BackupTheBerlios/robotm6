@@ -8,6 +8,7 @@
 #include "implementation/envSimu.h"
 #include "implementation/servoSimu.h"
 #include "implementation/soundSimu.h"
+#include "implementation/alimSimu.h"
 #include "implementation/craneSimu.h"
 #include "implementation/skittleDetectorSimu.h"
 #include "implementation/teslaSimu.h"
@@ -24,6 +25,7 @@
 #include "implementation/env05.h"
 #include "implementation/servo05.h"
 #include "implementation/sound05.h"
+#include "implementation/alim05.h"
 #include "implementation/crane05.h"
 #include "implementation/skittleDetector05.h"
 #include "implementation/tesla05.h"
@@ -36,6 +38,7 @@ namespace {
     pthread_mutex_t repositoryLock = PTHREAD_MUTEX_INITIALIZER;
     void no_op(...){};
 }
+RobotDevicesCL* RobotDevicesCL::instance_=NULL;
 
 void* RobotDevicesThreadBody(void* robotDevices)
 {
@@ -52,8 +55,9 @@ RobotDevicesCL::RobotDevicesCL() :
     RobotBase("Robot devices", CLASS_ROBOT_DEVICES),
     motorOdom_(NULL), motor_(NULL), odometer_(NULL), lcd_(NULL), bumper_(NULL),
     sound_(NULL), env_(NULL), servo_(NULL), crane_(NULL), tesla_(NULL),
-    skittle_(NULL)
+    skittle_(NULL), alim_(NULL)
 {
+    instance_=this;
     LOG_FUNCTION();
     thread_ = 0;
     bool init = (MTHREAD_CREATE("RobotDevices Thread",
@@ -82,6 +86,8 @@ RobotDevicesCL::~RobotDevicesCL()
     if (crane_)    { delete crane_;    sound_=NULL; }
     if (tesla_)    { delete tesla_;    stopWatching(tesla_); tesla_=NULL; }
     if (skittle_)  { delete skittle_;  stopWatching(skittle_); skittle_=NULL; }
+    if (alim_)     { delete alim_;     alim_=NULL; }
+    instance_=NULL;
 }
 
 /** @brief detecte et cree toutes les cartes */
@@ -101,6 +107,7 @@ void RobotDevicesCL::allocDevices()
     allocCrane();
     allocSkittle();
     allocTesla();
+    allocAlim();
 }
 
 void RobotDevicesCL::allocMotorOdom()
@@ -278,6 +285,21 @@ void RobotDevicesCL::allocTesla()
     }
 }
 
+void RobotDevicesCL::allocAlim()
+{
+    if (RobotConfig2005->hasAlim) {
+        if (RobotConfig2005->alimSimu) {
+            alim_ = new AlimSimu();
+        } else {
+            if (IoManager->getIoDevice(IO_ID_ALIM_05)) {
+                alim_ = new Alim05();
+            } else {
+                alim_ = new AlimCL();
+            }
+        }
+    }
+}
+
 /** @brief Envoie le signal d'arret d'urgence a toutes les cartes */
 void RobotDevicesCL::emergencyStop()
 {
@@ -292,6 +314,7 @@ void RobotDevicesCL::emergencyStop()
     if (skittle_)  skittle_->emergencyStop();
     if (tesla_)    tesla_->emergencyStop();
     if (crane_)    crane_->emergencyStop();
+    if (alim_)    alim_->emergencyStop();
 }
 
 /** @brief Envoie le signal de reset a toutes les cartes */
@@ -308,6 +331,7 @@ void RobotDevicesCL::reset()
     if (skittle_)  skittle_->reset();
     if (tesla_)    tesla_->reset();
     if (crane_)    crane_->reset();
+    if (alim_)     alim_->reset();
 }
 
 void RobotDevicesCL::periodicTask()

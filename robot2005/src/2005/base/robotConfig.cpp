@@ -32,10 +32,12 @@ RobotConfigAttack2005CL::RobotConfigAttack2005CL(bool simulated)
     motorSignLeft=(-1);
     motorSignRight=(-1); 
 
+    hasEnv=false;
     hasServo=true;
     hasCrane=false;
     hasSkittleDetector=false;
     hasTesla=false;
+    hasAlim=false;
 }
 
 // ----------------------------------------------------------------------------
@@ -70,9 +72,11 @@ RobotConfigDefence2005CL::RobotConfigDefence2005CL(bool simulated)
     motorSignLeft=(-1);
     motorSignRight=(-1); 
 
+    hasEnv=false;
     hasServo=false;
     hasCrane=true;
     hasSkittleDetector=true;
     hasTesla=true;
+    hasAlim=true;
 }
 
