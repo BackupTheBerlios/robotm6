@@ -161,17 +161,50 @@ bool Bumper05::getAllCaptors(unsigned char data[BUMPER_DATA_NBR])
 {
   if (!device_) return false;
   static bool firstError=true;
-  unsigned int l=BUMPER_DATA_NBR;
-  bool status = device_->writeRead(BUMPER_REQ_GET_ALL, data, l);
+  unsigned int l=4;
+  unsigned char comData[4];
+  bool status = device_->writeRead(BUMPER_REQ_GET_ALL, comData, l);
   if (!status && firstError) {
     // affiche le mesage d'erreur une seule fois
     LOG_ERROR("Bumper05::getAllCaptors read error\n");
   }
+  if (status
+      && ((comData[0] & 0xF0) != BUMPER_START_BITS)) {
+    if (firstError) LOG_ERROR("Bumper05::getAllCaptors bad starting bit\n");
+    LOG_DEBUG("getAllCaptors: bad starting bits 0x%2.2x, expected 0xA?\n", 
+	      comData[0]);
+    LOG_DEBUG("Bumper05 com: 0x%2.2x 0x%2.2x 0x%2.2x 0x%2.2x \n", 
+	      comData[0], comData[1], comData[2], comData[3]);
+    // try to flush the bumper buffer
+    l=4; device_->read(comData, l);
+    status = false;
+  }
+  if (status) {
+    // compute checksum
+    data[0] = (comData[0]&0x0F) + (comData[3] & 0xF0);
+    data[1] = comData[1];
+    data[2] = comData[2];
+    unsigned char checksum = (data[2]^data[1]^data[0]);
+    unsigned char checksum4bits = (checksum&0x0F) ^ ((checksum&0xF0)>>4);
+    if ((comData[3]&0x0F) != checksum4bits) {
+      if (firstError) LOG_ERROR("Bumper05::getAllCaptors bad checksum\n");
+      LOG_DEBUG("getAllCaptors: checksum error 0x%2.2x, expected 0x%2.2x\n", 
+		(comData[3]&0x0F), checksum4bits);
+      LOG_DEBUG("Bumper05 com: 0x%2.2x 0x%2.2x 0x%2.2x 0x%2.2x \n", 
+		comData[0], comData[1], comData[2], comData[3]);
+      // try to flush the bumper buffer
+      l=4; device_->read(comData, l);
+      status = false;
+    }
+  }
+  
+  // verifie que les donnees sont valides:
   firstError = status;
   if (status) {
     // for debug only
     assert(2<BUMPER_DATA_NBR);
-    LOG_DEBUG("Bumper05: 0x%2.2x 0x%2.2x 0x%2.2x \n", data[0], data[1], data[2]);
+    LOG_DEBUG("Bumper05: 0x%2.2x 0x%2.2x 0x%2.2x \n", 
+	      data[0], data[1], data[2]);
   }
   return status;
 }
@@ -194,8 +227,8 @@ void* BumperThreadBody(void* bumper)
 #include "io/serialPort.h"
 int main(int argc, char* argv[]) 
 {
-    //IoManager->submitIoHost(new SerialPort(0, false));
-    //IoManager->submitIoHost(new SerialPort(1, false));
+    IoManager->submitIoHost(new SerialPort(0, DEFAULT_READ_RETRIES, SERIAL_SPEED_38400));
+    IoManager->submitIoHost(new SerialPort(1, DEFAULT_READ_RETRIES, SERIAL_SPEED_38400));
     IoManager->submitIoHost(new SerialPort(3, DEFAULT_READ_RETRIES, SERIAL_SPEED_38400));
     //IoManager->submitIoHost(new SerialPort(3, false));
     EventsManagerCL* evtMgr = new EVENTS_MANAGER_DEFAULT();

@@ -121,9 +121,9 @@ void Lcd_05::ledPolice()
 #include "io/serialPort.h"
 int main(int argc, char* argv[]) 
 {
-    IoManager->submitIoHost(new SerialPort(0, false));
-    IoManager->submitIoHost(new SerialPort(1, false));
-   
+    IoManager->submitIoHost(new SerialPort(0,  DEFAULT_READ_RETRIES, SERIAL_SPEED_38400));
+    IoManager->submitIoHost(new SerialPort(1,  DEFAULT_READ_RETRIES, SERIAL_SPEED_38400));
+    IoManager->submitIoHost(new SerialPort(3,  DEFAULT_READ_RETRIES, SERIAL_SPEED_38400));
     Lcd_05 lcd;
     lcd.print("Hello world\n%s", "test");
     sleep(5);
@@ -158,8 +158,9 @@ int main(int argc, char* argv[])
 {
     ClassConfig::find(CLASS_SERIAL_DEVICE)->setVerboseLevel(VERBOSE_NO_MESSAGE);
     ClassConfig::find(CLASS_SERIAL_PORT)->setVerboseLevel(VERBOSE_NO_MESSAGE);
-    IoManager->submitIoHost(new SerialPort(0, false));
-    IoManager->submitIoHost(new SerialPort(1, false));
+    IoManager->submitIoHost(new SerialPort(0,  DEFAULT_READ_RETRIES, SERIAL_SPEED_38400));
+    IoManager->submitIoHost(new SerialPort(1,  DEFAULT_READ_RETRIES, SERIAL_SPEED_38400));
+    IoManager->submitIoHost(new SerialPort(3,  DEFAULT_READ_RETRIES, SERIAL_SPEED_38400));
     if (argc==1) {
       printf("Usage: %s ligne_1 ligne_2_bla_bla\n", argv[0]);
     }
