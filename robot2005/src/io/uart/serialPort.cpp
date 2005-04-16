@@ -29,6 +29,12 @@ static const speed_t SERIAL_SPEEDS[SERIAL_SPEED_MAX] =
     B600, B1200, B1800, B2400, B4800, B9600,
     B19200, B38400, B57600, B115200, B230400
 };
+// slightly redundant...
+static const char* SERIAL_SPEEDS_STRINGS[SERIAL_SPEED_MAX] =
+{ "50", "75", "110", "134", "150", "200", "300",
+  "600", "1200", "1800", "2400", "4800", "9600",
+  "19200", "38400", "57600", "115200", "230400"
+};
 
 class SerialDevice : public IoDevice {
 public: // constructor/destructor
@@ -112,7 +118,7 @@ bool SerialDevice::open() {
     }
     if ((cfsetospeed(&newtio, SERIAL_SPEEDS[speed_]) < 0) ||
 	(cfsetispeed(&newtio, SERIAL_SPEEDS[speed_]) < 0)) {
-	LOG_ERROR("Can't set speed to %d on device %s\n", speed_, dev);
+	LOG_ERROR("Can't set speed to %s on device %s\n", SERIAL_SPEEDS_STRINGS[speed_], dev);
 	close();
 	return false;
     }
@@ -149,8 +155,12 @@ bool SerialDevice::close() {
     return true;
 }
 
-// TODO: implement this method (if there's something to do) [flo]
 bool SerialDevice::reset() {
+    if (isOpen())
+    {
+	close();
+	open();
+    }
     return true;
 }
 
@@ -243,7 +253,7 @@ bool SerialDevice::setSpeed(SerialSpeed newSpeed) {
 	LOG_ERROR("Can't set speed of open device (tty %d)." , ttyNbr_);
 	return false;
     }
-    LOG_INFO("Setting speed of tty %d to %d\n", ttyNbr_, newSpeed);
+    LOG_INFO("Setting speed of tty %d to %s\n", ttyNbr_, SERIAL_SPEEDS_STRINGS[newSpeed]);
     speed_ = newSpeed;
     return true;
 }
@@ -261,19 +271,19 @@ SerialPort::SerialPort(int ttyNbr, bool isBlocking, SerialSpeed speed)
 	retries = 0;
     else
 	retries = DEFAULT_READ_RETRIES;
-    addInitialDevice(ttyNbr, isBlocking, retries, speed);
+    addInitialDevice(ttyNbr, isBlocking, speed, retries);
 }
 
-SerialPort::SerialPort(int ttyNbr, unsigned int retries, SerialSpeed speed)
+SerialPort::SerialPort(int ttyNbr, SerialSpeed speed, unsigned int retries)
     : RobotBase("SerialPort", CLASS_SERIAL_PORT), speed_(speed)
 {
-    addInitialDevice(ttyNbr, false, retries, speed);
+    addInitialDevice(ttyNbr, false, speed, retries);
 }
 
 void SerialPort::addInitialDevice(int ttyNbr,
 				  bool isBlocking,
-				  unsigned int retries,
-				  SerialSpeed speed) {
+				  SerialSpeed speed,
+				  unsigned int retries) {
     SerialSpeed initialSpeed;
     if (speed == SERIAL_SPEED_SCAN) {
 	initialSpeed = DEFAULT_SERIAL_SPEED;
@@ -293,7 +303,7 @@ const IoDeviceVector& SerialPort::listPorts() {
 }
 
 const IoDeviceScanInfoPairVector& SerialPort::scan() {
-    // TODO: we could implement a scan for blocking-devices using select. [flo]
+    // TODO_future: we could implement a scan for blocking-devices using select. [flo]
     LOG_INFO("Scanning serial port\n");
     IoByte scanAnswer;
     scannedDevice_.clear(); // new scan...
@@ -309,8 +319,8 @@ const IoDeviceScanInfoPairVector& SerialPort::scan() {
       }
       nbSpeeds = NB_MAX_NB_SPEEDS;
 */
-	scanSpeeds[0] = SERIAL_SPEED_9600;
-	scanSpeeds[1] = SERIAL_SPEED_38400;
+	scanSpeeds[0] = SERIAL_SPEED_38400;
+	scanSpeeds[1] = SERIAL_SPEED_9600;
 	nbSpeeds = 2;
     } else {
 	scanSpeeds[0] = speed_;
@@ -322,7 +332,9 @@ const IoDeviceScanInfoPairVector& SerialPort::scan() {
     bool answered = false;
     for (unsigned int i = 0; i < nbSpeeds; ++i) {
 	device->setSpeed(scanSpeeds[i]);
-	LOG_INFO("Scanning device tty %d at speed %d\n", device->getTtyNbr(), scanSpeeds[i]);
+	LOG_INFO("Scanning device tty %d at speed %s\n",
+		 device->getTtyNbr(),
+		 SERIAL_SPEEDS_STRINGS[scanSpeeds[i]]);
 	
 	if (IoHost::doIoDeviceScan(device, &scanAnswer)) {
 	    IoDeviceScanInfoPair info;
