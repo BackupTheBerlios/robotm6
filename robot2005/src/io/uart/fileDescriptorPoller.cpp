@@ -10,9 +10,7 @@ namespace {
 FileDescriptorPollerCL* FileDescriptorPollerCL::instance_ = NULL;
 
 FileDescriptorPollerCL::FileDescriptorPollerCL()
-    // TODO: add CLASS_FILE_DESCRIPTOR_POLLER to classconfig.h
-    //: RobotComponent("FileDescriptorPoller", CLASS_FILE_DESCRIPTOR_POLLER),
-    : RobotBase("FileDescriptorPoller", CLASS_DEFAULT)
+    : RobotBase("FileDescriptorPoller", CLASS_FILE_DESCRIPTOR_POLLER)
 {
     LOG_FUNCTION();
     no_op(repositoryLock4);
@@ -49,15 +47,14 @@ void FileDescriptorPollerCL::registerFileDescriptor(int fd,
 	// TODO: should not be a problem. am i wrong? [flo]
 	LOG_WARNING("Serious warning! registerFiledDescriptor after having "
 		    "created the thread \n");
-	return;
+	// return;
     }
     Lock localLock(&repositoryLock4);
     cbList_[fd].fd = fd;
     cbList_[fd].callback = cb;
     cbList_[fd].userData = userData;
-    // TODO: don't use magic const here! [flo]
-    strncpy(cbList_[fd].callbackName, cbName, 99);
-    cbList_[fd].callbackName[99] = 0;
+    strncpy(cbList_[fd].callbackName, cbName, MAX_CALLBACK_NAME_LENGTH);
+    cbList_[fd].callbackName[MAX_CALLBACK_NAME_LENGTH] = 0;
     LOG_INFO("Registered %s fd=%d maxFd_=%d\n", cbName, fd, maxFd_);
     maxFd_ = max(maxFd_, fd);
     FD_SET(fd, &listenedFds_);
@@ -108,8 +105,7 @@ void FileDescriptorPollerCL::periodicTask()
     }
 
     Lock localLock(&repositoryLock4);
-    // TODO: remove magic number [flo]
-    pollfd fds[8];
+    pollfd fds[MAX_POLLED_NB];
     unsigned int i = 0;
     FileDescriptorPollerCBDataList::iterator it;
     for (it = cbList_.begin();
@@ -120,8 +116,8 @@ void FileDescriptorPollerCL::periodicTask()
 	fds[i].events = POLLIN | POLLPRI;
 	fds[i].revents = 0;
     }
-    // TODO: remove hardcoded magic number.
-    int pollr = poll(fds, cbList_.size(), 20);
+
+    int pollr = poll(fds, cbList_.size(), POLL_TIMEOUT);
     if (pollr > 0)
     {
 	for (i = 0; i < cbList_.size(); ++i)

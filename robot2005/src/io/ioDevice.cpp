@@ -2,9 +2,7 @@
 #include "classConfig.h"
 
 IoDevice::IoDevice()
-    // TODO: add CLASS_IO_DEVICE to classConfig.h
-//    : RobotBase("IoDevice", CLASS_IO_DEVICE),
-    : RobotBase("IoDevice", CLASS_DEFAULT),
+    : RobotBase("IoDevice", CLASS_IO_DEVICE),
       callback_(NULL),
       userData_(NULL)
 {
