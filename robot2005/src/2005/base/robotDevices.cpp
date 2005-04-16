@@ -44,8 +44,7 @@ void* RobotDevicesThreadBody(void* robotDevices)
 {
     while(1)
     {
-	// TODO: remove magic number and replace with constant [flo]
-	usleep(10000);
+	usleep(LOOP_THREAD_SLEEP);
 	static_cast<RobotDevicesCL*>(robotDevices)->periodicTask();
     }
     return NULL;
@@ -75,6 +74,9 @@ RobotDevicesCL::RobotDevicesCL() :
 
 RobotDevicesCL::~RobotDevicesCL()
 {
+    for (unsigned int i = 0; i < toDelete_.size(); ++i)
+	delete toDelete_[i];
+    
     if (motorOdom_){ delete motorOdom_;motorOdom_=NULL; }
     if (motor_)    { delete motor_;    motor_=NULL; }
     if (odometer_) { delete odometer_; odometer_=NULL; }
@@ -94,9 +96,10 @@ RobotDevicesCL::~RobotDevicesCL()
 void RobotDevicesCL::allocDevices()
 {
     LOG_FUNCTION();
-    IoManager->submitIoHost(new SerialPort(0, false));
-    // TODO: keep reference for later deletion of serialPort
-    IoManager->submitIoHost(new SerialPort(1, false));
+    toDelete_.push_back(new SerialPort(0, SERIAL_SPEED_38400));
+    toDelete_.push_back(new SerialPort(1, SERIAL_SPEED_38400));
+    for (unsigned int i = 0; i < toDelete_.size(); ++i)
+	IoManager->submitIoHost(toDelete_[i]);
 
     allocMotorOdom();
     allocLcd();

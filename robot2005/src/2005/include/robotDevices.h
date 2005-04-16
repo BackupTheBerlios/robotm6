@@ -3,6 +3,7 @@
 
 #include "mthread.h"
 #include <set>
+#include <vector>
 #include "robotBase.h"
 #include "devices/lcd.h"
 #include "devices/odometer.h"
@@ -17,6 +18,12 @@
 #include "devices/alim.h"
 
 class MotorOdom05;
+
+// during each loop the thread sleeps LOOP_THREAD_SLEEP
+const unsigned int LOOP_THREAD_SLEEP = 10000;
+
+// forward-declaration:
+class IoHost;
 
 /** @brief Initialisation des cartes electroniques */
 class RobotDevicesCL : public RobotBase {
@@ -86,6 +93,9 @@ private:
     AlimCL*        alim_;
 
     static RobotDevicesCL* instance_;
+
+    typedef std::vector<IoHost*> IoHostVector;
+    IoHostVector toDelete_;
 };
 
 #endif
