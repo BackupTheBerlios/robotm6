@@ -53,8 +53,8 @@ public:
     SerialPort(int ttyNbr, bool isBlocking, SerialSpeed speed = SERIAL_SPEED_SCAN);
     // retries implies non-blocking.
     SerialPort(int ttyNbr,
-	       unsigned int readRetries = DEFAULT_READ_RETRIES,
-	       SerialSpeed = SERIAL_SPEED_SCAN);
+	       SerialSpeed = SERIAL_SPEED_SCAN,
+	       unsigned int readRetries = DEFAULT_READ_RETRIES);
     virtual ~SerialPort();
 
 public: // overwritten methods from IoHost
@@ -64,8 +64,8 @@ public: // overwritten methods from IoHost
 private: // methods
     void addInitialDevice(int ttyNbr,
 			  bool isBlocking,
-			  unsigned int retries,
-			  SerialSpeed speed);
+			  SerialSpeed speed,
+			  unsigned int retries);
     
 private: // fields
     IoDeviceVector device_; // there's just one device

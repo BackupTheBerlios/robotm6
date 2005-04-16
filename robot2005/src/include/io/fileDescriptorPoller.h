@@ -19,11 +19,17 @@
 
 typedef void (*FileDescriptorPollerCallBack)(void*, int); //void* userdata, int fileDescriptor
 
+const unsigned int MAX_CALLBACK_NAME_LENGTH = 99;
+// only MAX_POLLED_NB can be polled at same time.
+const unsigned int MAX_POLLED_NB = 8;
+// wait at most POLL_TIMEOUT for each poll
+const unsigned int POLL_TIMEOUT = 20;
+
 struct FileDescriptorPollerCBData {
     int fd;
     FileDescriptorPollerCallBack callback;
     void* userData;
-    char callbackName[100];
+    char callbackName[MAX_CALLBACK_NAME_LENGTH + 1];
 
     FileDescriptorPollerCBData(): fd(-1), callback(NULL), userData(NULL) {
         callbackName[0]=0;
