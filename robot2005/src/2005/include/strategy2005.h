@@ -37,7 +37,8 @@ class Strategy2005CL : public StrategyCL
     const char* menuName() const;
     /** @brief Configure the robot and wait for the startJack */
     bool waitStart(InitMode mode);
-    /** @brief Fonction qui effectue la derniere action du robot puis arrete le robot */
+    /** @brief Fonction qui effectue la derniere action du robot puis 
+        arrete le robot */
     virtual bool timerAlert();
     /** @brief Function lancee au bout d'1min30 */
     virtual void gameOver();
@@ -51,10 +52,6 @@ class Strategy2005CL : public StrategyCL
      * endEvt=true si l'evenement a ete catche
      */
     virtual bool checkEndEvents();
-    /**
-     * @brief Gere les collisions 
-     */
-    virtual bool checkCollision(bool &collisionEvt);
 
  protected:
     // Variables qui activent les tests pendant l'autoCheck
@@ -75,6 +72,8 @@ class Strategy2005CL : public StrategyCL
     void testDevicesConnection();
     /** @brief verifie que le bouton reboot a ete enclenche */
     bool checkRebootSwitch();
+    /** @brief verifie l'asservissement des roues et les odometres */
+    bool testMove();
     // === test de la communication avec les cartes UART ===
     bool checkAlim();
     bool checkTesla();
@@ -104,6 +103,7 @@ class Strategy2005CL : public StrategyCL
  private:
     SoundId soundDefeat_;
     SoundId soundVictory_;
+    bool    matchIsFinished_;
 };
 
 

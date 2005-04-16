@@ -7,6 +7,7 @@
 #include "lcd.h"
 #include "log.h"
 #include "geometry2D.h"
+#include "bumperMapping.h"
 
 // ----------------------------------------------------------------------------
 // Cette fonction est un EventsFn qui permet d'attendre la fin d'un 
@@ -236,6 +237,58 @@ bool StrategyAttackCL::getBridgeCaptors(BridgeCaptorStatus captors[BRIDGE_CAPTOR
     }
     memcpy(captors, captors2, sizeof(BridgeCaptorStatus)*BRIDGE_CAPTORS_NBR);
     return result;
+}
+
+// --------------------------------------------------------------------------
+// verifie que tous les capteurs pont disent qu'il y a un pont en position 
+// de depart. Si ce n'est pas le cas: si c'est un sharp qui merde, on 
+// desactive la detection sharp, si c'est un bumper un demande de reessayer,
+// si l'utilisateur skip, on desactive le capteur => risque de finir dans le 
+// trou
+// --------------------------------------------------------------------------
+bool StrategyAttackCL::testBridgeCaptors()
+{
+    LOG_COMMAND("== testBridgeCaptors ==\n");
+    BridgeCaptorStatus captors[BRIDGE_CAPTORS_NBR];
+    while(true) {
+        // lit la valeur des capteurs sur la carte bumper
+        while(true) {
+            if (Bumper->getBridgeCaptors(captors)) break;
+            LOG_ERROR("Cannot get bridge informations from bumpers\n");
+            if (!menu("getBridge error\nRetry      Skip")) break;
+        }
+        // teste les sharps
+        if (useSharpToDetectBridge_) {
+            if (bridgeDetectionByCenter_) {
+                if (captors[BRIDGE_SHARP_LEFT] == BRIDGE_NO) {
+                    LOG_ERROR("bridge sharp left does not work => disable bridge "
+                              "sharps!\n");
+                    useSharpToDetectBridge_ = false;
+                }
+            } else {
+                if (captors[BRIDGE_SHARP_LEFT] == BRIDGE_NO ||
+                    captors[BRIDGE_SHARP_CENTER] == BRIDGE_NO ||
+                    captors[BRIDGE_SHARP_RIGHT] == BRIDGE_NO) {
+                    LOG_ERROR("At least one bridge sharp(%s) does not work => "
+                              "disable bridge sharps!\n", BridgePosTxt(bridge_));
+                    useSharpToDetectBridge_ = false;
+                }
+            }
+        }
+        // teste les bumpers
+        if (captors[BRIDGE_BUMPER_LEFT] == BRIDGE_NO) {
+            LOG_ERROR("Left bridge bumper does not work\n");
+            if (menu("Bump Bridge left\nErr   Retry Skip")) continue;
+            else Bumper->disableCaptor(BRIDG_BUMP_LEFT);
+        }
+        if (captors[BRIDGE_BUMPER_RIGHT] == BRIDGE_NO) {
+            LOG_ERROR("Right bridge bumper does not work\n");
+            if (menu("Bump Bridge right\nErr   Retry Skip")) continue;
+            else Bumper->disableCaptor(BRIDG_BUMP_RIGHT);
+        }
+        return true;
+    }
+    return true;
 }
 
 // calcule la position du pont en fonction des sharps quand on est aligne

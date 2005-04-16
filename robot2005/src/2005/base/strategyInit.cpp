@@ -59,6 +59,57 @@ bool Strategy2005CL::checkRebootSwitch()
     return true;
 }
 
+// ---------------------------------------------------------------------------
+// Strategy2005CL::testMove
+// ---------------------------------------------------------------------------
+bool Strategy2005CL::testMove()
+{
+    LOG_COMMAND("== testMove ==\n");
+    bool retry = true;
+    while (retry) {
+        Lcd->print("Test move");
+        RobotPos->set(0,0,0);
+        // on avance de 10cm
+        Move->forward(100);
+        Events->wait(evtEndMove);
+        if (Events->isInWaitResult(EVENTS_PWM_ALERT_LEFT)) {
+            LOG_ERROR("TestMove:EVENTS_PWM_ALERT_LEFT\n");
+            retry = menu("PWM Alert left\nRetry     Skip");
+            continue;
+        } else if (Events->isInWaitResult(EVENTS_PWM_ALERT_RIGHT)) {
+            LOG_ERROR("TestMove:EVENTS_PWM_ALERT_RIGHT\n");
+            retry = menu("PWM Alert right\nRetry     Skip");
+            continue;
+        } else if (dist(RobotPos->pt(), Point(100,0)) > 30) {
+            LOG_ERROR("TestMove: endPos error: real %s - expected (100, 0, 0)\n",
+                      RobotPos->txt());
+            retry = menu("RobotPos alert\nRetry     Skip");
+            continue;
+        } 
+
+        // on recule de 10cm
+        Move->backward(100);
+        Events->wait(evtEndMove);
+        if (Events->isInWaitResult(EVENTS_PWM_ALERT_LEFT)) {
+            LOG_ERROR("TestMove:EVENTS_PWM_ALERT_LEFT\n");
+            retry = menu("PWM Alert left\nRetry     Skip");
+            continue;
+        } else if (Events->isInWaitResult(EVENTS_PWM_ALERT_RIGHT)) {
+            LOG_ERROR("TestMove:EVENTS_PWM_ALERT_RIGHT\n");
+            retry = menu("PWM Alert right\nRetry     Skip");
+            continue;
+        } else if (dist(RobotPos->pt(), Point(0,0)) > 30) {
+            LOG_ERROR("TestMove: endPos error: real %s - expected (0, 0, 0)\n",
+                      RobotPos->txt());
+            retry = menu("RobotPos alert\nRetry     Skip");
+            continue;
+        }
+
+        retry = false;
+    }
+    return true;
+}
+
 // -------------------------------------------------------------------------
 // Strategy2005CL::checkLcd
 // -------------------------------------------------------------------------
@@ -293,6 +344,8 @@ bool Strategy2005CL::waitJackout()
     LOG_COMMAND("WAIT START\n");
     Lcd->print("Ready to start\nWait jack out");
     Sound->play(SOUND_GO_FOR_LAUNCH, SND_PRIORITY_URGENT);
+    Lcd->setLed(LCD_LED_RED,   LCD_LED_OFF);
+    Lcd->setLed(LCD_LED_GREEN, LCD_LED_ON);
     Events->waitNot(EVENTS_JACKIN);
 
     Lcd->print("Go, go, go...");

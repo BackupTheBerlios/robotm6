@@ -35,6 +35,7 @@ class StrategyAttackCL : public Strategy2005CL
 
  protected:
     bool autoCheck();
+    bool testBridgeCaptors();
  private:
     // le boolean renvoye par les fonctions indique si la command a
     // terminee normalement ou non. Si elle n'a pas terminee normalement
@@ -44,6 +45,8 @@ class StrategyAttackCL : public Strategy2005CL
     // ================ Tire des catapultes ==================
     /** @brief Tire des balles avec les catapultes */
     void fireCatapults();
+    /** @brief met les servos des catapultes dans la position de depart */
+    bool prepareCatapults();
 
     // ================ Detection et traversee du pont ==================
     /** @brief va a l'endroit ou on detecte les pont par capteurs sharps */
@@ -117,6 +120,7 @@ class StrategyAttackCL : public Strategy2005CL
     bool           useLeftBridge_; 
     /** utilise le pont du mileu pour essayer de traverser */
     bool           bridgeDetectionByCenter_;
+    bool           useSharpToDetectBridge_;
     
     /** grille qui permet de savoir ou on est deja passe et ou il faut aller */
     GridAttack*    grid_;

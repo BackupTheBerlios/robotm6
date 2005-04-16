@@ -23,6 +23,7 @@ StrategyAttackCL::StrategyAttackCL(RobotMainCL* main):
     Strategy2005CL("StrategyAttack", "Robot attack", CLASS_STRATEGY, main),
     bridgeAvailibility_(0xFF), bridge_(BRIDGE_POS_UNKNOWN), 
     useLeftBridge_(true), bridgeDetectionByCenter_(true), 
+    useSharpToDetectBridge_(true),
     grid_(NULL), lastExplorationDir_(ATTACK_EXPLORE_COL),
     attackPhase_(ATTACK_WAIT_START), skittleMiddleProcessed_(false)
 {
@@ -47,16 +48,18 @@ bool StrategyAttackCL::autoCheck()
     Strategy2005CL::autoCheck();
     // est ce qu'on essaye de passer par le pont du milieu ?
     bridgeDetectionByCenter_ = !menu("Detection pont\nGauche    Milieu");
-    // verifier les capteurs sharps detecteurs de pont
-    // TODO
-    // verifier les bumpers du pont
-    // TODO
-    // verifier les sharps
+    // verifier les capteurs sharps et bumpers detecteurs de pont
+    testBridgeCaptors();
+    // verifier les sharps detecteurs d'environnement
     // TODO
     // verifier l'asservissement
-    // TODO
+    testMove();
+    // met les servos en position
+    prepareCatapults();
+    // maintenant il n'y a plus qu'a bien placer le robot sur la table
+    // et mettre les balles dans les catapultes
+    // et attendre la jack de depart
     return true;
-    // on est pret au depart
 }
 // --------------------------------------------------------------------------
 // Point d'entree du programme du robot: commande haut niveau du robot
@@ -87,7 +90,8 @@ void StrategyAttackCL::run(int argc, char* argv[])
     if (checkEndEvents()) return; // fin du match
 
     // utilise les capteurs pour trouver le pont et traverse le pont
-    if (!getBridgePosBySharp()) {
+    if (!useSharpToDetectBridge_ || 
+        !getBridgePosBySharp()) {
         // les sharps ne marchent pas, on va tout droit pour voir...
         getNearestBridgeEntry();
 
@@ -117,6 +121,19 @@ void StrategyAttackCL::run(int argc, char* argv[])
 // ========================= Tire des catapultes ========================
 
 // ------------------------------------------------------------------------
+// Met les servos des catapultes dans la position de depart
+// ------------------------------------------------------------------------
+bool StrategyAttackCL::prepareCatapults()
+{
+    LOG_FUNCTION();
+    Servo->setServoPosition(1, 0x00);
+    // on attend un peu pour etre sur que les servos sont dans la bonne position
+    usleep(CATAPULT_AWAIT_DELAY*1000);
+    Servo->disableAll();
+    return true;
+}
+
+// ------------------------------------------------------------------------
 // Tire des balles avec les catapultes 
 // ------------------------------------------------------------------------
 void StrategyAttackCL::fireCatapults()
@@ -124,7 +141,7 @@ void StrategyAttackCL::fireCatapults()
     // pour tirer plus vite que notre ombre on commande le servo en premier,
     // les logs viendront ensuite
     Servo->setServoPosition(1, 0xFF);
-    LOG_FUNCTION();
+    LOG_COMMAND("Fire Catapults");
     setAttackPhase(ATTACK_FIRE_CATAPULT);
     Lcd->print("Fire");
 
@@ -142,7 +159,8 @@ void StrategyAttackCL::fireCatapults()
 // ------------------------------------------------------------------------
 bool StrategyAttackCL::killCenterSkittles()
 {
-  return false;
+    LOG_COMMAND("killCenterSkittles");
+    return false;
 }
 
 // ------------------------------------------------------------------------

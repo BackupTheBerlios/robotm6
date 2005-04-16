@@ -29,7 +29,8 @@ Strategy2005CL::Strategy2005CL(const char* name,
     StrategyCL(name, menuName, classId, main), 
     testBumper_(true), testMove_(true),
     soundDefeat_(SOUND_PERDU),
-    soundVictory_(SOUND_GAGNE)
+    soundVictory_(SOUND_GAGNE),
+    matchIsFinished_(false)
 {
 }
 
@@ -44,9 +45,17 @@ Strategy2005CL::~Strategy2005CL()
 // Strategy2005CL::waitStart
 // -------------------------------------------------------------------------
 // Procedure de depart
+// Les leds du lcd:
+//  led rouge = le robot se configure
+//  led verte = le robot attend qu'on enleve la jack
+//  led verte clignote = on est en match
+//  led rouge clignote = le match est termine
 // -------------------------------------------------------------------------
 bool Strategy2005CL::waitStart(InitMode mode) 
 {
+    matchIsFinished_ = false;
+    Lcd->setLed(LCD_LED_RED,   LCD_LED_ON);
+    Lcd->setLed(LCD_LED_GREEN, LCD_LED_OFF);
     switch(mode) {
     case INIT_COMPLETE:
         autoCheck();
@@ -57,6 +66,8 @@ bool Strategy2005CL::waitStart(InitMode mode)
         // on demare tout de suite
         break;
     }
+    Lcd->setLed(LCD_LED_RED,   LCD_LED_OFF);
+    Lcd->setLed(LCD_LED_GREEN, LCD_LED_BLINK);
     main_->startMatch();
     return true;
 }
@@ -69,6 +80,7 @@ bool Strategy2005CL::waitStart(InitMode mode)
 // -------------------------------------------------------------------------
 void Strategy2005CL::emergencyStop()
 {
+    matchIsFinished_ = true;
     Move->stop();
     if (Timer->time()>TIME_MATCH*0.9) {
         // fin du match normale
@@ -77,6 +89,8 @@ void Strategy2005CL::emergencyStop()
         // on a arrete le robot avant la fin du match
         LOG_WARNING("EMERGENCY_STOP is pressed\n");
         Lcd->print("EMERGENCY STOP");
+        Lcd->setLed(LCD_LED_GREEN, LCD_LED_OFF);
+        Lcd->setLed(LCD_LED_RED,   LCD_LED_BLINK);
         Log->stopMatch();
 
         // unregister game over and emergency stop exceptions
@@ -107,9 +121,12 @@ void Strategy2005CL::emergencyStop()
 // -------------------------------------------------------------------------
 void Strategy2005CL::gameOver()
 {
+    matchIsFinished_ = true;
     Move->stop();
     LOG_WARNING("GAME is OVER\n");
     Lcd->print("GAME OVER");
+    Lcd->setLed(LCD_LED_GREEN, LCD_LED_OFF);
+    Lcd->setLed(LCD_LED_RED,   LCD_LED_BLINK);
 
     Log->stopMatch();
     Position pos = RobotPos->pos();
@@ -160,6 +177,9 @@ bool Strategy2005CL::timerAlert()
 // ----------------------------------------------------------------------------
 bool Strategy2005CL::checkEndEvents()
 {
+    if (matchIsFinished_) {
+        return true;
+    }
     if (Events->isInWaitResult(EVENTS_EMERGENCY_STOP)
 	|| Events->check(EVENTS_EMERGENCY_STOP)) {
         emergencyStop();
@@ -234,122 +254,6 @@ bool evtRebootSwitch(bool evt[])
   return (evt[EVENTS_BUTTON_YES] 
 	  || evt[EVENTS_BUTTON_NO]
 	  || evt[EVENTS_SWITCH_REBOOT]);
-}
-
-// -------------------------------------------------------------------------
-// Stategy::checkCollision
-// -------------------------------------------------------------------------
-// S'eloigne d'un obstacle qui vient d'etre detecte et ajoute un element à 
-// la liste HLI->bompObstacles
-// -------------------------------------------------------------------------
-bool Strategy2005CL::checkCollision(bool &collisionEvt)
-{
-#ifdef LSM_TODO
-    if (Timer->time() < 1500) {
-	collisionEvt = false;
-	return true;
-    }
-    if (!Events->isInWaitResult(EVENTS_GROUP_BUMPER)
-	&& !Events->isInWaitResult(EVENTS_PWM_ALERT)) {
-	collisionEvt = false;
-        return true;
-    }
-    MoveDirection oldDir = MvtMgr->getDirection();
-    do {
-      LOG_COMMAND("Avoid Collision\n");
-      collisionEvt = true;
-
-      Obstacle obstacle;
-
-      // evitement de collision
-      MvtMgr->setRobotDirection(MOVE_DIRECTION_FORWARD);
-      if (Events->isInWaitResult(EVENTS_PWM_ALERT)) {
-//	  SOUND->play(SOUND_ALERT_MOTOR);
-	// motor pwm
-	MotorSpeed  speedLeft;
-	MotorSpeed  speedRight;
-	MvtMgr->getMotorSpeed(speedLeft, speedRight);
-	if (speedLeft+speedRight > 0) {
-            Point detectionPoint=RobotPos->pt() 
-                + ROBOT_RAYON * Point(cos(RobotPos->thetaAbsolute()), 
-                                      sin(RobotPos->thetaAbsolute()));
-	    obstacle=Obstacle(detectionPoint
-                              + 50.*Point(cos(RobotPos->thetaAbsolute()), 
-				    sin(RobotPos->thetaAbsolute())),
-                              detectionPoint,
-                              Timer->time()
-                              );
-	    Move->backward(100);
-	} else {
-	    Point detectionPoint=RobotPos->pt() 
-                - ROBOT_RAYON * Point(cos(RobotPos->thetaAbsolute()), 
-                                      sin(RobotPos->thetaAbsolute()));
-	    obstacle=Obstacle(detectionPoint
-                              - 50.*Point(cos(RobotPos->thetaAbsolute()), 
-                                       sin(RobotPos->thetaAbsolute())),
-                              detectionPoint,
-                              Timer->time()
-                              );
-	    Move->forward(100);
-	}
-#ifdef LSM_TODO
-	HLI->setBumpObstacle(obstacle);
-#endif
-	Events->unraise(EVENTS_PWM_ALERT);
-      } else {
-#ifdef LSM_TODO
-	    // bumper events
-	    int bump=0;
-	    if (Events->isInWaitResult(EVENTS_BUMPER_FC))  bump = 0;
-	    if (Events->isInWaitResult(EVENTS_BUMPER_FR))  bump = 1;
-	    if (Events->isInWaitResult(EVENTS_BUMPER_FL))  bump = 2;
-	    if (Events->isInWaitResult(EVENTS_BUMPER_SRF)) bump = 3;
-	    if (Events->isInWaitResult(EVENTS_BUMPER_SRR)) bump = 4;
-	    if (Events->isInWaitResult(EVENTS_BUMPER_SLF)) bump = 5;
-	    if (Events->isInWaitResult(EVENTS_BUMPER_SLR)) bump = 6;
-	    if (Events->isInWaitResult(EVENTS_BUMPER_RR))  bump = 7;
-	    if (Events->isInWaitResult(EVENTS_BUMPER_RL))  bump = 8;
-	    if (Events->isInWaitResult(EVENTS_BUMPER_RC))  bump = 9;
-	    if (Events->isInWaitResult(EVENTS_BUMPER_BORDURE_RR)) bump = 10;
-	    if (Events->isInWaitResult(EVENTS_BUMPER_BORDURE_RL)) bump = 11;
-	    if (Events->isInWaitResult(EVENTS_BUMPER_TOP_F)) bump = 12;
-	    if (Events->isInWaitResult(EVENTS_BUMPER_TOP_R)) bump = 13;
-	    Point detectionPoint=RobotPos->pt() 
-		+ ((dridaqButtonMapping_[bump].pos.r)
-		   *Point(cos(RobotPos->thetaAbsolute()+
-			      dridaqButtonMapping_[bump].pos.theta), 
-			  sin(RobotPos->thetaAbsolute()+
-			      dridaqButtonMapping_[bump].pos.theta)));
-	    obstacle=Obstacle(detectionPoint + (OBSTACLE_RAYON)
-			      *Point(cos(RobotPos->thetaAbsolute()+
-					 dridaqButtonMapping_[bump].pos.theta), 
-				     sin(RobotPos->thetaAbsolute()+
-					 dridaqButtonMapping_[bump].pos.theta)),
-			      detectionPoint,
-			      Timer->time());
-	    if (Events->isInWaitResult(EVENTS_BUMPER_FC)
-		|| Events->isInWaitResult(EVENTS_BUMPER_FR)
-		|| Events->isInWaitResult(EVENTS_BUMPER_FL)
-		|| Events->isInWaitResult(EVENTS_BUMPER_SRF)
-		|| Events->isInWaitResult(EVENTS_BUMPER_SLF)
-		|| Events->isInWaitResult(EVENTS_BUMPER_TOP_F)) {
-		Move->backward(100);
-	    } else {
-		Move->forward(100);
-	    }
-
-	HLI->setBumpObstacle(obstacle);
-#endif
-      }
-
-      Events->wait(evtEndMoveCollision);
-      bool tmpEvt=false;
-      if (!checkEvents(tmpEvt)) return false;
-    } while (Events->isInWaitResult(EVENTS_GROUP_BUMPER)
-	     || Events->isInWaitResult(EVENTS_PWM_ALERT));
-    MvtMgr->setRobotDirection(oldDir);
-#endif
-    return true;
 }
 
 // --------------------------------------------------------------------------
