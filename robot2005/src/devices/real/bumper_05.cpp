@@ -227,10 +227,12 @@ void* BumperThreadBody(void* bumper)
 #include "io/serialPort.h"
 int main(int argc, char* argv[]) 
 {
-    IoManager->submitIoHost(new SerialPort(0, DEFAULT_READ_RETRIES, SERIAL_SPEED_38400));
-    IoManager->submitIoHost(new SerialPort(1, DEFAULT_READ_RETRIES, SERIAL_SPEED_38400));
-    IoManager->submitIoHost(new SerialPort(3, DEFAULT_READ_RETRIES, SERIAL_SPEED_38400));
-    //IoManager->submitIoHost(new SerialPort(3, false));
+    IoManager->submitIoHost(new SerialPort(0, SERIAL_SPEED_38400));
+#ifndef GUMSTIX
+    IoManager->submitIoHost(new SerialPort(1, SERIAL_SPEED_38400));
+#endif
+    IoManager->submitIoHost(new SerialPort(2, SERIAL_SPEED_38400));
+    IoManager->submitIoHost(new SerialPort(3, SERIAL_SPEED_38400));
     EventsManagerCL* evtMgr = new EVENTS_MANAGER_DEFAULT();
 
     Bumper05 bumper;
