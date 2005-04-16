@@ -213,10 +213,22 @@ bool UbartMultiplexer::write(IoByte* buf, unsigned int& length) {
     // Hardcoded protocol:
     //   first 4 bits are device-id.
     //   resting 4 bits are length of request.
-    // TODO: length must be <= 15 !!!
-    return device_->write(static_cast<unsigned char>(targetId_) << 4
-			  | static_cast<unsigned char>(length))
-	&& device_->write(buf, length);
+    bool result = true;
+    unsigned int sent = 0;
+    while (result && (sent < length)) {
+	unsigned int toSendThisTurn = (length - sent);
+	// we can only send 4 bits of length to the Ubart
+	// 4 bits -> 15 chars
+	if (toSendThisTurn > 15) toSendThisTurn = 15;
+	result = 
+	    device_->write(static_cast<unsigned char>(targetId_) << 4
+			  | static_cast<unsigned char>(toSendThisTurn))
+	    && device_->write(buf + sent, toSendThisTurn);
+	// update var, even if it didn't work.
+	sent += toSendThisTurn;
+    }
+    length = sent;
+    return result;
 }
 
 bool UbartMultiplexer::read(IoByte* buf, unsigned int& length) {
