@@ -23,6 +23,30 @@ Alim05::~Alim05()
 {
     if (device_) device_->close();
 }
+
+bool Alim05::getAllTension(Millivolt tension[4]) 
+{
+    if (!device_) return false;
+    unsigned int l=ALIM_TENSION_NBR;
+    unsigned char comData[ALIM_TENSION_NBR];
+    bool status = device_->writeRead(ALIM_REQ_GET_TENSION, comData, l);
+    if (!status) {
+        // affiche le mesage d'erreur une seule fois
+        LOG_ERROR("Alim05::getAllTension read error\n");
+        return false;
+    }
+    for(int i=0; i<4 && i<ALIM_TENSION_NBR; i++) {
+        if (comData[i]==0) {
+            LOG_ERROR("Tension battery %d: 0 V\n", i);
+        } else if (comData[i]==1) {
+            LOG_ERROR("Battery %d is not connected\n", i);
+        } else {
+            tension[i] = 7200 + 50*comData[i]; // TODO use fab conversion method
+            LOG_WARNING("Battery %d: %2.2fV\n", i, tension[i]/1000.);
+        }
+    }
+    return true; 
+}
 /** @brief passe en mode 12V */
 bool Alim05::mode12V()
 {

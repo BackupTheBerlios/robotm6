@@ -5,6 +5,7 @@
 #include "geometry2D.h"
 #include "log.h"
 #include "robotTimer.h"
+#include "robotConfig.h"
 
 // ============================================================================
 // private namespace
@@ -738,16 +739,27 @@ char* MovementRotateOnWheel::txt()
 // ----------------------------------------------------------------------------
 // MovementRealign::MovementRealign
 // ----------------------------------------------------------------------------
-MovementRealign::MovementRealign(bool       stopLeftWheel,
-                                 Millimeter distMaxWheel,
+MovementRealign::MovementRealign(Millimeter distMaxWheel,
                                  Radian     theta,
                                  MoveGain   gain,
                                  MotorSpeed maxSpeed,
                                  MoveCL*    move) :
     Movement(MOVE_REALIGN_TYPE, "MovementRealign", 
              max(maxSpeed, MOVE_MAX_ROTATION_SPEED), gain, move), 
-    theta_(theta), leftWheel_(stopLeftWheel), distMax_(distMaxWheel)
+    theta_(theta), leftWheel_(true), distMax_(distMaxWheel)
 {
+    // est ce qu'on doit bloquer la roue gauche?
+    leftWheel_ = (na2PI(theta-RobotPos->thetaAbsolute(), -M_PI)<0);
+    blockedWheelPoint_ = getStopWheelPoint();
+}
+
+Point MovementRealign::getStopWheelPoint()
+{
+    Point pt = RobotPos->pt();
+    Radian theta = RobotPos->thetaAbsolute() + (leftWheel_?(M_PI/2):(-M_PI/2));
+    pt.x += RobotConfig->getMotorD()*cos(theta);
+    pt.y += RobotConfig->getMotorD()*sin(theta);
+    return pt;
 }
 
 // ----------------------------------------------------------------------------
@@ -774,7 +786,8 @@ void MovementRealign::periodicTask()
       + (MOVE_ROTATION_INTEGRAL_GAIN * getIntegralTerm()); // integral
    
     updateIntegralTerm(error);
-    
+    Point wheelPoint = getStopWheelPoint();
+    bool canMoveStopWheel = (dist(wheelPoint, blockedWheelPoint_) < distMax_);
     double speedRight=0, speedLeft=0, speed=0;
     if (!endOfMovement_) {
         // Convertir (rotationSpeed) en (speedLeft, speedRight)
@@ -792,11 +805,21 @@ void MovementRealign::periodicTask()
         if (leftWheel_) {
             // la roue gauche ne doit pas bouger!
             speedRight =  speed;
-            speedLeft  = 0;
+            if (canMoveStopWheel) speedLeft  = speedLeft/2;
+            else speedLeft  = 0;
+            if (speed > 0) {
+                stop();
+                return;
+            }
         } else {
             // la roue droite ne doit pas bouger!
-            speedRight = 0;
             speedLeft  = -speed;
+            if (canMoveStopWheel) speedRight = speedRight/2;
+            else speedRight  = 0;
+            if (speed > 0) {
+                stop();
+                return;
+            }
         }
     }
     LOG_DEBUG("%d %d\n", (int)speedLeft, (int)speedRight);

@@ -368,22 +368,33 @@ void MoveCL::realign(Radian      finalDir,
     if (fabs(backwardDist - MOVE_USE_DEFAULT_DIST)<0.1) {
 	backwardDist = defaultRealignDist_;
     }
-    bool stopLeftWheel=false;
-    if (na2PI(finalDir - RobotPos->theta(), -M_PI) > 0) {
-        // on tourne vers la gauche: on recule un peu de la roue 
-        // droite et beaucoup de la gauche
-        stopLeftWheel=false;
-    } else { 
-        // on tourne vers la droite: on recule un peu de la roue 
-        // gauche et beaucoup de la droite
-        stopLeftWheel=true;
-    }
-    setCurrentMovement(new MovementRealign(stopLeftWheel,
-                                           backwardDist, 
+    setCurrentMovement(new MovementRealign(backwardDist, 
                                            finalDir, 
                                            gain, 
                                            maxSpeed,
                                            this));
+}
+
+// ----------------------------------------------------------------------------
+// Move::rotateOnWheel
+// ----------------------------------------------------------------------------
+void MoveCL::rotateOnWheel(Radian      finalDir,
+                           bool        stopLeftWheel,
+                           MoveGain    gain,
+                           MotorSpeed  maxSpeed)
+{
+    stop();
+    if (gain == MOVE_USE_DEFAULT_GAIN) {
+	gain = defaultRotationGain_;
+    }
+    if (maxSpeed == MOVE_USE_DEFAULT_SPEED) {
+	maxSpeed = defaultMaxRotationSpeed_;
+    }
+    setCurrentMovement(new MovementRotateOnWheel(stopLeftWheel,
+                                                 finalDir, 
+                                                 gain, 
+                                                 maxSpeed,
+                                                 this));
 }
 
 // ----------------------------------------------------------------------------
@@ -409,9 +420,9 @@ void MoveCL::rotateFromAngle(Radian      deltaTheta,
 // Move::go2Target
 // ----------------------------------------------------------------------------
 void MoveCL::go2Target(Millimeter  x, 
-                     Millimeter  y,
-                     MoveGain    gain, 
-                     MotorSpeed  maxSpeed)
+                       Millimeter  y,
+                       MoveGain    gain, 
+                       MotorSpeed  maxSpeed)
 {
     go2Target(Point(x, y), gain, maxSpeed);
 }

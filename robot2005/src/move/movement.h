@@ -168,19 +168,21 @@ class MovementRotate : public Movement
 class MovementRealign : public Movement
 {
  public:
-    MovementRealign(bool       stopLeftWheel,
-                    Millimeter distMaxWheel,
+    MovementRealign(Millimeter distMaxWheel,
                     Radian     theta,
                     MoveGain   gain,
                     MotorSpeed maxSpeed,
                     MoveCL*    move);
-    void periodicTask();
+
+    Point getStopWheelPoint();
+    void  periodicTask();
     char* txt();
 
  protected:
     Radian     theta_;
     bool       leftWheel_;
     Millimeter distMax_;
+    Point      blockedWheelPoint_;
 };
 
 // -----------------------------------------------------------------

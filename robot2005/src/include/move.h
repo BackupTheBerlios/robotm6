@@ -120,7 +120,8 @@ class MoveCL : public RobotComponent
     void backward(Millimeter  dist,
                   MotorSpeed  maxSpeed=MOVE_USE_DEFAULT_SPEED); 
     
-    /** Fait tourner le robot sur lui même vers un angle donné. 
+    /** Fait tourner le robot sur lui même vers un angle donné, en allant 
+        en marche arriere et en reculant a pein d'une des deux roues 
 	cf repère du terrain */
     void realign(Radian      finalDir,
                  Millimeter  backwardDist=MOVE_USE_DEFAULT_DIST,
@@ -139,6 +140,13 @@ class MoveCL : public RobotComponent
     void rotateFromAngle(Radian      deltaTheta,
                          MoveGain    gain=MOVE_USE_DEFAULT_GAIN ,
                          MotorSpeed  maxSpeed=MOVE_USE_DEFAULT_SPEED);
+
+    /**  Fait tourner le robot sur lui même vers un angle donné en bloquand une roue.
+         si stopLeftWheel = true on fait tourner que le moteur droit */
+    void rotateOnWheel(Radian      finalDir,
+                       bool        stopLeftWheel,
+                       MoveGain    gain=MOVE_USE_DEFAULT_GAIN,
+                       MotorSpeed  maxSpeed=MOVE_USE_DEFAULT_SPEED);
 
     /** Le robot va jusqu'à un point cible. Tout d'abord il tourne sur
 	lui même dans la bonne direction, puis il s'asservit sur le point 

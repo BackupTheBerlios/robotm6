@@ -29,7 +29,7 @@ class AlimCL : public RobotDeviceCL {
   static AlimCL* instance();
   virtual bool reset()  { return true; }
   virtual bool exists() const { return false; }
-  virtual void emergencyStop() { /* todo  demander a gibus comment on arrete l'electro aimant*/ }
+  virtual void emergencyStop() {  }
   /** @brief envoie le servo a un position donnee et l'asservi */
   virtual bool getAllTension(Millivolt tension[4]) { return false; }
   /** @brief passe en mode 12V */

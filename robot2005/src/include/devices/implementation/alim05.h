@@ -22,7 +22,8 @@ class Alim05 : public AlimCL {
     Alim05();
     ~Alim05();
     bool exists() const { return true; }
-    
+
+    bool getAllTension(Millivolt tension[4]); 
     /** @brief passe en mode 12V */
     bool mode12V();
     /** @brief passe en mode 28V */
