@@ -176,16 +176,10 @@ void EventsManagerCL::unraiseEventsBumpers()
     evtStatus_[(int)EVENTS_SKITTLE_DETECTED]=false;
     evtStatus_[(int)EVENTS_SKITTLE_ATTACHED]=false;
     
-    evtStatus_[(int)EVENTS_BUMPER_FC]=false;  // front center
     evtStatus_[(int)EVENTS_BUMPER_FR]=false;  // front right
     evtStatus_[(int)EVENTS_BUMPER_FL]=false;  // front left
-    evtStatus_[(int)EVENTS_BUMPER_SLF]=false; // side left front
-    evtStatus_[(int)EVENTS_BUMPER_SLR]=false; // side left rear
-    evtStatus_[(int)EVENTS_BUMPER_SRF]=false; // side right front
-    evtStatus_[(int)EVENTS_BUMPER_SRR]=false; // side right rear
     evtStatus_[(int)EVENTS_BUMPER_RR]=false; // rear right
     evtStatus_[(int)EVENTS_BUMPER_RL]=false; // rear left
-    evtStatus_[(int)EVENTS_BUMPER_RC]=false; // rear center
     evtStatus_[(int)EVENTS_BUMPER_BORDURE_RR]=false; // bordure rear right (z=15mm)
     evtStatus_[(int)EVENTS_BUMPER_BORDURE_RL]=false; // bordure rear left
     evtStatus_[(int)EVENTS_BUMPER_TOP_F]=false; // top front   (z=390mm) => detection barre d'enbut

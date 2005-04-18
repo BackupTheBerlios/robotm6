@@ -45,16 +45,16 @@ void GridAttack::setVisitTime(Millisecond time,
 }
 
 void GridAttack::setObstacleTime(Millisecond time, 
-                                 Position pos)
+                                 Point pt)
 {
-    GPoint pt=getGPoint(pos.center);
-    element(pt).obstacleTime=time;
+    GPoint gpt=getGPoint(pt);
+    element(gpt).obstacleTime=time;
 }
 
-void GridAttack::setSkittleDetected(Position pos)
+void GridAttack::setSkittleDetected(Point pt)
 {
-    GPoint pt=getGPoint(pos.center);
-    element(pt).skittleAtBegining=true;
+    GPoint gpt=getGPoint(pt);
+    element(gpt).skittleAtBegining=true;
 }
 
 int GridAttack::scoreRow(GridUnit    row, 

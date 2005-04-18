@@ -24,6 +24,7 @@ class Bumper05: public BumperCL {
   bool exists() const { return true; }
 
   void disableCaptor(unsigned int bumperId);
+  void enableCaptor(unsigned int bumperId);
   bool getBridgeCaptors(BridgeCaptorStatus captors[BRIDGE_CAPTORS_NBR]);
   bool getEmergencyStop(bool& emergencyStop);
   bool getJackin(bool& jackin);

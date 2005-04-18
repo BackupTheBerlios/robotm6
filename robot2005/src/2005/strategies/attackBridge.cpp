@@ -11,9 +11,9 @@
 
 // ----------------------------------------------------------------------------
 // Cette fonction est un EventsFn qui permet d'attendre la fin d'un 
-// mouvement en testant en plus les collisions basees sur les bumper
+// mouvement en testant en plus si il y a un fosse devant
 // ----------------------------------------------------------------------------
-bool evtEndMoveBridge(bool evt[])
+static bool evtEndMoveBridge(bool evt[])
 {
     return evtEndMove(evt)
         || evt[EVENTS_GROUP_BRIDGE];

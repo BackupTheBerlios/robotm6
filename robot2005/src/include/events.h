@@ -61,34 +61,15 @@ typedef enum EventsEnum {
     EVENTS_SKITTLE_DETECTED, // quille detectee par le rateau
     EVENTS_SKITTLE_ATTACHED, // detection de l'accrochage d'une quille par l'electro aimant
 
-    EVENTS_ENV_TOP_FRONT,
     EVENTS_ENV_TOP_RIGHT,
     EVENTS_ENV_TOP_LEFT,
-    EVENTS_ENV_MIDDLE_LEFT,
-    EVENTS_ENV_MIDDLE_RIGHT,
-    EVENTS_ENV_BOTTOM_BACK,
-    EVENTS_ENV_MIDDLE_FRONT_LEFT,
-    EVENTS_ENV_MIDDLE_FRONT_RIGHT,
-    EVENTS_ENV_MIDDLE_BACK_LEFT,
-    EVENTS_ENV_MIDDLE_BACK_RIGHT,
-    EVENTS_ENV_BOTTOM_LEFT_1,
-    EVENTS_ENV_BOTTOM_LEFT_2,
-    EVENTS_ENV_BOTTOM_RIGHT_1,
-    EVENTS_ENV_BOTTOM_RIGHT_2,
-    EVENTS_ENV_BOTTOM_BACK_LEFT,
-    EVENTS_ENV_BOTTOM_BACK_RIGHT,
-    EVENTS_ENV_MIDDLE_FRONT_CENTER,
+    EVENTS_ENV_SIDE_LEFT,
+    EVENTS_ENV_SIDE_RIGHT,
     
-    EVENTS_BUMPER_FC,  // front center
     EVENTS_BUMPER_FR,  // front right
     EVENTS_BUMPER_FL,  // front left
-    EVENTS_BUMPER_SLF, // side left front
-    EVENTS_BUMPER_SLR, // side left rear
-    EVENTS_BUMPER_SRF, // side right front
-    EVENTS_BUMPER_SRR, // side right rear
     EVENTS_BUMPER_RR, // rear right
     EVENTS_BUMPER_RL, // rear left
-    EVENTS_BUMPER_RC, // rear center
     EVENTS_BUMPER_BORDURE_RR, // bordure rear right (z=15mm)
     EVENTS_BUMPER_BORDURE_RL, // bordure rear left
     EVENTS_BUMPER_TOP_F, // top front   (z=390mm) => detection barre d'enbut
@@ -135,45 +116,15 @@ static EventsInfoStruct EventsInfo[EVENTS_NBR] = {
     { EVENTS_SKITTLE_DETECTED, "EVT_SKITTLE_DETECTED", EVENTS_GROUP_NONE }, 
     { EVENTS_SKITTLE_ATTACHED, "EVT_SKITTLE_ATTACHED", EVENTS_GROUP_NONE }, 
    
-    { EVENTS_ENV_TOP_FRONT, "EVT_ENV_TOP_FRONT",    EVENTS_GROUP_ENV_DETECTOR},
-    { EVENTS_ENV_TOP_RIGHT, "EVT_ENV_TOP_RIGHT",    EVENTS_GROUP_ENV_DETECTOR},
-    { EVENTS_ENV_TOP_LEFT,  "EVT_ENV_TOP_LEFT",     EVENTS_GROUP_ENV_DETECTOR},
-    { EVENTS_ENV_MIDDLE_LEFT,"EVT_ENV_MIDDLE_LEFT", EVENTS_GROUP_ENV_DETECTOR},
-    {EVENTS_ENV_MIDDLE_RIGHT,"EVT_ENV_MIDDLE_RIGHT",EVENTS_GROUP_ENV_DETECTOR},
-    { EVENTS_ENV_BOTTOM_BACK,"EVT_ENV_BOTTOM_BACK", EVENTS_GROUP_ENV_DETECTOR},
-    { EVENTS_ENV_MIDDLE_FRONT_LEFT, "EVT_ENV_MIDDLE_FRONT_LEFT", 
-        EVENTS_GROUP_ENV_DETECTOR },
-    { EVENTS_ENV_MIDDLE_FRONT_RIGHT,"EVT_ENV_MIDDLE_FRONT_RIGHT",
-        EVENTS_GROUP_ENV_DETECTOR },
-    { EVENTS_ENV_MIDDLE_BACK_LEFT,  "EVT_ENV_MIDDLE_BACK_LEFT", 
-        EVENTS_GROUP_ENV_DETECTOR },
-    { EVENTS_ENV_MIDDLE_BACK_RIGHT, "EVT_ENV_MIDDLE_BACK_RIGHT", 
-        EVENTS_GROUP_ENV_DETECTOR },
-    { EVENTS_ENV_BOTTOM_LEFT_1,     "EVT_ENV_BOTTOM_LEFT_1", 
-        EVENTS_GROUP_ENV_DETECTOR },
-    { EVENTS_ENV_BOTTOM_LEFT_2,     "EVT_ENV_BOTTOM_LEFT_2", 
-        EVENTS_GROUP_ENV_DETECTOR },
-    { EVENTS_ENV_BOTTOM_RIGHT_1,    "EVT_ENV_BOTTOM_RIGHT_1", 
-        EVENTS_GROUP_ENV_DETECTOR },
-    { EVENTS_ENV_BOTTOM_RIGHT_2,    "EVT_ENV_BOTTOM_RIGHT_2", 
-        EVENTS_GROUP_ENV_DETECTOR },
-    { EVENTS_ENV_BOTTOM_BACK_LEFT,     "EVT_ENV_BOTTOM_BACK_LEFT", 
-        EVENTS_GROUP_ENV_DETECTOR },
-    { EVENTS_ENV_BOTTOM_BACK_RIGHT,    "EVT_ENV_BOTTOM_BACK_RIGHT", 
-        EVENTS_GROUP_ENV_DETECTOR },
-    { EVENTS_ENV_MIDDLE_FRONT_CENTER,    "EVT_ENV_MIDDLE_FRONT_CENTER", 
-        EVENTS_GROUP_ENV_DETECTOR },  
-
-    { EVENTS_BUMPER_FC, "EVT_BUMP_FRONT_CENTER", EVENTS_GROUP_BUMPER }, 
+    { EVENTS_ENV_TOP_RIGHT,  "EVT_ENV_TOP_RIGHT",  EVENTS_GROUP_ENV_DETECTOR},
+    { EVENTS_ENV_TOP_LEFT,   "EVT_ENV_TOP_LEFT",   EVENTS_GROUP_ENV_DETECTOR},
+    { EVENTS_ENV_SIDE_LEFT,  "EVT_ENV_SIDE_LEFT",  EVENTS_GROUP_ENV_DETECTOR},
+    { EVENTS_ENV_SIDE_RIGHT, "EVT_ENV_SIDE_RIGHT", EVENTS_GROUP_ENV_DETECTOR},
+    
     { EVENTS_BUMPER_FR, "EVT_BUMP_FRONT_RIGHT", EVENTS_GROUP_BUMPER }, 
-    { EVENTS_BUMPER_FL, "EVT_BUMP_FRONT_LEFT", EVENTS_GROUP_BUMPER }, 
-    { EVENTS_BUMPER_SLF,"EVT_BUMP_SIDE_LEFT_FRONT", EVENTS_GROUP_BUMPER },
-    { EVENTS_BUMPER_SLR,"EVT_BUMP_SIDE_LEFT_REAR", EVENTS_GROUP_BUMPER }, 
-    { EVENTS_BUMPER_SRF,"EVT_BUMP_SIDE_RIGHT_FRONT", EVENTS_GROUP_BUMPER },
-    { EVENTS_BUMPER_SRR,"EVT_BUMP_SIDE_RIGHT_REAR", EVENTS_GROUP_BUMPER },
-    { EVENTS_BUMPER_RR, "EVT_BUMP_REAR_RIGHT", EVENTS_GROUP_BUMPER },
-    { EVENTS_BUMPER_RL, "EVT_BUMP_REAR_LEFT", EVENTS_GROUP_BUMPER },
-    { EVENTS_BUMPER_RC, "EVT_BUMP_REAR_CENTER", EVENTS_GROUP_BUMPER },
+    { EVENTS_BUMPER_FL, "EVT_BUMP_FRONT_LEFT",  EVENTS_GROUP_BUMPER }, 
+    { EVENTS_BUMPER_RR, "EVT_BUMP_REAR_RIGHT",  EVENTS_GROUP_BUMPER },
+    { EVENTS_BUMPER_RL, "EVT_BUMP_REAR_LEFT",   EVENTS_GROUP_BUMPER },
     { EVENTS_BUMPER_BORDURE_RR,"EVT_BUMP_BORDURE_RIGHT",EVENTS_GROUP_BUMPER },
     { EVENTS_BUMPER_BORDURE_RL,"EVT_BUMP_BORDURE_LEFT", EVENTS_GROUP_BUMPER },
     { EVENTS_BUMPER_TOP_F, "EVT_BUMP_TOP_F", EVENTS_GROUP_BUMPER }, 
@@ -234,8 +185,9 @@ class EventsManagerCL : public RobotComponent
      * évenement est enablé 
      */
     void disable(EventsEnum evt);
-    /** @brief Enregistre un callback exécuté par le thread qui fait un move 
-     * (permet de thrower des exceptions dans le callback quand un evenement est raisé
+    /** @brief Enregistre un callback exécuté par le thread qui fait un wait 
+     * (permet de thrower des exceptions dans le callback quand un evenement
+     * est raisé
      */
     void registerCallback(EventsEnum evt,
 			  void* userData,
@@ -247,7 +199,8 @@ class EventsManagerCL : public RobotComponent
                                   EventsFunctionPtr evtCallback,
 				  const char* callBackName);
     /** @brief Enregistre un callback exécuté par le thread qui fait un move 
-     * (permet de thrower des exceptions dans le callback quand un evenement est unraisé
+     * (permet de thrower des exceptions dans le callback quand un evenement 
+     * est unraisé
      */
     void registerNotCallback(EventsEnum evt,
 			     void* userData,

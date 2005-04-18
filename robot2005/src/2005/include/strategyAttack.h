@@ -3,6 +3,7 @@
  
 #include "strategy2005.h"
 #include "devices/bumper.h"
+#include "events.h"
 
 enum AttackExplorationDirection {
     ATTACK_EXPLORE_ROW=0,
@@ -32,7 +33,7 @@ class StrategyAttackCL : public Strategy2005CL
     void run(int argc, char*argv[]);
 
     void periodicTask(Millisecond time);
-
+    void envDetectorCallBack(EventsEnum evt); 
  protected:
     bool autoCheck();
     bool testBridgeCaptors();
@@ -128,9 +129,12 @@ class StrategyAttackCL : public Strategy2005CL
         on prendra l'autre type */
     AttackExplorationDirection lastExplorationDir_;
     /* Dans quel partie du match on est */
-    AttackPhase                attackPhase_;
-    /* est ce qu'on a fait tomber les quilles du milieu ? */
-    bool          skittleMiddleProcessed_;
+    AttackPhase    attackPhase_;
+    /* est ce qu'on a deja fait tomber les quilles du milieu ? */
+    volatile bool  skittleMiddleProcessed_;
+    /* est ce qu'on est en train d'aller faire tomber les quilles du milieu? 
+       si oui on active les detecteurs de ponts quand x<2400 */
+    volatile bool  isProcessingMiddleSkittles_;
     
 };
 

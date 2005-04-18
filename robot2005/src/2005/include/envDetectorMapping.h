@@ -5,10 +5,10 @@
 #include "env.h"
 
 enum EnvDetectorId {
-    ENV_DETECTOR_0=0,
-    ENV_DETECTOR_1,
-    ENV_DETECTOR_2,
-    ENV_DETECTOR_3,
+    ENV_DETECTOR_TOP_RIGHT=0,
+    ENV_DETECTOR_TOP_LEFT,
+    ENV_DETECTOR_SIDE_RIGHT,
+    ENV_DETECTOR_SIDE_LEFT,
     
     ENV_DETECTOR_NBR
 };
@@ -28,16 +28,19 @@ struct EnvDetectorMappingStruct {
  
 };
 
-EnvDetectorMappingStruct EnvDetectorMapping[ENV_DETECTOR_NBR]= {
-    {ENV_DETECTOR_0, "EnvDetector 0",   EVENTS_ENV_TOP_FRONT,   0, 0, false,  ENV_NEAR,
+static EnvDetectorMappingStruct EnvDetectorMapping[ENV_DETECTOR_NBR]= {
+    {ENV_DETECTOR_TOP_RIGHT, "EnvDetector TOP RIGHT",   EVENTS_ENV_TOP_RIGHT, 
+     0, 0, false,  ENV_NEAR,
     true },
-    {ENV_DETECTOR_1, "EnvDetector 1",   EVENTS_ENV_TOP_FRONT,   0, 2, false,  ENV_NEAR,
+    {ENV_DETECTOR_TOP_LEFT, "EnvDetector TOP LEFT",   EVENTS_ENV_TOP_LEFT,  
+     0, 2, false,  ENV_NEAR,
      true},
-    {ENV_DETECTOR_2, "EnvDetector 2",   EVENTS_ENV_TOP_FRONT,   0, 4, false,  ENV_NEAR,
+    {ENV_DETECTOR_SIDE_RIGHT, "EnvDetector SIDE RIGHT", EVENTS_ENV_SIDE_RIGHT,
+     0, 4, false,  ENV_NEAR,
     true},
-    {ENV_DETECTOR_3, "EnvDetector 3",   EVENTS_ENV_TOP_FRONT,   0, 6, false,  ENV_NEAR,
+    {ENV_DETECTOR_SIDE_LEFT, "EnvDetector SIDE LEFT",   EVENTS_ENV_SIDE_LEFT,
+     0, 6, false,  ENV_NEAR,
     true}
-    // TODO: set the correct events (need to know the captor position
 };
 
 #endif

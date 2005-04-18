@@ -17,6 +17,11 @@ enum BumperId {
   BRIDG_SHARP_CENTER,
   BRIDG_SHARP_RIGHT,
 
+  BUMP_RR, // rear right
+  BUMP_RL, // rear left
+  BUMP_FL, // front left
+  BUMP_FR, // front right
+
   BUMPERS_NBR
 };
 
@@ -31,8 +36,8 @@ struct BumperMappingStruct {
     bool enableAtReset;
 };
 
-// TODO set the correct mapping
-BumperMappingStruct BumpersMapping[BUMPERS_NBR]= {
+// TODO set the correct mapping for bumpers
+static BumperMappingStruct BumpersMapping[BUMPERS_NBR]= {
     {BUTTON_YES,    "Button Yes",      EVENTS_BUTTON_YES,      false, 0, 0,
     true},
     {BUTTON_NO,     "Button No",       EVENTS_BUTTON_NO,       false, 0, 0,
@@ -55,8 +60,18 @@ BumperMappingStruct BumpersMapping[BUMPERS_NBR]= {
     {BRIDG_SHARP_CENTER, "SharpBridgeCenter", EVENTS_GROUP_NONE,        
      true, 0, 1, true},
     {BRIDG_SHARP_RIGHT,"SharpBridgeRight",    EVENTS_GROUP_NONE,        
-     true, 0, 2, true}
-    // TODO: add bumpers 2,1 a 2,7
+     true, 0, 2, true},
+    // TODO: add bumpers 2,1 a 2,7 
+
+    {BUMP_RR,    "Bumper Rear Right",     EVENTS_BUMPER_RR,      false, 2, 1,
+     true},
+    {BUMP_RL,    "Bumper Rear Left",      EVENTS_BUMPER_RL,      false, 2, 2,
+     true},
+    {BUMP_FR,    "Bumper Front Right",    EVENTS_BUMPER_FR,      false, 2, 3,
+     true},
+    {BUMP_FL,    "Bumper Front Left",     EVENTS_BUMPER_FL,      false, 2, 4,
+     true}
+   
 };
 
 #endif

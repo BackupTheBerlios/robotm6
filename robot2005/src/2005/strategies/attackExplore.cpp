@@ -7,8 +7,30 @@
 #include "movementManager.h"
 #include "events.h"
 #include "geometry2D.h"
+#include "bumperMapping.h"
 
 typedef GridAttack::GridUnit GridUnit;
+
+// ----------------------------------------------------------------------------
+// Cette fonction est un EventsFn qui permet d'attendre la fin d'un 
+// mouvement en testant en plus si il y a un fosse devant
+// ----------------------------------------------------------------------------
+static bool evtEndMoveBridge(bool evt[])
+{
+    return evtEndMove(evt)
+        || evt[EVENTS_GROUP_BRIDGE];
+}
+
+// ----------------------------------------------------------------------------
+// Cette fonction est un EventsFn qui permet d'attendre la fin d'un 
+// mouvement en testant en plus les sharps a l'avant du robot
+// ----------------------------------------------------------------------------
+static bool evtEndMoveEnvDetector(bool evt[])
+{
+    return evtEndMove(evt)
+        || evt[EVENTS_ENV_TOP_RIGHT]
+        || evt[EVENTS_ENV_TOP_LEFT];
+}
 
 // --------------------------------------------------------------------------
 // Choisi une des 2 trajectoires predefinie et l'execute jusqu'à collision
@@ -36,7 +58,7 @@ bool StrategyAttackCL::preDefinedSkittleExploration()
 // ---------------------------------------------------------------
 bool StrategyAttackCL::preDefinedSkittleExploration1()
 {
-    LOG_FUNCTION();
+    LOG_COMMAND("preDefinedSkittleExploration1\n");
     Trajectory t;
     t.push_back(Point(2640, 1650)); 
     t.push_back(Point(3240, 1650)); 
@@ -97,7 +119,7 @@ bool StrategyAttackCL::preDefinedSkittleExploration1()
 // ---------------------------------------------------------------
 bool StrategyAttackCL::preDefinedSkittleExploration2()
 {
-    LOG_FUNCTION();
+    LOG_COMMAND("preDefinedSkittleExploration2\n");
     Trajectory t;
     t.push_back(Point(2640, 1350)); 
     t.push_back(Point(3240, 1350)); 
@@ -184,6 +206,7 @@ bool StrategyAttackCL::preDefinedSkittleExploration2()
 // --------------------------------------------------------------------------
 bool StrategyAttackCL::basicSkittleExploration()
 {
+    LOG_COMMAND("basicSkittleExploration\n");
     updateGrid();
     GridPoint gpts[3];
     if (lastExplorationDir_ == ATTACK_EXPLORE_COL) {
@@ -496,4 +519,69 @@ void StrategyAttackCL::updateGrid()
           grid_->hasNoUnexploredSkittle()))) {
         setAttackPhase(ATTACK_GRAND_MENAGE);
     }
+}
+
+// ------------------------------------------------------------------------
+// va faire tomber les quilles du milieu du terrain (la pile de 3) 
+// ------------------------------------------------------------------------
+bool StrategyAttackCL::killCenterSkittles()
+{
+    LOG_COMMAND("killCenterSkittles");
+    isProcessingMiddleSkittles_ = true;
+    Trajectory t;
+    // on va ver le pont du milieu en arrivant par le milieu du terrain
+    if (RobotPos->x()>2400) {
+        t.push_back(Point(RobotPos->x(), 1050));
+    }
+    t.push_back(Point(2400, 1050));
+    t.push_back(Point(2100, 1260));
+    MvtMgr->setRobotDirection(MOVE_DIRECTION_FORWARD);
+    Move->followTrajectory(t, TRAJECTORY_BASIC);
+    Events->wait(evtEndMoveBridge);
+    // on a reussi ?
+    if (Events->isInWaitResult(EVENTS_MOVE_END)) {
+        LOG_OK("On a fait tomber les quilles du milieu\n");
+        skittleMiddleProcessed_ = true; // on a du faire tomber les quilles
+    } else {
+        // c'est la fin du match?
+        if (checkEndEvents()) goto endMiddleSkittleError;
+        // on est tombe dans le trou?
+        if ((Events->isInWaitResult(EVENTS_NO_BRIDGE_BUMP_LEFT) ||
+             Events->isInWaitResult(EVENTS_NO_BRIDGE_BUMP_RIGHT))
+            && RobotPos->x()<2400) {
+            Move->stop(); // on ne va pas plus loin!
+            LOG_OK("On a fait tomber les quilles du milieu\n");
+            skittleMiddleProcessed_ = true; // on a du faire tomber les quilles
+            MvtMgr->setRobotDirection(MOVE_DIRECTION_FORWARD);
+            Move->backward(100);
+            Events->wait(evtEndMoveNoCollision);
+            if (checkEndEvents()) goto endMiddleSkittleError;
+        } 
+        if (RobotPos->x() < 2200) {
+            LOG_OK("On a fait tomber les quilles du milieu\n");
+            skittleMiddleProcessed_ = true; // on a du faire tomber les quilles
+        }
+        // en cas de probleme, on ne fait rien, la suite de la procedure 
+        // consiste a s'eloigner du fosse
+    }
+    
+    // on s'eloigne du fosse
+    while(RobotPos->x()<2300) {
+        MvtMgr->setRobotDirection(MOVE_DIRECTION_BACKWARD);
+        Move->go2Target(2600, 1050);
+        Events->wait(evtEndMove);
+        // on a reussi ?
+        if (Events->isInWaitResult(EVENTS_MOVE_END)) break;
+        // c'est la fin du match?
+        if (checkEndEvents()) return false;
+    }
+    Bumper->disableCaptor(BRIDG_BUMP_LEFT);
+    Bumper->disableCaptor(BRIDG_BUMP_RIGHT);
+    isProcessingMiddleSkittles_ = false;
+    return true;
+ endMiddleSkittleError:
+    Bumper->disableCaptor(BRIDG_BUMP_LEFT);
+    Bumper->disableCaptor(BRIDG_BUMP_RIGHT);
+    isProcessingMiddleSkittles_ = false;
+    return false;
 }

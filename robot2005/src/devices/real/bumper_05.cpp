@@ -48,8 +48,17 @@ bool Bumper05::reset()
 
 void Bumper05::disableCaptor(unsigned int captorId) 
 {
-    skipCaptor_[captorId] = true;
-    Events->unraise(BumpersMapping[captorId].evt);
+    if (!skipCaptor_[captorId]) {
+        skipCaptor_[captorId] = true;
+        Events->unraise(BumpersMapping[captorId].evt);
+    }
+}
+
+void Bumper05::enableCaptor(unsigned int captorId) 
+{
+    if (skipCaptor_[captorId]) {
+        skipCaptor_[captorId] = false;
+    }
 }
 
 bool Bumper05::getBridgeCaptors(BridgeCaptorStatus captors[BRIDGE_CAPTORS_NBR])

@@ -29,8 +29,8 @@ class GridAttack
                       Position pos);
 
     void setObstacleTime(Millisecond time, 
-                         Position pos);
-    void setSkittleDetected(Position pos);
+                         Point pt);
+    void setSkittleDetected(Point pt);
     int  scoreRow(GridUnit    row, 
                   GridUnit    col, 
                   bool        dir,

@@ -9,11 +9,20 @@
 #include "servo.h"
 #include "gridAttack.h"
 #include "robotTimer.h"
+#include "bumperMapping.h"
 
-void gridAttackPeriodicTask(void *userData, Millisecond time)
+void gridAttackPeriodicTask(void *userData, 
+                            Millisecond time)
 {
     if (!userData) return;
     ((StrategyAttackCL*)userData)->periodicTask(time);
+}
+
+void StrategyAttackEnvDetectorCallBack(void* userData,
+                                       EventsEnum evt)
+{
+    if (!userData) return;
+    ((StrategyAttackCL*)userData)->envDetectorCallBack(evt);
 }
 
 // --------------------------------------------------------------------------
@@ -61,6 +70,7 @@ bool StrategyAttackCL::autoCheck()
     // et attendre la jack de depart
     return true;
 }
+
 // --------------------------------------------------------------------------
 // Point d'entree du programme du robot: commande haut niveau du robot
 // --------------------------------------------------------------------------
@@ -73,7 +83,12 @@ void StrategyAttackCL::run(int argc, char* argv[])
     Lcd->print("SophiaTeam");
     RobotPos->setOdometerType(ODOMETER_MOTOR);
     //RobotPos->setOdometerType(ODOMETER_UART_MANUAL);
-
+    Events->registerImmediatCallback(EVENTS_ENV_SIDE_RIGHT, this,
+                                     StrategyAttackEnvDetectorCallBack,
+                                     "StrategyAttackEnvDetectorCallBack");
+    Events->registerImmediatCallback(EVENTS_ENV_SIDE_RIGHT, this,
+                                     StrategyAttackEnvDetectorCallBack,
+                                     "StrategyAttackEnvDetectorCallBack");
     setStartingPosition();
     waitStart(INIT_FAST);
 
@@ -109,11 +124,16 @@ void StrategyAttackCL::run(int argc, char* argv[])
     // utilise un super algo d'exploration du terrain
     setAttackPhase(ATTACK_ONLY_SKITTLES);
     Lcd->print("Explore a donf");
+    int counterTryMiddle=0;
     while(true) {
         basicSkittleExploration();
         if (checkEndEvents()) return; // fin du match
-
-        // TODO: penser a aller faire tomber les quilles du milieu un jour
+        if (!isProcessingMiddleSkittles_ 
+            && (--counterTryMiddle < 0)) {
+            killCenterSkittles();
+            if (checkEndEvents()) return; // fin du match
+            counterTryMiddle = 3;
+        }
     }
     return;
 }
@@ -144,7 +164,7 @@ void StrategyAttackCL::fireCatapults()
     LOG_COMMAND("Fire Catapults");
     setAttackPhase(ATTACK_FIRE_CATAPULT);
     Lcd->print("Fire");
-
+    Log->fireBalls();
     // on attend un peut pour etre sur qu'on a tirer avant de couper les
     // moteurs et de bouger
     usleep(CATAPULT_AWAIT_DELAY*1000);
@@ -155,15 +175,6 @@ void StrategyAttackCL::fireCatapults()
 // ================ Exploration de la zone ennemie ==================
 
 // ------------------------------------------------------------------------
-// va faire tomber les quilles du milieu du terrain (la pile de 3) 
-// ------------------------------------------------------------------------
-bool StrategyAttackCL::killCenterSkittles()
-{
-    LOG_COMMAND("killCenterSkittles");
-    return false;
-}
-
-// ------------------------------------------------------------------------
 // tache periodique qui met a jour la grille pour dire ou on est deja passe
 // ------------------------------------------------------------------------
 void StrategyAttackCL::periodicTask(Millisecond time)
@@ -172,30 +183,68 @@ void StrategyAttackCL::periodicTask(Millisecond time)
         attackPhase_ >= ATTACK_PREDEFINED_TRAJEC) {
         grid_->setVisitTime(time, RobotPos->pos());
     }
+    if (isProcessingMiddleSkittles_) {
+        if (RobotPos->x() < 2450) {
+            Bumper->enableCaptor(BRIDG_BUMP_LEFT);
+            Bumper->enableCaptor(BRIDG_BUMP_RIGHT);
+        } else {
+            Bumper->disableCaptor(BRIDG_BUMP_LEFT);
+            Bumper->disableCaptor(BRIDG_BUMP_RIGHT);
+        }
+    }
 }
 
+// -------------------------------------------------------------------------------
+// Met a jour la grille quand on detect un true sur les cotes du robot
+// -------------------------------------------------------------------------------
+void StrategyAttackCL::envDetectorCallBack(EventsEnum evt) 
+{
+    Point pt;
+    switch(evt) {
+    case EVENTS_ENV_SIDE_LEFT:
+        pt = RobotPos->pt()+300.*Point(cos(RobotPos->thetaAbsolute()+M_PI/2),
+                                       sin(RobotPos->thetaAbsolute()+M_PI/2));
+        if (pt.x < 2500) return; // on ne detecte pas les quilles chez nous!
+        Log->skittle(pt);
+        if (grid_) grid_->setSkittleDetected(pt);
+        break;
+    case EVENTS_ENV_SIDE_RIGHT:
+        pt = RobotPos->pt()+300.*Point(cos(RobotPos->thetaAbsolute()-M_PI/2),
+                                       sin(RobotPos->thetaAbsolute()-M_PI/2));
+        if (pt.x < 2500) return; // on ne detecte pas les quilles chez nous!
+        Log->skittle(pt);
+        if (grid_) grid_->setSkittleDetected(pt);
+        break;
+    default:
+        break;
+    }
+}
+
+// -------------------------------------------------------------------------------
+// Petit message pour les log quand change de phase de jeu
+// -------------------------------------------------------------------------------
 void StrategyAttackCL::setAttackPhase(AttackPhase phase)
 {
     attackPhase_ = phase;
 
     switch (attackPhase_) { 
     case ATTACK_WAIT_START:
-        { LOG_WARNING("Change Attack Phase to ATTACK_WAIT_START\n"); }
+        { LOG_OK("Change Attack Phase to ATTACK_WAIT_START\n"); }
     break;
     case ATTACK_FIRE_CATAPULT:
-        { LOG_WARNING("Change Attack Phase to ATTACK_FIRE_CATAPULT\n"); }
+        { LOG_OK("Change Attack Phase to ATTACK_FIRE_CATAPULT\n"); }
     break;
     case ATTACK_CROSS_BRIDGE:
-        { LOG_WARNING("Change Attack Phase to ATTACK_CROSS_BRIDGE\n"); }
+        { LOG_OK("Change Attack Phase to ATTACK_CROSS_BRIDGE\n"); }
     break;
     case ATTACK_PREDEFINED_TRAJEC:
-        { LOG_WARNING("Change Attack Phase to ATTACK_PREDEFINED_TRAJEC\n"); }
+        { LOG_OK("Change Attack Phase to ATTACK_PREDEFINED_TRAJEC\n"); }
     break;
     case ATTACK_ONLY_SKITTLES:
-        { LOG_WARNING("Change Attack Phase to ATTACK_ONLY_SKITTLES\n"); }
+        { LOG_OK("Change Attack Phase to ATTACK_ONLY_SKITTLES\n"); }
     break;
     case ATTACK_GRAND_MENAGE:       
-        { LOG_WARNING("Change Attack Phase to ATTACK_GRAND_MENAGE\n"); }
+        { LOG_OK("Change Attack Phase to ATTACK_GRAND_MENAGE\n"); }
     break;
     }
 }

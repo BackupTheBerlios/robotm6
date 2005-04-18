@@ -43,8 +43,10 @@ class BumperCL: public RobotDeviceCL {
   virtual bool reset()  { return true; }
   virtual bool exists() const { return false; }
 
-  // disbale the events raised by a captor
+  // disable the events raised by a captor
   virtual void disableCaptor(unsigned int bumperId){}
+  // enable the events raised by a captor
+  virtual void enableCaptor(unsigned int bumperId){}
   // return the status of the bridge captors
   virtual bool getBridgeCaptors(BridgeCaptorStatus captors[BRIDGE_CAPTORS_NBR]) { return false; }
   /** emergencyStop=true: arret d'urgence enfonce */
