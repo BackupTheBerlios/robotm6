@@ -20,6 +20,9 @@ static bool evtEndMoveBridge(bool evt[])
 }
 
 
+// ---------------------------------------------------------------------------
+// fonction qui boucle jusqu'a ce que le robot ait traverse le pont ou
+// que ce soit la fin du match 
 bool StrategyAttackCL::findAndCrossBridge() 
 { 
     while (true) {   
@@ -38,7 +41,8 @@ bool StrategyAttackCL::findAndCrossBridge()
             }
         } 
         if (checkEndEvents()) return false;
-        getNearestBridgeEntry();
+        getNearestBridgeEntry(); // met a jour bridge avec une autre
+				 // position de pont a explorer
     }
 }
 
@@ -51,6 +55,8 @@ void StrategyAttackCL::getNearestBridgeEntry()
     // si on a deja tout teste, on reteste a nouveau...
     if (!(bridgeAvailibility_&0x0F)) bridgeAvailibility_ = 0x0F;
     // trouve le pont non explore le plus proche
+  
+    // utilise le pont le voisin de la position actuelle
     if (!(bridgeAvailibility_ & (1<<currentBit))) {
         switch(currentBit) {
         case 0:
@@ -69,6 +75,8 @@ void StrategyAttackCL::getNearestBridgeEntry()
             currentBit=(currentBit+1)%4;
         }
     }
+    // verifie aue la nouvelle position a essayer n'a pas encore
+    // ete essayee, si c'est le cas, on essaye le pont d'a cote
     if (!(bridgeAvailibility_ & (1<<currentBit))) {
         switch(currentBit) {
         case 0:
@@ -87,6 +95,7 @@ void StrategyAttackCL::getNearestBridgeEntry()
             currentBit=(currentBit+1)%4;
         }
     }
+    // verifie que la nouvelle position du pont non exploree
     if (!(bridgeAvailibility_ & (1<<currentBit))) {
         switch(currentBit) {
         case 1:
@@ -99,7 +108,7 @@ void StrategyAttackCL::getNearestBridgeEntry()
             currentBit=(currentBit+1)%4;
         }
     }
-    // should be ok...
+    // la on devrait avoir trouve une position non exploree
     switch(currentBit) {
         case 0:
             bridge_ = BRIDGE_POS_BORDURE;
@@ -198,8 +207,8 @@ bool StrategyAttackCL::gotoBridgeDetection()
   return false;
 }
 
-// Recupere la valeur des sharps detecteurs de pont: verifie que la valeur ne 
-// varie pas
+// Recupere la valeur des cqpteurs detecteurs de pont: verifie que la valeur ne 
+// varie pas. si la vqleur vqrie la fonction retourne false
 bool StrategyAttackCL::getBridgeCaptors(BridgeCaptorStatus captors[BRIDGE_CAPTORS_NBR],
                                         bool checkSharp)
 {
@@ -298,7 +307,7 @@ bool StrategyAttackCL::getBridgePosBySharpFromCenter
 {
     // on doit arrive vers le pont du milieu
     if (fabs(RobotPos->y() -  BRIDGE_ENTRY_SIOUX_Y) > BRIDGE_ENTRY_MARGIN) 
-        return false;
+         return false;
     if (captors[BRIDGE_SHARP_LEFT] == BRIDGE_DETECTED
         && captors[BRIDGE_SHARP_CENTER] == BRIDGE_DETECTED) {
         // pont contre le pont fixe
@@ -425,6 +434,7 @@ bool StrategyAttackCL::gotoBridgeEntry(Millimeter y,
         return false;
     } 
     if (Events->isInWaitResult(EVENTS_MOVE_END)) return true;
+    if (checkEndEvents()) return false;
     return false;
 }
 
@@ -526,11 +536,13 @@ bool StrategyAttackCL::crossBridge()
         if (Events->isInWaitResult(EVENTS_MOVE_END)) return true;
         // c'est la fin du match?
         if (checkEndEvents()) return false;
-        // on s'est plante, on recule un peu, on se reoriente et on repart!
-        Move->backward(100);
-        Events->wait(evtEndMoveNoCollision);
-        if (checkEndEvents()) return false;
-        Move->rotate(0);
+        // on s'est plante, on recule un peu, on se reoriente et on
+        // repart!
+	Move->realign(0);
+	// Move->backward(100);
+	// Events->wait(evtEndMoveNoCollision);
+	// if (checkEndEvents()) return false;
+	// Move->rotate(0);
         Events->wait(evtEndMoveNoCollision);
         if (checkEndEvents()) return false;
     } while (retry++<5);
