@@ -90,7 +90,7 @@ void StrategyAttackCL::run(int argc, char* argv[])
                                      StrategyAttackEnvDetectorCallBack,
                                      "StrategyAttackEnvDetectorCallBack");
     setStartingPosition();
-    waitStart(INIT_FAST);
+    waitStart(INIT_NONE);
 
     Move->enableAccelerationController(false);
     MvtMgr->enableAutomaticReset(false);
