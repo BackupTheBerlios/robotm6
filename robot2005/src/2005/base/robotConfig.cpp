@@ -10,8 +10,12 @@
 RobotConfigAttack2005CL::RobotConfigAttack2005CL(bool simulated)
     : RobotConfig2005CL("Robot attack", simulated)
 {
-    isRobotAttack=(true);
-    isMotorISA=(true);
+    isRobotAttack=true;
+#ifndef GUMSTIX
+    isMotorISA=true;
+#else
+    isMotorISA=false;
+#endif
     startingPos=Position(490, 1675, 0);
     timeAlertBeforeEnd =(80000);
 
@@ -51,7 +55,11 @@ RobotConfigDefence2005CL::RobotConfigDefence2005CL(bool simulated)
     : RobotConfig2005CL("Robot defence", simulated)
 {
     isRobotAttack=(false);
-    isMotorISA=(true);
+#ifndef GUMSTIX
+    isMotorISA=true;
+#else
+    isMotorISA=false;
+#endif
     startingPos=Position(50, 1700, -M_PI/2.);
     timeAlertBeforeEnd =(75000);
 

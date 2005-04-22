@@ -97,7 +97,12 @@ void RobotDevicesCL::allocDevices()
 {
     LOG_FUNCTION();
     toDelete_.push_back(new SerialPort(0, SERIAL_SPEED_38400));
+#ifndef GUMSTIX
     toDelete_.push_back(new SerialPort(1, SERIAL_SPEED_38400));
+#else
+    toDelete_.push_back(new SerialPort(2, SERIAL_SPEED_38400));
+    toDelete_.push_back(new SerialPort(3, SERIAL_SPEED_38400));
+#endif
     for (unsigned int i = 0; i < toDelete_.size(); ++i)
 	IoManager->submitIoHost(toDelete_[i]);
 

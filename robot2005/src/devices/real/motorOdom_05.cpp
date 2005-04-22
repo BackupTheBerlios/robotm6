@@ -129,11 +129,11 @@ bool MotorOdom05::setSpeedAndCachePosition(MotorSpeed left,
     buf[2] = right;
 
     static unsigned char buf2[20];
-    unsigned int l2=13;
+    unsigned int l2=12;
     if (device_->writeRead(buf, l, buf2, l2)) {
         unsigned char checksum=buf[0]; 
         for(int k=1; k<12;k++)  checksum ^= buf[k];
-        if (checksum != buf[13]) {
+        if (false && checksum != buf[13]) {
 	  //bad checksum, flush the buffer!
 	  l2=20;
 	  device_->read(buf, l2);
@@ -147,9 +147,9 @@ bool MotorOdom05::setSpeedAndCachePosition(MotorSpeed left,
 	  motorPwmRight_ = buf2[11];
 	}
 #ifdef TEST_MAIN
-	LOG_DEBUG("ol(0x2.2x 0x2.2x) or(0x2.2x 0x2.2x) "
-		  "pl(0x2.2x0x2.2x 0x2.2x) pr(0x2.2x 0x2.2x 0x2.2x) "
-		  "wl=0x2.2x, wr=0x2.2x\n",
+	LOG_DEBUG("ol(0x%2.2x 0x%2.2x) or(0x%2.2x 0x%2.2x) "
+		  "pl(0x%2.2x0x%2.2x 0x%2.2x) pr(0x%2.2x 0x%2.2x 0x%2.2x) "
+		  "wl=0x%2.2x, wr=0x%2.2x\n",
 		  buf2[0], buf2[1], 
 		  buf2[2], buf2[3], 
 		  buf2[4], buf2[5], buf2[6],
@@ -378,7 +378,12 @@ int main() {
   (void) signal(SIGINT, motorRealTelecommandSIGINT);
 
   IoManager->submitIoHost(new SerialPort(0));
+#ifndef GUMSTIX
   IoManager->submitIoHost(new SerialPort(1));
+#else
+  IoManager->submitIoHost(new SerialPort(2));
+  IoManager->submitIoHost(new SerialPort(3));
+#endif
 
   MotorOdom05 motor;
   pMotor=&motor;
