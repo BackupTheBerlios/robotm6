@@ -137,6 +137,16 @@ bool MotorOdom05::setSpeedAndCachePosition(MotorSpeed left,
         motorPosRight_ = (((int)buf2[7])<<16)+(((int)buf2[8])<<8)+(int)buf2[9];
         motorPwmLeft_  = buf2[10];
         motorPwmRight_ = buf2[11];
+#ifdef TEST_MAIN
+	LOG_DEBUG("ol(0x2.2x 0x2.2x) or(0x2.2x 0x2.2x) "
+		  "pl(0x2.2x0x2.2x 0x2.2x) pr(0x2.2x 0x2.2x 0x2.2x) "
+		  "wl=0x2.2x, wr=0x2.2x\n",
+		  buf2[0], buf2[1], 
+		  buf2[2], buf2[3], 
+		  buf2[4], buf2[5], buf2[6],
+		  buf2[7], buf2[8], buf2[9],
+		  buf2[10], buf2[11]);
+#endif
         return true;
     } else {
         LOG_ERROR("Com Error send%d/3, received:%d/12\n", l, l2);
@@ -292,7 +302,7 @@ bool getKeyboardOrder(MotorOdom05& motor)
     motor.reset();
     order.speedLeft=0;
     order.speedRight=0;
-    break;
+    return true;
   case 'p' :
   case 'P' :
       { 
@@ -358,8 +368,8 @@ int main() {
   configureKeyboard();
   (void) signal(SIGINT, motorRealTelecommandSIGINT);
 
-  IoManager->submitIoHost(new SerialPort(0, false));
-  IoManager->submitIoHost(new SerialPort(1, false));
+  IoManager->submitIoHost(new SerialPort(0));
+  IoManager->submitIoHost(new SerialPort(1));
 
   MotorOdom05 motor;
   pMotor=&motor;

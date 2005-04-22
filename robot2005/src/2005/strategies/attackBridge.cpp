@@ -406,21 +406,47 @@ bool StrategyAttackCL::gotoBridgeEntry(Millimeter y,
         // car on etait peut etre dans le trou...
         Events->disable(EVENTS_NO_BRIDGE_BUMP_LEFT);
         Events->disable(EVENTS_NO_BRIDGE_BUMP_RIGHT);
-        // on s'eloigne un peu du bord, pour aller en x qui nous permet
-        //de nous promener tranquillement le long de la riviere
-        Move->go2Target(BRIDGE_ENTRY_NAVIGATE_X, RobotPos->y());
-        Events->wait(evtEndMove);
-        if (checkEndEvents()) return false;
-        if (!Events->isInWaitResult(EVENTS_MOVE_END)) return false;
-
-        // va en face du pont
-        Events->enable(EVENTS_NO_BRIDGE_BUMP_LEFT);
-        Events->enable(EVENTS_NO_BRIDGE_BUMP_RIGHT);
-        Trajectory t;
-        t.push_back(Point(BRIDGE_ENTRY_NAVIGATE_X, y));
-        t.push_back(Point(BRIDGE_DETECT_BUMP_X, y));
-        MvtMgr->setRobotDirection(MOVE_DIRECTION_FORWARD);
-        Move->followTrajectory(t);
+	if (fabs(RobotPos->y()-y)>400) {
+	  // on va loin: on recule bettement puit on prend un point cible
+	  // on s'eloigne un peu du bord, pour aller en x qui nous permet
+	  //de nous promener tranquillement le long de la riviere
+	  Move->go2Target(BRIDGE_ENTRY_NAVIGATE_X, RobotPos->y());
+	  Events->wait(evtEndMove);
+	  if (checkEndEvents()) return false;
+	  if (!Events->isInWaitResult(EVENTS_MOVE_END)) return false;
+	  
+	  // va en face du pont
+	  Events->enable(EVENTS_NO_BRIDGE_BUMP_LEFT);
+	  Events->enable(EVENTS_NO_BRIDGE_BUMP_RIGHT);
+	  Trajectory t;
+	  t.push_back(Point(BRIDGE_ENTRY_NAVIGATE_X, y));
+	  t.push_back(Point(BRIDGE_DETECT_BUMP_X, y));
+	  MvtMgr->setRobotDirection(MOVE_DIRECTION_FORWARD);
+	  Move->followTrajectory(t);
+	} else {
+	  // on ne va pas loin en y donc on fait un joli mouvement en S
+	  Millimeter y2 = (RobotPos->y()+y)/2; // entre le point cible et nous
+	  Trajectory t;
+	  t.push_back(Point(BRIDGE_DETECT_BUMP_X-100, RobotPos->y()));
+	  t.push_back(Point(BRIDGE_ENTRY_NAVIGATE_X+100, y2));
+	  t.push_back(Point(BRIDGE_ENTRY_NAVIGATE_X, y2));
+	  // on s'eloigne un peu du bord, pour aller en x qui nous permet
+	  //de nous promener tranquillement le long de la riviere
+	  Move->followTrajectory(t);
+	  Events->wait(evtEndMove);
+	  if (checkEndEvents()) return false;
+	  if (!Events->isInWaitResult(EVENTS_MOVE_END)) return false;
+	  
+	  // va en face du pont
+	  Events->enable(EVENTS_NO_BRIDGE_BUMP_LEFT);
+	  Events->enable(EVENTS_NO_BRIDGE_BUMP_RIGHT);
+	  t.clear();
+	  t.push_back(Point(BRIDGE_ENTRY_NAVIGATE_X+100, y2));
+	  t.push_back(Point(BRIDGE_DETECT_BUMP_X-100, y));
+	  t.push_back(Point(BRIDGE_DETECT_BUMP_X, y));
+	  MvtMgr->setRobotDirection(MOVE_DIRECTION_FORWARD);
+	  Move->followTrajectory(t);
+	}
     }
     // utiliser les bumpers events pour savoir si on tombe dans un trou...
     Events->wait(evtEndMoveBridge);
