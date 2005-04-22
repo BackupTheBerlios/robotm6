@@ -95,7 +95,7 @@ MovementManagerCL::MovementManagerCL(MotorCL* motor, OdometerCL* odom) :
  // ----------------------------------------------------------------------------
  // movementManagerThreadBody
  // ----------------------------------------------------------------------------
- static const int MOVEMENT_MANAGER_THREAD_PERIOD=1000;
+ static const int MOVEMENT_MANAGER_THREAD_PERIOD=10;
 
 
  static void* movementManagerThreadBody(void* data)
@@ -103,7 +103,7 @@ MovementManagerCL::MovementManagerCL(MotorCL* motor, OdometerCL* odom) :
      MovementManagerCL* mvtMgr = MovementManagerCL::instance();
      while (true) {
 	 mvtMgr->periodicTask();
-	 usleep(MOVEMENT_MANAGER_THREAD_PERIOD);
+	 usleep(MOVEMENT_MANAGER_THREAD_PERIOD*1000);
      }
      return NULL;
  }
