@@ -19,8 +19,8 @@ enum BumperId {
 
   BUMP_RR, // rear right
   BUMP_RL, // rear left
-  BUMP_FL, // front left
   BUMP_FR, // front right
+  BUMP_FL, // front left
 
   BUMPERS_NBR
 };

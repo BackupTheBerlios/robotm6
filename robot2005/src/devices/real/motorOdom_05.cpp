@@ -129,14 +129,23 @@ bool MotorOdom05::setSpeedAndCachePosition(MotorSpeed left,
     buf[2] = right;
 
     static unsigned char buf2[20];
-    unsigned int l2=12;
+    unsigned int l2=13;
     if (device_->writeRead(buf, l, buf2, l2)) {
-        odomPosLeft_   = (((int)buf2[0])<<8)+(int)buf2[1];
-        odomPosRight_  = (((int)buf2[1])<<8)+(int)buf2[3];
-        motorPosLeft_  = (((int)buf2[4])<<16)+(((int)buf2[5])<<8)+(int)buf2[6];
-        motorPosRight_ = (((int)buf2[7])<<16)+(((int)buf2[8])<<8)+(int)buf2[9];
-        motorPwmLeft_  = buf2[10];
-        motorPwmRight_ = buf2[11];
+        unsigned char checksum=buf[0]; 
+        for(int k=1; k<12;k++)  checksum ^= buf[k];
+        if (checksum != buf[13]) {
+	  //bad checksum, flush the buffer!
+	  l2=20;
+	  device_->read(buf, l2);
+	  LOG_ERROR("Checksum error!\n");
+	} else {
+	  odomPosLeft_   = (((int)buf2[0])<<8)+(int)buf2[1];
+	  odomPosRight_  = (((int)buf2[1])<<8)+(int)buf2[3];
+	  motorPosLeft_  = (((int)buf2[4])<<16)+(((int)buf2[5])<<8)+(int)buf2[6];
+	  motorPosRight_ = (((int)buf2[7])<<16)+(((int)buf2[8])<<8)+(int)buf2[9];
+	  motorPwmLeft_  = buf2[10];
+	  motorPwmRight_ = buf2[11];
+	}
 #ifdef TEST_MAIN
 	LOG_DEBUG("ol(0x2.2x 0x2.2x) or(0x2.2x 0x2.2x) "
 		  "pl(0x2.2x0x2.2x 0x2.2x) pr(0x2.2x 0x2.2x 0x2.2x) "
