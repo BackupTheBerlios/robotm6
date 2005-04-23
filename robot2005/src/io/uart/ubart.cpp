@@ -1,5 +1,5 @@
 #include "io/ubart.h"
-#define LOG_DEBUG_ON
+//#define LOG_DEBUG_ON
 #include "log.h"
 
 /**
@@ -28,7 +28,7 @@ public: // Ubart-specific methods
 private: // fields
     UbartMultiplexer* multiplexer_;
     bool isOpen_;
-    unsigned int ubartId_;
+    const unsigned int ubartId_;
 };
 
 /**
@@ -122,6 +122,7 @@ bool Ubart::write(IoByte* buf, unsigned int& length)
 bool Ubart::writeRead(IoByte* sendBuffer, unsigned int& sendLength,
 		      IoByte* receiveBuffer, unsigned int& receiveLength)
 {
+    LOG_DEBUG("writeRead of Ubart %d\n", ubartId_);
     UbartLock(this);
     return write(sendBuffer, sendLength)
 	&& read(receiveBuffer, receiveLength);
@@ -184,6 +185,7 @@ void UbartMultiplexer::unlock() {
 }
 
 void UbartMultiplexer::switchToUbart(Ubart* ubart) {
+    LOG_DEBUG("switching to ubart %d\n", ubart->getUbartId());
     targetId_ = ubart->getUbartId();
 }
 
@@ -255,6 +257,7 @@ bool UbartMultiplexer::read(IoByte* buf, unsigned int& length) {
 	//   resting 4 bits are length of request.
 	// In this case we just switch the ubart (so length == 0).
 	device_->write(static_cast<unsigned char>(targetId_) << 4);
+	currentId_ = targetId_;
     }
     LOG_DEBUG("Read on ubart %d\n", currentId_);
     if(device_->read(buf, length)) {
