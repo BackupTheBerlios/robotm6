@@ -302,8 +302,13 @@ int main(int argc, char* argv[])
   }
   ClassConfig::find(CLASS_SERIAL_DEVICE)->setVerboseLevel(VERBOSE_NO_MESSAGE);
   ClassConfig::find(CLASS_SERIAL_PORT)->setVerboseLevel(VERBOSE_NO_MESSAGE);
-  IoManager->submitIoHost(new SerialPort(0, false));
-  IoManager->submitIoHost(new SerialPort(1, false));
+  IoManager->submitIoHost(new SerialPort(0, SERIAL_SPEED_38400));
+#ifndef GUMSTIX
+  IoManager->submitIoHost(new SerialPort(1, SERIAL_SPEED_38400));
+#endif
+  IoManager->submitIoHost(new SerialPort(2, SERIAL_SPEED_38400));
+  IoManager->submitIoHost(new SerialPort(3, SERIAL_SPEED_38400));
+  
   if (IoManager->getIoDevice(IO_ID_BUMPER_05)) {
     Bumper05 bumper;
     unsigned char data[BUMPER_DATA_NBR];

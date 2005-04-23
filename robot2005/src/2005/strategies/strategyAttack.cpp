@@ -165,7 +165,7 @@ void StrategyAttackCL::fireCatapults()
     // pour tirer plus vite que notre ombre on commande le servo en premier,
     // les logs viendront ensuite
     Servo->setServoPosition(1, 0xFF);
-    LOG_COMMAND("Fire Catapults");
+    LOG_COMMAND("Fire Catapults\n");
     setAttackPhase(ATTACK_FIRE_CATAPULT);
     Lcd->print("Fire");
     Log->fireBalls();

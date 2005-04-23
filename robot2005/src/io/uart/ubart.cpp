@@ -1,4 +1,6 @@
 #include "io/ubart.h"
+#define LOG_DEBUG_ON
+#include "log.h"
 
 /**
  * @brief Ubarts need to lock the multiplexer, then make the multiplexer
@@ -164,7 +166,8 @@ const IoDeviceVector& UbartMultiplexer::listPorts() {
 const IoDeviceScanInfoPairVector& UbartMultiplexer::scan() {
     foundDevices_.clear();
     for (unsigned int i = 0; i < ubarts_.size(); ++i) {
-	switchToUbart(static_cast<Ubart*>(ubarts_[i]));
+        LOG_INFO("ubart scan %d\n", i);
+        switchToUbart(static_cast<Ubart*>(ubarts_[i]));
 	IoByte scanAnswer;
 	if (doIoDeviceScan(ubarts_[i], &scanAnswer))
 	    foundDevices_.push_back(IoDeviceScanInfoPair(ubarts_[i], scanAnswer));
@@ -210,22 +213,36 @@ bool UbartMultiplexer::isBlocking() const {
 
 bool UbartMultiplexer::write(IoByte* buf, unsigned int& length) {
     currentId_ = targetId_;
+    LOG_DEBUG("write %d bytes on ubart %d\n", length, currentId_);
     // Hardcoded protocol:
     //   first 4 bits are device-id.
     //   resting 4 bits are length of request.
     bool result = true;
     unsigned int sent = 0;
+    unsigned int stillToSendThisTurn=0;
     while (result && (sent < length)) {
 	unsigned int toSendThisTurn = (length - sent);
 	// we can only send 4 bits of length to the Ubart
 	// 4 bits -> 15 chars
 	if (toSendThisTurn > 15) toSendThisTurn = 15;
+	stillToSendThisTurn = toSendThisTurn;
+	IoByte address = ((static_cast<unsigned char>(targetId_) << 4)
+			   | ((static_cast<unsigned char>(stillToSendThisTurn)) & 0x0F)) ;
 	result = 
-	    device_->write(static_cast<unsigned char>(targetId_) << 4
-			  | static_cast<unsigned char>(toSendThisTurn))
-	    && device_->write(buf + sent, toSendThisTurn);
+	  device_->write(address)
+	  && device_->write(buf + sent, stillToSendThisTurn);
+#ifdef LOG_DEBUG_ON
+	  printf("address=0x%2.2x\n",address);
+	for(unsigned int i=0;i<toSendThisTurn; i++) {
+	  char* buf2=(char*)buf+sent;
+	  printf("Ox%2.2x(%c)", buf2[i], buf2[i]);
+	}
+	printf("\n");
+	printf("write result=%s, toSend=%d, stillToSend=%d\n", 
+	       b2s(result), toSendThisTurn, stillToSendThisTurn);
+#endif
 	// update var, even if it didn't work.
-	sent += toSendThisTurn;
+	sent += toSendThisTurn - stillToSendThisTurn;
     }
     length = sent;
     return result;
@@ -239,5 +256,12 @@ bool UbartMultiplexer::read(IoByte* buf, unsigned int& length) {
 	// In this case we just switch the ubart (so length == 0).
 	device_->write(static_cast<unsigned char>(targetId_) << 4);
     }
-    return device_->read(buf, length);
+    LOG_DEBUG("Read on ubart %d\n", currentId_);
+    if(device_->read(buf, length)) {
+      if (length>0) { LOG_DEBUG("Read OK: 0x%2.2x\n", buf[0]) };
+      return true;
+    } else {
+      LOG_DEBUG("Read error\n");
+      return false;
+    }
 }

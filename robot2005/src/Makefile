@@ -117,9 +117,11 @@ check:
 ## ===========================================================================
 ## Upload the program into the robot
 ## ===========================================================================
-install: 
-#efface les anciens binaires, logs et phots
-	../bin/installBin.sh
+install2: 
+	scp -r ../gumstix/bin ../gumstix/so/ root@gumb2:robot
+
+install1:
+	scp -r ../gumstix/bin ../gumstix/so/ root@gumb:robot
 
 cleanRobot:
 #efface les anciens logs et photos
