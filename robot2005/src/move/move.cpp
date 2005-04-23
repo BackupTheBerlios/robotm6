@@ -476,10 +476,10 @@ void MoveCL::go2Target(Point       pt,
 // MoveCL::followTrajectory
 // ----------------------------------------------------------------------------
 void MoveCL::followTrajectory(Trajectory const&   trajectory2, 
-                            MoveTrajectoryMode  mode,
-                            MoveGain            gain, 
-                            MotorSpeed          maxSpeed,
-			    bool                noRotation)
+                              MoveTrajectoryMode  mode,
+                              MoveGain            gain, 
+                              MotorSpeed          maxSpeed,
+                              bool                noRotation)
 {
     // stop();
     // rotation dans la bonne direction, puis asservissement sur le premier point !

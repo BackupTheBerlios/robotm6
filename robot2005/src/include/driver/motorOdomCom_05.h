@@ -48,9 +48,9 @@ static const unsigned char MOTOR_ODOM_REQ_GET_ODOM_CODER  = 0x0D;
 // reseter les 2 hctl
 static const unsigned char MOTOR_ODOM_REQ_RESET  = 0x0E;
 // reseter les 2 hctl
-static const unsigned char MOTOR_ODOM_REQ_RESET_HCTL_L  = 0x0E;
+static const unsigned char MOTOR_ODOM_REQ_RESET_LEFT  = 0x0E;
 // reseter les 2 hctl
-static const unsigned char MOTOR_ODOM_REQ_RESET_HCTL_R  = 0x0E;
+static const unsigned char MOTOR_ODOM_REQ_RESET_RIGHT  = 0x0E;
 
 // l'envoie de donnees sur plusieurs octets commence toujours par l'octet de poids fort
 #endif 

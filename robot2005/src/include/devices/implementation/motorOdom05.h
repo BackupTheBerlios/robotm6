@@ -63,6 +63,11 @@ class MotorOdom05 : public RobotDeviceCL
 
   void getCacheMotorPwm(MotorPWM &left,
                         MotorPWM &right);
+
+  bool resetHctlLeft();
+  bool resetHctlRight();
+  void dumpMotorStats();
+
  private:
   IoDevice* device_;
   
@@ -72,5 +77,8 @@ class MotorOdom05 : public RobotDeviceCL
   CoderPosition odomPosRight_;
   MotorPWM      motorPwmLeft_;
   MotorPWM      motorPwmRight_;
+
+  int errorNbr_;
+  int reqNbr_;
 };
 

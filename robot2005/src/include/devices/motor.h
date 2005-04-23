@@ -47,7 +47,10 @@ class MotorCL : public RobotDeviceCL
     virtual bool isStarted() { return true; };
     /** Reset les hctl (gauche et droite) */
     virtual bool reset();
-    
+
+    virtual bool resetHctlLeft()  { return reset(); }
+    virtual bool resetHctlRight() { return reset(); }
+    virtual void dumpMotorStats() {}
     
     /** reset les compteurs qui verifie que les roues ne sont pas bloquees */
     void resetPwmAlert();

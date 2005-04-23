@@ -92,8 +92,10 @@ class MovementManagerCL : public RobotComponent
                savoir si le code n'a pas ete boggue */
     bool validate();
 
-    RobotPositionCL* position(){return position_;}
-    MoveCL*          move()    {return move_;}
+    RobotPositionCL* position() { return position_; }
+    MoveCL*          move()     { return move_; }
+    MotorCL*         motor()    { return motor_; }
+    OdometerCL*      odometer() { return odometer_; }
     /** @brief Reset les moteurs quand on detecte qu'ils sont bloques */
     void enableAutomaticReset(bool enable);
    
@@ -119,7 +121,6 @@ class MovementManagerCL : public RobotComponent
     void setSpeed(MotorSpeed  speedLeft,
 		  MotorSpeed  speedRight);
  protected:
-    MotorCL* motor() { return motor_; }
     void startThread();
     void getCoderPosition(CoderPosition& left, 
 			  CoderPosition& right);

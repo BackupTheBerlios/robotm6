@@ -90,6 +90,7 @@ void StrategyAttackCL::run(int argc, char* argv[])
                                      StrategyAttackEnvDetectorCallBack,
                                      "StrategyAttackEnvDetectorCallBack");
     setStartingPosition();
+    bridgeDetectionByCenter_=true;
     waitStart(INIT_NONE);
 
     Move->enableAccelerationController(false);
@@ -102,6 +103,8 @@ void StrategyAttackCL::run(int argc, char* argv[])
     setAttackPhase(ATTACK_CROSS_BRIDGE);
     Lcd->print("Goto bridge");
     gotoBridgeDetection();
+    Move->stop();
+    sleep(5);
     if (checkEndEvents()) return; // fin du match
 
     // utilise les capteurs pour trouver le pont et traverse le pont
@@ -111,6 +114,7 @@ void StrategyAttackCL::run(int argc, char* argv[])
         getNearestBridgeEntry();
 
     }
+    sleep(5);
     Lcd->print("Find and cross\nBridge");
     findAndCrossBridge();
     if (checkEndEvents()) return; // fin du match

@@ -523,7 +523,7 @@ MovementTrajectory::MovementTrajectory(Trajectory const&   trajectory,
                                                         sin(RobotPos->theta()) ));
     }
     LOG_INFO("Trajectory\n");
-    for(int i=0; i<trajectory_.size(); i++) {
+    for(unsigned int i=0; i<trajectory_.size(); i++) {
       trajectory_[i].print();
     }
 }

@@ -350,13 +350,15 @@ void TestMoveStrategy3CL::run(int argc, char* argv[])
     MvtMgr->enableAutomaticReset(false);
 
     RobotPos->set(0,0,0); 
-    Move->rotate(M_PI/2);
+    //Move->go2Target(Point(1000,0));
+    Move->rotateFromAngle(4*M_PI);
     Events->wait(evtEndMovePwm);
     Move->stop();
     RobotPos->print();
     sleep(5);
     RobotPos->print();
     return; 
+
     Move->go2Target(Point(1000,0));
     Events->wait(evtEndMovePwm);
     if (Events->check(EVENTS_PWM_ALERT_LEFT)) {

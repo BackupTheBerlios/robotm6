@@ -486,7 +486,7 @@ void RobotPositionCL::periodicTask(Millisecond time)
 
     // toutes les secondes on affiche la position estimee du robot
     static Millisecond oldTime=0;
-    if (oldTime+3000<time) { 
+    if (oldTime+300<time) { 
         LOG_INFO("Time=%ds, "
 		 "%sOdometer: x=%d y=%d t=%d %s "
 		 "-- %sHctl: x=%d y=%d t=%d %s\n",
@@ -499,6 +499,7 @@ void RobotPositionCL::periodicTask(Millisecond time)
                  (int)posHctl_.center.x, (int)posHctl_.center.y, 
                  r2d(posHctl_.direction),
                  KB_RESTORE);
+        if (MvtMgr->motor()) MvtMgr->motor()->dumpMotorStats();
         oldTime=time;
     }
 

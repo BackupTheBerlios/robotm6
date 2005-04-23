@@ -49,7 +49,7 @@ static const MotorSpeed MOVE_SPEED_FAST         = 60;
 static const MotorSpeed MOVE_MAX_ROTATION_SPEED = 20;
 
 /** Consigne minimale pour avancer */
-static const MotorSpeed MOVE_MIN_SPEED                = 8;
+static const MotorSpeed MOVE_MIN_SPEED                = 4;
 /** Acceleration maximale autorisee (variation de la consigne entre 
     deux setSpeed()) */
 static const MotorSpeed MOVE_MAX_DELTA_SPEED          = 1;

@@ -9,13 +9,11 @@
 
 #include "log.h"
 
-int errorRate=0;
-int passRate=0;
-
 MotorOdom05::MotorOdom05() : 
     RobotDeviceCL("MotorOdom05", CLASS_MOTOR_ODOM), device_(NULL),
     motorPosLeft_(0), motorPosRight_(0),
-    odomPosLeft_(0), odomPosRight_(0)
+    odomPosLeft_(0), odomPosRight_(0),
+    errorNbr_(0), reqNbr_(0)
 {
     device_ = IoManager->getIoDevice(IO_ID_MOTOR_ODOM_05);
     if (device_ != NULL) {
@@ -47,8 +45,8 @@ bool MotorOdom05::reset()
 /** Desasservit les moteurs */
 bool MotorOdom05::idle()
 {
-     if (!device_) return false;
-     LOG_FUNCTION();
+    if (!device_) return false;
+    LOG_FUNCTION();
     return device_->write(MOTOR_ODOM_REQ_RESET);
 }
 
@@ -143,7 +141,7 @@ bool MotorOdom05::setSpeedAndCachePosition(MotorSpeed left,
     buffOut[0] = MOTOR_ODOM_REQ_SET_SPEED_AND_GET_POS;
     buffOut[1] = left;
     buffOut[2] = right;
-    passRate++;
+    reqNbr_++;
     //printf("setspeed(%d %d)\n", left, right);
     static unsigned char buffIn[20];
     unsigned int l2=13;
@@ -151,10 +149,10 @@ bool MotorOdom05::setSpeedAndCachePosition(MotorSpeed left,
         unsigned char checksum=buffIn[0]; 
         for(int k=1; k<12;k++)  checksum ^= buffIn[k];
         if (checksum != buffIn[12]) {
-	  errorRate++;
+	  errorNbr_++;
 	  //bad checksum, flush the buffer!
-	  LOG_ERROR("Checksum error! (read=0x%2.2x != expected=0x%2.2x), %d/%d %.2lf\n", 
-		    buffIn[12], checksum, errorRate, passRate, (float)errorRate/passRate);
+	  LOG_ERROR("Checksum error! (read=0x%2.2x != expected=0x%2.2x)\n", 
+		    buffIn[12], checksum);
 	  l2=20;
 	  device_->read(buffIn, l2);
 	} else {
@@ -202,6 +200,25 @@ void MotorOdom05::getCacheMotorPwm(MotorPWM &pLeft,
     pLeft  = motorPwmLeft_;
     pRight = motorPwmRight_;
 }
+
+bool MotorOdom05::resetHctlLeft()  
+{ 
+    if (!device_) return false;
+    LOG_FUNCTION();
+    return device_->write(MOTOR_ODOM_REQ_RESET_LEFT);
+}
+bool MotorOdom05::resetHctlRight() 
+{ 
+    if (!device_) return false;
+    LOG_FUNCTION();
+    return device_->write(MOTOR_ODOM_REQ_RESET_RIGHT); 
+}
+void MotorOdom05::dumpMotorStats() 
+{
+    LOG_INFO("Motor Communication status: Error=%d, Requests=%d, Error rate=%.2lf",
+             errorNbr_, reqNbr_, 100.*errorNbr_/reqNbr_);
+}
+
 
 #ifdef TEST_MAIN
 
