@@ -132,8 +132,13 @@ bool EnvDetector05::getAllCaptors(unsigned char& data)
 #include "io/serialPort.h"
 int main(int argc, char* argv[]) 
 {
-    IoManager->submitIoHost(new SerialPort(0, false));
-    IoManager->submitIoHost(new SerialPort(1, false));
+    IoManager->submitIoHost(new SerialPort(0));
+#ifndef GUMSTIX
+    IoManager->submitIoHost(new SerialPort(1));
+#else
+    IoManager->submitIoHost(new SerialPort(2));
+    IoManager->submitIoHost(new SerialPort(3));
+#endif
     EventsManagerCL* evtMgr = new EVENTS_MANAGER_DEFAULT();
 
     EnvDetector05 env;
