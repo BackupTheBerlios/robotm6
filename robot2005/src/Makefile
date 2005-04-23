@@ -123,6 +123,12 @@ install2:
 install1:
 	scp -r ../gumstix/bin ../gumstix/so/ root@gumb:robot
 
+installu2: 
+	scp -r ../gumstix/bin ../gumstix/so/ root@gumu2:robot
+
+installu1:
+	scp -r ../gumstix/bin ../gumstix/so/ root@gumu:robot
+
 cleanRobot:
 #efface les anciens logs et photos
 	../bin/cleanRobot.sh
