@@ -31,13 +31,13 @@ void IoManagerCL::submitIoHost(IoHost* host)
 	{
 	    IoInfo info = ioId2ioInfo(id);
 	    LOG_INFO("%s is connected (scan-info: 0x%x)\n", info.name, scanInfo);
-	    id2deviceMap_[id] = foundDevices[0].device;
+	    id2deviceMap_[id] = foundDevices[i].device;
 	    if (isIoHost(id)) autoSubmit(id);
 	}
 	else
 	{
 	    LOG_ERROR("Dropping unknown device with scanInfo (0x%x)\n",
-		      foundDevices[0].scanInfo);
+		      foundDevices[i].scanInfo);
 	}
     }
     ioHosts_.push_back(host);
