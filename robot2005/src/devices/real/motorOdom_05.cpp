@@ -9,6 +9,9 @@
 
 #include "log.h"
 
+int errorRate=0;
+int passRate=0;
+
 MotorOdom05::MotorOdom05() : 
     RobotDeviceCL("MotorOdom05", CLASS_MOTOR_ODOM), device_(NULL),
     motorPosLeft_(0), motorPosRight_(0),
@@ -18,6 +21,9 @@ MotorOdom05::MotorOdom05() :
     if (device_ != NULL) {
 	if (device_->open()) {
 	    LOG_OK("Initialization Done\n");
+	    idle();
+	    setSpeed(0,0);
+	    setAcceleration(0x40);
 	} else {
 	    device_=NULL;
 	    LOG_ERROR("Device-open for MotorOdom05 failed.\n");
@@ -41,8 +47,8 @@ bool MotorOdom05::reset()
 /** Desasservit les moteurs */
 bool MotorOdom05::idle()
 {
-    if (!device_) return false;
-    LOG_FUNCTION();
+     if (!device_) return false;
+     LOG_FUNCTION();
     return device_->write(MOTOR_ODOM_REQ_RESET);
 }
 
@@ -80,7 +86,12 @@ bool MotorOdom05::getMotorPosition(MotorPosition &left,
     if (device_->writeRead(MOTOR_ODOM_REQ_GET_HCTL_CODER, buf, l)) {
         left  = (((int)buf[0])<<16)+(((int)buf[1])<<8)+(int)buf[2];
         right = (((int)buf[3])<<16)+(((int)buf[4])<<8)+(int)buf[5];
-        return true;
+#ifdef TEST_MAIN
+	LOG_DEBUG("hctlLeft(0x%2.2x 0x%2.2x 0x%2.2x) hctlRight(0x%2.2x 0x%2.2x 0x%2.2x)\n",
+		  buf[0], buf[1], buf[2], 
+		  buf[3], buf[4], buf[5]);
+#endif
+       return true;
     } else {
         return false;
     }
@@ -96,6 +107,11 @@ bool MotorOdom05::getOdomPosition(CoderPosition &left,
     if (device_->writeRead(MOTOR_ODOM_REQ_GET_ODOM_CODER, buf, l)) {
         left  = (((int)buf[0])<<8)+(int)buf[1];
         right = (((int)buf[2])<<8)+(int)buf[3];
+#ifdef TEST_MAIN
+	LOG_DEBUG("odomLeft(0x%2.2x 0x%2.2x) odomRight(0x%2.2x 0x%2.2x)\n",
+		  buf[0], buf[1], 
+		  buf[2], buf[3]);
+#endif
         return true;
     } else {
         return false;
@@ -122,39 +138,42 @@ bool MotorOdom05::setSpeedAndCachePosition(MotorSpeed left,
                                            MotorSpeed right)
 {
     if (!device_) return false;
-    static unsigned char buf[8];
+    static unsigned char buffOut[8];
     unsigned int l=3;
-    buf[0] = MOTOR_ODOM_REQ_SET_SPEED_AND_GET_POS;
-    buf[1] = left;
-    buf[2] = right;
-
-    static unsigned char buf2[20];
-    unsigned int l2=12;
-    if (device_->writeRead(buf, l, buf2, l2)) {
-        unsigned char checksum=buf[0]; 
-        for(int k=1; k<12;k++)  checksum ^= buf[k];
-        if (false && checksum != buf[13]) {
+    buffOut[0] = MOTOR_ODOM_REQ_SET_SPEED_AND_GET_POS;
+    buffOut[1] = left;
+    buffOut[2] = right;
+    passRate++;
+    //printf("setspeed(%d %d)\n", left, right);
+    static unsigned char buffIn[20];
+    unsigned int l2=13;
+    if (device_->writeRead(buffOut, l, buffIn, l2)) {
+        unsigned char checksum=buffIn[0]; 
+        for(int k=1; k<12;k++)  checksum ^= buffIn[k];
+        if (checksum != buffIn[12]) {
+	  errorRate++;
 	  //bad checksum, flush the buffer!
+	  LOG_ERROR("Checksum error! (read=0x%2.2x != expected=0x%2.2x), %d/%d %.2lf\n", 
+		    buffIn[12], checksum, errorRate, passRate, (float)errorRate/passRate);
 	  l2=20;
-	  device_->read(buf, l2);
-	  LOG_ERROR("Checksum error!\n");
+	  device_->read(buffIn, l2);
 	} else {
-	  odomPosLeft_   = (((int)buf2[0])<<8)+(int)buf2[1];
-	  odomPosRight_  = (((int)buf2[1])<<8)+(int)buf2[3];
-	  motorPosLeft_  = (((int)buf2[4])<<16)+(((int)buf2[5])<<8)+(int)buf2[6];
-	  motorPosRight_ = (((int)buf2[7])<<16)+(((int)buf2[8])<<8)+(int)buf2[9];
-	  motorPwmLeft_  = buf2[10];
-	  motorPwmRight_ = buf2[11];
+	  odomPosLeft_   = (((int)buffIn[0])<<8)+(int)buffIn[1];
+	  odomPosRight_  = (((int)buffIn[1])<<8)+(int)buffIn[3];
+	  motorPosLeft_  = (((int)buffIn[4])<<16)+(((int)buffIn[5])<<8)+(int)buffIn[6];
+	  motorPosRight_ = (((int)buffIn[7])<<16)+(((int)buffIn[8])<<8)+(int)buffIn[9];
+	  motorPwmLeft_  = buffIn[10];
+	  motorPwmRight_ = buffIn[11];
 	}
 #ifdef TEST_MAIN
-	LOG_DEBUG("ol(0x%2.2x 0x%2.2x) or(0x%2.2x 0x%2.2x) "
-		  "pl(0x%2.2x0x%2.2x 0x%2.2x) pr(0x%2.2x 0x%2.2x 0x%2.2x) "
-		  "wl=0x%2.2x, wr=0x%2.2x\n",
-		  buf2[0], buf2[1], 
-		  buf2[2], buf2[3], 
-		  buf2[4], buf2[5], buf2[6],
-		  buf2[7], buf2[8], buf2[9],
-		  buf2[10], buf2[11]);
+	LOG_DEBUG("odomL(0x%2.2x 0x%2.2x) odomR(0x%2.2x 0x%2.2x) "
+		  "hctlL(0x%2.2x0x%2.2x 0x%2.2x) hctlR(0x%2.2x 0x%2.2x 0x%2.2x) "
+		  "pwmL(0x%2.2x), pwmR(0x%2.2x)\n",
+		  buffIn[0], buffIn[1], 
+		  buffIn[2], buffIn[3], 
+		  buffIn[4], buffIn[5], buffIn[6],
+		  buffIn[7], buffIn[8], buffIn[9],
+		  buffIn[10], buffIn[11]);
 #endif
         return true;
     } else {
@@ -324,7 +343,7 @@ bool getKeyboardOrder(MotorOdom05& motor)
         motor.getMotorPosition(posLeft, posRight);
         motor.getOdomPosition(codLeft, codRight);
     }
-    printf("Position: motor: l=%d,\tr=%d\t odometer:l=%d,\tr=%d\n", 
+    printf("Position: hctl: l=%d,\tr=%d\t odometer:l=%d,\tr=%d\n", 
            posLeft, posRight, codLeft, codRight);
       }
     break; 

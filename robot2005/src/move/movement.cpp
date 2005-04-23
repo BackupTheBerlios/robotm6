@@ -93,6 +93,7 @@ const char* Movement::name()
 void Movement::setLRSpeed(MoveLinearSpeed   linearSpeed,
                           MoveRotationSpeed rotationSpeed)
 {
+  maxSpeed_=10;
     double speedRight=0, speedLeft=0;
     if (!endOfMovement_) {
         // Convertir (linearSpeed, rotationSpeed) en (speedLeft, speedRight)
@@ -140,6 +141,7 @@ bool Movement::moveToPoint(Point target, MoveGain gain,
                                                   + (forward?0:M_PI));
     attractivePoint.y += MOVE_ATTRACTIVE_DIST*sin(RobotPos->theta()
                                                   + (forward?0:M_PI));
+    attractivePoint.print();
     
     // end ?= current point=target point 
     // or length from starting point > distance to final point 
@@ -519,6 +521,10 @@ MovementTrajectory::MovementTrajectory(Trajectory const&   trajectory,
         trajectory_.push_back(RobotPos->pt());
         trajectory_.push_back(RobotPos->pt()+200.*Point(cos(RobotPos->theta()),
                                                         sin(RobotPos->theta()) ));
+    }
+    LOG_INFO("Trajectory\n");
+    for(int i=0; i<trajectory_.size(); i++) {
+      trajectory_[i].print();
     }
 }
 

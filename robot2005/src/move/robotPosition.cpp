@@ -267,6 +267,7 @@ void RobotPositionCL::updateHctlPosition()
     } else {
         CoderPosition left=0, right=0;
         MvtMgr->getCoderPosition(left, right);
+	//	printf("%d %d\n", left, right);
         getPosition(posHctl_,
                     left, 
                     right,
@@ -485,7 +486,7 @@ void RobotPositionCL::periodicTask(Millisecond time)
 
     // toutes les secondes on affiche la position estimee du robot
     static Millisecond oldTime=0;
-    if (oldTime+1000<time) { 
+    if (oldTime+3000<time) { 
         LOG_INFO("Time=%ds, "
 		 "%sOdometer: x=%d y=%d t=%d %s "
 		 "-- %sHctl: x=%d y=%d t=%d %s\n",

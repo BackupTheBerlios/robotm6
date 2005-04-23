@@ -349,7 +349,14 @@ void TestMoveStrategy3CL::run(int argc, char* argv[])
     Move->enableAccelerationController(false);
     MvtMgr->enableAutomaticReset(false);
 
-    RobotPos->set(0,0,0);
+    RobotPos->set(0,0,0); 
+    Move->rotate(M_PI/2);
+    Events->wait(evtEndMovePwm);
+    Move->stop();
+    RobotPos->print();
+    sleep(5);
+    RobotPos->print();
+    return; 
     Move->go2Target(Point(1000,0));
     Events->wait(evtEndMovePwm);
     if (Events->check(EVENTS_PWM_ALERT_LEFT)) {
@@ -424,8 +431,8 @@ LOG_INFO("SIMULATED\n");
   //ClassConfig::find(CLASS_MOVE)->setVerboseLevel(VERBOSE_DEBUG);
   //// ICI ICI ICI => strategy2 = traverse le pont
   //robotMain->run(strategy2, argc, argv); // traverse le pont
-  robotMain->run(strategyAttack, argc, argv); // traverse le pont
-  //robotMain->run(strategy3, argc, argv); // blocage des roues
+  //robotMain->run(strategyAttack, argc, argv); // traverse le pont
+  robotMain->run(strategy3, argc, argv); // blocage des roues
   //robotMain->run(strategy1, argc, argv); //deplacement fichier  test des deplacements
  
 

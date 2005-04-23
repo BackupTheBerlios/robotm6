@@ -48,7 +48,7 @@ static const double POSITION_ROBOT_HCTL_Ed     = 1.;
 static const double POSITION_ROBOT_HCTL_Cr     = 2./((1./POSITION_ROBOT_HCTL_Ed)+1.);
 static const double POSITION_ROBOT_HCTL_Cl     = 2./(POSITION_ROBOT_HCTL_Ed+1.);
 /** @brief Signe du codeur hctl gauche en allant vers l'avant */
-static const double POSITION_CODER_HCTL_SIGN_LEFT  = -1.;
+static const double POSITION_CODER_HCTL_SIGN_LEFT  = +1.;
 /** @brief Signe du codeur hctl droit en allant vers l'avant */
 static const double POSITION_CODER_HCTL_SIGN_RIGHT = -1.;
 

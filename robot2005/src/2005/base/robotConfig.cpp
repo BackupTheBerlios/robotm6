@@ -33,7 +33,7 @@ RobotConfigAttack2005CL::RobotConfigAttack2005CL(bool simulated)
     motorEd=(1);
     motorCr=(1);
     motorCl=(1);
-    motorSignLeft=(-1);
+    motorSignLeft=(1);
     motorSignRight=(-1); 
 
     hasEnv=false;
@@ -77,7 +77,7 @@ RobotConfigDefence2005CL::RobotConfigDefence2005CL(bool simulated)
     motorEd=(1);
     motorCr=(1);
     motorCl=(1);
-    motorSignLeft=(-1);
+    motorSignLeft=(1);
     motorSignRight=(-1); 
 
     hasEnv=false;
