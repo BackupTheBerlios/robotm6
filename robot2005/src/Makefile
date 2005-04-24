@@ -1,7 +1,11 @@
 SRC_ROOT=.
 ## list of directories to compile and their orders
 
+ifdef GUMSTIX
+COMPILE_DIR_ORDER=log tools simulator move events io main 2005 devices #ftv1.2 
+else
 COMPILE_DIR_ORDER=log tools soundPlayer viewer3D simulator move events io main 2005 devices #ftv1.2 
+endif
 #modules
 
 SRCS=*.cpp
@@ -14,16 +18,16 @@ include $(SRC_ROOT)/Makefile.include
 ## Complety recreate the project: Create all libs and binaries
 ## ===========================================================================
 # HACK: should be able to do depend even for gumstix.
-ifdef GUMSTIX
-all: clean fast
-else 
 all: clean depend fast
-endif
 
 ## ===========================================================================
 ## Create all libs and binaries
 ## ===========================================================================
+ifdef GUMSTIX
+fast: timestamp lib bin
+else
 fast: timestamp lib bin validate 
+endif
 
 ## ===========================================================================
 ## Create libraries. Must be done before creating binaries

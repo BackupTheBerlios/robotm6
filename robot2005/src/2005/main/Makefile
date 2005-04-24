@@ -77,10 +77,10 @@ validate:
 ## ===========================================================================
 
 mainAttackSimu.o: mainAttack.cpp
-	${CC} -o $@ -c mainAttack.cpp ${DEFAULT_INC_DIR} -DSIMULATED=true
+	${CC} -o $@ -c mainAttack.cpp $(DEFAULT_CFLAGS) ${DEFAULT_INC_DIR} -DSIMULATED=true
 
 mainDefenceSimu.o: mainDefence.cpp
-	${CC} -o $@ -c mainDefence.cpp ${DEFAULT_INC_DIR} -DSIMULATED=true
+	${CC} -o $@ -c mainDefence.cpp $(DEFAULT_CFLAGS) ${DEFAULT_INC_DIR} -DSIMULATED=true
 
 ${BIN_DIR}/attack: mainAttack.o
 	${CC} -o $@ $^ $(DEFAULT_CFLAGS) ${INC_DIR} ${DEFAULT_INC_DIR} ${BIN_LIBS_LOCATION} ${BIN_LIBS} ${BIN_FLAGS}

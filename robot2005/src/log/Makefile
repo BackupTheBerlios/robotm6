@@ -11,7 +11,11 @@ OBJS=log.o
 ## ===========================================================================
 ## Source files used to generate dependencies
 ## ===========================================================================
+ifdef GUMSTIX
+SCRS=log.cpp log2html.cpp logger.cpp
+else
 SRCS=*.cpp
+endif
 
 ## ===========================================================================
 ## Additionnal flags for this directory. See makefile.include for common flags

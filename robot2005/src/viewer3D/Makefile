@@ -55,22 +55,14 @@ clean:	default_clean
 ## ===========================================================================
 ## Main rules : ----- LIB -----
 ## ===========================================================================
-ifdef GUMSTIX
-lib:
-else
 lib: $(STATIC_LIB_DIR)/${LIB_NAME}.a ${DYNAMIC_LIB_DIR}/${LIB_NAME}.so
-endif
  
 
 ## ===========================================================================
 ## Main rules : ----- BIN -----
 ## ===========================================================================
-ifdef GUMSTIX
-bin:
-else
 bin: OpenGlMain.o dummyXmuColor.o $(STATIC_LIB_DIR)/${LIB_NAME}.a
 	${CC} -o $(BIN_SIMU_DIR)/ViewerTest ${DEFAULT_INC_DIR} ${DEFAULT_CFLAGS} OpenGlMain.o dummyXmuColor.o $(STATIC_LIB_DIR)/${LIB_NAME}.a $(STATIC_LIB_DIR)/libtools.a $(STATIC_LIB_DIR)/liblogBasic.a -lglut -lGLU -lGL -lm -lpthread -l$(LIB_STDCPP) -lz
-endif
 
 ## ===========================================================================
 ## Main rules : ----- VALIDATE -----

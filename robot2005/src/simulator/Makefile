@@ -15,7 +15,11 @@ OBJS_SERVER=simulator.o simulatorServer.o simulatorRobot.o simulatorSkittle.o si
 ## ===========================================================================
 ## Source files used to generate dependencies
 ## ===========================================================================
+ifdef GUMSTIX
+SCRS=simulatorClient.cpp
+else
 SRCS=*.cpp
+endif
 
 ## ===========================================================================
 ## Additionnal flags for this directory. See makefile.include for common flags
