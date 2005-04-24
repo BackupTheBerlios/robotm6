@@ -16,20 +16,20 @@ RobotConfigAttack2005CL::RobotConfigAttack2005CL(bool simulated)
 #else
     isMotorISA=false;
 #endif
-    startingPos=Position(490, 1675, 0);
+    startingPos=Position(72, 1775, 0);
     timeAlertBeforeEnd =(80000);
 
-    odometerK=(.057521639);
-    odometerD=(313);
+    odometerK=(.22983);
+    odometerD=(312.55);
     odometerEd=(0.997264);
     odometerCr=2./((1./odometerEd)+1);
     odometerCl=2./(odometerEd+1);
-    odometerSignLeft=(1);
-    odometerSignRight=(-1);
+    odometerSignLeft=(-1);
+    odometerSignRight=(1);
 
     automaticMotorReset=(true);
     motorK=(0.00430613851);
-    motorD=(340);
+    motorD=(338);
     motorEd=(1);
     motorCr=(1);
     motorCl=(1);
@@ -63,17 +63,17 @@ RobotConfigDefence2005CL::RobotConfigDefence2005CL(bool simulated)
     startingPos=Position(50, 1700, -M_PI/2.);
     timeAlertBeforeEnd =(75000);
 
-    odometerK=(.057521639);
-    odometerD=(313);
+    odometerK=(.22983);
+    odometerD=(313.53);
     odometerEd=(0.997264);
     odometerCr=2./((1./odometerEd)+1);
     odometerCl=2./(odometerEd+1);
-    odometerSignLeft=(1);
-    odometerSignRight=(-1);
+    odometerSignLeft=(-1);
+    odometerSignRight=(1);
 
     automaticMotorReset=(true);
     motorK=(0.00430613851);
-    motorD=(340);
+    motorD=(342);
     motorEd=(1);
     motorCr=(1);
     motorCl=(1);

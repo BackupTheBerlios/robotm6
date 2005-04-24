@@ -353,6 +353,9 @@ void TestMoveStrategy3CL::run(int argc, char* argv[])
     //Move->go2Target(Point(1000,0));
     Move->rotateFromAngle(4*M_PI);
     Events->wait(evtEndMovePwm);
+    if (Events->isInWaitResult(EVENTS_MOVE_END)) {
+      LOG_OK("Move end correct\n");
+    }
     Move->stop();
     RobotPos->print();
     sleep(5);

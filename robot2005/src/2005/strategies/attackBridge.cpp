@@ -196,8 +196,15 @@ bool StrategyAttackCL::gotoBridgeDetection()
       Events->wait(evtEndMove);
       if (checkEndEvents()) return false;
       if (Events->isInWaitResult(EVENTS_MOVE_END)) {
-          Move->stop();
-          return true;
+	Move->rotate(0);
+	Move->stop();
+
+         Events->wait(evtEndMove);
+	 if (checkEndEvents()) return false;
+	 if (Events->isInWaitResult(EVENTS_MOVE_END)) {
+	   return true;
+	 }
+	 return true;
       }
       // collision: on recule et on essaye de repartir par un autre endroit...
       Move->backward(300);

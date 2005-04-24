@@ -157,7 +157,7 @@ bool MotorOdom05::setSpeedAndCachePosition(MotorSpeed left,
 	  device_->read(buffIn, l2);
 	} else {
 	  odomPosLeft_   = (((int)buffIn[0])<<8)+(int)buffIn[1];
-	  odomPosRight_  = (((int)buffIn[1])<<8)+(int)buffIn[3];
+	  odomPosRight_  = (((int)buffIn[2])<<8)+(int)buffIn[3];
 	  motorPosLeft_  = (((int)buffIn[4])<<16)+(((int)buffIn[5])<<8)+(int)buffIn[6];
 	  motorPosRight_ = (((int)buffIn[7])<<16)+(((int)buffIn[8])<<8)+(int)buffIn[9];
 	  motorPwmLeft_  = buffIn[10];

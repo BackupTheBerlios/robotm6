@@ -6,6 +6,7 @@
 #include "log.h"
 #include "robotTimer.h"
 #include "robotConfig.h"
+#define LOG_DEBUG_ON
 
 // ============================================================================
 // private namespace
@@ -13,7 +14,7 @@
 
 namespace {
     const unsigned int MOVE_INTEGRAL_MEMORY_SIZE = 10;
-    static const Millisecond MVT_TIMEOUT = 10000;
+    static const Millisecond MVT_TIMEOUT = 45000;
     double sigmaError_=0;
     double integralMemory_[MOVE_INTEGRAL_MEMORY_SIZE];
     int integralMemoryIndex_=0;
@@ -93,7 +94,7 @@ const char* Movement::name()
 void Movement::setLRSpeed(MoveLinearSpeed   linearSpeed,
                           MoveRotationSpeed rotationSpeed)
 {
-  maxSpeed_=10;
+  //maxSpeed_=10;
     double speedRight=0, speedLeft=0;
     if (!endOfMovement_) {
         // Convertir (linearSpeed, rotationSpeed) en (speedLeft, speedRight)
@@ -499,7 +500,7 @@ char* MovementGo2Target::txt()
     return txt_; 
 }
 
-// ============================================================================
+ // ============================================================================
 // class MovementTrajectory
 // ============================================================================
 

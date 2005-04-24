@@ -81,8 +81,8 @@ void StrategyAttackCL::run(int argc, char* argv[])
     }
     grid_->reset();
     Lcd->print("SophiaTeam\nAttack");
-    RobotPos->setOdometerType(ODOMETER_MOTOR);
-    //RobotPos->setOdometerType(ODOMETER_UART_MANUAL);
+    //RobotPos->setOdometerType(ODOMETER_MOTOR);
+    RobotPos->setOdometerType(ODOMETER_UART_MANUAL);
     Events->registerImmediatCallback(EVENTS_ENV_SIDE_RIGHT, this,
                                      StrategyAttackEnvDetectorCallBack,
                                      "StrategyAttackEnvDetectorCallBack");

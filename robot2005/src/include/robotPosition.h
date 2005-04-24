@@ -37,7 +37,7 @@ static const int    POSITION_TEXT_LENGTH = 256;
     motrice*/
 static const double POSITION_ROBOT_HCTL_K     = 0.00430513851;//0.00435228546; // .0043286478;  // 1700/3014
 /** @brief Distance entre les 2 roues motrices */
-static const double POSITION_ROBOT_HCTL_D     = 340;
+static const double POSITION_ROBOT_HCTL_D     = 342;
 /** 
  * @brief Facteurs de correction 
  *  Voir: Measurement and Correction of Systematic Odometry Errors in 
@@ -55,18 +55,18 @@ static const double POSITION_CODER_HCTL_SIGN_RIGHT = -1.;
 
 /** @brief Conversion pas de codeur ODOMETRE/distance parcourue par une roue
     odometre */
-static const double POSITION_ROBOT_ODOM_K     = .057521639;
+static const double POSITION_ROBOT_ODOM_K     =0.22983;
 /** @brief Distance entre les 2 roues motrices */
-static const double POSITION_ROBOT_ODOM_D     = 313;
+static const double POSITION_ROBOT_ODOM_D     = 313.53;
 /** @brief Facteurs de correction */
 static const double POSITION_ROBOT_ODOM_Eb     = 1.; //1.004; //0.99241848;//1.00463051;  //1.
 static const double POSITION_ROBOT_ODOM_Ed     = 0.9972640;//0.99589715; //1.;  
 static const double POSITION_ROBOT_ODOM_Cr     = 2./((1./POSITION_ROBOT_ODOM_Ed)+1.);
 static const double POSITION_ROBOT_ODOM_Cl     = 2./(POSITION_ROBOT_ODOM_Ed+1.);
 /** @brief Signe du codeur hctl gauche en allant vers l'avant */
-static const double POSITION_CODER_ODOM_SIGN_LEFT  = 1.;
+static const double POSITION_CODER_ODOM_SIGN_LEFT  = -1.;
 /** @brief Signe du codeur hctl droit en allant vers l'avant */
-static const double POSITION_CODER_ODOM_SIGN_RIGHT = -1.;
+static const double POSITION_CODER_ODOM_SIGN_RIGHT = 1.;
 
 static const int POS_BUFFER_SIZE = 20;
 static const Millisecond POS_BUFFER_STEP_TIME = 50;
@@ -220,7 +220,8 @@ class RobotPositionCL : public RobotComponent
                      Millimeter     KLeft,
                      Millimeter     KRight,
                      Millimeter     D,
-                     bool           first);
+                     bool           first,
+		     int &          counter);
   public:
     Position getHctlPosition() const;
     Position getOdometerPosition() const; 

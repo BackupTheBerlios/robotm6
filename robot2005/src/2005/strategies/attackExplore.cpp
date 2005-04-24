@@ -75,7 +75,7 @@ bool StrategyAttackCL::preDefinedSkittleExploration1()
     }
     
     MvtMgr->setRobotDirection(MOVE_DIRECTION_BACKWARD);
-    Move->go2Target(Point(3190, 1100));
+    Move->go2Target(Point(3190, 1050));
     Events->wait(evtEndMove);
     if (!Events->isInWaitResult(EVENTS_MOVE_END)) {
         // on n'a pas reussi
@@ -159,8 +159,9 @@ bool StrategyAttackCL::preDefinedSkittleExploration2()
         return false;
     }
 
+    // on recule un peu
     MvtMgr->setRobotDirection(MOVE_DIRECTION_BACKWARD);
-    Move->go2Target(Point(3190, 1100));
+    Move->go2Target(Point(3190, 1050));
     Events->wait(evtEndMove);
     if (!Events->isInWaitResult(EVENTS_MOVE_END)) {
         // on n'a pas reussi
@@ -172,7 +173,7 @@ bool StrategyAttackCL::preDefinedSkittleExploration2()
     
     t.clear();
     t.push_back(Point(2550, 1050)); 
-    t.push_back(Point(2594, 1700)); 
+    t.push_back(Point(2594, 1650)); 
     t.push_back(Point(3340, 1650)); 
     MvtMgr->setRobotDirection(MOVE_DIRECTION_FORWARD);
     Move->followTrajectory(t, TRAJECTORY_BASIC);

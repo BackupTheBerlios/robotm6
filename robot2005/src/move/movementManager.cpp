@@ -95,7 +95,7 @@ MovementManagerCL::MovementManagerCL(MotorCL* motor, OdometerCL* odom) :
  // ----------------------------------------------------------------------------
  // movementManagerThreadBody
  // ----------------------------------------------------------------------------
- static const int MOVEMENT_MANAGER_THREAD_PERIOD=10;
+ static const int MOVEMENT_MANAGER_THREAD_PERIOD=1;
 
 
  static void* movementManagerThreadBody(void* data)

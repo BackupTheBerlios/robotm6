@@ -10,8 +10,8 @@ static const unsigned char SERVO_PING_ID  = 0xCB;
 // puis envoyer la position entre 0xB0 et 0xF1
 // la carte ne repond rien
 static const unsigned char SERVO_REQ_SET_POS  = 0x90;
-static const unsigned char SERVO_POS_MIN  = 0xB0;
-static const unsigned char SERVO_POS_MAX  = 0xF1;
+static const unsigned char SERVO_POS_MIN  = 0x11;
+static const unsigned char SERVO_POS_MAX  = 0x49;
 
 static const unsigned char SERVO_ID_MIN  = 0;
 static const unsigned char SERVO_ID_MAX  = 3;

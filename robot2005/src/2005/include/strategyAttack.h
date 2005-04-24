@@ -169,7 +169,7 @@ static const Millimeter ATTACK_CHANGE_TARGET_POINT_DIST = 50;
 static const Millimeter ATTACK_EXPLORE_METHOD_Y = 1570;
 
 static const unsigned char ATTACK_SERVO_CATAPULT = 0;
-static const unsigned char ATTACK_SERVO_POS_CATA_FIRE  = 0xFF;
-static const unsigned char ATTACK_SERVO_POS_CATA_ARMED = 0;
+static const unsigned char ATTACK_SERVO_POS_CATA_FIRE  = 0x49;
+static const unsigned char ATTACK_SERVO_POS_CATA_ARMED = 0x11;
 
 #endif // __STRATEGY_ATTACK_H__

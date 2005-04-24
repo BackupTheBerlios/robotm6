@@ -15,6 +15,7 @@
 void robotPositionMotorHasBeenReset()
 {
     RobotPos->resetHctlCoders();
+    RobotPos->resetOdomCoders();
 }
 
 
@@ -73,6 +74,8 @@ void RobotPositionCL::set(Millimeter X,
                           Millimeter Y, 
                           Radian T)
 {
+    resetHctlCoders();
+    resetOdomCoders();
     pos_.center.x  = X;
     pos_.center.y  = Y;
     pos_.direction = T;
@@ -162,9 +165,7 @@ void RobotPositionCL::print()
 bool RobotPositionCL::reset()
 {
     LOG_FUNCTION();
-    resetHctlCoders();
-    resetOdomCoders();
-
+  
     set(RobotConfig->startingPos.center.x,
         RobotConfig->startingPos.center.y,
         RobotConfig->startingPos.direction);
@@ -190,17 +191,17 @@ bool RobotPositionCL::validate()
 // RobotPositionCL::getPosition
 // ----------------------------------------------------------------------------
 void RobotPositionCL::getPosition(Position&      posi,
-                                CoderPosition  leftPos, 
-                                CoderPosition  rightPos,
-                                CoderPosition& leftPosOld, 
-                                CoderPosition& rightPosOld,
-                                Millimeter     KLeft,
-                                Millimeter     KRight,
-                                Millimeter     D,// distance entre les 2 codeurs
-                                bool           first)
+				  CoderPosition  leftPos, 
+				  CoderPosition  rightPos,
+				  CoderPosition& leftPosOld, 
+				  CoderPosition& rightPosOld,
+				  Millimeter     KLeft,
+				  Millimeter     KRight,
+				  Millimeter     D,// distance entre les 2 codeurs
+				  bool           first,
+				  int&           counter)
 {
-    static int counter=0;
-  //  printf("c=%d lo=%d ro=%d, l=%d, r=%d kl=%lf, kr=%lf, d=%lf\n", counter, leftPosOld, rightPosOld, leftPos, rightPos, KLeft, KRight, D);
+  //printf("c=%d lo=%d ro=%d, l=%d, r=%d kl=%lf, kr=%lf, d=%lf\n", counter, leftPosOld, rightPosOld, leftPos, rightPos, KLeft, KRight, D);
     if (counter-- == 0) {
 	leftPosOld  = leftPos;
         rightPosOld = rightPos;
@@ -208,7 +209,7 @@ void RobotPositionCL::getPosition(Position&      posi,
 	if (counter<0) counter=-1;
     }
     if (first) {
-	counter=5; // avant la valeur des codeurs change...
+	counter=3; // avant la valeur des codeurs change...
         // on a rester les codeurs, on fait comme si on n'avait pas bouger car les 
         // valeurs ***Old sont invalides
     } else if (counter<0) {
@@ -262,6 +263,7 @@ void RobotPositionCL::getPosition(Position&      posi,
 // ----------------------------------------------------------------------------
 void RobotPositionCL::updateHctlPosition()
 {
+  static int counterHctl=0;
     if (RobotConfig->positionSimu) { 
         Simulator->getRobotEstimatedPosition(posHctl_.center, posHctl_.direction);
     } else {
@@ -276,7 +278,8 @@ void RobotPositionCL::updateHctlPosition()
                     RobotConfig->getMotorKLeft(),
                     RobotConfig->getMotorKRight(),
                     RobotConfig->getMotorD(),
-                    firstHctl_);
+                    firstHctl_,
+		    counterHctl);
         firstHctl_    = false;
     }
 }
@@ -308,6 +311,7 @@ void RobotPositionCL::setOdometerAliveStatus(bool alive)
 // ----------------------------------------------------------------------------
 void RobotPositionCL::updateOdometerPosition()
 {
+  static int counterOdom=0;
     if (RobotConfig->positionSimu) {
         Simulator->getRobotRealPosition(posOdom_.center, posOdom_.direction);
     } else {
@@ -320,6 +324,10 @@ void RobotPositionCL::updateOdometerPosition()
             setOdometerAliveStatus(true);
         }
         Position oldPos=posOdom_;
+	/*	printf("posOdom_=%d %d %d, %d %d %d %d, %s\n", 
+	       (int)posOdom_.center.x, (int)posOdom_.center.y, r2d(posOdom_.direction), 
+	       left, right, leftOdomOld_, rightOdomOld_,
+	       b2s(firstOdom_)); */
         getPosition(posOdom_,
                     left, 
                     right,
@@ -328,8 +336,12 @@ void RobotPositionCL::updateOdometerPosition()
                     RobotConfig->getOdometerKLeft(),
                     RobotConfig->getOdometerKRight(),
                     RobotConfig->getOdometerD(),
-                    firstOdom_);
-        
+                    firstOdom_,
+		    counterOdom);
+        /*printf("posOdom_After=%d %d %d, %d %d %d %d, %s\n", 
+	       (int)posOdom_.center.x, (int)posOdom_.center.y, r2d(posOdom_.direction), 
+	       left, right, leftOdomOld_, rightOdomOld_, b2s(firstOdom_));
+	*/
         if (!firstOdom_) {
             if ((fabs(oldPos.center.x - posOdom_.center.x) > 200)
                 || (fabs(oldPos.center.y - posOdom_.center.y) > 200)
@@ -386,6 +398,7 @@ void RobotPositionCL::resetOdoColliDetection()
 // ----------------------------------------------------------------------------
 void RobotPositionCL::detectCollision()
 {
+  return ;
     if (odometerType_ == ODOMETER_MOTOR 
        || !enableOdoHtclColliDetec_) return;
     if (firstSum_) {
@@ -442,6 +455,7 @@ void RobotPositionCL::detectCollision()
 // ----------------------------------------------------------------------------
 void RobotPositionCL::periodicTask(Millisecond time)
 {
+#if 0
     switch(odometerType_) {
     case ODOMETER_UART_MANUAL:
         // Il n'y a qu'en mode manuel qu'il faut faire un updateOdometerPosition
@@ -465,6 +479,9 @@ void RobotPositionCL::periodicTask(Millisecond time)
         updateHctlPosition();
         break;
     }
+#endif
+    updateOdometerPosition();
+    updateHctlPosition();
 
     // met a jour la position utilisee par le robot: soit celle des moteurs, soit celle
     // des odometres
