@@ -32,7 +32,12 @@ BigTesla05::~BigTesla05()
     if (device_) device_->close();
 }
 
-  
+void BigTesla05::emergencyStop() 
+{ 
+    disableDetector();  
+    stopTesla(); 
+}
+
 /** verification que le detecteur d'accrochage marche,
     a faire avait le debut du match */
 bool BigTesla05::testDetector(bool& result)
@@ -115,29 +120,70 @@ bool BigTesla05::detectSkittleAttached()
 }
 
 #ifdef TEST_MAIN
+#include "mthread.h"
+#include <signal.h>
+BigTesla05* tesla_=NULL;
+
+void* TeslaThreadBody(void*)
+{
+    while(1)
+    {
+	// TODO: remove magic number and replace with constant [flo]
+	usleep(100000);
+	if (tesla_) tesla_->periodicTask();
+    }
+    return NULL;
+}
+void teslaSIGINT(int sig) {
+  if (tesla_) tesla_->reset();
+  usleep(10000);
+  exit(-1);
+}
 
 #include "io/serialPort.h"
 int main(int argc, char* argv[]) 
-{
-    IoManager->submitIoHost(new SerialPort(0, false));
-    IoManager->submitIoHost(new SerialPort(1, false));
-    IoManager->submitIoHost(new SerialPort(2, false));
-    IoManager->submitIoHost(new SerialPort(3, false));  
-    EventsManagerCL* evtMgr = new EVENTS_MANAGER_DEFAULT();
+{ 
+    (void) signal(SIGINT, teslaSIGINT);
 
+    IoManager->submitIoHost(new SerialPort(0, SERIAL_SPEED_38400));
+#ifndef GUMSTIX
+    IoManager->submitIoHost(new SerialPort(1, SERIAL_SPEED_38400));
+#endif
+    IoManager->submitIoHost(new SerialPort(2, SERIAL_SPEED_38400));
+    IoManager->submitIoHost(new SerialPort(3, SERIAL_SPEED_38400));
+    EventsManagerCL* evtMgr = new EVENTS_MANAGER_DEFAULT();
+    MThreadId thread = 0;
+    MTHREAD_CREATE("Tesla Thread",
+		   &thread,
+		   NULL,
+		   TeslaThreadBody,
+		   NULL);
     int choice;
-    BigTesla05 tesla;
+    tesla_ = new BigTesla05(); 
     bool loop=true;
     while(loop) {
-      printf("Menu: 0=disable ALL, 1=setPosition, 2=exit\n>");
+      printf("Menu: 0=stop, 1=start electro, 2=enable detector, 3=disbale detector 4=exit\n>");
       scanf("%d", &choice);
       switch(choice) {
       case 0:
-	break;
-      case 1:
-        break;
-      case 2:
-	loop=false;
+          tesla_->stopTesla(); 
+          break;
+      case 1: 
+          {
+              printf("Tesla mode:0=5V, 1=12V, 2=28V, 3=42V\n");
+              scanf("%d", &choice);
+              tesla_->startTesla((TeslaMode)choice);
+          }
+          break;
+      case 2: 
+          tesla_->enableDetector(); 
+          break;
+      case 3: 
+          tesla_->disableDetector(); 
+          break;
+      case 4:
+          tesla_->stopTesla(); 
+          loop=false;
 	break;
       }
     }

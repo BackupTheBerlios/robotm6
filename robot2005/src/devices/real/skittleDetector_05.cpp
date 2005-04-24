@@ -36,10 +36,10 @@ bool SkittleDetector05::reset()
     return true;
 }
 
-// envoie la grue a une certaine position, retourne la derniere
+// retourne la derniere
 // position detectee de quille, meme si la quille n'est plus detectee
 // actuellement il y a l'ancienne valeur
-bool SkittleDetector05::getValue(SkittlePosition& pos)
+bool SkittleDetector05::getLastValue(SkittlePosition& pos)
 {
     pos=lastPos_;
     return true;
@@ -57,20 +57,22 @@ void SkittleDetector05::disableDetection()
 
 void SkittleDetector05::periodicTask()
 {
-    if (getBasicValue() && 
+    SkittlePosition pos;
+    if (getBasicValue(pos) && 
         enableEvents_ && 
-        (lastPos_ != 0)) {
-        LOG_INFO("Skittle detected at pos:%d\n", lastPos_);
+        (pos != mask_)) {
+        LOG_INFO("Skittle detected at pos:%d\n", pos);
         Events->raise(EVENTS_SKITTLE_DETECTED);
     }
 }
 
-bool SkittleDetector05::getBasicValue()
+bool SkittleDetector05::getBasicValue(SkittlePosition& pos)
 {
     if (!device_) return false;
     unsigned char buf[2];
     if (device_->writeRead(SKITTLE_DETECTOR_REQ_GET_BASIC_POSITION, buf)) {
-        lastPos_ = buf[0];
+        if (buf[0] != 0) lastPos_ = buf[0];
+        pos = buf[0];
         return true;
     } else {
         LOG_DEBUG("SkittleDetector05 COM error\n");
@@ -83,11 +85,14 @@ bool SkittleDetector05::getBasicValue()
 #include "io/serialPort.h"
 int main(int argc, char* argv[]) 
 {
-    IoManager->submitIoHost(new SerialPort(0, false));
-    IoManager->submitIoHost(new SerialPort(1, false));
-    IoManager->submitIoHost(new SerialPort(2, false));
-    IoManager->submitIoHost(new SerialPort(3, false));  
     EventsManagerCL* evtMgr = new EVENTS_MANAGER_DEFAULT();
+    IoManager->submitIoHost(new SerialPort(0, SERIAL_SPEED_38400));
+#ifndef GUMSTIX
+    IoManager->submitIoHost(new SerialPort(1, SERIAL_SPEED_38400));
+#endif
+    IoManager->submitIoHost(new SerialPort(2, SERIAL_SPEED_38400));
+    IoManager->submitIoHost(new SerialPort(3, SERIAL_SPEED_38400));
+  
 
     SkittleDetector05 skittle;
     bool loop=true;

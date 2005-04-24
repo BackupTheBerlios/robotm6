@@ -13,10 +13,12 @@ class SkittleDetector05 : public SkittleDetectorCL {
   bool reset();
   bool exists() const { return true; }
   
-  // envoie la grue a une certaine position, retourne la derniere
+  // retourne la derniere
   // position detectee de quille, meme si la quille n'est plus detectee
   // actuellement il y a l'ancienne valeur
-  bool getValue(SkittlePosition& pos);
+  bool getLastValue(SkittlePosition& pos);
+  // renvoie la valeur actuelle du capteur
+  bool getBasicValue(SkittlePosition& pos);
   // active l'evenement de detection de la quille // par defaut a true
   void enableDetection();
   // desactive l'evenement de detection de la quille
@@ -25,8 +27,6 @@ class SkittleDetector05 : public SkittleDetectorCL {
   void periodicTask();
 
  private:
-  bool SkittleDetector05::getBasicValue();
-
   IoDevice* device_;
   bool enableEvents_;
   SkittlePosition lastPos_;

@@ -12,7 +12,7 @@ class BigTesla05 : public BigTeslaCL {
   /** @brief Retourne l'instance unique*/
   bool reset()  { return true; }
   bool exists() const { return true; }
-  
+  void emergencyStop();
   /** verification que le detecteur d'accrochage marche,
       a faire avait le debut du match */
   bool testDetector(bool& result);

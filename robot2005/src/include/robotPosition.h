@@ -164,6 +164,11 @@ class RobotPositionCL : public RobotComponent
         pas modifiee par MOVE_DIRECTION_BACKWARD */
     Position   posAbsolute() const;
 
+    /** @brief Renvoie true si le point est devant le robot (qu'il 
+        faut passer en mode
+        MvtMgr->setRobotDirection(MOVE_DIRECTION_FORWARD); */
+    bool isTargetForward(Point const& target);
+
     /** @brief active la detection des collision par comparaison des hctl
 	       et des odometres */
     void enableColliDetectionWithOdometer(bool enable);

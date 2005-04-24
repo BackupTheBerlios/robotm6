@@ -55,10 +55,12 @@ bool Crane05::disableMotors()
 #include "io/serialPort.h"
 int main(int argc, char* argv[]) 
 {
-    IoManager->submitIoHost(new SerialPort(0, false));
-    IoManager->submitIoHost(new SerialPort(1, false));
-    IoManager->submitIoHost(new SerialPort(2, false));
-    IoManager->submitIoHost(new SerialPort(3, false));
+    IoManager->submitIoHost(new SerialPort(0, SERIAL_SPEED_38400));
+#ifndef GUMSTIX
+    IoManager->submitIoHost(new SerialPort(1, SERIAL_SPEED_38400));
+#endif
+    IoManager->submitIoHost(new SerialPort(2, SERIAL_SPEED_38400));
+    IoManager->submitIoHost(new SerialPort(3, SERIAL_SPEED_38400));
     int choice, x, z;
     Crane05 crane;
     bool loop=true;

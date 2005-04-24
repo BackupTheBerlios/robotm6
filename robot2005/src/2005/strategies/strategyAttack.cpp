@@ -80,7 +80,7 @@ void StrategyAttackCL::run(int argc, char* argv[])
         grid_ = new GridAttack();
     }
     grid_->reset();
-    Lcd->print("SophiaTeam");
+    Lcd->print("SophiaTeam\nAttack");
     RobotPos->setOdometerType(ODOMETER_MOTOR);
     //RobotPos->setOdometerType(ODOMETER_UART_MANUAL);
     Events->registerImmediatCallback(EVENTS_ENV_SIDE_RIGHT, this,
@@ -150,11 +150,14 @@ void StrategyAttackCL::run(int argc, char* argv[])
 bool StrategyAttackCL::prepareCatapults()
 {
     LOG_FUNCTION();
-    Servo->setServoPosition(1, 0x00);
+    // on envoie 2 fois l'ordre pour asser car c'est une action hyper importante!
+    Servo->setServoPosition(ATTACK_SERVO_CATAPULT, ATTACK_SERVO_POS_CATA_ARMED);
+    Servo->setServoPosition(ATTACK_SERVO_CATAPULT, ATTACK_SERVO_POS_CATA_ARMED);
     // on attend un peu pour etre sur que les servos sont dans la bonne position
     usleep(CATAPULT_AWAIT_DELAY*1000);
     Servo->disableAll();
-    return true;
+    Servo->disableAll();
+   return true;
 }
 
 // ------------------------------------------------------------------------
@@ -164,7 +167,9 @@ void StrategyAttackCL::fireCatapults()
 {
     // pour tirer plus vite que notre ombre on commande le servo en premier,
     // les logs viendront ensuite
-    Servo->setServoPosition(1, 0xFF);
+    // on envoie 2 fois l'ordre pour asser car c'est une action hyper importante!
+    Servo->setServoPosition(ATTACK_SERVO_CATAPULT, ATTACK_SERVO_POS_CATA_FIRE);
+    Servo->setServoPosition(ATTACK_SERVO_CATAPULT, ATTACK_SERVO_POS_CATA_FIRE);
     LOG_COMMAND("Fire Catapults\n");
     setAttackPhase(ATTACK_FIRE_CATAPULT);
     Lcd->print("Fire");
@@ -173,6 +178,7 @@ void StrategyAttackCL::fireCatapults()
     // moteurs et de bouger
     usleep(CATAPULT_AWAIT_DELAY*1000);
 
+    Servo->disableAll();
     Servo->disableAll();
 }
 

@@ -505,3 +505,8 @@ void RobotPositionCL::periodicTask(Millisecond time)
 
     txtChanged_ = true;
 }
+
+bool RobotPositionCL::isTargetForward(Point const& target)
+{
+    return isZeroAngle(thetaAbsolute()-dir(pt(), target), M_PI/2);
+}
