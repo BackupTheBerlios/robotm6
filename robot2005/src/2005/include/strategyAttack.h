@@ -21,6 +21,13 @@ enum AttackPhase {
 
 class GridAttack;
 
+enum BorderEnum {
+    BORDER_X3644,
+    BORDER_Y0,
+    BORDER_Y2100
+};
+    
+
 /** @class StrategyAttackCL
  * Strategy du robot d'attaque
  */
@@ -95,6 +102,11 @@ class StrategyAttackCL : public Strategy2005CL
     void noBridgeHere();
 
     //////////////////////////   EXPLORATION    ////////////////////////////
+    BorderEnum startAlign();
+    bool bumpedBorder();
+    bool finishAlign(BorderEnum targetBorder);
+    bool alignBorder();
+    
     bool preDefinedSkittleExploration1();
     bool preDefinedSkittleExploration2();
 

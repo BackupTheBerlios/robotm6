@@ -44,18 +44,11 @@ static bool evtEndMoveEnvDetector(bool evt[])
         || evt[EVENTS_ENV_TOP_LEFT];
 }
 
-
-enum BorderEnum {
-    BORDER_X3644,
-    BORDER_Y0,
-    BORDER_Y2100
-};
-
 // ----------------------------------------------------------------------------
 // First part of alignBorder. selects closest border, and starts movement
 // to border.
 // ----------------------------------------------------------------------------
-static BorderEnum startAlign()
+BorderEnum StrategyAttackCL::startAlign()
 {
     // get position and direction
     Point pos = RobotPos->pt();
@@ -113,7 +106,7 @@ static BorderEnum startAlign()
 // returns true, if either both bumper at the front, or both bumper behind are
 // activated.
 // ----------------------------------------------------------------------------
-static bool bumpedBorder() {
+bool StrategyAttackCL::bumpedBorder() {
     return (Events->isInWaitResult(EVENTS_BUMPER_FL) &&
 	    Events->isInWaitResult(EVENTS_BUMPER_FR))
 	|| (Events->isInWaitResult(EVENTS_BUMPER_RL) &&
@@ -124,7 +117,7 @@ static bool bumpedBorder() {
 // finishes the borderAlign: if we bumped a border, the position and angle are
 // updated.
 // ----------------------------------------------------------------------------
-static bool finishAlign(BorderEnum targetBorder) {
+bool StrategyAttackCL::finishAlign(BorderEnum targetBorder) {
     const Millimeter MAX_DISTANCE_DELTA = TERRAIN_CASE_LARGEUR;
 
     // TODO: get real values from somewhere:
@@ -136,9 +129,9 @@ static bool finishAlign(BorderEnum targetBorder) {
     if (Events->isInWaitResult(EVENTS_MOVE_END)) {
 	// usually good. really bad here, as we reached the point
 	// outside of the terrain...
-	//LOG_ERROR("reached target-point outside of terrain (%d, %d).\n",
-	//	  reachedPos.x,
-	//	  reachedPos.y);
+	LOG_ERROR("reached target-point outside of terrain (%.2lf, %.2lf).\n",
+		  reachedPos.x,
+		  reachedPos.y);
 	return false;
     } else if (bumpedBorder()) {
 	// we bumped
@@ -150,8 +143,8 @@ static bool finishAlign(BorderEnum targetBorder) {
 	    } else if (isZeroAngle(reachedAngle + M_PI, M_PI_4)) {
 		RobotPos->set(3644 - BACK_TO_CENTER, reachedPos.y, M_PI);
 	    } else {
-		//LOG_ERROR("Angle's just too bad for adjustement: (%d, %d) %.2lf"
-		//	  reachedPos->x, reachedPos->y, reachedAngle);
+		LOG_ERROR("Angle's just too bad for adjustement: (%.2lf, %.2lf) %.2lf\n",
+			  reachedPos.x, reachedPos.y, reachedAngle);
 		return false;
 	    }
 	} else if (targetBorder == BORDER_Y0 &&
@@ -162,8 +155,8 @@ static bool finishAlign(BorderEnum targetBorder) {
 	    } else if (isZeroAngle(reachedAngle - M_PI_2, M_PI_4)) {
 		RobotPos->set(reachedPos.x, FRONT_TO_CENTER, -M_PI_2);
 	    } else {
-		//LOG_ERROR("Angle's just too bad for adjustement: (%d, %d) %.2lf"
-		//	  reachedPos->x, reachedPos->y, reachedAngle);
+		LOG_ERROR("Angle's just too bad for adjustement: (%.2lf, %.2lf) %.2lf\n",
+			  reachedPos.x, reachedPos.y, reachedAngle);
 		return false;
 	    }
 	} else if (targetBorder == BORDER_Y2100 &&
@@ -174,19 +167,20 @@ static bool finishAlign(BorderEnum targetBorder) {
 	    } else if (isZeroAngle(reachedAngle - M_PI_2, M_PI_4)) {
 		RobotPos->set(reachedPos.x, 2100 - BACK_TO_CENTER, -M_PI_2);
 	    } else {
-		//LOG_ERROR("Angle's just too bad for adjustement: (%d, %d) %.2lf"
-		//	  reachedPos->x, reachedPos->y, reachedAngle);
+		LOG_ERROR("Angle's just too bad for adjustement: (%.2lf, %.2lf) %.2lf\n",
+			  reachedPos.x, reachedPos.y, reachedAngle);
 		return false;
 	    }
 	}
-	//LOG_INFO("Adjusted position to (%d, %d) and theta to %.2lf\n",
-	//	 RobotPos->x(), RobotPos->y(), RobotPos->theta());
+	LOG_INFO("Adjusted position to (%.2lf, %.2lf) and theta to %.2lf\n",
+		 RobotPos->x(), RobotPos->y(), RobotPos->theta());
 	return true;
     } else if (Events->isInWaitResult(EVENTS_PWM_ALERT_LEFT) ||
 	       Events->isInWaitResult(EVENTS_PWM_ALERT_RIGHT)) {
-	//LOG_WARNING("didn't reach border due to PWM-alert (most likely collision).\n");
+	LOG_WARNING("didn't reach border due to PWM-alert (most likely collision).\n");
 	return false;
     }
+    return false; // should never come here...
 }
 
 // ----------------------------------------------------------------------------
@@ -194,7 +188,7 @@ static bool finishAlign(BorderEnum targetBorder) {
 // (moves to border and updates the position, when it detects the border).
 // Returns false, if we couldn't detect the border (obstacle...).
 // ----------------------------------------------------------------------------
-static bool alignBorder()
+bool StrategyAttackCL::alignBorder()
 {
     // TODO: activate events
     BorderEnum targetBorder = startAlign();
@@ -231,8 +225,7 @@ bool StrategyAttackCL::preDefinedSkittleExploration1()
     LOG_COMMAND("preDefinedSkittleExploration1\n");
     Trajectory t;
     t.push_back(Point(2640, 1650)); 
-    t.push_back(Point(3240, 1650)); 
-    t.push_back(Point(3190, 650)); 
+    t.push_back(Point(3240, 1650));
     MvtMgr->setRobotDirection(MOVE_DIRECTION_FORWARD);
     Move->followTrajectory(t, TRAJECTORY_BASIC);
     Events->wait(evtEndMove);
@@ -243,7 +236,33 @@ bool StrategyAttackCL::preDefinedSkittleExploration1()
         // TODO manage collisions
         return false;
     }
+
+    //alignBorder();
+
+    MvtMgr->setRobotDirection(MOVE_DIRECTION_FORWARD);
+    Move->rotate(-M_PI_2);
+    Events->wait(evtEndMove);
+    if (!Events->isInWaitResult(EVENTS_MOVE_END)) {
+        // on n'a pas reussi
+        // c'est la fin du match?
+        if (checkEndEvents()) return false;
+        // TODO manage collisions
+        return false;
+    }
     
+    //alignBorder();
+    
+    MvtMgr->setRobotDirection(MOVE_DIRECTION_FORWARD);
+    Move->go2Target(Point(3190, 650));
+    Events->wait(evtEndMove);
+    if (!Events->isInWaitResult(EVENTS_MOVE_END)) {
+        // on n'a pas reussi
+        // c'est la fin du match?
+        if (checkEndEvents()) return false;
+        // TODO manage collisions
+        return false;
+    }
+
     MvtMgr->setRobotDirection(MOVE_DIRECTION_BACKWARD);
     Move->go2Target(Point(3190, 1050));
     Events->wait(evtEndMove);
@@ -303,11 +322,16 @@ bool StrategyAttackCL::preDefinedSkittleExploration2()
         // TODO manage collisions
         return false;
     }
+
+    //alignBorder();
     
     // on recule un petit peu car on ne sais pas ce qu'on va se prendre en
     // approchant du robot adverse!, mieux vaut tenir que courir
     MvtMgr->setRobotDirection(MOVE_DIRECTION_BACKWARD);
-    Move->go2Target(Point(3190, 1700));
+    t.clear();
+    t.push_back(Point(3144, 1350)); 
+    t.push_back(Point(3190, 1700)); 
+    Move->followTrajectory(t, TRAJECTORY_BASIC);
     Events->wait(evtEndMove);
     if (!Events->isInWaitResult(EVENTS_MOVE_END)) {
         // on n'a pas reussi
@@ -316,6 +340,8 @@ bool StrategyAttackCL::preDefinedSkittleExploration2()
         // TODO manage collisions
         return false;
     }
+
+    //alignBorder();
 
     // on va droit sur l'adversaire
     MvtMgr->setRobotDirection(MOVE_DIRECTION_FORWARD);
