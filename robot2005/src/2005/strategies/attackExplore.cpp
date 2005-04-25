@@ -12,6 +12,18 @@
 typedef GridAttack::GridUnit GridUnit;
 
 // ----------------------------------------------------------------------------
+// returns true, if either the movement finished (PWM or reached target), or
+// if both bumpers (either front or rear) are activated.
+// ----------------------------------------------------------------------------
+static bool evtEndMoveBorder(bool evt[]) {
+    return evtEndMove(evt)
+	|| (evt[EVENTS_BUMPER_FL] &&
+	    evt[EVENTS_BUMPER_FR])
+	|| (evt[EVENTS_BUMPER_RL] &&
+	    evt[EVENTS_BUMPER_RR]);
+}
+
+// ----------------------------------------------------------------------------
 // Cette fonction est un EventsFn qui permet d'attendre la fin d'un 
 // mouvement en testant en plus si il y a un fosse devant
 // ----------------------------------------------------------------------------
@@ -32,8 +44,166 @@ static bool evtEndMoveEnvDetector(bool evt[])
         || evt[EVENTS_ENV_TOP_LEFT];
 }
 
+
+enum BorderEnum {
+    BORDER_X3644,
+    BORDER_Y0,
+    BORDER_Y2100
+};
+
+// ----------------------------------------------------------------------------
+// First part of alignBorder. selects closest border, and starts movement
+// to border.
+// ----------------------------------------------------------------------------
+static BorderEnum startAlign()
+{
+    // get position and direction
+    Point pos = RobotPos->pt();
+    Radian angle = RobotPos->thetaAbsolute();
+
+    BorderEnum targetBorder;
+    
+    // find closest border
+    // are we facing borderX3644 or borderYs
+    if (isZeroAngle(angle, M_PI_4)) {
+	MvtMgr->setRobotDirection(MOVE_DIRECTION_FORWARD);
+	targetBorder = BORDER_X3644;
+    } else if (isZeroAngle(angle + M_PI, M_PI_4)) {
+	MvtMgr->setRobotDirection(MOVE_DIRECTION_BACKWARD);
+	targetBorder = BORDER_X3644;
+    } else {
+	// facing borderYs
+	if (pos.y > 1050) {
+	    targetBorder = BORDER_Y2100;
+	    if (isZeroAngle(angle - M_PI_2, M_PI_4))
+		MvtMgr->setRobotDirection(MOVE_DIRECTION_FORWARD);
+	    else
+		MvtMgr->setRobotDirection(MOVE_DIRECTION_BACKWARD);
+	} else {
+	    targetBorder = BORDER_Y0;
+	    if (isZeroAngle(angle + M_PI_2, M_PI_4))
+		MvtMgr->setRobotDirection(MOVE_DIRECTION_FORWARD);
+	    else
+		MvtMgr->setRobotDirection(MOVE_DIRECTION_BACKWARD);
+	}
+    }
+
+    // could be anything, but char* suggested a square's length
+    const Millimeter OUTSIDE_DELTA = TERRAIN_CASE_LARGEUR;
+    
+    Point targetPoint;
+    switch (targetBorder) {
+    case BORDER_X3644:
+	targetPoint = Point(3644 + OUTSIDE_DELTA, pos.y);
+	break;
+    case BORDER_Y0:
+	targetPoint = Point(pos.x, -OUTSIDE_DELTA);
+	break;
+    case BORDER_Y2100:
+	targetPoint = Point(pos.x, 2100 + OUTSIDE_DELTA);
+	break;
+    }
+
+    Move->go2Target(targetPoint);
+    
+    return targetBorder;
+}
+
+// ----------------------------------------------------------------------------
+// returns true, if either both bumper at the front, or both bumper behind are
+// activated.
+// ----------------------------------------------------------------------------
+static bool bumpedBorder() {
+    return (Events->isInWaitResult(EVENTS_BUMPER_FL) &&
+	    Events->isInWaitResult(EVENTS_BUMPER_FR))
+	|| (Events->isInWaitResult(EVENTS_BUMPER_RL) &&
+	    Events->isInWaitResult(EVENTS_BUMPER_RR));
+}
+
+// ----------------------------------------------------------------------------
+// finishes the borderAlign: if we bumped a border, the position and angle are
+// updated.
+// ----------------------------------------------------------------------------
+static bool finishAlign(BorderEnum targetBorder) {
+    const Millimeter MAX_DISTANCE_DELTA = TERRAIN_CASE_LARGEUR;
+
+    // TODO: get real values from somewhere:
+    const Millimeter FRONT_TO_CENTER = 70;
+    const Millimeter BACK_TO_CENTER = 70;
+    
+    Point reachedPos = RobotPos->pt();
+    Radian reachedAngle = RobotPos->thetaAbsolute();
+    if (Events->isInWaitResult(EVENTS_MOVE_END)) {
+	// usually good. really bad here, as we reached the point
+	// outside of the terrain...
+	//LOG_ERROR("reached target-point outside of terrain (%d, %d).\n",
+	//	  reachedPos.x,
+	//	  reachedPos.y);
+	return false;
+    } else if (bumpedBorder()) {
+	// we bumped
+	if (targetBorder == BORDER_X3644 &&
+	    reachedPos.x > 3644 - MAX_DISTANCE_DELTA)
+	{
+	    if (isZeroAngle(reachedAngle, M_PI_4)) {
+		RobotPos->set(3644 - FRONT_TO_CENTER, reachedPos.y, 0);
+	    } else if (isZeroAngle(reachedAngle + M_PI, M_PI_4)) {
+		RobotPos->set(3644 - BACK_TO_CENTER, reachedPos.y, M_PI);
+	    } else {
+		//LOG_ERROR("Angle's just too bad for adjustement: (%d, %d) %.2lf"
+		//	  reachedPos->x, reachedPos->y, reachedAngle);
+		return false;
+	    }
+	} else if (targetBorder == BORDER_Y0 &&
+		   reachedPos.y < MAX_DISTANCE_DELTA)
+	{
+	    if (isZeroAngle(reachedAngle + M_PI_2, M_PI_4)) {
+		RobotPos->set(reachedPos.x, BACK_TO_CENTER, M_PI_2);
+	    } else if (isZeroAngle(reachedAngle - M_PI_2, M_PI_4)) {
+		RobotPos->set(reachedPos.x, FRONT_TO_CENTER, -M_PI_2);
+	    } else {
+		//LOG_ERROR("Angle's just too bad for adjustement: (%d, %d) %.2lf"
+		//	  reachedPos->x, reachedPos->y, reachedAngle);
+		return false;
+	    }
+	} else if (targetBorder == BORDER_Y2100 &&
+		   reachedPos.y > 2100 - MAX_DISTANCE_DELTA)
+	{
+	    if (isZeroAngle(reachedAngle + M_PI_2, M_PI_4)) {
+		RobotPos->set(reachedPos.x, 2100 - FRONT_TO_CENTER, M_PI_2);
+	    } else if (isZeroAngle(reachedAngle - M_PI_2, M_PI_4)) {
+		RobotPos->set(reachedPos.x, 2100 - BACK_TO_CENTER, -M_PI_2);
+	    } else {
+		//LOG_ERROR("Angle's just too bad for adjustement: (%d, %d) %.2lf"
+		//	  reachedPos->x, reachedPos->y, reachedAngle);
+		return false;
+	    }
+	}
+	//LOG_INFO("Adjusted position to (%d, %d) and theta to %.2lf\n",
+	//	 RobotPos->x(), RobotPos->y(), RobotPos->theta());
+	return true;
+    } else if (Events->isInWaitResult(EVENTS_PWM_ALERT_LEFT) ||
+	       Events->isInWaitResult(EVENTS_PWM_ALERT_RIGHT)) {
+	//LOG_WARNING("didn't reach border due to PWM-alert (most likely collision).\n");
+	return false;
+    }
+}
+
+// ----------------------------------------------------------------------------
+// selects the closest border (without turning), and realigns the robot to it
+// (moves to border and updates the position, when it detects the border).
+// Returns false, if we couldn't detect the border (obstacle...).
+// ----------------------------------------------------------------------------
+static bool alignBorder()
+{
+    // TODO: activate events
+    BorderEnum targetBorder = startAlign();
+    Events->wait(evtEndMoveBorder);
+    return finishAlign(targetBorder);
+}
+
 // --------------------------------------------------------------------------
-// Choisi une des 2 trajectoires predefinie et l'execute jusqu'à collision
+// Choisit une des 2 trajectoires predefinie et l'execute jusqu'à collision
 // --------------------------------------------------------------------------
 bool StrategyAttackCL::preDefinedSkittleExploration()
 {
