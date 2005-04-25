@@ -525,5 +525,5 @@ void RobotPositionCL::periodicTask(Millisecond time)
 
 bool RobotPositionCL::isTargetForward(Point const& target)
 {
-    return isZeroAngle(thetaAbsolute()-dir(pt(), target), M_PI/2);
+    return isZeroAngle(thetaAbsolute()-dir(pt(), target), M_PI_2);
 }
