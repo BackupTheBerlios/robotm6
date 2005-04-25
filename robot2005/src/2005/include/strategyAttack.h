@@ -146,16 +146,17 @@ static const Millimeter BRIDGE_DETECT_BUMP_X  = 1400;
 // abscisse de fin de traversee de pont
 static const Millimeter BRIDGE_CROSS_BRIDGE_X  = 2300;
 static const Millimeter BRIDGE_CROSS_BRIDGE_X_MARGIN  = 50;
+static const Millimeter BRIDGE_ENTRY_MARGIN  = 50;
 
 static const Millimeter BRIDGE_ENTRY_SIOUX_Y          = 1300; // passe par le pont du milieu
 static const Millimeter BRIDGE_ENTRY_CENTER_Y         = 1425; // centre du pont
 static const Millimeter BRIDGE_ENTRY_MIDDLE_CENTER_Y  = 1575; // centre du pont
 static const Millimeter BRIDGE_ENTRY_MIDDLE_BORDURE_Y = 1725; // centre du pont
 static const Millimeter BRIDGE_ENTRY_BORDURE_Y        = 1875; // centre du pont
-// si on est a plus que ca du centre du point on recule pour se realigner
-static const Millimeter BRIDGE_ENTRY_MARGIN           = 50;   
+// si on est a plus que ca du centre du point on recule pour se realignerstatic const Millimeter BRIDGE_ENTRY_MARGIN           = 50;   
 
-
+static const double ATTACK_BRIDGE_GAIN=0.2;
+static const int    ATTACK_BRIDGE_SPEED=15;
 
 // temps d'attente entre le demarage des servo et le debut du deplacement
 static const Millisecond CATAPULT_AWAIT_DELAY         = 500;

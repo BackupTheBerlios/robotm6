@@ -349,9 +349,10 @@ void TestMoveStrategy3CL::run(int argc, char* argv[])
     Move->enableAccelerationController(false);
     MvtMgr->enableAutomaticReset(false);
 
-    RobotPos->set(0,0,0); 
+    RobotPos->set(0,0,M_PI/4); 
+    Move->realign(0);
     //Move->go2Target(Point(1000,0));
-    Move->rotateFromAngle(4*M_PI);
+    //Move->rotateFromAngle(4*M_PI);
     Events->wait(evtEndMovePwm);
     if (Events->isInWaitResult(EVENTS_MOVE_END)) {
       LOG_OK("Move end correct\n");

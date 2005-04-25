@@ -192,7 +192,7 @@ bool StrategyAttackCL::gotoBridgeDetection()
           t.push_back(Point(BRIDGE_DETECT_SHARP_X-250, BRIDGE_ENTRY_MIDDLE_BORDURE_Y));
           t.push_back(Point(BRIDGE_DETECT_SHARP_X,     BRIDGE_ENTRY_MIDDLE_BORDURE_Y));
       }
-      Move->followTrajectory(t, TRAJECTORY_RECTILINEAR, 1, 40); // gain, vitesse max
+      Move->followTrajectory(t, TRAJECTORY_RECTILINEAR, -1, 40); // gain, vitesse max
       Events->wait(evtEndMove);
       if (checkEndEvents()) return false;
       if (Events->isInWaitResult(EVENTS_MOVE_END)) {
@@ -393,12 +393,14 @@ bool StrategyAttackCL::gotoBridgeEntry(Millimeter y,
 				       bool rotateLeft, 
 				       bool rotateRight)
 {
+    Move->enableAccelerationController(true);
     if (fabs(RobotPos->y() - y) < BRIDGE_ENTRY_MARGIN) {
         Events->enable(EVENTS_NO_BRIDGE_BUMP_LEFT);
         Events->enable(EVENTS_NO_BRIDGE_BUMP_RIGHT);
         LOG_INFO("gotoBridgeEntry Easy:%d\n", (int)y);
         MvtMgr->setRobotDirection(MOVE_DIRECTION_FORWARD);
-        Move->go2Target(Point(BRIDGE_DETECT_BUMP_X, y));
+        Move->go2Target(Point(BRIDGE_DETECT_BUMP_X, y),
+			ATTACK_BRIDGE_GAIN, ATTACK_BRIDGE_SPEED);
     } else {
         LOG_INFO("gotoBridgeEntry Hard:%d\n", (int)y);
         // se debrouile pour que le robot ne fasse pas un demi tour sur lui meme
@@ -413,7 +415,7 @@ bool StrategyAttackCL::gotoBridgeEntry(Millimeter y,
         // car on etait peut etre dans le trou...
         Events->disable(EVENTS_NO_BRIDGE_BUMP_LEFT);
         Events->disable(EVENTS_NO_BRIDGE_BUMP_RIGHT);
-	if (fabs(RobotPos->y()-y)>400) {
+	if (fabs(RobotPos->y()-y)>220) {
 	  // on va loin: on recule bettement puit on prend un point cible
 	  // on s'eloigne un peu du bord, pour aller en x qui nous permet
 	  //de nous promener tranquillement le long de la riviere
@@ -429,7 +431,8 @@ bool StrategyAttackCL::gotoBridgeEntry(Millimeter y,
 	  t.push_back(Point(BRIDGE_ENTRY_NAVIGATE_X, y));
 	  t.push_back(Point(BRIDGE_DETECT_BUMP_X, y));
 	  MvtMgr->setRobotDirection(MOVE_DIRECTION_FORWARD);
-	  Move->followTrajectory(t);
+	  Move->followTrajectory(t, TRAJECTORY_RECTILINEAR,
+			ATTACK_BRIDGE_GAIN, ATTACK_BRIDGE_SPEED);
 	} else {
 	  // on ne va pas loin en y donc on fait un joli mouvement en S
 	  Millimeter y2 = (RobotPos->y()+y)/2; // entre le point cible et nous
@@ -452,11 +455,13 @@ bool StrategyAttackCL::gotoBridgeEntry(Millimeter y,
 	  t.push_back(Point(BRIDGE_DETECT_BUMP_X-100, y));
 	  t.push_back(Point(BRIDGE_DETECT_BUMP_X, y));
 	  MvtMgr->setRobotDirection(MOVE_DIRECTION_FORWARD);
-	  Move->followTrajectory(t);
+	  Move->followTrajectory(t, TRAJECTORY_RECTILINEAR,
+			ATTACK_BRIDGE_GAIN, ATTACK_BRIDGE_SPEED);
 	}
     }
     // utiliser les bumpers events pour savoir si on tombe dans un trou...
     Events->wait(evtEndMoveBridge);
+    Move->enableAccelerationController(false);
     if (Events->isInWaitResult(EVENTS_NO_BRIDGE_BUMP_LEFT) ||
         Events->isInWaitResult(EVENTS_NO_BRIDGE_BUMP_RIGHT)) {
         // le pont n'est pas la! Faut vite s'arreter!
