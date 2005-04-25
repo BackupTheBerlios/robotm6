@@ -1,6 +1,7 @@
 #include "io/ioManager.h"
 #include "io/ubart.h"
 #include "log.h"
+#include <algorithm>
 
 IoManagerCL* IoManagerCL::instance_ = NULL;
 
@@ -22,6 +23,17 @@ IoManagerCL::~IoManagerCL() {
 
 void IoManagerCL::submitIoHost(IoHost* host)
 {
+    rescan(host);
+}
+
+void IoManagerCL::rescan() {
+    // don't use iterator, as we might modify the ioHosts_-vector.
+    for (unsigned int i = 0; i < ioHosts_.size(); ++i)
+	rescan(ioHosts_[i]);
+}
+
+void IoManagerCL::rescan(IoHost* host)
+{
     const IoDeviceScanInfoPairVector& foundDevices = host->scan();
     for (unsigned int i = 0; i < foundDevices.size(); ++i)
     {
@@ -31,8 +43,10 @@ void IoManagerCL::submitIoHost(IoHost* host)
 	{
 	    IoInfo info = ioId2ioInfo(id);
 	    LOG_INFO("%s is connected (scan-info: 0x%x)\n", info.name, scanInfo);
-	    id2deviceMap_[id] = foundDevices[i].device;
-	    if (isIoHost(id)) autoSubmit(id);
+	    if (id2deviceMap_.find(id) == id2deviceMap_.end()) {
+		id2deviceMap_[id] = foundDevices[i].device;
+		if (isIoHost(id)) autoSubmit(id);
+	    }
 	}
 	else
 	{
@@ -40,7 +54,8 @@ void IoManagerCL::submitIoHost(IoHost* host)
 		      foundDevices[i].scanInfo);
 	}
     }
-    ioHosts_.push_back(host);
+    if (find(ioHosts_.begin(), ioHosts_.end(), host) == ioHosts_.end())
+	ioHosts_.push_back(host);
 }
 
 bool IoManagerCL::isIoHost(IoId id) const {

@@ -57,6 +57,17 @@ public: // methods
     IoDevice* getIoDevice(IoId id);
 
     /**
+     * @brief rescans all submitted IoHosts
+     */
+    void rescan();
+
+    /**
+     * @brief rescans provided IoHost (if the host hasn't been submitted, this
+     * equals an submitIoHost).
+     */
+    void rescan(IoHost* host);
+
+    /**
      * @brief given a scanInfo finds the associated IoId. If none matches
      * IO_ID_NONE is returned.
      */
