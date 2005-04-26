@@ -473,6 +473,7 @@ void MovementGo2Target::periodicTask()
     if (!totalLengthInit_) {
       totalLength_ = dist(target_, startingPoint_);
       totalLengthInit_ = true;
+      target_ = startingPoint_ + (target_ - startingPoint_) * ((totalLength_+400.) /totalLength_);
     }
     if (distToTarget > MOVE_NEAR_TARGET_DIST) { 
         // on est loin de la cible => on trouve un point cible plus proche
