@@ -77,29 +77,26 @@ class StrategyAttackCL : public Strategy2005CL
 
  private:
     ///////////////////////////// PONT ////////////////////////////
-   /** @brief met a jour la variable bridge_ en fonction de ce que disent les 
-        sharps */
-    bool getBridgePosBySharp();
-    /** @brief se place en face du pont ou on peut utiliser les bumpers pour 
-        savoir si le pont est bien la. La variable bridge doit deja etre mise 
-        a jour */
-
-    bool gotoBridgeEntry();
-    /** @brief verifie que le pont est bien la ! renvoie false si les 
-        bumpers ne repondent pas */
-    bool getBridgePosByBumper(bool& bridgeInFront);
-    /** @brief traverse le pont : detection de collisions...*/
-    bool crossBridge();
     unsigned char getPosBit();
     void getNearestBridgeEntry();
-    bool gotoBridgeEntry(Millimeter y, 
-			 bool rotateLeft=false, 
-			 bool rotateRight=false);
+    void noBridgeHere();
+
+    bool gotoBridgeEntry(Millimeter y);
+    bool gotoBridgeEntry();
+    bool gotoBridgeEntryNear(Millimeter y);
+    bool gotoBridgeEntryFar(Millimeter y);
+    bool gotoBridgeEntryEasy(Millimeter y);
+    bool gotoBridgeEntryRotateToSeeBridge();
+    
+    bool crossBridge();
+
+    bool checkBridgeBumperEvent(); 
+    bool getBridgePosBySharp();
+    bool getBridgePosByBumper(bool& bridgeInFront);
     bool getBridgePosBySharpFromLeft(BridgeCaptorStatus captors[BRIDGE_CAPTORS_NBR]);
     bool getBridgePosBySharpFromCenter(BridgeCaptorStatus captors[BRIDGE_CAPTORS_NBR]);
     bool getBridgeCaptors(BridgeCaptorStatus captors[BRIDGE_CAPTORS_NBR],
                           bool checkSharps);
-    void noBridgeHere();
 
     //////////////////////////   EXPLORATION    ////////////////////////////
     BorderEnum startAlign();
@@ -150,11 +147,19 @@ class StrategyAttackCL : public Strategy2005CL
     
 };
 
+enum BRIDGE_ENTRY_POS_BITS {
+    BRIDGE_ENTRY_BORDURE_BIT        =0,
+    BRIDGE_ENTRY_MIDDLE_BORDURE_BIT =1,
+    BRIDGE_ENTRY_MIDDLE_CENTER_BIT  =2,
+    BRIDGE_ENTRY_CENTER_BIT         =3,
+    BRIDGE_ENTRY_SIOUX_BIT          =4
+};
+
 // abscisse sure, sur laquelle on s'alligne pour aller d'une position de pont a l'autre
 static const Millimeter BRIDGE_ENTRY_NAVIGATE_X = 1200;
 // abscisse ou on peut utiliser les sharps pour detecter le pont
 static const Millimeter BRIDGE_DETECT_SHARP_X = 1400; // on s'arrete toujours un peu avant
-static const Millimeter BRIDGE_DETECT_BUMP_X  = 1400;
+static const Millimeter BRIDGE_DETECT_BUMP_X  = 1350;
 // abscisse de fin de traversee de pont
 static const Millimeter BRIDGE_CROSS_BRIDGE_X  = 2300;
 static const Millimeter BRIDGE_CROSS_BRIDGE_X_MARGIN  = 50;
@@ -181,8 +186,17 @@ static const Millimeter ATTACK_CHANGE_TARGET_POINT_DIST = 50;
 // si y > EXPLORE_METHOD_Y on utilise la trajectoire 1, sinon on utilise la 2
 static const Millimeter ATTACK_EXPLORE_METHOD_Y = 1570;
 
-static const unsigned char ATTACK_SERVO_CATAPULT = 0;
-static const unsigned char ATTACK_SERVO_POS_CATA_FIRE  = 0x49;
-static const unsigned char ATTACK_SERVO_POS_CATA_ARMED = 0x11;
+struct CatapultServo {
+  unsigned char id;
+  unsigned char posFire;
+  unsigned char posArmed;
+};
 
+static const unsigned int ATTACK_CATAPULT_SERVO_NBR=3;
+static CatapultServo catapultServos[ATTACK_CATAPULT_SERVO_NBR] = {
+  { 0, 0x48, 0x09},
+  { 1, 0x48, 0x09},
+  { 2, 0x48, 0x09}
+};
+ 
 #endif // __STRATEGY_ATTACK_H__

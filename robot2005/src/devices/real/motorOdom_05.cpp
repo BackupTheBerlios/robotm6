@@ -215,7 +215,7 @@ bool MotorOdom05::resetHctlRight()
 }
 void MotorOdom05::dumpMotorStats() 
 {
-    LOG_INFO("Motor Communication status: Error=%d, Requests=%d, Error rate=%.2lf",
+    LOG_INFO("Motor Communication status: Error=%d, Requests=%d, Error rate=%.2lf\n",
              errorNbr_, reqNbr_, 100.*errorNbr_/reqNbr_);
 }
 

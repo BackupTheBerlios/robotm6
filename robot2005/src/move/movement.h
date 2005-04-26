@@ -183,6 +183,7 @@ class MovementRealign : public Movement
     bool       leftWheel_;
     Millimeter distMax_;
     Point      blockedWheelPoint_;
+    bool       canMoveStopWheel_;
 };
 
 // -----------------------------------------------------------------

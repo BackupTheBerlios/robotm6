@@ -42,7 +42,13 @@ bool Alim05::getAllTension(Millivolt tension[4])
             LOG_ERROR("Battery %d is not connected\n", i);
         } else {
             tension[i] = 7200 + 50*comData[i]; // TODO use fab conversion method
-            LOG_WARNING("Battery %d: %2.2fV\n", i, tension[i]/1000.);
+            if (tension[i]>14) {
+	      LOG_OK("Battery %d: %2.2fV\n", i, tension[i]/1000.);
+	    } else if (tension[i]>13) {
+	      LOG_WARNING("Battery %d: %2.2fV\n", i, tension[i]/1000.);
+	    } else {
+	      LOG_ERROR("Battery %d: %2.2fV\n", i, tension[i]/1000.);
+	    }
         }
     }
     return true; 

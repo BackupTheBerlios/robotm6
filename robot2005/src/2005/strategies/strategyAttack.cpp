@@ -10,6 +10,7 @@
 #include "gridAttack.h"
 #include "robotTimer.h"
 #include "bumperMapping.h"
+#include "alim.h"
 
 void gridAttackPeriodicTask(void *userData, 
                             Millisecond time)
@@ -34,7 +35,8 @@ StrategyAttackCL::StrategyAttackCL(RobotMainCL* main):
     useLeftBridge_(true), bridgeDetectionByCenter_(true), 
     useSharpToDetectBridge_(true),
     grid_(NULL), lastExplorationDir_(ATTACK_EXPLORE_COL),
-    attackPhase_(ATTACK_WAIT_START), skittleMiddleProcessed_(false)
+    attackPhase_(ATTACK_WAIT_START), skittleMiddleProcessed_(false),
+    isProcessingMiddleSkittles_(false)
 {
     grid_ = new GridAttack();
     Timer->registerPeriodicFunction(gridAttackPeriodicTask,
@@ -55,16 +57,20 @@ StrategyAttackCL::~StrategyAttackCL()
 bool StrategyAttackCL::autoCheck()
 {
     Strategy2005CL::autoCheck();
+    Millivolt tension[4];
+    //Alim->getAllTension(tension);
     // est ce qu'on essaye de passer par le pont du milieu ?
-    bridgeDetectionByCenter_ = !menu("Detection pont\nGauche    Milieu");
+    bridgeDetectionByCenter_ = !menu("Strategy\nGauche    Sioux");
+    Lcd->print("Catapult armed\n++ Test Move ++"); 
+    // met les servos en position
+    prepareCatapults();
     // verifier les capteurs sharps et bumpers detecteurs de pont
     testBridgeCaptors();
     // verifier les sharps detecteurs d'environnement
     // TODO
     // verifier l'asservissement
+    sleep(2);
     testMove();
-    // met les servos en position
-    prepareCatapults();
     // maintenant il n'y a plus qu'a bien placer le robot sur la table
     // et mettre les balles dans les catapultes
     // et attendre la jack de depart
@@ -91,7 +97,7 @@ void StrategyAttackCL::run(int argc, char* argv[])
                                      "StrategyAttackEnvDetectorCallBack");
     setStartingPosition();
     bridgeDetectionByCenter_=true;
-    waitStart(INIT_FAST);
+    waitStart(INIT_COMPLETE);
 
     Move->enableAccelerationController(false);
     MvtMgr->enableAutomaticReset(false);
@@ -150,12 +156,11 @@ void StrategyAttackCL::run(int argc, char* argv[])
 bool StrategyAttackCL::prepareCatapults()
 {
     LOG_FUNCTION();
-    // on envoie 2 fois l'ordre pour asser car c'est une action hyper importante!
-    Servo->setServoPosition(ATTACK_SERVO_CATAPULT, ATTACK_SERVO_POS_CATA_ARMED);
-    Servo->setServoPosition(ATTACK_SERVO_CATAPULT, ATTACK_SERVO_POS_CATA_ARMED);
-    // on attend un peu pour etre sur que les servos sont dans la bonne position
+    for(unsigned int i=0; i<ATTACK_CATAPULT_SERVO_NBR; i++) {
+      Servo->setServoPosition(catapultServos[i].id, 
+			      catapultServos[i].posArmed);
+    }
     usleep(CATAPULT_AWAIT_DELAY*1000);
-    Servo->disableAll();
     Servo->disableAll();
    return true;
 }
@@ -167,9 +172,12 @@ void StrategyAttackCL::fireCatapults()
 {
     // pour tirer plus vite que notre ombre on commande le servo en premier,
     // les logs viendront ensuite
-    // on envoie 2 fois l'ordre pour asser car c'est une action hyper importante!
-    Servo->setServoPosition(ATTACK_SERVO_CATAPULT, ATTACK_SERVO_POS_CATA_FIRE);
-    Servo->setServoPosition(ATTACK_SERVO_CATAPULT, ATTACK_SERVO_POS_CATA_FIRE);
+    // on envoie 2 fois l'ordre pour asser car c'est une action hyper
+    // importante!
+    for(unsigned int i=0; i<ATTACK_CATAPULT_SERVO_NBR; i++) {
+        Servo->setServoPosition(catapultServos[i].id, 
+				catapultServos[i].posFire);
+    }
     LOG_COMMAND("Fire Catapults\n");
     setAttackPhase(ATTACK_FIRE_CATAPULT);
     Lcd->print("Fire");
@@ -178,7 +186,6 @@ void StrategyAttackCL::fireCatapults()
     // moteurs et de bouger
     usleep(CATAPULT_AWAIT_DELAY*1000);
 
-    Servo->disableAll();
     Servo->disableAll();
 }
 

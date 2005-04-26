@@ -41,7 +41,7 @@ RobotConfigAttack2005CL::RobotConfigAttack2005CL(bool simulated)
     hasCrane=false;
     hasSkittleDetector=false;
     hasTesla=false;
-    hasAlim=false;
+    hasAlim=true;
 }
 
 // ----------------------------------------------------------------------------

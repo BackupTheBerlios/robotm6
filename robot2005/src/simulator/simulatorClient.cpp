@@ -72,6 +72,7 @@ SimulatorClient::~SimulatorClient()
     if (socket_) {
         socket_->close();
         delete socket_;
+	socket_=NULL;
     } 
     simulatorClient_ = NULL;
 }
@@ -534,8 +535,7 @@ Millimeter SimulatorClient::getGroundDistance(Millimeter rPosCaptor,
 {
     if (!socket_) return INFINITE_DIST;
     Lock localLock(&repositoryLock);
-    unsigned char* buf=setBufferHeader(SIMU_REQ_GET_GROUND_DIST, 
-                                       2*sizeof(Millimeter)+sizeof(Radian));
+    unsigned char* buf=setBufferHeader(SIMU_REQ_GET_GROUND_DIST,                                        2*sizeof(Millimeter)+sizeof(Radian));
     memcpy(buf, &rPosCaptor, sizeof(Millimeter)); buf+=sizeof(Millimeter);
     memcpy(buf, &dirPosCaptor, sizeof(Radian));   buf+=sizeof(Radian);
     memcpy(buf, &zPosCaptor, sizeof(Millimeter)); 

@@ -200,14 +200,13 @@ void LogCL::message(ClassId     classId,
 // ---------------------------------------------------------------------------
 // Enregistre la position du robot
 // ---------------------------------------------------------------------------
-void LogCL::position(Position const& pos)
+void LogCL::position(Millimeter x,
+		     Millimeter y,
+		     Radian     t)
 {	
     LogPacketHeader header(LOG_TYPE_POSITION);
-    LogPacketPosition data;
-    data.x     = pos.center.x;
-    data.y     = pos.center.y;
-    data.theta = pos.direction;
-    header.length=sizeof(LogPacketPosition);
+    LogPosition data(x, y, t);
+    header.length=sizeof(LogPosition);
     sendPacket(header, (Byte*)(&data));	
 }
 

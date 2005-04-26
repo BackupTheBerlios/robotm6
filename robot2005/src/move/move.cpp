@@ -35,7 +35,7 @@ MoveCL* MoveCL::move_=NULL;
 MoveCL::MoveCL() : 
     RobotComponent("Move", CLASS_MOVE), currentMovement_(NULL),
     enableAccelerationController_(false), userAbort_(false),
-    defaultRotationGain_(MOVE_GAIN_DEFAULT),
+    defaultRotationGain_(10*MOVE_GAIN_DEFAULT),
     defaultLinearGain_(MOVE_GAIN_DEFAULT),
     defaultMaxRotationSpeed_(MOVE_MAX_ROTATION_SPEED),
     defaultMaxLinearSpeed_(MOVE_SPEED_DEFAULT),

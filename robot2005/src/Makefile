@@ -133,16 +133,21 @@ installu2:
 installu1:
 	scp -r ../gumstix/bin ../gumstix/so/ root@gumu:robot
 
-cleanRobot:
+cleanRobot2:
 #efface les anciens logs et photos
-	../bin/cleanRobot.sh
+	ssh root@gumb2 'rm -f robot/*.log.gz' 
 
 ## ===========================================================================
 ## Download the robot match data on the PC
 ## ===========================================================================
-getData:
+getData2:
 # reccupere les donnees de match sur le gros PC
-	../bin/copyMatchData.sh
+	scp root@gumb2:'robot/*.log.gz' ../log
+
+getData1:
+# reccupere les donnees de match sur le gros PC
+	scp root@gumb:'robot/*.log.gz' ../log
+
 
 
 ## ===========================================================================

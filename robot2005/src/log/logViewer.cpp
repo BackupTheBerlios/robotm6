@@ -26,7 +26,7 @@ extern void reshapeRobot3D(int w, int h);
 
 typedef long LogTime; // millisecond
 typedef multimap<LogTime, LogPacketMessage>    LogVMessage;
-typedef multimap<LogTime, LogPacketPosition>   LogVPosition;
+typedef multimap<LogTime, LogPosition>         LogVPosition;
 typedef multimap<LogTime, LogPacketMotorInfo>  LogVMotor;
 typedef multimap<LogTime, LogPacketEnumValue>  LogVSound;
 typedef multimap<LogTime, LogPacketTrajectory> LogVTrajectory;
@@ -422,8 +422,8 @@ void loadLog(int id, const char* filename)
 	    break;
 
 	case LOG_TYPE_POSITION:
-	    data_[id].pos.insert(std::pair<LogTime, LogPacketPosition>
-                                 (currentTime, *((LogPacketPosition*)data)));
+	    data_[id].pos.insert(std::pair<LogTime, LogPosition>
+                                 (currentTime, *((LogPosition*)data)));
 	    break;
 	case LOG_TYPE_MOTOR:
 	    data_[id].motor.insert(std::pair<LogTime, LogPacketMotorInfo>
@@ -524,7 +524,7 @@ Position getPosition(int robotId, LogTime t)
 	if ((*it).first > t) {
 	    t2 = (*it).first;
 	    p2 = Point((*it).second.x, (*it).second.y);
-	    dir2=(*it).second.theta;
+	    dir2=(*it).second.t*M_PI/180.;
 	    if (t2 == t1 || it == data_[robotId].pos.begin()) {
 		return Position(p2, dir2);
 	    } else {

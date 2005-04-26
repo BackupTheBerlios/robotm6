@@ -161,11 +161,14 @@ MovementManagerCL::MovementManagerCL(MotorCL* motor, OdometerCL* odom) :
     if (periodicCallback_) {
         periodicCallback_();
     }
+
     static short logCounter=0;
     if (logCounter++ > 5) {
         if (motor_) Log->motor(motorCom_.pwmLeft, motorCom_.pwmRight,
                                motorCom_.posLeft, motorCom_.posRight);
-        if (position_) Log->position(position_->pos());
+        if (position_) Log->position(position_->x(),
+				     position_->y(),
+				     position_->thetaAbsolute());
         logCounter = 0;
     }
 }

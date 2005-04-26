@@ -366,9 +366,9 @@ void packetToHtml(FILE* htmlFile,
     case LOG_TYPE_POSITION:
         {
             char txt[255];
-            LogPacketPosition* pos= (LogPacketPosition*)data;
+            LogPosition* pos= (LogPosition*)data;
             sprintf(txt, "x=%d, y=%d, theta=%d", 
-                    (int)pos->x, (int)pos->y, r2d(pos->theta));
+                    pos->x, pos->y, pos->t);
             htmlLine(htmlFile,
                      packetHeader.timeStamp-packetTime,
                      packetHeader.timeStamp-packetTimeFromStartMatch,

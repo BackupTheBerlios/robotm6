@@ -341,16 +341,17 @@ class TestMoveStrategy3CL : public Strategy2005CL
 
 void TestMoveStrategy3CL::run(int argc, char* argv[])
 {
-    Lcd->print("SophiaTeam");
-    RobotPos->setOdometerType(ODOMETER_MOTOR);
-    //RobotPos->setOdometerType(ODOMETER_UART_MANUAL);
+    Lcd->print("SophiaTeam2");
+    //RobotPos->setOdometerType(ODOMETER_MOTOR);
+    RobotPos->setOdometerType(ODOMETER_UART_MANUAL);
     setStartingPosition();
     waitStart(INIT_NONE);
     Move->enableAccelerationController(false);
     MvtMgr->enableAutomaticReset(false);
 
-    RobotPos->set(0,0,M_PI/4); 
+    RobotPos->set(400,400,M_PI/4); 
     Move->realign(0);
+    //Move->rotateOnWheel(0, false);
     //Move->go2Target(Point(1000,0));
     //Move->rotateFromAngle(4*M_PI);
     Events->wait(evtEndMovePwm);

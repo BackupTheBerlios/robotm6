@@ -18,6 +18,7 @@
 #include "robotDevices.h"
 #include "movementManager.h"
 
+extern bool evtDialogButtonReleasedFilter(bool evt[]);
 
 // ============================================================================
 // ==============================   class Strategy2005CL   ====================
@@ -51,6 +52,7 @@ bool Strategy2005CL::checkRebootSwitch()
 	LOG_WARNING("Reboot switch not set\n");
 	Sound->play(SOUND_WAIT_REBOOT_SWITCH, SND_PRIORITY_URGENT);
 	Lcd->print("Reboot switch\nRetry      Skip");
+	Events->wait(evtDialogButtonReleasedFilter);
 	Events->wait(evtRebootSwitch);
 	if (Events->isInWaitResult(EVENTS_BUTTON_YES)){}
 	else if (Events->isInWaitResult(EVENTS_BUTTON_NO)) return true;
@@ -324,7 +326,7 @@ bool Strategy2005CL::waitJackout()
     unlockEmergencyStop();
     if (Events->check(EVENTS_JACKIN)) {
 	LOG_WARNING("JACK is already in, wait out\n");
-	Lcd->print("Wait jack out");
+	Lcd->print("Jack already in\nWait jack out");
 	Sound->play(SOUND_WAIT_JACKOUT, SND_PRIORITY_URGENT);
 	Events->waitNot(EVENTS_JACKIN);
 	sleep(1);

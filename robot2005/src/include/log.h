@@ -173,6 +173,11 @@ typedef struct LogPosition {
     y=(short)pt.y;
     t=(short)r2d(direction);
   }
+  LogPosition(Millimeter X, Millimeter Y, Radian direction){
+    x=(short)X;
+    y=(short)Y;
+    t=(short)r2d(direction);
+  }
   LogPosition(Position p){
     x=(short)p.center.x;
     y=(short)p.center.y;
@@ -356,7 +361,7 @@ typedef struct LogPacketTrajectory {
 #endif // LOG_INFO
 
 #ifdef LOG_DIRECTORY_INFO
-static const char* LOG_DIRECTORY_NAME = "/root/log";
+static const char* LOG_DIRECTORY_NAME = ".";
 #endif // LOG_INFO
 
 // ============================================================================
@@ -412,7 +417,9 @@ class LogCL : RobotComponent
     /** @brief enregistre la position du pont */
     void bridge(BridgePosition pos);
     /** @brief enregistre la position du robot */
-    void position(Position const& pos);
+    void position(Millimeter x,
+		  Millimeter y,
+		  Radian     t);
     /** @brief enregistre les données moteur */
     void motor(MotorPWM motorPwmLeft,
 	       MotorPWM motorPwmRight,

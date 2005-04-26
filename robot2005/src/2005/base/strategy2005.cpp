@@ -246,6 +246,16 @@ bool evtDialogButtonFilter(bool evt[])
 	|| evt[EVENTS_BUTTON_NO];
 }
 
+// ----------------------------------------------------------------------------
+// Cette fonction est un EventsFn qui permet d'attendre la pression d'une 
+// touche du lcd
+// ----------------------------------------------------------------------------
+bool evtDialogButtonReleasedFilter(bool evt[])
+{
+    return !evt[EVENTS_BUTTON_YES]
+        && !evt[EVENTS_BUTTON_NO];
+}
+
 // ---------------------------------------------------------------------------
 // evtRebootSwitch
 // ---------------------------------------------------------------------------
@@ -287,7 +297,7 @@ bool Strategy2005CL::menu(const char*fmt, ...)
     if (strlen(text)>0 && fmt != NULL) {
         Lcd->print(text);
     }
-    Events->waitNot(evtDialogButtonFilter);
+    Events->waitNot(evtDialogButtonReleasedFilter);
     Events->wait(evtDialogButtonFilter);
     return (Events->isInWaitResult(EVENTS_BUTTON_YES));
 }
