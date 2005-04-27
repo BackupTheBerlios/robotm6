@@ -57,15 +57,14 @@ StrategyAttackCL::~StrategyAttackCL()
 bool StrategyAttackCL::autoCheck()
 {
     Strategy2005CL::autoCheck();
-    Millivolt tension[4];
-    // on essaye 2 fois de recupper la tension
-    if (!Alim->getAllTension(tension)) Alim->getAllTension(tension);
     // est ce qu'on essaye de passer par le pont du milieu ?
     bridgeDetectionByCenter_ = !menu("Strategy\nGauche    Sioux");
     Lcd->print("Catapult armed\n++ Test Move ++"); 
     // met les servos en position
+    sleep(1);
     prepareCatapults();
     // verifier les capteurs sharps et bumpers detecteurs de pont
+    sleep(1);
     testBridgeCaptors();
     // verifier les sharps detecteurs d'environnement
     // TODO

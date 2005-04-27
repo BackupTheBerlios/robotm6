@@ -18,6 +18,8 @@
 #include "robotDevices.h"
 #include "movementManager.h"
 
+#define STARTPOS_USER // demande a l'utilisateur de cliquer sur un
+		      // bouton quand le robot est a la bonne position
 extern bool evtDialogButtonReleasedFilter(bool evt[]);
 
 // ============================================================================
@@ -307,18 +309,56 @@ bool Strategy2005CL::autoCheck()
 {
     LOG_COMMAND("== Auto check begin ==\n");
     testDevicesConnection();
+    sleep(1);
+    checkVoltage();
     checkRebootSwitch();
     unlockEmergencyStop();
     return true;
 }
 
+// -------------------------------------------------------------------------
+// Strategy2005CL::resetMotorForPrepareRobot
+// -------------------------------------------------------------------------
 bool Strategy2005CL::resetMotorForPrepareRobot()
 {
-  MvtMgr->motorReset();
-  menu("Press any key\nTo asservir");
-  MvtMgr->motorAsservi();
+  MvtMgr->motor()->idle();
+  menu("Press any key\nTo block motors");
+  MvtMgr->motor()->unidle();
+#ifdef STARTPOS_USER
+  menu("Press any key\nWhen start pos");
+  setStartingPosition();
+#endif
   return true;
 } 
+
+static const Millivolt VOLTAGE_CRITICAL = 13000;
+
+// -------------------------------------------------------------------------
+// Strategy2005CL::checkVoltage
+// -------------------------------------------------------------------------
+bool Strategy2005CL::checkVoltage()
+{
+    Millivolt tension[4];
+    // on essaye 2 fois de recupperer la tension
+    if (!Alim->getAllTension(tension)) {
+        sleep(1);
+        if (!Alim->getAllTension(tension)) return false;
+    }
+    bool alimError=false;
+    for(int i=0;i<4;i++) {
+        if (tension[i] < VOLTAGE_CRITICAL) {
+            alimError = true;
+        }
+    }
+    if (alimError) {
+        menu("Volt error:%.1lf\n %.1lf %.1lf %.1lf", 
+	     tension[0]/1000., 
+	     tension[1]/1000., 
+	     tension[2]/1000., 
+	     tension[3]/1000.);
+    }
+    return true;
+}    
 // -------------------------------------------------------------------------
 // Strategy2005CL::waitJackout
 // -------------------------------------------------------------------------
@@ -344,8 +384,9 @@ bool Strategy2005CL::waitJackout()
     // on attends un peu car en general on a du mal a enfoncer
     // la jack et ca fait des faux contacts
     sleep(3);
-
+#ifdef STARTPOS_USER
     setStartingPosition();
+#endif
 
     LOG_COMMAND("WAIT START\n");
     Lcd->print("Ready to start\nWait jack out");

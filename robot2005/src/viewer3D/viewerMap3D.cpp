@@ -1104,8 +1104,11 @@ void Viewer3DCL::drawBridges3D()
                  +TERRAIN_PONT_FIXE_LARGEUR/2;
     drawBridge3D(y, false);
     drawBridge3D(TERRAIN_Y-y, false);
-    if (bridge_ ==BRIDGE_POS_UNKNOWN) {
-      bridge_ =  robotData_[0].estimatedBridge;
+    for(unsigned int i=0; i<VIEWER_MAX_ROBOT_NBR; i++) {
+        if (robotData_[i].estimatedBridge != BRIDGE_POS_UNKNOWN) {
+            bridge_ =  robotData_[i].estimatedBridge;
+            break;
+        }
     }
     switch(bridge_) {
     case BRIDGE_POS_BORDURE: 

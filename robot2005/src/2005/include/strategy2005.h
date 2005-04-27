@@ -33,7 +33,6 @@ class Strategy2005CL : public StrategyCL
                    RobotMainCL* main);
     virtual ~Strategy2005CL();
 
-    bool resetMotorForPrepareRobot();
     /** @brief Return the name of the strategy */
     const char* menuName() const;
     /** @brief Configure the robot and wait for the startJack */
@@ -85,7 +84,12 @@ class Strategy2005CL : public StrategyCL
     bool checkMove();
     bool checkBumper();
     bool checkLcd();
-
+    /* desasservi les moteurs et attend qu'on appuie sur une touche
+       pour les asservir a nouveau */
+    bool resetMotorForPrepareRobot();
+    /** verifie la tension des batterie */
+    bool checkVoltage();
+    
     /** @brief change le titre utilise pour le menu lcd pour decrire la 
         strategie */
     void setMenuName(const char* name);

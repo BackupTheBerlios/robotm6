@@ -423,6 +423,11 @@ void Viewer3DCL::drawEstimatedBridges2D(Millimeter y)
 // ---------------------------------------------------------------
 void Viewer3DCL::drawBridges2D()
 {
+    for(unsigned int i=0; i<VIEWER_MAX_ROBOT_NBR; i++) {
+        drawEstimatedBridges2D((int)i);
+        if (robotData_[i].estimatedBridge != BRIDGE_POS_UNKNOWN) return;
+    }
+    
     Millimeter y=TERRAIN_Y/2 
                  +TERRAIN_BORDURE_PONT_LARGEUR
                  +TERRAIN_PONT_FIXE_LARGEUR/2;
@@ -455,9 +460,6 @@ void Viewer3DCL::drawBridges2D()
     case BRIDGE_POS_UNKNOWN:
     default:
         break;
-    }
-    for(unsigned int i=0; i<VIEWER_MAX_ROBOT_NBR; i++) {
-        drawEstimatedBridges2D((int)i);
     }
 }
 // ---------------------------------------------------------------

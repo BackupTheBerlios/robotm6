@@ -258,17 +258,3 @@ MotorDirection MovementManagerCL::getMotorDirection()
     return MOTOR_DIRECTION_STOP;
 }
 
-void MovementManagerCL::motorAsservi()
-{
-  setSpeed(0, 0);
-}
-
-void MovementManagerCL::motorIdleLeft()
-{
-
-}
-
-void MovementManagerCL::motorIdleRight()
-{
-
-}

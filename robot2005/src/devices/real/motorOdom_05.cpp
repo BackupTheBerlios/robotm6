@@ -225,18 +225,6 @@ void MotorOdom05::getCacheMotorPwm(MotorPWM &pLeft,
     pRight = motorPwmRight_;
 }
 
-bool MotorOdom05::resetHctlLeft()  
-{ 
-    if (!device_) return false;
-    LOG_FUNCTION();
-    return device_->write(MOTOR_ODOM_REQ_RESET_LEFT);
-}
-bool MotorOdom05::resetHctlRight() 
-{ 
-    if (!device_) return false;
-    LOG_FUNCTION();
-    return device_->write(MOTOR_ODOM_REQ_RESET_RIGHT); 
-}
 void MotorOdom05::dumpMotorStats() 
 {
     LOG_INFO("Motor Communication status: Error=%d, Requests=%d, Error rate=%.2lf\n",

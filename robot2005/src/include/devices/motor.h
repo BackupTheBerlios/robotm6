@@ -48,8 +48,6 @@ class MotorCL : public RobotDeviceCL
     /** Reset les hctl (gauche et droite) */
     virtual bool reset();
 
-    virtual bool resetHctlLeft()  { return reset(); }
-    virtual bool resetHctlRight() { return reset(); }
     virtual void dumpMotorStats() {}
     
     /** reset les compteurs qui verifie que les roues ne sont pas bloquees */
@@ -82,6 +80,7 @@ class MotorCL : public RobotDeviceCL
     virtual void idleRight(){ reset();}
     // asservi les moteurs
     virtual void unidle(){ setSpeed(0,0);} 
+
     /** enregistre un callback execute quand les moteurs sont resete */
     void registerResetCallback(FunctionPtr cb);
     /** Fonction a appeler periodiquement pour verfifier ques les roues ne sont

@@ -64,8 +64,6 @@ class MotorOdom05 : public RobotDeviceCL
   void getCacheMotorPwm(MotorPWM &left,
                         MotorPWM &right);
 
-  bool resetHctlLeft();
-  bool resetHctlRight();
   // desaservi les moteurs
   void idleLeft();
   void idleRight();

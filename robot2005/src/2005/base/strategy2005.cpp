@@ -14,6 +14,9 @@
 #include "movementManager.h"
 //#include "ioManager.h"
 
+// do not stop if there the user or an electrical issue press the
+// emergencyStop button
+// #define STOP_ON_EMERGENCY_STOP
 
 // ============================================================================
 // ==============================   class Strategy2005CL   ====================
@@ -180,11 +183,14 @@ bool Strategy2005CL::checkEndEvents()
     if (matchIsFinished_) {
         return true;
     }
+#ifdef STOP_ON_EMERGENCY_STOP
     if (Events->isInWaitResult(EVENTS_EMERGENCY_STOP)
 	|| Events->check(EVENTS_EMERGENCY_STOP)) {
         emergencyStop();
         return true;
-    } else if (Events->isInWaitResult(EVENTS_GAME_OVER)
+    } else 
+#endif
+    if (Events->isInWaitResult(EVENTS_GAME_OVER)
 	       || Events->check(EVENTS_GAME_OVER)) {
         gameOver();
         return true;
@@ -208,7 +214,9 @@ bool Strategy2005CL::checkEndEvents()
 bool evtEndMoveNoCollision(bool evt[])
 {
     return evt[EVENTS_MOVE_END] 
+#ifdef STOP_ON_EMERGENCY_STOP
         || evt[EVENTS_EMERGENCY_STOP] 
+#endif
         || evt[EVENTS_GAME_OVER]
         || evt[EVENTS_TIMER_ALERT];
 }
