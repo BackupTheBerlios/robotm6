@@ -148,8 +148,12 @@ void Bumper05::periodicTask()
                     ((data_[byte]&(bit)) != (newData[byte]&(bit)))) {
                     if (((newData[byte]&(bit)) != 0) ^ BumpersMapping[i].reversed) {
                         Events->raise(BumpersMapping[i].evt);
+			if (i == EMERGENCY_STOP) Log->emergencyStopPressed(true);
+			else if (i == START_JACK) Log->jackIn(true);
                     } else {
                         Events->unraise(BumpersMapping[i].evt);
+			if (i == EMERGENCY_STOP) Log->emergencyStopPressed(false);
+			else if (i == START_JACK) Log->jackIn(false);
                     }
                 }
             }
@@ -308,7 +312,8 @@ int main(int argc, char* argv[])
 #endif
   IoManager->submitIoHost(new SerialPort(2, SERIAL_SPEED_38400));
   IoManager->submitIoHost(new SerialPort(3, SERIAL_SPEED_38400));
-  
+  LogCL log;
+
   if (IoManager->getIoDevice(IO_ID_BUMPER_05)) {
     Bumper05 bumper;
     unsigned char data[BUMPER_DATA_NBR];

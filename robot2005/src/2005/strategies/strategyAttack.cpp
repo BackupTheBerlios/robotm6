@@ -58,7 +58,8 @@ bool StrategyAttackCL::autoCheck()
 {
     Strategy2005CL::autoCheck();
     Millivolt tension[4];
-    //Alim->getAllTension(tension);
+    // on essaye 2 fois de recupper la tension
+    if (!Alim->getAllTension(tension)) Alim->getAllTension(tension);
     // est ce qu'on essaye de passer par le pont du milieu ?
     bridgeDetectionByCenter_ = !menu("Strategy\nGauche    Sioux");
     Lcd->print("Catapult armed\n++ Test Move ++"); 
@@ -74,6 +75,7 @@ bool StrategyAttackCL::autoCheck()
     // maintenant il n'y a plus qu'a bien placer le robot sur la table
     // et mettre les balles dans les catapultes
     // et attendre la jack de depart
+    resetMotorForPrepareRobot();
     return true;
 }
 

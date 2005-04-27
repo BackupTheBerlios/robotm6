@@ -535,7 +535,7 @@ Position getPosition(int robotId, LogTime t)
 	}
 	t1 = (*it).first;
 	p1 = Point((*it).second.x, (*it).second.y);
-	dir1=(*it).second.theta;
+	dir1=(*it).second.t*M_PI/180;
     }
     return Position(p1, dir1);
 }

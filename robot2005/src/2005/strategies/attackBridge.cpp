@@ -537,6 +537,7 @@ bool StrategyAttackCL::gotoBridgeEntry(Millimeter y)
 // --------------------------------------------------------------------------
 bool StrategyAttackCL::gotoBridgeEntryEasy(Millimeter y)
 {
+    if (RobotPos->x() > BRIDGE_DETECT_BUMP_X - 30) return true;
     Events->enable(EVENTS_NO_BRIDGE_BUMP_LEFT);
     Events->enable(EVENTS_NO_BRIDGE_BUMP_RIGHT);
     LOG_COMMAND("gotoBridgeEntry Easy:%d\n", (int)y);
@@ -600,7 +601,7 @@ bool StrategyAttackCL::gotoBridgeEntryNear(Millimeter y)
     t.push_back(Point(BRIDGE_DETECT_BUMP_X-100, y2));
     //t.push_back(Point(BRIDGE_ENTRY_NAVIGATE_X-100, y));
     t.push_back(Point(BRIDGE_ENTRY_NAVIGATE_X, (2*y+y2)/3));
-    Move->followTrajectory(t, TRAJECTORY_RECTILINEAR, 2, 30);
+    Move->followTrajectory(t, TRAJECTORY_RECTILINEAR, 3, 30);
    
     
     //    Move->go2Target(BRIDGE_ENTRY_NAVIGATE_X, RobotPos->y());
@@ -628,7 +629,7 @@ bool StrategyAttackCL::gotoBridgeEntryNear(Millimeter y)
     Events->enable(EVENTS_NO_BRIDGE_BUMP_LEFT);
     Events->enable(EVENTS_NO_BRIDGE_BUMP_RIGHT);
     MvtMgr->setRobotDirection(MOVE_DIRECTION_FORWARD);
-    Move->go2Target(BRIDGE_DETECT_BUMP_X, y, 1, 20);
+    Move->go2Target(BRIDGE_DETECT_BUMP_X, y, 2, 30);
     //ATTACK_BRIDGE_GAIN, ATTACK_BRIDGE_SPEED);
     return true;
 }
@@ -651,7 +652,7 @@ bool StrategyAttackCL::gotoBridgeEntryRotateToSeeBridge()
         Events->enable(EVENTS_NO_BRIDGE_BUMP_RIGHT);
         MvtMgr->setRobotDirection(MOVE_DIRECTION_FORWARD); 
         Move->enableAccelerationController(true);
-        Move->rotateOnWheel(-M_PI_4 , false, -1, 10);
+        Move->rotateOnWheel(-M_PI_4/1.8 , false, -1, 10);
         Events->wait(evtEndMoveBridge);
         Move->enableAccelerationController(false);
         if (checkBridgeBumperEvent()) {
@@ -661,7 +662,7 @@ bool StrategyAttackCL::gotoBridgeEntryRotateToSeeBridge()
             return false;
         Events->disable(EVENTS_NO_BRIDGE_BUMP_LEFT);
         Events->disable(EVENTS_NO_BRIDGE_BUMP_RIGHT);
-        Move->rotateOnWheel(M_PI_4 , false);
+        Move->rotateOnWheel(0 , false);
         Events->wait(evtEndMove);
         if (checkEndEvents()) 
             return false;
@@ -708,7 +709,7 @@ bool StrategyAttackCL::crossBridge()
         return false; 
     
     int retry=0;
-    LOG_COMMAND("crossBridge: %d\n", (int)tgt.y);
+    LOG_COMMAND("crossBridge: %s\n", tgt.txt());
     do {
         Move->enableAccelerationController(true);
         MvtMgr->setRobotDirection(MOVE_DIRECTION_FORWARD);

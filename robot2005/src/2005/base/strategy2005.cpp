@@ -293,7 +293,7 @@ bool Strategy2005CL::menu(const char*fmt, ...)
     va_start(argp, fmt);
     vsprintf(text, fmt, argp);
     va_end(argp);
-
+    usleep(500000);
     if (strlen(text)>0 && fmt != NULL) {
         Lcd->print(text);
     }

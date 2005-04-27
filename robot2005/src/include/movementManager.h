@@ -120,6 +120,9 @@ class MovementManagerCL : public RobotComponent
     MotorDirection getMotorDirection();
     void setSpeed(MotorSpeed  speedLeft,
 		  MotorSpeed  speedRight);
+    void motorAsservi();
+    void motorIdleLeft();
+    void motorIdleRight();
  protected:
     void startThread();
     void getCoderPosition(CoderPosition& left, 

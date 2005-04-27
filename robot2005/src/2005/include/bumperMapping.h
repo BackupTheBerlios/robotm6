@@ -65,11 +65,11 @@ static BumperMappingStruct BumpersMapping[BUMPERS_NBR]= {
 
     {BUMP_RR,    "Bumper Rear Right",     EVENTS_BUMPER_RR,      false, 2, 1,
      true},
-    {BUMP_RL,    "Bumper Rear Left",      EVENTS_BUMPER_RL,      false, 2, 2,
+    {BUMP_RL,    "Bumper Rear Left",      EVENTS_BUMPER_RL,      false, 2, 4,
      true},
-    {BUMP_FR,    "Bumper Front Right",    EVENTS_BUMPER_FR,      false, 2, 3,
+    {BUMP_FR,    "Bumper Front Right",    EVENTS_BUMPER_FR,      false, 2, 2,
      true},
-    {BUMP_FL,    "Bumper Front Left",     EVENTS_BUMPER_FL,      false, 2, 4,
+    {BUMP_FL,    "Bumper Front Left",     EVENTS_BUMPER_FL,      false, 2, 3,
      true}
    
 };

@@ -75,6 +75,9 @@ void MotorCL::periodicTask()
                 right, left, counterRight_, counterLeft_);
 #endif
       alert=true;
+      if (enableAutomaticReset_) {
+	idleRight();
+      }
 #ifndef TELECOMMAND_MAIN
       Events->raise(EVENTS_PWM_ALERT_LEFT);
 #endif
@@ -91,6 +94,9 @@ void MotorCL::periodicTask()
                 right, left, counterRight_, counterLeft_);
 #endif
       alert=true;
+      if (enableAutomaticReset_) {
+	idleRight();
+      }
 #ifndef TELECOMMAND_MAIN
       Events->raise(EVENTS_PWM_ALERT_RIGHT);
 #endif
@@ -104,9 +110,6 @@ void MotorCL::periodicTask()
   if (alert) {
     counterLeft_=0;
     counterRight_=0;
-    if (enableAutomaticReset_) {
-      reset();
-    }
     if (alertFunction_) {
       alertFunction_(left, right);
     }

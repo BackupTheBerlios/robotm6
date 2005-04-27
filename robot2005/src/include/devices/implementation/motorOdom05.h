@@ -66,6 +66,11 @@ class MotorOdom05 : public RobotDeviceCL
 
   bool resetHctlLeft();
   bool resetHctlRight();
+  // desaservi les moteurs
+  void idleLeft();
+  void idleRight();
+    // asservi les moteurs
+  void unidle();
   void dumpMotorStats();
 
  private:

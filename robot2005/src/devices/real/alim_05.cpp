@@ -27,13 +27,19 @@ Alim05::~Alim05()
 bool Alim05::getAllTension(Millivolt tension[4]) 
 {
     if (!device_) return false;
-    unsigned int l=ALIM_TENSION_NBR;
-    unsigned char comData[ALIM_TENSION_NBR];
+    unsigned int l=5;
+    unsigned char comData[5];
     bool status = device_->writeRead(ALIM_REQ_GET_TENSION, comData, l);
     if (!status) {
         // affiche le mesage d'erreur une seule fois
         LOG_ERROR("Alim05::getAllTension read error\n");
         return false;
+    }
+    unsigned char checkSum=comData[0]^comData[1]^comData[2]^comData[3];
+    if (checkSum != comData[4]) {
+      LOG_ERROR("getAllTension CheckSumError: read=0x%2.2x, expected=0x%2.2x\n",
+		comData[4], checkSum);
+      return false;
     }
     for(int i=0; i<4 && i<ALIM_TENSION_NBR; i++) {
         if (comData[i]==0) {
@@ -43,11 +49,11 @@ bool Alim05::getAllTension(Millivolt tension[4])
         } else {
             tension[i] = 7200 + 50*comData[i]; // TODO use fab conversion method
             if (tension[i]>14) {
-	      LOG_OK("Battery %d: %2.2fV\n", i, tension[i]/1000.);
+	      LOG_OK("Battery %d: %2.2fV (0x%2.2x)\n", i, tension[i]/1000., comData[i]);
 	    } else if (tension[i]>13) {
-	      LOG_WARNING("Battery %d: %2.2fV\n", i, tension[i]/1000.);
+	      LOG_WARNING("Battery %d: %2.2fV (0x%2.2x)\n", i, tension[i]/1000., comData[i]);
 	    } else {
-	      LOG_ERROR("Battery %d: %2.2fV\n", i, tension[i]/1000.);
+	      LOG_ERROR("Battery %d: %2.2fV (Ox%2.2x)\n", i, tension[i]/1000., comData[i]);
 	    }
         }
     }

@@ -160,11 +160,8 @@ bool Strategy2005CL::checkMove()
         LOG_ERROR("Move device not found\n");
         Sound->play(SOUND_CARTE_MOVE);
 	Sound->play(SOUND_NE_REPOND_PAS);
-        if(menu("Move not ping\nretry      skip")) {
-            // Flo todo: reping a device...
-        } else {
-            return false;
-        }
+        Lcd->print("Move not ping\nConnect & Reboot");
+        while(1) sleep(1);
     }      
     return true;
 }
@@ -180,7 +177,7 @@ bool Strategy2005CL::checkServo()
         Sound->play(SOUND_CARTE_SERVO);
 	Sound->play(SOUND_NE_REPOND_PAS);
         if(menu("Servo not ping\nretry      skip")) {
-            // Flo todo: reping a device...
+	  main_->robotDevices()->rescan();
         } else {
             return false;
         }
@@ -315,6 +312,13 @@ bool Strategy2005CL::autoCheck()
     return true;
 }
 
+bool Strategy2005CL::resetMotorForPrepareRobot()
+{
+  MvtMgr->motorReset();
+  menu("Press any key\nTo asservir");
+  MvtMgr->motorAsservi();
+  return true;
+} 
 // -------------------------------------------------------------------------
 // Strategy2005CL::waitJackout
 // -------------------------------------------------------------------------

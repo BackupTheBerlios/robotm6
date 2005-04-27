@@ -34,7 +34,8 @@ class RobotDevicesCL : public RobotBase {
 
     /** @brief detecte et cree toutes les cartes */
     void allocDevices();
-
+    /** reping devices and alloc new ones */
+    void rescan();
     /** @brief Envoie le signal d'arret d'urgence a toutes les cartes */
     void emergencyStop();
 

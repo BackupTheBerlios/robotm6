@@ -6,7 +6,8 @@
 static const unsigned char ALIM_REQ_PING = 0xAA;
 static const unsigned char ALIM_PING_ID  = 0xCD;
 
-// demande la tension des 4 batteries : renvoie 4 octects (1 octect par batterie)
+// demande la tension des 4 batteries : renvoie 4 octects (1 octect
+// par batterie) + checksum= xor des 4 octets
 static const unsigned char ALIM_REQ_GET_TENSION  = 0xA0;
 static const unsigned char ALIM_TENSION_NBR  = 4;
 

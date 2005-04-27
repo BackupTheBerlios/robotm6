@@ -1,5 +1,4 @@
 #include <assert.h>
-//#define LOG_DEBUG_ON
 
 #include "movement.h"
 #include "movementManager.h"
@@ -7,8 +6,7 @@
 #include "log.h"
 #include "robotTimer.h"
 #include "robotConfig.h"
-
-//#define LOG_DEBUG_ON
+#define LOG_DEBUG_ON
 
 // ============================================================================
 // private namespace
@@ -16,7 +14,7 @@
 
 namespace {
     const unsigned int MOVE_INTEGRAL_MEMORY_SIZE = 10;
-    static const Millisecond MVT_TIMEOUT = 45000;
+    static const Millisecond MVT_TIMEOUT = 12000;
     double sigmaError_=0;
     double integralMemory_[MOVE_INTEGRAL_MEMORY_SIZE];
     int integralMemoryIndex_=0;
@@ -144,7 +142,7 @@ bool Movement::moveToPoint(Point target, MoveGain gain,
                                                   + (forward?0:M_PI));
     attractivePoint.y += MOVE_ATTRACTIVE_DIST*sin(RobotPos->theta()
                                                   + (forward?0:M_PI));
-    //attractivePoint.print();
+    attractivePoint.print();
     
     // end ?= current point=target point 
     // or length from starting point > distance to final point 
@@ -226,8 +224,7 @@ void Movement::stop()
 // ============================================================================
 
 // ----------------------------------------------------------------------------
-// MovementForward::MovementForward
-// ----------------------------------------------------------------------------
+// MovementForward::MovementForward// ----------------------------------------------------------------------------
 MovementForward::MovementForward(Millimeter dist,
                                  MotorSpeed maxSpeed,
                                  MoveCL*      move) :
@@ -456,9 +453,6 @@ MovementGo2Target::MovementGo2Target(Point      target,
     Movement(MOVE_GOTOTARGET_TYPE, "GotoTarget", maxSpeed, gain, move), 
     target_(target), totalLength_(0), totalLengthInit_(false)
 {
-   if (totalLength_>10) {
-    //  target_ += (target_ - RobotPos->pt()) * (300. /totalLength_);
-  }  
 }
 
 // ----------------------------------------------------------------------------
@@ -471,9 +465,8 @@ void MovementGo2Target::periodicTask()
     Point moveTargetPoint   = target_;
     MoveGain gain           = gain_;
     if (!totalLengthInit_) {
-      totalLength_ = dist(target_, startingPoint_);
-      totalLengthInit_ = true;
-      target_ = startingPoint_ + (target_ - startingPoint_) * ((totalLength_+400.) /totalLength_);
+        totalLength_ = dist(target_, startingPoint_);
+        totalLengthInit_ = true;
     }
     if (distToTarget > MOVE_NEAR_TARGET_DIST) { 
         // on est loin de la cible => on trouve un point cible plus proche
@@ -517,11 +510,11 @@ MovementTrajectory::MovementTrajectory(Trajectory const&   trajectory,
                                        MoveTrajectoryMode  mode,
                                        MoveGain            gain,
                                        MotorSpeed          maxSpeed,
-                                       MoveCL*               move) :
+                                       MoveCL*             move) :
     Movement(MOVE_TRAJECTORY_TYPE, "Trajectory", maxSpeed, gain, move), 
     trajectory_(trajectory), trajectoryMode_(mode), 
     currentIndex_(0.), lastIndex_(0), totalLength_(-1), lastLength_(0),
-    realMaxSpeed_(maxSpeed)
+    realMaxSpeed_(maxSpeed), first_(true)
 {
     if (trajectory_.size() <= 1) {
         trajectory_.clear();
@@ -533,6 +526,21 @@ MovementTrajectory::MovementTrajectory(Trajectory const&   trajectory,
     for(unsigned int i=0; i<trajectory_.size(); i++) {
       trajectory_[i].print();
     }
+
+    // a virtual last point but stop the robot when arriving to the user
+    // last point so the robot does not rotate on itself at the end of the
+    // trajectory
+    Point lastPoint2;
+    if (trajectory_.size()>=2) {
+        lastPoint2 = trajectory_[trajectory_.size()-2];
+    } else {
+        lastPoint2 = RobotPos->pt();
+    }
+    Point lastPoint = trajectory_[trajectory_.size()-1];
+    Millimeter d = dist(lastPoint2, lastPoint);
+    lastPoint = lastPoint2+(lastPoint-lastPoint2)*((d+400.)/d);
+    trajectory_.push_back(lastPoint);
+    trajectory_[trajectory_.size()-1].print();
 }
 
 // ----------------------------------------------------------------------------
@@ -551,7 +559,7 @@ void MovementTrajectory::getNextPoint(Point &newPoint,
     }
     Millimeter length = Geometry2D::getSquareDistance(pt, newPoint);
 
-    // if arriving near target point or distance to target point increase then pas to next point
+    // if arriving near target point or distance to target point increase then pass to next point
     while (((fabs(lastIndex_-index) < MVT_TRAJECTORY_DELTA_INDEX
              && lastLength_ < length)
             || (length < MVT_TRAJECTORY_MIN_SQUARE_LENGTH)) 
@@ -571,7 +579,7 @@ void MovementTrajectory::getNextPoint(Point &newPoint,
     lastIndex_  = index;
 
     if (index >= maxIndex) index = maxIndex;
-    //printf("nextPt= %.2lf %s\n", index, newPoint.txt());
+    printf("nextPt= %.2lf %s\n", index, newPoint.txt());
     
 }
 
@@ -619,18 +627,21 @@ void MovementTrajectory::periodicTask()
     MoveGain gain = gain_;
     Point moveTargetPoint = RobotPos->pt();
     unsigned int lastIndex = (unsigned int)currentIndex_;
-    unsigned int maxIndex = (unsigned int)(trajectory_.size() - 1);
+    unsigned int maxIndex = (unsigned int)(trajectory_.size() - 2);
     if (trajectory_.size()<1) return;
     // trouve le point cible
     getNextPoint(moveTargetPoint, currentIndex_);
 
-    // si on est sur le dernier segment, on ne doit pas depasser le dernier point
-    if ((unsigned int)currentIndex_ == maxIndex
-       && lastIndex != currentIndex_) {
+    // si on est sur le dernier segment, on ne doit pas depasser le dernier point utilisateur
+    // le movement a rajouter un point bidon pour etre sur de ne pas tourner en fin de trajectoire
+    if ((unsigned int)currentIndex_ >= maxIndex && first_) {
+         first_=false;
          beforeLastPoint_ = RobotPos->pt();
-         totalLength_ = dist(beforeLastPoint_, trajectory_[maxIndex]);
+         totalLength_ = 2*MOVE_ATTRACTIVE_DIST; //dist(beforeLastPoint_, trajectory_[maxIndex]);
     }
-    
+    if (!first_) {
+      gain_ *= 1-0.2*((dist(beforeLastPoint_, RobotPos->pt())) / MOVE_ATTRACTIVE_DIST);
+    }
     Millimeter distance=distToVirage((unsigned int)currentIndex_);
     if (distance>400) maxSpeed_ = realMaxSpeed_;
     else if (distance<100) maxSpeed_ = VITESSE_MAX_VIRAGE;
@@ -726,8 +737,7 @@ void MovementRotateOnWheel::periodicTask()
             speedLeft  = -speed;
         }
     }
-    LOG_DEBUG("speedLeft=%d speedRight=%d error=%.2lf\n", 
-	      (int)speedLeft, (int)speedRight, error);
+    LOG_DEBUG("%d %d\n", (int)speedLeft, (int)speedRight);
     move_->setSpeed((MotorSpeed)speedLeft, 
                     (MotorSpeed)speedRight);
 
@@ -760,13 +770,11 @@ MovementRealign::MovementRealign(Millimeter distMaxWheel,
                                  MoveCL*    move) :
     Movement(MOVE_REALIGN_TYPE, "MovementRealign", 
              max(maxSpeed, MOVE_MAX_ROTATION_SPEED), gain, move), 
-    theta_(theta), leftWheel_(true), distMax_(distMaxWheel),
-    canMoveStopWheel_(true)
+    theta_(theta), leftWheel_(true), distMax_(distMaxWheel)
 {
     // est ce qu'on doit bloquer la roue gauche?
     leftWheel_ = (na2PI(theta-RobotPos->thetaAbsolute(), -M_PI)<0);
     blockedWheelPoint_ = getStopWheelPoint();
-    
 }
 
 Point MovementRealign::getStopWheelPoint()
@@ -803,7 +811,7 @@ void MovementRealign::periodicTask()
    
     updateIntegralTerm(error);
     Point wheelPoint = getStopWheelPoint();
-    canMoveStopWheel_ &= (dist(wheelPoint, blockedWheelPoint_) < distMax_);
+    bool canMoveStopWheel = (dist(wheelPoint, blockedWheelPoint_) < distMax_);
     double speedRight=0, speedLeft=0, speed=0;
     if (!endOfMovement_) {
         // Convertir (rotationSpeed) en (speedLeft, speedRight)
@@ -821,7 +829,7 @@ void MovementRealign::periodicTask()
         if (leftWheel_) {
             // la roue gauche ne doit pas bouger!
             speedRight =  speed;
-            if (canMoveStopWheel_) speedLeft  = speedRight/2;
+            if (canMoveStopWheel) speedLeft  = speedLeft/2;
             else speedLeft  = 0;
             if (speed > 0) {
                 stop();
@@ -830,7 +838,7 @@ void MovementRealign::periodicTask()
         } else {
             // la roue droite ne doit pas bouger!
             speedLeft  = -speed;
-            if (canMoveStopWheel_) speedRight = speedLeft/2;
+            if (canMoveStopWheel) speedRight = speedRight/2;
             else speedRight  = 0;
             if (speed > 0) {
                 stop();
@@ -838,8 +846,7 @@ void MovementRealign::periodicTask()
             }
         }
     }
-    LOG_DEBUG("speedLeft=%d speedRight=%d canMove=%s, error=%.2lf\n", 
-	      (int)speedLeft, (int)speedRight, b2s(canMoveStopWheel_), error);
+    LOG_DEBUG("%d %d\n", (int)speedLeft, (int)speedRight);
     move_->setSpeed((MotorSpeed)speedLeft, 
                     (MotorSpeed)speedRight);
 

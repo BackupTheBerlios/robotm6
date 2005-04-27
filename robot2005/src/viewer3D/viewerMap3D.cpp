@@ -1104,6 +1104,9 @@ void Viewer3DCL::drawBridges3D()
                  +TERRAIN_PONT_FIXE_LARGEUR/2;
     drawBridge3D(y, false);
     drawBridge3D(TERRAIN_Y-y, false);
+    if (bridge_ ==BRIDGE_POS_UNKNOWN) {
+      bridge_ =  robotData_[0].estimatedBridge;
+    }
     switch(bridge_) {
     case BRIDGE_POS_BORDURE: 
         y = TERRAIN_BORDURE_PONT_LARGEUR+TERRAIN_PONT_LARGEUR/2.;

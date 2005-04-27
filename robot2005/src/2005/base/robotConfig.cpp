@@ -60,7 +60,7 @@ RobotConfigDefence2005CL::RobotConfigDefence2005CL(bool simulated)
 #else
     isMotorISA=false;
 #endif
-    startingPos=Position(50, 1700, -M_PI/2.);
+    startingPos=Position(50, 1725, 0);
     timeAlertBeforeEnd =(75000);
 
     odometerK=(.22983);

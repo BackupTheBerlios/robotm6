@@ -33,6 +33,7 @@ class Strategy2005CL : public StrategyCL
                    RobotMainCL* main);
     virtual ~Strategy2005CL();
 
+    bool resetMotorForPrepareRobot();
     /** @brief Return the name of the strategy */
     const char* menuName() const;
     /** @brief Configure the robot and wait for the startJack */

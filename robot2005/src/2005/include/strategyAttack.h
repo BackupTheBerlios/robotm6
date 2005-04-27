@@ -104,6 +104,8 @@ class StrategyAttackCL : public Strategy2005CL
     bool finishAlign(BorderEnum targetBorder);
     bool alignBorder();
     
+    bool avoidObstacle();
+
     bool preDefinedSkittleExploration1();
     bool preDefinedSkittleExploration2();
 
@@ -158,7 +160,7 @@ enum BRIDGE_ENTRY_POS_BITS {
 // abscisse sure, sur laquelle on s'alligne pour aller d'une position de pont a l'autre
 static const Millimeter BRIDGE_ENTRY_NAVIGATE_X = 1200;
 // abscisse ou on peut utiliser les sharps pour detecter le pont
-static const Millimeter BRIDGE_DETECT_SHARP_X = 1400; // on s'arrete toujours un peu avant
+static const Millimeter BRIDGE_DETECT_SHARP_X = 1350; // on s'arrete toujours un peu avant
 static const Millimeter BRIDGE_DETECT_BUMP_X  = 1350;
 // abscisse de fin de traversee de pont
 static const Millimeter BRIDGE_CROSS_BRIDGE_X  = 2300;
@@ -184,7 +186,7 @@ static const Millisecond ATTACK_TIME_EXPLORE_ALL      = 45000;
 // distance de laquelle on depalce le point cible pour etre sur qu'un mouvement se terminera au centre d'une case
 static const Millimeter ATTACK_CHANGE_TARGET_POINT_DIST = 50;
 // si y > EXPLORE_METHOD_Y on utilise la trajectoire 1, sinon on utilise la 2
-static const Millimeter ATTACK_EXPLORE_METHOD_Y = 1570;
+static const Millimeter ATTACK_EXPLORE_METHOD_Y = 1450;
 
 struct CatapultServo {
   unsigned char id;

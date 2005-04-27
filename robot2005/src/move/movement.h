@@ -290,6 +290,7 @@ class MovementTrajectory : public Movement
     Millimeter          lastLength_;
     Point               beforeLastPoint_;
     MotorSpeed          realMaxSpeed_;
+    bool                first_;
 
 };
 

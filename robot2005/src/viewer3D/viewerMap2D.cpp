@@ -66,7 +66,6 @@ void Viewer3DCL::drawRobots2D()
     for(unsigned int i=0; i<VIEWER_MAX_ROBOT_NBR; i++) {
         drawRobot2D(i, false);
         if (enableEstimatedDisplay_) drawRobot2D(i, true);
-        drawEstimatedBridges2D((int)i);
     }
 }
 
@@ -456,6 +455,9 @@ void Viewer3DCL::drawBridges2D()
     case BRIDGE_POS_UNKNOWN:
     default:
         break;
+    }
+    for(unsigned int i=0; i<VIEWER_MAX_ROBOT_NBR; i++) {
+        drawEstimatedBridges2D((int)i);
     }
 }
 // ---------------------------------------------------------------

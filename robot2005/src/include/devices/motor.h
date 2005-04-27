@@ -77,8 +77,11 @@ class MotorCL : public RobotDeviceCL
                         MotorPWM &right){}
  
     /** Desasservit les moteurs */
-    virtual void idle(){}
-
+    virtual void idle(){reset();}
+    virtual void idleLeft(){reset();}
+    virtual void idleRight(){ reset();}
+    // asservi les moteurs
+    virtual void unidle(){ setSpeed(0,0);} 
     /** enregistre un callback execute quand les moteurs sont resete */
     void registerResetCallback(FunctionPtr cb);
     /** Fonction a appeler periodiquement pour verfifier ques les roues ne sont

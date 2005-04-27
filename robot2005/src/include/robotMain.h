@@ -69,6 +69,9 @@ class RobotMainCL : public RobotBase
     void robotMainUserAbortCB();
     /** Met à zero le chronometre */
     virtual void startMatch();
+
+    RobotDevicesCL* robotDevices() { return devices_; }
+
  protected:
     /** Reset tous les composants de RobotMain */
     virtual void resetAll();

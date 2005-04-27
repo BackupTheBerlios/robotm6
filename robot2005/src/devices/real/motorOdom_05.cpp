@@ -39,15 +39,39 @@ MotorOdom05::~MotorOdom05()
 /** Reset les hctl (gauche et droite) */
 bool MotorOdom05::reset()
 {
-    return idle();
+    if (!device_) return false;
+    LOG_FUNCTION();
+    return device_->write(MOTOR_ODOM_REQ_RESET);
 }
 
 /** Desasservit les moteurs */
 bool MotorOdom05::idle()
 {
-    if (!device_) return false;
-    LOG_FUNCTION();
-    return device_->write(MOTOR_ODOM_REQ_RESET);
+  idleLeft();
+  idleRight();
+  return true;
+}
+
+ // desaservi les moteurs
+void MotorOdom05::idleLeft()
+{
+  if (!device_) return;
+  LOG_FUNCTION();
+  device_->write(MOTOR_ODOM_REQ_IDLE_LEFT);
+}
+void MotorOdom05::idleRight()
+{
+  if (!device_) return;
+  LOG_FUNCTION();
+  device_->write(MOTOR_ODOM_REQ_IDLE_RIGHT);
+}
+
+// asservi les moteurs
+void MotorOdom05::unidle()
+{
+  if (!device_) return;
+  LOG_FUNCTION();
+  device_->write(MOTOR_ODOM_REQ_UNIDLE);
 }
 
 /** Defini la constante d'acceleration des moteurs */

@@ -118,9 +118,24 @@ void RobotDevicesCL::allocDevices()
     allocAlim();
 }
 
+void RobotDevicesCL::rescan()
+{
+    IoManager->rescan();
+    allocMotorOdom();
+    allocLcd();
+    allocSound();
+    allocBumper();
+    allocEnv();
+    allocServo();
+    allocCrane();
+    allocSkittle();
+    allocTesla();
+    allocAlim();
+}
 void RobotDevicesCL::allocMotorOdom()
 {
     if (IoManager->getIoDevice(IO_ID_MOTOR_ODOM_05)) {
+        if (motorOdom_ && !motorOdom_->exists()) delete motorOdom_;
         motorOdom_ = new MotorOdom05();
     }
     allocMotor();
@@ -129,20 +144,24 @@ void RobotDevicesCL::allocMotorOdom()
 
 void RobotDevicesCL::allocMotor()
 {
-    if (RobotConfig2005->hasMotor) { 
+    if (RobotConfig2005->hasMotor) {
+        if (motor_ && motor_->exists()) return;
         if (RobotConfig2005->motorSimu) {
+            if (motor_ && !motor_->exists()) delete motor_;
             motor_ = new MotorSimu(RobotConfig->automaticMotorReset);
         } else {
 #ifndef GUMSTIX
             if (RobotConfig->isMotorISA) {
+                if (motor_ && !motor_->exists()) delete motor_;
                 motor_ = new MotorIsa(RobotConfig->automaticMotorReset);
             } else
 #endif
 	    {
                 if (motorOdom_ != NULL) {
+                    if (motor_ && !motor_->exists()) delete motor_;
                     motor_ = new Motor05(motorOdom_);
                 } else {
-                    motor_ = new MotorCL(RobotConfig->automaticMotorReset);
+                    if (!motor_) motor_ = new MotorCL(RobotConfig->automaticMotorReset);
                 }
             }
         }
@@ -151,17 +170,21 @@ void RobotDevicesCL::allocMotor()
 
 void RobotDevicesCL::allocOdometer()
 {
-    if (RobotConfig2005->hasOdometer) {  
+    if (RobotConfig2005->hasOdometer) { 
+        if (odometer_ && odometer_->exists()) return; 
         if (RobotConfig2005->odometerSimu) {
+            if (odometer_ && !odometer_->exists()) delete odometer_;
             odometer_ = new OdometerSimu();
         } else {
             if (motorOdom_ != NULL) {
+                if (odometer_ && !odometer_->exists()) delete odometer_;
                 odometer_ = new Odometer05(motorOdom_);
             }
             else if (IoManager->getIoDevice(IO_ID_ODOMETER_04)) {
+                if (odometer_ && !odometer_->exists()) delete odometer_;
                 odometer_ = new Odometer_04();
             } else {
-                odometer_ = new OdometerCL();
+                if(!odometer_) odometer_ = new OdometerCL();
             }
         }
     }
@@ -169,13 +192,16 @@ void RobotDevicesCL::allocOdometer()
 void RobotDevicesCL::allocLcd()
 {
     if (RobotConfig2005->hasLcd) {  
+        if (lcd_ && lcd_->exists()) return; 
         if (RobotConfig2005->lcdSimu) {
+            if (lcd_ && !lcd_->exists()) delete lcd_; 
             lcd_   = new LcdSimu();
         } else {
             if (IoManager->getIoDevice(IO_ID_LCD_05)) {
+                if (lcd_ && !lcd_->exists()) delete lcd_; 
                 lcd_ = new Lcd_05();
             } else {
-                lcd_ = new LcdCL();
+                if (!lcd_) lcd_ = new LcdCL();
             }
         }
     }
@@ -185,13 +211,16 @@ void RobotDevicesCL::allocLcd()
 void RobotDevicesCL::allocSound()
 {
     if (RobotConfig2005->hasSound) {
+        if (sound_ && sound_->exists()) return; 
         if (RobotConfig2005->soundSimu) {
+            if (sound_ && !sound_->exists()) delete sound_; 
             sound_   = new SoundSimu();
         } else {
             if (IoManager->getIoDevice(IO_ID_SOUND_05)) {
+                if (sound_ && !sound_->exists()) delete sound_; 
                 sound_ = new Sound05CL();
             } else {
-                sound_ = new SoundCL();
+                if (!sound_) sound_ = new SoundCL();
             }
         }
     }
@@ -200,15 +229,18 @@ void RobotDevicesCL::allocSound()
 void RobotDevicesCL::allocBumper()
 {
     if (RobotConfig2005->hasBumper) {
+        if (bumper_ && bumper_->exists()) return; 
         if (RobotConfig2005->bumperSimu) {
+            if (bumper_ && !bumper_->exists()) delete bumper_; 
             bumper_ = new BumperSimu();
             startWatching(bumper_);
         } else {
             if (IoManager->getIoDevice(IO_ID_BUMPER_05)) {
+                if (bumper_ && !bumper_->exists()) delete bumper_; 
                 bumper_ = new Bumper05();
                 startWatching(bumper_);
             } else {
-                bumper_ = new BumperCL();
+                if (!bumper_) bumper_ = new BumperCL();
             }
         }
     }
@@ -217,15 +249,18 @@ void RobotDevicesCL::allocBumper()
 void RobotDevicesCL::allocEnv()
 {
     if (RobotConfig2005->hasEnv) {
+        if (env_ && env_->exists()) return; 
         if (RobotConfig2005->envSimu) {
+            if (env_ && !env_->exists()) delete env_; 
             env_ = new EnvDetectorSimu();
             startWatching(env_);
         } else {
             if (IoManager->getIoDevice(IO_ID_ENV_05)) {
+                if (env_ && !env_->exists()) delete env_; 
                 env_ = new EnvDetector05();
                 startWatching(env_);
             } else {
-                env_ = new EnvDetectorCL();
+                if (!env_) env_ = new EnvDetectorCL();
             }
         }
     }
@@ -234,13 +269,16 @@ void RobotDevicesCL::allocEnv()
 void RobotDevicesCL::allocServo()
 {
     if (RobotConfig2005->hasServo) {
+        if (servo_ && servo_->exists()) return; 
         if (RobotConfig2005->servoSimu) {
+            if (servo_ && !servo_->exists()) delete servo_; 
             servo_ = new ServoSimu();
         } else {
             if (IoManager->getIoDevice(IO_ID_SERVO_05)) {
+                if (servo_ && !servo_->exists()) delete servo_; 
                 servo_ = new Servo05();
             } else {
-                servo_ = new ServoCL();
+                if (!servo_) servo_ = new ServoCL();
             }
         }
     } 
@@ -249,13 +287,16 @@ void RobotDevicesCL::allocServo()
 void RobotDevicesCL::allocCrane()
 {
     if (RobotConfig2005->hasCrane) {
+        if (crane_ && crane_->exists()) return; 
         if (RobotConfig2005->craneSimu) {
+            if (crane_ && !crane_->exists()) delete crane_; 
             crane_ = new CraneSimu();
         } else {
             if (IoManager->getIoDevice(IO_ID_CRANE_05)) {
+                if (crane_ && !crane_->exists()) delete crane_; 
                 crane_ = new Crane05();
             } else {
-                crane_ = new CraneCL();
+                if (!crane_) crane_ = new CraneCL();
             }
         }
     }
@@ -264,14 +305,17 @@ void RobotDevicesCL::allocCrane()
 void RobotDevicesCL::allocSkittle()
 {
     if (RobotConfig2005->hasSkittleDetector) {
+        if (skittle_ && skittle_->exists()) return; 
         if (RobotConfig2005->skittleDetectorSimu) {
+            if (skittle_ && !skittle_->exists()) delete skittle_;
             skittle_ = new SkittleDetectorSimu();
         } else {
             if (IoManager->getIoDevice(IO_ID_SKITTLE_DETECTOR_05)) {
+                if (skittle_ && !skittle_->exists()) delete skittle_;
                 skittle_ = new SkittleDetector05();
                 startWatching(skittle_);
             } else {
-                skittle_ = new SkittleDetectorCL();
+                if (!skittle_) skittle_ = new SkittleDetectorCL();
             }
         }
     }
@@ -280,14 +324,17 @@ void RobotDevicesCL::allocSkittle()
 void RobotDevicesCL::allocTesla()
 {
     if (RobotConfig2005->hasTesla) {
+        if (tesla_ && tesla_->exists()) return; 
         if (RobotConfig2005->teslaSimu) {
+            if (tesla_ && !tesla_->exists()) delete tesla_; 
             tesla_ = new BigTeslaSimu();
         } else {
             if (IoManager->getIoDevice(IO_ID_TESLA_05)) {
+                if (tesla_ && !tesla_->exists()) delete tesla_; 
                 tesla_ = new BigTesla05();
                 startWatching(tesla_);
             } else {
-                tesla_ = new BigTeslaCL();
+                if (!tesla_) tesla_ = new BigTeslaCL();
             }
         }
     }
@@ -296,13 +343,16 @@ void RobotDevicesCL::allocTesla()
 void RobotDevicesCL::allocAlim()
 {
     if (RobotConfig2005->hasAlim) {
+        if (alim_ && alim_->exists()) return; 
         if (RobotConfig2005->alimSimu) {
+            if (alim_ && !alim_->exists()) delete alim_;
             alim_ = new AlimSimu();
         } else {
             if (IoManager->getIoDevice(IO_ID_ALIM_05)) {
+                if (alim_ && !alim_->exists()) delete alim_;
                 alim_ = new Alim05();
             } else {
-                alim_ = new AlimCL();
+                if (!alim_) alim_ = new AlimCL();
             }
         }
     }
