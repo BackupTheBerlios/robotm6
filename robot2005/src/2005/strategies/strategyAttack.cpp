@@ -36,7 +36,8 @@ StrategyAttackCL::StrategyAttackCL(RobotMainCL* main):
     useSharpToDetectBridge_(true),
     grid_(NULL), lastExplorationDir_(ATTACK_EXPLORE_COL),
     attackPhase_(ATTACK_WAIT_START), skittleMiddleProcessed_(false),
-    isProcessingMiddleSkittles_(false)
+    isProcessingMiddleSkittles_(false), bridgeBySharps_(BRIDGE_POS_UNKNOWN), 
+    useBridgeBumpers_(true), demoMode_(0)
 {
     grid_ = new GridAttack();
     Timer->registerPeriodicFunction(gridAttackPeriodicTask,
@@ -58,6 +59,7 @@ bool StrategyAttackCL::autoCheck()
 {
     Strategy2005CL::autoCheck();
     // est ce qu'on essaye de passer par le pont du milieu ?
+    demoMode_ = menu("Bridge mid cent\nDemo    Normal")?1:0;
     bridgeDetectionByCenter_ = !menu("Strategy\nGauche    Sioux");
     Lcd->print("Catapult armed\n++ Test Move ++"); 
     // met les servos en position
@@ -109,17 +111,21 @@ void StrategyAttackCL::run(int argc, char* argv[])
     // va vers le pont
     setAttackPhase(ATTACK_CROSS_BRIDGE);
     Lcd->print("Goto bridge");
-    gotoBridgeDetection();
-    Move->stop();
-    // sleep(5);
-    if (checkEndEvents()) return; // fin du match
-
-    // utilise les capteurs pour trouver le pont et traverse le pont
-    if (!useSharpToDetectBridge_ || 
-        !getBridgePosBySharp()) {
+    if (demoMode_==1) {
+      crossBridgeDemo();
+    } else {
+      gotoBridgeDetection();
+      Move->stop();
+      // sleep(5);
+      if (checkEndEvents()) return; // fin du match
+      
+      // utilise les capteurs pour trouver le pont et traverse le pont
+      if (!useSharpToDetectBridge_ || 
+	  !getBridgePosBySharp()) {
         // les sharps ne marchent pas, on va tout droit pour voir...
         getNearestBridgeEntry();
-
+	
+      }
     }
     // sleep(5);
     Lcd->print("Find and cross\nBridge");
@@ -264,5 +270,33 @@ void StrategyAttackCL::setAttackPhase(AttackPhase phase)
     case ATTACK_GRAND_MENAGE:       
         { LOG_OK("Change Attack Phase to ATTACK_GRAND_MENAGE\n"); }
     break;
+    }
+}
+
+
+Point getAttackWheelPos(bool left) 
+{
+    Point currentPos = RobotPos->pt();
+    Point leftWheel(currentPos);
+    Radian theta = RobotPos->thetaAbsolute();
+    double c = cos(theta);
+    double s = sin(theta);
+    // TODO: get real constants
+    const Millimeter LEFT = 170;
+    const Millimeter FRONT = 110;
+    leftWheel.x += FRONT * c -(left?1:-1)* LEFT * s;
+    leftWheel.y += FRONT * s +(left?1:-1)* LEFT * c;
+    return leftWheel;
+}
+
+bool StrategyAttackCL::calcSupportCenterCollision(Point pos, Point& supportCenter) const 
+{
+    GridAttack::GPoint gridPoint = grid_->getGPoint(pos);
+    bool canContainSupport = grid_->element(gridPoint).skittleAtBeginning;
+    if (!canContainSupport)
+	return false;
+    else {
+	supportCenter = grid_->getPoint(gridPoint);
+	return true;
     }
 }

@@ -224,7 +224,8 @@ void Movement::stop()
 // ============================================================================
 
 // ----------------------------------------------------------------------------
-// MovementForward::MovementForward// ----------------------------------------------------------------------------
+// MovementForward::MovementForward
+// ----------------------------------------------------------------------------
 MovementForward::MovementForward(Millimeter dist,
                                  MotorSpeed maxSpeed,
                                  MoveCL*      move) :
@@ -626,14 +627,14 @@ void MovementTrajectory::periodicTask()
     assert(!endOfMovement_);
     MoveGain gain = gain_;
     Point moveTargetPoint = RobotPos->pt();
-    unsigned int lastIndex = (unsigned int)currentIndex_;
     unsigned int maxIndex = (unsigned int)(trajectory_.size() - 2);
     if (trajectory_.size()<1) return;
     // trouve le point cible
     getNextPoint(moveTargetPoint, currentIndex_);
-
-    // si on est sur le dernier segment, on ne doit pas depasser le dernier point utilisateur
-    // le movement a rajouter un point bidon pour etre sur de ne pas tourner en fin de trajectoire
+    move_->setTrajectoryCurrentIndex((unsigned int)currentIndex_);
+    // si on est sur le dernier segment, on ne doit pas depasser le dernier 
+    // point utilisateur le movement a rajouter un point bidon pour etre sur
+    // de ne pas tourner en fin de trajectoire
     if ((unsigned int)currentIndex_ >= maxIndex && first_) {
          first_=false;
          beforeLastPoint_ = RobotPos->pt();
@@ -791,7 +792,6 @@ Point MovementRealign::getStopWheelPoint()
 // ----------------------------------------------------------------------------
 void MovementRealign::periodicTask()
 {
-    // TODO
     assert(!endOfMovement_);
     // compute the angle between current direction and target direction 
     Radian error = theta_ - na2PI(RobotPos->theta(),
@@ -863,5 +863,51 @@ char* MovementRealign::txt()
              name(),
              RobotPos->txt(),
              r2d(theta_));
+    return txt_;
+}
+
+// ----------------------------------------------------------------------------
+// MovementSetSpeed::MovementSetSpeed
+// ----------------------------------------------------------------------------
+MovementSetSpeed::MovementSetSpeed(Millimeter dist,
+                                   MotorSpeed speedLeft,
+                                   MotorSpeed speedRight,
+                                   MoveCL*    move) :
+    Movement(MOVE_SET_SPEED_TYPE, "SetSpeed", max(abs(speedLeft), abs(speedRight)), 
+             MOVE_GAIN_DEFAULT, move), 
+    distance_(dist), speedLeft_(speedLeft), speedRight_(speedRight)
+{
+   
+}
+    
+// ----------------------------------------------------------------------------
+// MovementSetSpeed::periodicTask
+// ----------------------------------------------------------------------------
+void MovementSetSpeed::periodicTask()
+{
+    Point currentPoint = RobotPos->pt();
+    assert(!endOfMovement_);
+    Millimeter distToTarget = distance_ - dist(startingPoint_, currentPoint);
+    if (distToTarget > 0) {    
+        move_->setSpeed((MotorSpeed)speedLeft_, 
+                        (MotorSpeed)speedRight_);
+    } else {
+        stop();
+	return;
+    }
+    if (Timer->time() > (startTime_+MVT_TIMEOUT))  stop();
+}
+
+// ----------------------------------------------------------------------------
+// MovementSetSpeed::txt
+// ----------------------------------------------------------------------------
+char* MovementSetSpeed::txt()
+{
+    Millimeter distToTarget = distance_ - dist(startingPoint_, RobotPos->pt());
+    snprintf(txt_, MOVEMENT_TXT_LENGHT,
+             "%s: robot=%s, dist2target=%d mm",
+             name(),
+             RobotPos->txt(),
+             (int)distToTarget);
     return txt_;
 }

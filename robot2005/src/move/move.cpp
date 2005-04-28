@@ -40,7 +40,8 @@ MoveCL::MoveCL() :
     defaultMaxRotationSpeed_(MOVE_MAX_ROTATION_SPEED),
     defaultMaxLinearSpeed_(MOVE_SPEED_DEFAULT),
     defaultBasicSpeed_(MOVE_SPEED_DEFAULT),
-    defaultRealignDist_(MOVE_REALIGN_DIST_DEFAULT)
+    defaultRealignDist_(MOVE_REALIGN_DIST_DEFAULT),
+    trajectoryIndexOffset_(0)
 {
     pthread_mutex_init(&repositoryLock, NULL);
     assert(move_ == NULL);
@@ -126,69 +127,6 @@ bool MoveCL::validate()
 // ----------------------------------------------------------------------------
 void MoveCL::calibrate()
 {
-#if 0
-/*
-    int c = 0;
-    RobotPosition* robotPosition = Position::get();
-    Millisecond time=0;
-
-    printf("Pressez la touche 'entree' pour que le robot avance de 2 m\n");
-    c = getc(stdin);
-    // on avance de 2 metres
-    robotPosition->set(0, 0, 0);
-    forward(2000, MOVE_SPEED_SLOW);
-    while (currentMovement_) {
-        robotPosition->periodicTask(time);
-        this->periodicTask(time);
-        usleep(100);
-    }
-    // on attend un peu
-    c=0;
-    while (c++<1000) {
-        robotPosition->periodicTask(time);
-        this->periodicTask(time);
-        usleep(1000);
-    }
-    // on trouve une meilleure valeur pour K
-    int realDist=0;
-    printf("Mesurez la distance reellement parcourrue et entrez la (sous forme entiere):\n");
-    scanf("%d", &realDist);
-    double newK = realDist/norme(robotPosition->pt)*POSITION_ROBOT_K;
-    printf("Une meilleure valeur pour POSITION_ROBOT_K serait : %f, ancienne valeur: %f\n", 
-           (float)newK,
-           (float)POSITION_ROBOT_K);
-    
-    // trouver la valeur de POSITION_ROBOT_D
-    printf("Pressez la touche 'entree' pour que le robot fasse 2 tours sur lui meme\n");
-    c = getc(stdin);
-    robotPosition->set(0, 0, 0);
-    rotateFromAngle(4*M_PI, MOVE_GAIN_SLOW, MOVE_SPEED_SLOW);
-    while (currentMovement_) {
-        robotPosition->periodicTask(time);
-        this->periodicTask(time);
-        usleep(100);
-    }
-    // on attend un peu
-    c=0;
-    while (c++<1000) {
-        robotPosition->periodicTask(time);
-        this->periodicTask(time);
-        usleep(1000);
-    }
-    // on trouve une meilleure valeur pour K
-    int realDir=0;
-    printf("Entrez la direction du robot en degre (0..360)(sous forme entiere, dans le sens trigonometrique):\n");
-    scanf("%d", &realDir);
-    if (realDir<180) realDir+=720;
-    else realDir+=360;
-    double newD = (realDir*M_PI/360.)/(robotPosition->theta)*POSITION_ROBOT_D;
-    printf("Une meilleure valeur pour POSITION_ROBOT_D serait : %f, ancienne valeur: %f\n", 
-           (float)newD,
-           (float)POSITION_ROBOT_D);
-
-    printf("Corrigez les valeurs dans position.h, recompiler et recommencer...\n");
-*/
-#endif
 }
 
 // ----------------------------------------------------------------------------
@@ -241,6 +179,26 @@ void MoveCL::emergencyStop()
     lastSpeedReqLeft_ = 0;
     lastSpeedReqRight_= 0;
     MvtMgr->setSpeed(0, 0);
+}
+
+// ----------------------------------------------------------------------------
+// MoveCL::idleMotorLeft
+// ----------------------------------------------------------------------------
+void MoveCL::idleMotorLeft()
+{
+    lastSpeedLeft_    = 0;
+    lastSpeedReqLeft_ = 0;
+    MvtMgr->motor()->idleLeft();
+}
+
+// ----------------------------------------------------------------------------
+// MoveCL::idleMotorRight
+// ----------------------------------------------------------------------------
+void MoveCL::idleMotorRight()
+{
+    lastSpeedRight_   = 0;
+    lastSpeedReqRight_= 0;
+    MvtMgr->motor()->idleRight();
 }
 
 // ----------------------------------------------------------------------------
@@ -305,7 +263,7 @@ void MoveCL::stop()
 // MoveCL::forward
 // ----------------------------------------------------------------------------
 void MoveCL::forward(Millimeter  dist, 
-                   MotorSpeed  maxSpeed)
+                     MotorSpeed  maxSpeed)
 {
     stop();
     if (maxSpeed == MOVE_USE_DEFAULT_SPEED) {
@@ -328,6 +286,29 @@ void MoveCL::backward(Millimeter  dist,
     }
     setCurrentMovement(new MovementBackward(dist, 
                                             maxSpeed,
+                                            this));
+}
+
+// ----------------------------------------------------------------------------
+// MoveCL::setSpeedOnDist
+// ----------------------------------------------------------------------------
+void MoveCL::setSpeedOnDist(Millimeter  dist, 
+                            MotorSpeed  speedLeft,
+                            MotorSpeed  speedRight,
+                            bool        idleBlockedWheel)
+{
+    stop();
+    if (idleBlockedWheel) {
+        // desasservi la roue blocquee
+        if (speedLeft == 0) {
+            idleMotorLeft();
+        } else if (speedRight == 0) {
+            idleMotorRight();
+        }
+    }
+    setCurrentMovement(new MovementSetSpeed(dist, 
+                                            speedLeft,
+                                            speedRight,
                                             this));
 }
 
@@ -381,7 +362,8 @@ void MoveCL::realign(Radian      finalDir,
 void MoveCL::rotateOnWheel(Radian      finalDir,
                            bool        stopLeftWheel,
                            MoveGain    gain,
-                           MotorSpeed  maxSpeed)
+                           MotorSpeed  maxSpeed,
+                           bool        idleBlockedWheel)
 {
     stop();
     if (gain == MOVE_USE_DEFAULT_GAIN) {
@@ -389,6 +371,14 @@ void MoveCL::rotateOnWheel(Radian      finalDir,
     }
     if (maxSpeed == MOVE_USE_DEFAULT_SPEED) {
 	maxSpeed = defaultMaxRotationSpeed_;
+    }
+    if (idleBlockedWheel) {
+        // desasservi la roue blocquee
+        if (stopLeftWheel) {
+            idleMotorLeft();
+        } else {
+            idleMotorRight();
+        }
     }
     setCurrentMovement(new MovementRotateOnWheel(stopLeftWheel,
                                                  finalDir, 
@@ -422,7 +412,8 @@ void MoveCL::rotateFromAngle(Radian      deltaTheta,
 void MoveCL::go2Target(Millimeter  x, 
                        Millimeter  y,
                        MoveGain    gain, 
-                       MotorSpeed  maxSpeed)
+                       MotorSpeed  maxSpeed,
+                       bool        noRotation)
 {
     go2Target(Point(x, y), gain, maxSpeed);
 }
@@ -431,8 +422,9 @@ void MoveCL::go2Target(Millimeter  x,
 // MoveCL::go2Target
 // ----------------------------------------------------------------------------
 void MoveCL::go2Target(Point       pt, 
-                     MoveGain    gain, 
-                     MotorSpeed  maxSpeed)
+                       MoveGain    gain, 
+                       MotorSpeed  maxSpeed,
+                       bool        noRotation)
 {
     stop();
     // rotation dans la bonne direction, puis asservissement sur un point final !
@@ -445,12 +437,13 @@ void MoveCL::go2Target(Point       pt,
     }if (maxSpeed == MOVE_USE_DEFAULT_SPEED) {
 	newMaxSpeed = defaultMaxRotationSpeed_;
     }
-    Movement * mvtRotation = new MovementRotate
-                                   (finalDir, 
-                                    newGain, 
-                                    newMaxSpeed,
-                                    this);
-
+    Movement * mvtRotation =NULL;
+    if (!noRotation) {
+        mvtRotation = new MovementRotate(finalDir, 
+                                         newGain, 
+                                         newMaxSpeed,
+                                         this);
+    }
     newGain=gain;
     newMaxSpeed = maxSpeed;
     if (gain == MOVE_USE_DEFAULT_GAIN) {
@@ -463,13 +456,36 @@ void MoveCL::go2Target(Point       pt,
                                       newGain, 
                                       newMaxSpeed,
                                       this);
-    mvtRotation->registerNextMovement(mvtGotoTarget);
-
+    if (!noRotation) {
+        mvtRotation->registerNextMovement(mvtGotoTarget);
+    }
     Trajectory t;
     t.push_back(RobotPos->pt());
     t.push_back(pt);
     Log->trajectory(t);
-    setCurrentMovement(mvtRotation);
+    if (!noRotation) {
+        setCurrentMovement(mvtRotation);
+    } else {
+        setCurrentMovement(mvtGotoTarget);
+    }
+}
+
+unsigned int trajectoryIndexOffset_;
+
+// ----------------------------------------------------------------------------
+// MoveCL::getTrajectoryCurrentIndex
+// ----------------------------------------------------------------------------
+unsigned int  MoveCL::getTrajectoryCurrentIndex() 
+{
+    return trajectoryCurrentIndex_ - trajectoryIndexOffset_;
+}
+
+// ----------------------------------------------------------------------------
+// MoveCL::setTrajectoryCurrentIndex
+// ----------------------------------------------------------------------------
+void MoveCL::setTrajectoryCurrentIndex(unsigned int currentIndex) 
+{
+    trajectoryCurrentIndex_ = currentIndex+1;
 }
 
 // ----------------------------------------------------------------------------
@@ -481,6 +497,7 @@ void MoveCL::followTrajectory(Trajectory const&   trajectory2,
                               MotorSpeed          maxSpeed,
                               bool                noRotation)
 {
+    trajectoryIndexOffset_ = 0;
     // stop();
     // rotation dans la bonne direction, puis asservissement sur le premier point !
     Trajectory* trajectory;
@@ -540,6 +557,7 @@ void MoveCL::followTrajectory(Trajectory const&   trajectory2,
       if (dist(RobotPos->pt(), (*trajectory)[0]) > 120
 	  || trajectory->size() == 1) {
 	  t2.push_back(RobotPos->pt());
+          trajectoryIndexOffset_ = 1;
       }
       Trajectory::const_iterator it= trajectory->begin();
       for(;it != trajectory->end(); it++) {

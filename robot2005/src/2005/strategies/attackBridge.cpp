@@ -29,9 +29,7 @@ bool StrategyAttackCL::findAndCrossBridge()
     while (true) {   
         if (gotoBridgeEntry()) {
             if (crossBridge()) {
-                Events->disable(EVENTS_NO_BRIDGE_BUMP_LEFT);
-                Events->disable(EVENTS_NO_BRIDGE_BUMP_RIGHT);
-                if (bridgeDetectionByCenter_ &&
+              if (bridgeDetectionByCenter_ &&
                     (bridge_ == BRIDGE_POS_CENTER ||
                      bridge_ == BRIDGE_POS_MIDDLE_CENTER) ) {
                     // on est passe par le pont du milieu, on fait tomber les 
@@ -57,8 +55,29 @@ void StrategyAttackCL::getNearestBridgeEntry()
 
     // si on a deja tout teste, on reteste a nouveau sauf l'endrit ou on est...
     if (!(bridgeAvailibility_ & 0x0F)) {
-        bridgeAvailibility_ = 0x1F;
-        noBridgeHere();
+        if (bridgeBySharps_ != BRIDGE_POS_UNKNOWN) {
+	  // utilise la position des capteurs sharps et desactive les
+	  // capteurs de pont
+	  disableBridgeCaptors();  
+	  useBridgeBumpers_ = false;
+	  bridge_ = bridgeBySharps_;
+	  LOG_WARNING("Nearest bridge - Stop using bumpers, use sharps! goto: %s\n", 
+		    BridgePosTxt(bridge_));
+	  Log->bridge(bridge_);
+	  return;
+	} else {
+	  // sioux
+	  disableBridgeCaptors();  
+	  bridge_ = BRIDGE_POS_CENTER;
+	  bridgeDetectionByCenter_ = true;
+	   LOG_WARNING("Nearest bridge - Stop using bumpers, use sioux, I AM A KAMIKAZE! goto: %s\n", 
+		    BridgePosTxt(bridge_));
+	  Log->bridge(bridge_);
+	  return;
+	  // on continue de tout essayer
+	  bridgeAvailibility_ = 0x1F;
+	  noBridgeHere();
+	}
     }
     // trouve le pont non explore le plus proche
     printf("A: Ox%2.2x 0X%2.2x\n", bridgeAvailibility_, currentBit);
@@ -410,6 +429,7 @@ bool StrategyAttackCL::getBridgePosBySharp()
     }
     LOG_INFO("Bridge by Sharp=%s\n", BridgePosTxt(bridge_));
     Log->bridge(bridge_);
+    bridgeBySharps_ = bridge_;
     return true;
 }
 
@@ -538,8 +558,7 @@ bool StrategyAttackCL::gotoBridgeEntry(Millimeter y)
 bool StrategyAttackCL::gotoBridgeEntryEasy(Millimeter y)
 {
     if (RobotPos->x() > BRIDGE_DETECT_BUMP_X - 30) return true;
-    Events->enable(EVENTS_NO_BRIDGE_BUMP_LEFT);
-    Events->enable(EVENTS_NO_BRIDGE_BUMP_RIGHT);
+    enableBridgeCaptors();
     LOG_COMMAND("gotoBridgeEntry Easy:%d\n", (int)y);
     MvtMgr->setRobotDirection(MOVE_DIRECTION_FORWARD);
     Move->go2Target(Point(BRIDGE_DETECT_BUMP_X, y),
@@ -552,8 +571,7 @@ bool StrategyAttackCL::gotoBridgeEntryEasy(Millimeter y)
 // --------------------------------------------------------------------------
 bool StrategyAttackCL::gotoBridgeEntryFar(Millimeter y)
 {
-    Events->disable(EVENTS_NO_BRIDGE_BUMP_LEFT);
-    Events->disable(EVENTS_NO_BRIDGE_BUMP_RIGHT);
+    disableBridgeCaptors();
     Millimeter y2 = RobotPos->y();
     LOG_COMMAND("gotoBridgeEntry Hard Far:%d\n", (int)y);
     // on va loin: on recule bettement puit on prend un point cible
@@ -564,25 +582,21 @@ bool StrategyAttackCL::gotoBridgeEntryFar(Millimeter y)
     if (checkEndEvents() || 
         !Events->isInWaitResult(EVENTS_MOVE_END)) {
         Move->enableAccelerationController(false);
-        // collision
-        //Move->backward(100);
-        //Events->wait(evtEndMoveNoCollision);
         return false;
     }
     
     // va en face du pont
-    Events->enable(EVENTS_NO_BRIDGE_BUMP_LEFT);
-    Events->enable(EVENTS_NO_BRIDGE_BUMP_RIGHT);
+    enableBridgeCaptors();
     Trajectory t;
     // Pour eviter les rotations finales on 
     if (y2 < y)
       t.push_back(Point(BRIDGE_ENTRY_NAVIGATE_X, y-75));
     else
-     t.push_back(Point(BRIDGE_ENTRY_NAVIGATE_X, y+75));
+      t.push_back(Point(BRIDGE_ENTRY_NAVIGATE_X, y+75));
     t.push_back(Point(BRIDGE_DETECT_BUMP_X, y));
     MvtMgr->setRobotDirection(MOVE_DIRECTION_FORWARD);
     Move->followTrajectory(t, TRAJECTORY_RECTILINEAR); 
-    //ATTACK_BRIDGE_GAIN, ATTACK_BRIDGE_SPEED);
+    // dont wait events, it is done by the upper function
     return true;
 }
 
@@ -592,45 +606,30 @@ bool StrategyAttackCL::gotoBridgeEntryFar(Millimeter y)
 bool StrategyAttackCL::gotoBridgeEntryNear(Millimeter y)
 {
     Trajectory t;
-    Events->disable(EVENTS_NO_BRIDGE_BUMP_LEFT);
-    Events->disable(EVENTS_NO_BRIDGE_BUMP_RIGHT);
+    disableBridgeCaptors();
     LOG_COMMAND("gotoBridgeEntry Hard Near:%d\n", (int)y);
     // on ne va pas loin en y donc on fait un joli mouvement en S
     // met les servos en position
     Millimeter y2 = RobotPos->y();
     t.push_back(Point(BRIDGE_DETECT_BUMP_X-100, y2));
-    //t.push_back(Point(BRIDGE_ENTRY_NAVIGATE_X-100, y));
     t.push_back(Point(BRIDGE_ENTRY_NAVIGATE_X, (2*y+y2)/3));
     Move->followTrajectory(t, TRAJECTORY_RECTILINEAR, 3, 30);
    
-    
-    //    Move->go2Target(BRIDGE_ENTRY_NAVIGATE_X, RobotPos->y());
-    /*
-      Millimeter y2 = (RobotPos->y()+y)/2; // entre le point cible et nous
-      Trajectory t;
-      t.push_back(Point(BRIDGE_DETECT_BUMP_X-100, RobotPos->y()));
-      t.push_back(Point(BRIDGE_ENTRY_NAVIGATE_X+100, y2));
-      t.push_back(Point(BRIDGE_ENTRY_NAVIGATE_X, y2));
-      // on s'eloigne un peu du bord, pour aller en x qui nous permet
-      //de nous promener tranquillement le long de la riviere
-      Move->followTrajectory(t);
-    */
     Events->wait(evtEndMove);
-    if (checkEndEvents() || 
-        !Events->isInWaitResult(EVENTS_MOVE_END)) {
-        Move->enableAccelerationController(false);
-        // collision
-        Move->backward(100);
-        Events->wait(evtEndMoveNoCollision);
-        return false;
+    Move->enableAccelerationController(false);
+    if (checkEndEvents()) return false; 
+    if(!Events->isInWaitResult(EVENTS_MOVE_END)) {
+      // collision
+      Move->backward(100);
+      Events->wait(evtEndMoveNoCollision);
+      return false;
     }
     
     // va en face du pont
-    Events->enable(EVENTS_NO_BRIDGE_BUMP_LEFT);
-    Events->enable(EVENTS_NO_BRIDGE_BUMP_RIGHT);
+    enableBridgeCaptors();
     MvtMgr->setRobotDirection(MOVE_DIRECTION_FORWARD);
     Move->go2Target(BRIDGE_DETECT_BUMP_X, y, 2, 30);
-    //ATTACK_BRIDGE_GAIN, ATTACK_BRIDGE_SPEED);
+    // dont need to wait, it is done by the upper function
     return true;
 }
 
@@ -648,8 +647,7 @@ bool StrategyAttackCL::gotoBridgeEntryRotateToSeeBridge()
         // il faut faire une rotation sur une roue pour voir si le pont 
         // et la et eviter de tomber comme une merde
         LOG_INFO("Rotate to detect Bridge\n");
-        Events->enable(EVENTS_NO_BRIDGE_BUMP_LEFT);
-        Events->enable(EVENTS_NO_BRIDGE_BUMP_RIGHT);
+	enableBridgeCaptors();
         MvtMgr->setRobotDirection(MOVE_DIRECTION_FORWARD); 
         Move->enableAccelerationController(true);
         Move->rotateOnWheel(-M_PI_4/1.8 , false, -1, 10);
@@ -660,14 +658,40 @@ bool StrategyAttackCL::gotoBridgeEntryRotateToSeeBridge()
         } 
         if (checkEndEvents()) 
             return false;
-        Events->disable(EVENTS_NO_BRIDGE_BUMP_LEFT);
-        Events->disable(EVENTS_NO_BRIDGE_BUMP_RIGHT);
-        Move->rotateOnWheel(0 , false);
+	disableBridgeCaptors();
+	Move->rotateOnWheel(0 , false);
         Events->wait(evtEndMove);
         if (checkEndEvents()) 
             return false;
     }
     return result;
+}
+
+bool StrategyAttackCL::crossBridgeDemo() 
+{
+  Move->go2Target(Point(1400, 1725));
+  Events->wait(evtEndMove);
+  MvtMgr->setRobotDirection(MOVE_DIRECTION_BACKWARD);
+  Move->go2Target(Point(1200, 1700));
+  Events->wait(evtEndMove);
+  MvtMgr->setRobotDirection(MOVE_DIRECTION_FORWARD);
+  Move->go2Target(Point(1400, BRIDGE_ENTRY_MIDDLE_CENTER_Y));
+  Events->wait(evtEndMove);
+  bridge_ = BRIDGE_POS_MIDDLE_CENTER;
+  bridgeDetectionByCenter_=false;
+  return true; 
+}
+
+void StrategyAttackCL::enableBridgeCaptors() {
+  if (useBridgeBumpers_) {
+    Events->enable(EVENTS_NO_BRIDGE_BUMP_LEFT);
+    Events->enable(EVENTS_NO_BRIDGE_BUMP_RIGHT);
+  }
+}
+
+void StrategyAttackCL::disableBridgeCaptors() {
+  Events->disable(EVENTS_NO_BRIDGE_BUMP_LEFT);
+  Events->disable(EVENTS_NO_BRIDGE_BUMP_RIGHT);
 }
 
 // ======================================================================
@@ -714,8 +738,7 @@ bool StrategyAttackCL::crossBridge()
         Move->enableAccelerationController(true);
         MvtMgr->setRobotDirection(MOVE_DIRECTION_FORWARD);
         Move->go2Target(tgt);
-        Events->enable(EVENTS_NO_BRIDGE_BUMP_LEFT);
-        Events->enable(EVENTS_NO_BRIDGE_BUMP_RIGHT);
+	enableBridgeCaptors();
     crossBridgeWaitEnd:
         Events->wait(evtEndMoveBridge);
         Move->enableAccelerationController(false);

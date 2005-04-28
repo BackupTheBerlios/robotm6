@@ -115,10 +115,18 @@ class MoveCL : public RobotComponent
                  MotorSpeed  maxSpeed=MOVE_USE_DEFAULT_SPEED);
 
     /** Fait reculer le robot vers l'arriere. Le movement n'est pas
-	réguler(le robot n'ira pas droit). A n'utiliser que sur des courtes
+	régule (le robot n'ira pas droit). A n'utiliser que sur des courtes
 	distances (moins de 30cm) */
     void backward(Millimeter  dist,
                   MotorSpeed  maxSpeed=MOVE_USE_DEFAULT_SPEED); 
+
+    /** Envoie la meme consigne aux moteurs jusqu'a ce que le robot ce soit 
+        deplace de la distance voulue par rapport a son point de depart
+        idleBlockedWheel : desasservi la roue dont la vitesse est nulle */
+    void setSpeedOnDist(Millimeter  dist, 
+                        MotorSpeed  speedLeft,
+                        MotorSpeed  speedRight,
+                        bool        idleBlockedWheel=false);
     
     /** Fait tourner le robot sur lui même vers un angle donné, en allant 
         en marche arriere et en reculant a pein d'une des deux roues 
@@ -142,11 +150,14 @@ class MoveCL : public RobotComponent
                          MotorSpeed  maxSpeed=MOVE_USE_DEFAULT_SPEED);
 
     /**  Fait tourner le robot sur lui même vers un angle donné en bloquand une roue.
-         si stopLeftWheel = true on fait tourner que le moteur droit */
+         si stopLeftWheel = true on fait tourner que le moteur droit
+         idleBlockedWheel : deasservi la roue autour de laquelle on tourne
+    */
     void rotateOnWheel(Radian      finalDir,
                        bool        stopLeftWheel,
                        MoveGain    gain=MOVE_USE_DEFAULT_GAIN,
-                       MotorSpeed  maxSpeed=MOVE_USE_DEFAULT_SPEED);
+                       MotorSpeed  maxSpeed=MOVE_USE_DEFAULT_SPEED,
+                       bool        idleBlockedWheel=false);
 
     /** Le robot va jusqu'à un point cible. Tout d'abord il tourne sur
 	lui même dans la bonne direction, puis il s'asservit sur le point 
@@ -154,13 +165,15 @@ class MoveCL : public RobotComponent
     void go2Target(Millimeter  x, 
                    Millimeter  y,
                    MoveGain    gain=MOVE_USE_DEFAULT_GAIN ,
-                   MotorSpeed  maxSpeed=MOVE_USE_DEFAULT_SPEED);
+                   MotorSpeed  maxSpeed=MOVE_USE_DEFAULT_SPEED,
+                   bool        noRotation=false);
     /** Le robot va jusqu'à un point cible. Tout d'abord il tourne sur
 	lui même dans la bonne direction, puis il s'asservit sur le point 
 	cible et suit à peu près une ligne droite. */
     void go2Target(Point       pt,
                    MoveGain    gain=MOVE_USE_DEFAULT_GAIN ,
-                   MotorSpeed  maxSpeed=MOVE_USE_DEFAULT_SPEED);
+                   MotorSpeed  maxSpeed=MOVE_USE_DEFAULT_SPEED,
+                   bool        noRotation=false);
     
     /** Le robot suit une trajectoire: il passe par une liste de points
 	donnés à l'avance. \n
@@ -178,7 +191,11 @@ class MoveCL : public RobotComponent
                           MoveGain            gain=MOVE_USE_DEFAULT_GAIN ,
                           MotorSpeed          maxSpeed=MOVE_USE_DEFAULT_SPEED,
 			  bool                noRotation=false);
-
+    
+    /** Renvoie le numero du point de la trajectoire vers lequel va le robot 
+        (premier point=0) */
+    unsigned int getTrajectoryCurrentIndex();
+    
     /** Arrete le robot quand l'utilisateur fait un CTRL+C */
     void userAbort();
 
@@ -200,11 +217,18 @@ class MoveCL : public RobotComponent
     /** @brief Met a jour la vitesse des moteurs */
     void setSpeed(MotorSpeed  speedLeft,
 		  MotorSpeed  speedRight);
+    /** @brief Desasservi le moteur gauche jusqu'a ce qu'on lui envoie une
+        vitesse != 0 */
+    void idleMotorLeft();
+    /** @brief Desasservi le moteur droit jusqu'a ce qu'on lui envoie une
+        vitesse != 0 */
+    void idleMotorRight();
+
  private:
     // members
     Movement*         currentMovement_;
-    bool      enableAccelerationController_;
-    bool      userAbort_;
+    bool              enableAccelerationController_;
+    bool              userAbort_;
     static MoveCL*    move_;
     static MotorSpeed lastSpeedLeft_;
     static MotorSpeed lastSpeedRight_;
@@ -217,17 +241,21 @@ class MoveCL : public RobotComponent
     MotorSpeed defaultMaxLinearSpeed_;
     MotorSpeed defaultBasicSpeed_;
     Millimeter defaultRealignDist_;
+    unsigned int trajectoryIndexOffset_;
+    unsigned int trajectoryCurrentIndex_;
 
  protected:
     // functions
     void setCurrentMovement(Movement* mvt, bool needLock=true);
     void periodicTask(Millisecond time);
+    void setTrajectoryCurrentIndex(unsigned int currentIndex);
 
     // constructeur
     MoveCL();
     ~MoveCL();
     
     friend class Movement;
+    friend class MovementTrajectory;
     friend class MovementManagerCL;
 };
 

@@ -28,7 +28,8 @@ typedef enum MoveType {
     MOVE_REALIGN_TYPE,
     MOVE_GOTOTARGET_TYPE,
     MOVE_TRAJECTORY_TYPE,
-    MOVE_SERIES_TYPE
+    MOVE_SERIES_TYPE,
+    MOVE_SET_SPEED_TYPE
 } MoveType;
 
 typedef double MoveLinearSpeed;
@@ -132,6 +133,31 @@ class MovementBackward : public Movement
 
  protected:
     Millimeter distance_;
+};
+
+// -----------------------------------------------------------------
+// class MovementSetSpeed
+// -----------------------------------------------------------------
+
+/**
+ * @class MovementSetSpeed
+ * Met toujours la meme vitesse sur les roues jusqu'a ce qu'on se soit
+ * deplace d'une certaine distance
+ */
+class MovementSetSpeed : public Movement
+{
+ public:
+    MovementSetSpeed(Millimeter dist,
+                     MotorSpeed speedLeft,
+		     MotorSpeed speedRight,
+                     MoveCL*    move);
+    void periodicTask();
+    char* txt();
+
+ protected:
+    Millimeter distance_;
+    MotorSpeed speedLeft_;
+    MotorSpeed speedRight_;
 };
 
 // -----------------------------------------------------------------

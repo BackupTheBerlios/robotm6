@@ -89,7 +89,10 @@ class StrategyAttackCL : public Strategy2005CL
     bool gotoBridgeEntryRotateToSeeBridge();
     
     bool crossBridge();
+    bool crossBridgeDemo(); 
 
+    void enableBridgeCaptors();
+    void disableBridgeCaptors();
     bool checkBridgeBumperEvent(); 
     bool getBridgePosBySharp();
     bool getBridgePosByBumper(bool& bridgeInFront);
@@ -105,6 +108,7 @@ class StrategyAttackCL : public Strategy2005CL
     bool alignBorder();
     
     bool avoidObstacle();
+    bool goOverSupport();
 
     bool preDefinedSkittleExploration1();
     bool preDefinedSkittleExploration2();
@@ -122,7 +126,8 @@ class StrategyAttackCL : public Strategy2005CL
 
     ////////////////////////// MISC ////////////////////////////////
     void setAttackPhase(AttackPhase);
-    
+    bool calcSupportCenterCollision(Point pos, Point& supportCenter) const; 
+
  private:
     /** mask qui dit ou le peut etre (4 possibilites a tester) quand il n'y est
         pas on passe le bit a 0 */
@@ -146,8 +151,16 @@ class StrategyAttackCL : public Strategy2005CL
     /* est ce qu'on est en train d'aller faire tomber les quilles du milieu? 
        si oui on active les detecteurs de ponts quand x<2400 */
     volatile bool  isProcessingMiddleSkittles_;
+
+    BridgePosition bridgeBySharps_;
+    bool useBridgeBumpers_;
+    int demoMode_;
     
 };
+
+static const bool WHEEL_LEFT  = true;
+static const bool WHEEL_RIGHT = false;
+Point getAttackWheelPos(bool leftWheel);
 
 enum BRIDGE_ENTRY_POS_BITS {
     BRIDGE_ENTRY_BORDURE_BIT        =0,

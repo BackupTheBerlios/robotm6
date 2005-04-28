@@ -203,6 +203,30 @@ bool evtEndMoveAvoidObstacle(bool evt[])
     || (Timer->time() > avoidObstacleTimeout);
 }
 
+bool StrategyAttackCL::goOverSupport()
+{
+  bool leftWheelBlocked=false;
+  bool rightWheelBlocked=false;
+  if (Events->isInWaitResult(EVENTS_PWM_ALERT_LEFT)) {
+    LOG_WARNING("Left wheel is blocked\n");
+    leftWheelBlocked=true;
+  }
+  if (Events->isInWaitResult(EVENTS_PWM_ALERT_RIGHT)) {
+    LOG_WARNING("Right wheel is blocked\n");
+    rightWheelBlocked=true;
+  } 
+  if (rightWheelBlocked || 
+      leftWheelBlocked) {
+    Move->setSpeedOnDist(200, 
+			leftWheelBlocked?10:30,
+			rightWheelBlocked?10:30);
+    Events->wait(evtEndMove);
+  }
+  if (checkEndEvents()) return false;
+  if (Events->isInWaitResult(EVENTS_MOVE_END)) return true;
+  return avoidObstacle();
+}
+
 bool StrategyAttackCL::avoidObstacle()
 {
   Millimeter collisionEscapeDist=200;
@@ -220,6 +244,8 @@ bool StrategyAttackCL::avoidObstacle()
     LOG_WARNING("Right wheel is blocked\n");
     rightWheelBlocked=true;
   } 
+
+  
   switch(dirMotor) {
   case MOTOR_DIRECTION_STOP:
   case  MOTOR_DIRECTION_FORWARD:

@@ -1,5 +1,6 @@
 #include "devices/motor.h"
 #ifndef TELECOMMAND_MAIN
+#include "move.h"
 #include "log.h"
 #endif
 #include "events.h"
@@ -17,9 +18,8 @@ static const int MOTOR_PWM_TIME_ALERT=80;
 /** Reset les hctl (gauche et droite) */
 bool MotorCL::reset()
 {
-  counterLeft_=0;
-  counterRight_=0;
-  if (resetCallBack_) resetCallBack_();
+  resetPwmAlert();
+  if (resetCallBack_) resetCallBack_();  
   return true;
 }
 
@@ -75,11 +75,11 @@ void MotorCL::periodicTask()
                 right, left, counterRight_, counterLeft_);
 #endif
       alert=true;
-      if (enableAutomaticReset_) {
-	idleRight();
-      }
 #ifndef TELECOMMAND_MAIN
       Events->raise(EVENTS_PWM_ALERT_LEFT);
+      if (enableAutomaticReset_) {
+	Move->idleMotorLeft();
+      }
 #endif
     }
   } else {
@@ -94,11 +94,11 @@ void MotorCL::periodicTask()
                 right, left, counterRight_, counterLeft_);
 #endif
       alert=true;
-      if (enableAutomaticReset_) {
-	idleRight();
-      }
 #ifndef TELECOMMAND_MAIN
       Events->raise(EVENTS_PWM_ALERT_RIGHT);
+      if (enableAutomaticReset_) {
+	Move->idleMotorLeft();
+      }
 #endif
     }
   } else {
@@ -108,8 +108,7 @@ void MotorCL::periodicTask()
   lastRight=right;
   // on a un probleme sur une roue
   if (alert) {
-    counterLeft_=0;
-    counterRight_=0;
+    resetPwmAlert();
     if (alertFunction_) {
       alertFunction_(left, right);
     }

@@ -10,13 +10,13 @@ class GridAttack
 
     struct GridElement {
         DangerLevel    danger;
-        bool           skittleAtBegining;
+        bool           skittleAtBeginning;
         Millisecond    obstacleTime;
         Millisecond    lastVisitTime;
         
         GridElement(): 
             danger(DANGER_NONE), 
-            skittleAtBegining(false), 
+            skittleAtBeginning(false), 
             obstacleTime(TIME_NEVER), 
             lastVisitTime(TIME_NEVER) {}
     };
@@ -48,7 +48,6 @@ class GridAttack
     static int width()  { return sizeX_; }
     static int height() { return sizeY_; }
     
- private:
     int score(GridUnit    row, 
               GridUnit    col,
               Millisecond time);

@@ -20,6 +20,7 @@
 // ============================================================================
 
 typedef void (*MotorAlertFunction)(MotorPWM left, MotorPWM right);
+typedef void (*MotorPwmResetFunction)(int left, int right);
 
 // ============================================================================
 // ================================  const MOTOR_  ============================
@@ -87,12 +88,10 @@ class MotorCL : public RobotDeviceCL
         pas bloquees.  Si c'est le cas l'evenement EVENTS_PWM_ALERT est raise */
     void periodicTask();
 
- private:
+ protected:
     MotorAlertFunction alertFunction_;
     bool enableAutomaticReset_;
     int counterLeft_, counterRight_;
-
- protected:
     FunctionPtr resetCallBack_;
 };
 

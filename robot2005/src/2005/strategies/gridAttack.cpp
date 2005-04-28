@@ -24,15 +24,15 @@ void GridAttack::reset()
     for(int i=0; i<sizeX_*sizeY_; i++) {
         elements_[i] = GridElement();
     }
-    element(1,5).skittleAtBegining=true;
-    element(2,5).skittleAtBegining=true;
-    element(3,5).skittleAtBegining=true;
-    element(1,4).skittleAtBegining=true;
-    element(2,4).skittleAtBegining=true;
-    element(3,4).skittleAtBegining=true;
-    element(2,3).skittleAtBegining=true;
-    element(3,3).skittleAtBegining=true;
-    element(3,2).skittleAtBegining=true;
+    element(1,5).skittleAtBeginning=true;
+    element(2,5).skittleAtBeginning=true;
+    element(3,5).skittleAtBeginning=true;
+    element(1,4).skittleAtBeginning=true;
+    element(2,4).skittleAtBeginning=true;
+    element(3,4).skittleAtBeginning=true;
+    element(2,3).skittleAtBeginning=true;
+    element(3,3).skittleAtBeginning=true;
+    element(3,2).skittleAtBeginning=true;
 }
 
 void GridAttack::setVisitTime(Millisecond time, 
@@ -41,7 +41,7 @@ void GridAttack::setVisitTime(Millisecond time,
     GPoint pt=getGPoint(pos.center);
     GridElement& elem=element(pt);
     elem.lastVisitTime=time; 
-    elem.skittleAtBegining=false;
+    elem.skittleAtBeginning=false;
 }
 
 void GridAttack::setObstacleTime(Millisecond time, 
@@ -54,7 +54,7 @@ void GridAttack::setObstacleTime(Millisecond time,
 void GridAttack::setSkittleDetected(Point pt)
 {
     GPoint gpt=getGPoint(pt);
-    element(gpt).skittleAtBegining=true;
+    element(gpt).skittleAtBeginning=true;
 }
 
 int GridAttack::scoreRow(GridUnit    row, 
@@ -96,7 +96,7 @@ int GridAttack::score(GridUnit    row,
                       Millisecond time)
 {
     GridElement const& elem = element(row, col);
-    if (elem.skittleAtBegining) return 100;
+    if (elem.skittleAtBeginning) return 100;
     if (elem.obstacleTime > 0 && 
         time - elem.obstacleTime < 20000) return -1;
     if (elem.lastVisitTime > 0) 
@@ -109,7 +109,7 @@ bool GridAttack::hasNoUnexploredSkittle()
 {
     for(int i=1;i<4;i++) {
         for(int j=2;j<6;j++) {
-            if (element(i,j).skittleAtBegining) return false;
+            if (element(i,j).skittleAtBeginning) return false;
         }
     }
     return true;
