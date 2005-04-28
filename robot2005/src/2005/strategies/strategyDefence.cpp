@@ -125,7 +125,7 @@ void StrategyDefenceCL::run(int argc, char* argv[])
 bool StrategyDefenceCL::gotoBridgeHomologation()
 {
     Trajectory t;
-    t.push_back(Point(600, 1800));
+    t.push_back(Point(600, RobotPos->y()));
     t.push_back(Point(1050, 1500));
     t.push_back(Point(1250, 1265));
     t.push_back(Point(2500, 1265));
@@ -147,7 +147,7 @@ bool StrategyDefenceCL::gotoBridgeHomologation()
 bool StrategyDefenceCL::gotoBridgeByLeft()
 {
     Trajectory t;
-    t.push_back(Point(600, 1800));
+    t.push_back(Point(600, RobotPos->y()));
     t.push_back(Point(900, 1500));
     t.push_back(Point(1050, 1265));
     t.push_back(Point(1200, 1050));

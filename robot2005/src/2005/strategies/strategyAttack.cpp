@@ -103,7 +103,9 @@ void StrategyAttackCL::run(int argc, char* argv[])
     waitStart(INIT_COMPLETE);
 
     Move->enableAccelerationController(false);
-    MvtMgr->enableAutomaticReset(false);
+    // active le desasservissement automatique des moteurs en
+    // cas de PWM alerte
+    MvtMgr->enableAutomaticReset(true);  
     
     // tire les balles!
     fireCatapults();
@@ -274,7 +276,7 @@ void StrategyAttackCL::setAttackPhase(AttackPhase phase)
 }
 
 
-Point getAttackWheelPos(bool left) 
+Point getAttackWheelPos(bool left, bool forward) 
 {
     Point currentPos = RobotPos->pt();
     Point leftWheel(currentPos);
@@ -282,10 +284,10 @@ Point getAttackWheelPos(bool left)
     double c = cos(theta);
     double s = sin(theta);
     // TODO: get real constants
-    const Millimeter LEFT = 170;
-    const Millimeter FRONT = 110;
-    leftWheel.x += FRONT * c -(left?1:-1)* LEFT * s;
-    leftWheel.y += FRONT * s +(left?1:-1)* LEFT * c;
+    const Millimeter LEFT = left?170:-170;
+    const Millimeter FRONT = forward?210:150;
+    leftWheel.x += FRONT * c - LEFT * s;
+    leftWheel.y += FRONT * s + LEFT * c;
     return leftWheel;
 }
 

@@ -126,6 +126,7 @@ class StrategyAttackCL : public Strategy2005CL
 
     ////////////////////////// MISC ////////////////////////////////
     void setAttackPhase(AttackPhase);
+    Point getPwmObstaclePos(); 
     bool calcSupportCenterCollision(Point pos, Point& supportCenter) const; 
 
  private:
@@ -160,7 +161,7 @@ class StrategyAttackCL : public Strategy2005CL
 
 static const bool WHEEL_LEFT  = true;
 static const bool WHEEL_RIGHT = false;
-Point getAttackWheelPos(bool leftWheel);
+Point getAttackWheelPos(bool leftWheel, bool forward=true);
 
 enum BRIDGE_ENTRY_POS_BITS {
     BRIDGE_ENTRY_BORDURE_BIT        =0,

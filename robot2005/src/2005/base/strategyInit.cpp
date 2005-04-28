@@ -198,7 +198,7 @@ bool Strategy2005CL::checkEnv()
         Sound->play(SOUND_CARTE_ENV_DETECTOR);
 	Sound->play(SOUND_NE_REPOND_PAS);
         if(menu("Env not ping\nretry      skip")) {
-            // Flo todo: reping a device...
+	   main_->robotDevices()->rescan();
         } else {
             return false;
         }
@@ -217,7 +217,7 @@ bool Strategy2005CL::checkCrane()
         Sound->play(SOUND_CARTE_GRUE);
 	Sound->play(SOUND_NE_REPOND_PAS);
         if(menu("Grue not ping\nretry      skip")) {
-            // Flo todo: reping a device...
+	   main_->robotDevices()->rescan();
         } else {
             return false;
         }
@@ -236,7 +236,7 @@ bool Strategy2005CL::checkSkittleDetector()
         Sound->play(SOUND_CARTE_RATEAU);
 	Sound->play(SOUND_NE_REPOND_PAS);
         if(menu("Rateau not ping\nretry      skip")) {
-            // Flo todo: reping a device...
+            main_->robotDevices()->rescan();
         } else {
             return false;
         }
@@ -255,7 +255,7 @@ bool Strategy2005CL::checkTesla()
         Sound->play(SOUND_CARTE_RATEAU);
 	Sound->play(SOUND_NE_REPOND_PAS);
         if(menu("Aimant not ping\nretry      skip")) {
-            // Flo todo: reping a device...
+            main_->robotDevices()->rescan();
         } else {
             return false;
         }
@@ -274,7 +274,7 @@ bool Strategy2005CL::checkAlim()
         Sound->play(SOUND_CARTE_ALIM);
 	Sound->play(SOUND_NE_REPOND_PAS);
         if(menu("Alim not ping\nretry      skip")) {
-            // Flo todo: reping a device...
+	   main_->robotDevices()->rescan();
         } else {
             return false;
         }

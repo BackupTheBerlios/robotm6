@@ -203,20 +203,56 @@ bool evtEndMoveAvoidObstacle(bool evt[])
     || (Timer->time() > avoidObstacleTimeout);
 }
 
+Point StrategyAttackCL::getPwmObstaclePos() 
+{
+  Point ptWheelBlocked;
+  bool rightWheelBlocked=false;
+  bool leftWheelBlocked=false;
+  MotorDirection dirMotor = MvtMgr->getMotorDirection();
+  if (Events->isInWaitResult(EVENTS_PWM_ALERT_LEFT)) {
+    LOG_WARNING("Left wheel is blocked\n");
+    bool forward=true;
+    if (dirMotor == MOTOR_DIRECTION_LEFT || dirMotor == MOTOR_DIRECTION_BACKWARD) forward = false;
+    return getAttackWheelPos(WHEEL_LEFT, forward);
+  }
+  if (Events->isInWaitResult(EVENTS_PWM_ALERT_RIGHT)) {
+    LOG_WARNING("Right wheel is blocked\n");
+    bool forward=true;
+    if (dirMotor == MOTOR_DIRECTION_RIGHT || dirMotor == MOTOR_DIRECTION_BACKWARD) forward = false;
+    return getAttackWheelPos(WHEEL_RIGHT, forward);
+  } 
+  return Point(-100, -100);
+}
+
 bool StrategyAttackCL::goOverSupport()
 {
-  bool leftWheelBlocked=false;
+  LOG_COMMAND("goOverSupport\n");
   bool rightWheelBlocked=false;
+  bool leftWheelBlocked=false;
+  bool skittleDetected=false;
+  Point ptSupport;
+  Point ptWheelBlocked;
+  MotorDirection dirMotor = MvtMgr->getMotorDirection();
+ 
   if (Events->isInWaitResult(EVENTS_PWM_ALERT_LEFT)) {
     LOG_WARNING("Left wheel is blocked\n");
     leftWheelBlocked=true;
+    bool forward=true;
+    if (dirMotor == MOTOR_DIRECTION_LEFT || dirMotor == MOTOR_DIRECTION_BACKWARD) forward = false;
+    ptWheelBlocked=getAttackWheelPos(WHEEL_LEFT, forward);
   }
   if (Events->isInWaitResult(EVENTS_PWM_ALERT_RIGHT)) {
     LOG_WARNING("Right wheel is blocked\n");
     rightWheelBlocked=true;
+    bool forward=true;
+    if (dirMotor == MOTOR_DIRECTION_RIGHT || dirMotor == MOTOR_DIRECTION_BACKWARD) forward = false;
+    ptWheelBlocked=getAttackWheelPos(WHEEL_RIGHT, forward);
   } 
-  if (rightWheelBlocked || 
-      leftWheelBlocked) {
+  skittleDetected = calcSupportCenterCollision(ptWheelBlocked, ptSupport);
+ 
+  if (skittleDetected) {
+    LOG_INFO("Skittle support detected!\n");
+    Log->support(ptSupport, ptSupport);
     Move->setSpeedOnDist(200, 
 			leftWheelBlocked?10:30,
 			rightWheelBlocked?10:30);
@@ -324,7 +360,7 @@ bool StrategyAttackCL::preDefinedSkittleExploration1()
         // on n'a pas reussi
         // c'est la fin du match?
         if (checkEndEvents()) return false;
-        return avoidObstacle();
+        return goOverSupport();
     }
 
     //alignBorder();
@@ -336,7 +372,7 @@ bool StrategyAttackCL::preDefinedSkittleExploration1()
         // on n'a pas reussi
         // c'est la fin du match?
         if (checkEndEvents()) return false;
-        return avoidObstacle();
+        return goOverSupport();
     }
     
     //alignBorder();
@@ -348,7 +384,7 @@ bool StrategyAttackCL::preDefinedSkittleExploration1()
         // on n'a pas reussi
         // c'est la fin du match?
         if (checkEndEvents()) return false;
-        return avoidObstacle();
+        return goOverSupport();
         // TODO manage collisions
         return false;
     }
@@ -360,7 +396,7 @@ bool StrategyAttackCL::preDefinedSkittleExploration1()
         // on n'a pas reussi
         // c'est la fin du match?
         if (checkEndEvents()) return false;
-        return avoidObstacle();
+        return goOverSupport();
     }
     
     t.clear();
@@ -374,7 +410,7 @@ bool StrategyAttackCL::preDefinedSkittleExploration1()
         // on n'a pas reussi
         // c'est la fin du match?
         if (checkEndEvents()) return false;
-        return avoidObstacle();
+        return goOverSupport();
     }
 
     MvtMgr->setRobotDirection(MOVE_DIRECTION_BACKWARD);
@@ -384,7 +420,7 @@ bool StrategyAttackCL::preDefinedSkittleExploration1()
         // on n'a pas reussi
         // c'est la fin du match?
         if (checkEndEvents()) return false;
-        return avoidObstacle();
+        return goOverSupport();
     }
 
     return true;
@@ -406,7 +442,7 @@ bool StrategyAttackCL::preDefinedSkittleExploration2()
         // on n'a pas reussi
         // c'est la fin du match?
         if (checkEndEvents()) return false;
-        return avoidObstacle();
+        return goOverSupport();
         // TODO manage collisions
         return false;
     }
@@ -425,7 +461,7 @@ bool StrategyAttackCL::preDefinedSkittleExploration2()
         // on n'a pas reussi
         // c'est la fin du match?
         if (checkEndEvents()) return false;
-        return avoidObstacle();
+        return goOverSupport();
     }
 
     //alignBorder();
@@ -438,7 +474,7 @@ bool StrategyAttackCL::preDefinedSkittleExploration2()
         // on n'a pas reussi
         // c'est la fin du match?
         if (checkEndEvents()) return false;
-        return avoidObstacle();
+        return goOverSupport();
         // TODO manage collisions
         return false;
     }
@@ -451,7 +487,7 @@ bool StrategyAttackCL::preDefinedSkittleExploration2()
         // on n'a pas reussi
         // c'est la fin du match?
         if (checkEndEvents()) return false;
-        return avoidObstacle();
+        return goOverSupport();
         // TODO manage collisions
         return false;
     }
@@ -467,7 +503,7 @@ bool StrategyAttackCL::preDefinedSkittleExploration2()
         // on n'a pas reussi
         // c'est la fin du match?
         if (checkEndEvents()) return false;
-        return avoidObstacle();
+        return goOverSupport();
     }
 
     MvtMgr->setRobotDirection(MOVE_DIRECTION_BACKWARD);
@@ -477,7 +513,7 @@ bool StrategyAttackCL::preDefinedSkittleExploration2()
         // on n'a pas reussi
         // c'est la fin du match?
         if (checkEndEvents()) return false;
-        return avoidObstacle();
+        return goOverSupport();
         // TODO manage collisions
         return false;
     }
@@ -669,7 +705,7 @@ bool StrategyAttackCL::gotoGtps1(GridPoint gpts[3])
     if (Events->isInWaitResult(EVENTS_MOVE_END)) return true;
     // c'est la fin du match?
     if (checkEndEvents()) return false;
-    return avoidObstacle();
+    return goOverSupport();
 }
 
 // ---------------------------------------------------------------------
@@ -688,7 +724,7 @@ bool StrategyAttackCL::rotateOnGtps1(GridPoint gpts[3])
     if (Events->isInWaitResult(EVENTS_MOVE_END)) return true;
     // c'est la fin du match?
     if (checkEndEvents()) return false;
-    return avoidObstacle();
+    return goOverSupport();
 }
 
 // ---------------------------------------------------------------------
@@ -721,7 +757,7 @@ bool StrategyAttackCL::backBeforeGpts2(GridPoint gpts[3])
         if (Events->isInWaitResult(EVENTS_MOVE_END)) return true;
         // c'est la fin du match?
         if (checkEndEvents()) return false;
-	return avoidObstacle();
+	return goOverSupport();
     } 
     return true;
 }
@@ -766,7 +802,7 @@ bool StrategyAttackCL::gotoGpts2(GridPoint gpts[3],
     if (Events->isInWaitResult(EVENTS_MOVE_END)) return true;
     // c'est la fin du match?
     if (checkEndEvents()) return false;
-    return avoidObstacle();
+    return goOverSupport();
 }
 // ---------------------------------------------------------------------
 // On a depasse Gpts2, on recule pour aller sur gpts2
@@ -858,7 +894,7 @@ bool StrategyAttackCL::killCenterSkittles()
         if (Events->isInWaitResult(EVENTS_MOVE_END)) break;
         // c'est la fin du match?
         if (checkEndEvents()) return false;
-	return avoidObstacle();
+	return goOverSupport();
     }
     Bumper->disableCaptor(BRIDG_BUMP_LEFT);
     Bumper->disableCaptor(BRIDG_BUMP_RIGHT);
