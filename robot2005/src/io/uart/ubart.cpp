@@ -123,6 +123,16 @@ bool Ubart::writeRead(IoByte* sendBuffer, unsigned int& sendLength,
 		      IoByte* receiveBuffer, unsigned int& receiveLength)
 {
     LOG_DEBUG("writeRead of Ubart %d\n", ubartId_);
+    // DEBUG:
+    IoByte buffer[16];
+    unsigned int maxLength = 16;
+    read(buffer, maxLength);
+    if (maxLength != 16) {
+	LOG_ERROR("writeRead has input before send request (received %d bytes).\n", 16 - maxLength);
+	for (unsigned int i = 0; i < 16 - maxLength; ++i) {
+	    printf("0x%2.2x ", buffer[i]);
+	}
+    }
     UbartLock(this);
     return write(sendBuffer, sendLength)
 	&& read(receiveBuffer, receiveLength);
