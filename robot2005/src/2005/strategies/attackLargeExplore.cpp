@@ -142,7 +142,6 @@ bool StrategyLargeAttackCL::calcSupportCenterCollision(Point pos, Point* support
 
 bool StrategyLargeAttackCL::centerOnSupport(Point supportCenter) {
     const int XY_SQUARE_SAFETY = 100;
-    const int MOVE_XY_SQUARE_EPSILON = 100;
     const Radian THETA_DELTA = M_PI_4/3;
     unsigned int retries = 0;
     // TODO: get MOVE_XY_SQUARE_EPSILON from move.h

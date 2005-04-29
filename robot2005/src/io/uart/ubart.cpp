@@ -157,7 +157,8 @@ UbartMultiplexer::UbartMultiplexer(IoDevice* device)
       device_(device),
       openedUbarts_(0),
       currentId_(UBART_DEFAULT_ID),
-      targetId_(UBART_DEFAULT_ID)
+      targetId_(UBART_DEFAULT_ID),
+      lockCounter_(0)
 {
     pthread_mutex_init(&lock_, NULL);
     for (unsigned int i = 0; i < UBART_MAX_DEVICES; ++i)
@@ -188,10 +189,13 @@ const IoDeviceScanInfoPairVector& UbartMultiplexer::scan() {
 
 void UbartMultiplexer::lock() {
     pthread_mutex_lock(&lock_);
+    lockCounter_++;
 }
 
 void UbartMultiplexer::unlock() {
-    pthread_mutex_unlock(&lock_);
+    if (--lockCounter_ == 0) {
+	pthread_mutex_unlock(&lock_);
+    }
 }
 
 void UbartMultiplexer::switchToUbart(Ubart* ubart) {

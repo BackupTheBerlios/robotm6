@@ -57,4 +57,5 @@ private: // fields
     unsigned int currentId_;
     unsigned int targetId_;
     pthread_mutex_t lock_;
+    unsigned int lockCounter_;
 };
