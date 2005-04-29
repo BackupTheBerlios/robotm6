@@ -433,7 +433,7 @@ LOG_INFO("SIMULATED\n");
   strategy1 = new TestMoveStrategy1CL(robotMain);
   strategy2 = new TestMoveStrategy2CL(robotMain);
   strategy3 = new TestMoveStrategy3CL(robotMain);
-  strategyAttack = new StrategyAttackCL(robotMain);
+  strategyAttack = new StrategyAttackCL(robotMain, "strategy attack");
 
   //ClassConfig::find(CLASS_MOVE)->setVerboseLevel(VERBOSE_DEBUG);
   //// ICI ICI ICI => strategy2 = traverse le pont

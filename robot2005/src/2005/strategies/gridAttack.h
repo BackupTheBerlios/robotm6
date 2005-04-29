@@ -13,12 +13,15 @@ class GridAttack
         bool           skittleAtBeginning;
         Millisecond    obstacleTime;
         Millisecond    lastVisitTime;
+	bool           hasSupport;
         
         GridElement(): 
             danger(DANGER_NONE), 
             skittleAtBeginning(false), 
             obstacleTime(TIME_NEVER), 
-            lastVisitTime(TIME_NEVER) {}
+            lastVisitTime(TIME_NEVER),
+	    hasSupport(false)
+	    {}
     };
 
     GridAttack();

@@ -34,7 +34,7 @@ enum BorderEnum {
 class StrategyAttackCL : public Strategy2005CL
 {
  public :
-    StrategyAttackCL(RobotMainCL* main);
+    StrategyAttackCL(RobotMainCL* main, const char* menuName);
     virtual ~StrategyAttackCL();
 
     void run(int argc, char*argv[]);
@@ -44,7 +44,7 @@ class StrategyAttackCL : public Strategy2005CL
  protected:
     bool autoCheck();
     bool testBridgeCaptors();
- private:
+ protected:
     // le boolean renvoye par les fonctions indique si la command a
     // terminee normalement ou non. Si elle n'a pas terminee normalement
     // il faut verifier les events pour voir si ce n'est pas la fin du match
@@ -75,7 +75,7 @@ class StrategyAttackCL : public Strategy2005CL
     bool killCenterSkittles();
 
 
- private:
+ protected:
     ///////////////////////////// PONT ////////////////////////////
     unsigned char getPosBit();
     void getNearestBridgeEntry();
@@ -110,8 +110,8 @@ class StrategyAttackCL : public Strategy2005CL
     bool avoidObstacle();
     bool goOverSupport();
 
-    bool preDefinedSkittleExploration1();
-    bool preDefinedSkittleExploration2();
+    virtual bool preDefinedSkittleExploration1();
+    virtual bool preDefinedSkittleExploration2();
 
     void basicSkittleExplorationCol(GridPoint gpts[3]);
     void basicSkittleExplorationRow(GridPoint gpts[3]);
@@ -126,10 +126,11 @@ class StrategyAttackCL : public Strategy2005CL
 
     ////////////////////////// MISC ////////////////////////////////
     void setAttackPhase(AttackPhase);
+
     Point getPwmObstaclePos(); 
     bool calcSupportCenterCollision(Point pos, Point& supportCenter) const; 
 
- private:
+protected:
     /** mask qui dit ou le peut etre (4 possibilites a tester) quand il n'y est
         pas on passe le bit a 0 */
     unsigned char  bridgeAvailibility_;
@@ -210,7 +211,7 @@ struct CatapultServo {
 
 static const unsigned int ATTACK_CATAPULT_SERVO_NBR=3;
 static CatapultServo catapultServos[ATTACK_CATAPULT_SERVO_NBR] = {
-  { 0, 0x48, 0x09},
+  { 0, 0x09, 0x48},
   { 1, 0x48, 0x09},
   { 2, 0x48, 0x09}
 };

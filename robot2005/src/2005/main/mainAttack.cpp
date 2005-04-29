@@ -6,12 +6,14 @@
 #include "robotConfig2005.h"
 #include "robotMain2005.h"
 #include "strategyAttack.h"
+#include "strategyLargeAttack.h"
 
 int main(int argc, char* argv[])
 {
   RobotConfigCL*  config;
   RobotMainCL*    robotMain=NULL;
   StrategyCL*     strategyAttack=NULL;
+  StrategyCL*     strategyLargeAttack=NULL;
 
 #ifndef SIMULATED
 #define SIMULATED false
@@ -24,11 +26,17 @@ int main(int argc, char* argv[])
   config = new RobotConfigAttack2005CL(SIMULATED);
 
   robotMain = new RobotMain2005CL();
-  strategyAttack = new StrategyAttackCL(robotMain);
+
+  strategyAttack = new StrategyAttackCL(robotMain, "Char*");
+  strategyLargeAttack = new StrategyLargeAttackCL(robotMain, "flo");
+  
+  robotMain->addStrategyToMenu(strategyAttack);
+  robotMain->addStrategyToMenu(strategyLargeAttack);
+  robotMain->menu(argc, argv);
 
   //ClassConfig::find(CLASS_MOVE)->setVerboseLevel(VERBOSE_DEBUG);
 
-  robotMain->run(strategyAttack, argc, argv); // traverse le pont
+  //robotMain->run(strategyAttack, argc, argv); // traverse le pont
 
   while(1) {sleep(1);}
   delete strategyAttack;
