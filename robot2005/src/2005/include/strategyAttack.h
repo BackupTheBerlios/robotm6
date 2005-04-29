@@ -4,6 +4,7 @@
 #include "strategy2005.h"
 #include "devices/bumper.h"
 #include "events.h"
+#include "robotTimer.h"
 
 enum AttackExplorationDirection {
     ATTACK_EXPLORE_ROW=0,
@@ -27,6 +28,18 @@ enum BorderEnum {
     BORDER_Y2100
 };
     
+struct PwmAlertObstacle {
+  bool  rightWheelBlocked;
+  bool  leftWheelBlocked; 
+  bool  forward;
+  Point ptObstacle;
+  bool  colliDetected;
+  PwmAlertObstacle() : rightWheelBlocked(false), leftWheelBlocked(false),
+		       forward(true), ptObstacle(), colliDetected(false) {}
+  Obstacle getObstacle() {
+    return Obstacle(ptObstacle, Timer->time());
+  }
+};
 
 /** @class StrategyAttackCL
  * Strategy du robot d'attaque
@@ -127,7 +140,7 @@ class StrategyAttackCL : public Strategy2005CL
     ////////////////////////// MISC ////////////////////////////////
     void setAttackPhase(AttackPhase);
 
-    Point getPwmObstaclePos(); 
+    bool getPwmObstaclePos(PwmAlertObstacle &pwmObstacle ); 
     bool calcSupportCenterCollision(Point pos, Point& supportCenter) const; 
 
 protected:

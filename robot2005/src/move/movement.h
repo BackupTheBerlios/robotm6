@@ -74,8 +74,10 @@ class Movement : public RobotBase
     // protected functions
     void setLRSpeed(MoveLinearSpeed   linearSpeed,
                     MoveRotationSpeed rotationSpeed);
-    bool moveToPoint(Point target, MoveGain gain,
-                     Point startingPoint, Millimeter maxDist);
+    bool moveToPoint(Point      target, 
+                     MoveGain   gain,
+                     Point      startingPoint, 
+                     Millimeter maxSquareDist);
  protected:
     // protected members
     MotorSpeed   maxSpeed_;
@@ -111,7 +113,7 @@ class MovementForward : public Movement
     char* txt();
 
  protected:
-    Millimeter distance_;
+    Millimeter squareDistance_;
 };
 
 // -----------------------------------------------------------------
@@ -132,7 +134,7 @@ class MovementBackward : public Movement
     char* txt();
 
  protected:
-    Millimeter distance_;
+    Millimeter squareDistance_;
 };
 
 // -----------------------------------------------------------------
@@ -155,7 +157,7 @@ class MovementSetSpeed : public Movement
     char* txt();
 
  protected:
-    Millimeter distance_;
+    Millimeter squareDistance_;
     MotorSpeed speedLeft_;
     MotorSpeed speedRight_;
 };
@@ -207,7 +209,7 @@ class MovementRealign : public Movement
  protected:
     Radian     theta_;
     bool       leftWheel_;
-    Millimeter distMax_;
+    Millimeter squareDistMax_;
     Point      blockedWheelPoint_;
     bool       canMoveStopWheel_;
 };
@@ -278,7 +280,7 @@ class MovementGo2Target : public Movement
 
  protected:
     Point      target_;
-    Millimeter totalLength_;
+    Millimeter totalSquareLength_;
     bool       totalLengthInit_;
 };
 
@@ -312,8 +314,8 @@ class MovementTrajectory : public Movement
     MoveTrajectoryMode  trajectoryMode_;
     double              currentIndex_;
     double              lastIndex_;
-    Millimeter          totalLength_;
-    Millimeter          lastLength_;
+    Millimeter          totalSquareLength_;
+    Millimeter          lastSquareLength_;
     Point               beforeLastPoint_;
     MotorSpeed          realMaxSpeed_;
     bool                first_;

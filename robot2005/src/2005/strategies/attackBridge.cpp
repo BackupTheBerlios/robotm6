@@ -454,7 +454,7 @@ bool StrategyAttackCL::getBridgePosByBumper(bool& bridgeInFront)
 bool StrategyAttackCL::checkBridgeBumperEvent() 
 {
     if (Events->isInWaitResult(EVENTS_NO_BRIDGE_BUMP_LEFT) ||
-        Events->isInWaitResult(EVENTS_NO_BRIDGE_BUMP_RIGHT)) {
+	Events->isInWaitResult(EVENTS_NO_BRIDGE_BUMP_RIGHT)) {
         // le pont n'est pas la! Faut vite s'arreter!
         Move->emergencyStop();
         usleep(500000); // attend 0.5s et regarde a nouveau les bumpers pour voir 
@@ -611,10 +611,16 @@ bool StrategyAttackCL::gotoBridgeEntryNear(Millimeter y)
     // on ne va pas loin en y donc on fait un joli mouvement en S
     // met les servos en position
     Millimeter y2 = RobotPos->y();
-    t.push_back(Point(BRIDGE_DETECT_BUMP_X-100, y2));
-    t.push_back(Point(BRIDGE_ENTRY_NAVIGATE_X, (2*y+y2)/3));
-    Move->followTrajectory(t, TRAJECTORY_RECTILINEAR, 3, 30);
-   
+    if (y>1800) { // pont du bord
+      Move->go2Target(Point(BRIDGE_ENTRY_NAVIGATE_X, y2), 3, 30);
+    } else if (y<1500) { //  pont du bord ou pont contre le milieu
+      Move->go2Target(Point(BRIDGE_ENTRY_NAVIGATE_X, y2), 3, 30);
+    } else { // ponts au milieu
+      t.push_back(Point(BRIDGE_DETECT_BUMP_X-100, y2));
+      t.push_back(Point(BRIDGE_ENTRY_NAVIGATE_X, (2*y+y2)/3)); 
+      Move->followTrajectory(t, TRAJECTORY_RECTILINEAR, 3, 30);
+    }
+     
     Events->wait(evtEndMove);
     Move->enableAccelerationController(false);
     if (checkEndEvents()) return false; 
@@ -685,7 +691,11 @@ bool StrategyAttackCL::crossBridgeDemo()
 void StrategyAttackCL::enableBridgeCaptors() {
   if (useBridgeBumpers_) {
     Events->enable(EVENTS_NO_BRIDGE_BUMP_LEFT);
-    Events->enable(EVENTS_NO_BRIDGE_BUMP_RIGHT);
+    if (bridgeDetectionByCenter_ && (bridge_ == BRIDGE_POS_MIDDLE_CENTER || bridge_ == BRIDGE_POS_CENTER)) {
+      // on n'utilise pas le capteur droit si on passe en sioux
+    } else {
+      Events->enable(EVENTS_NO_BRIDGE_BUMP_RIGHT);
+    }
   }
 }
 

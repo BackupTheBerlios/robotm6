@@ -6,9 +6,6 @@
 #include "events.h"
 #include <unistd.h>
 
-
-static const int MOTOR_PWM_TIME_ALERT=80;
-
 // 80 = toutes les 2s
 
 // ============================================================================
@@ -27,6 +24,15 @@ void MotorCL::resetPwmAlert()
 {
     counterLeft_=0;
     counterRight_=0;
+}
+
+void MotorCL::setPwmAlertTimeout(int timeout)
+{
+    pwmAlertTimeout_ = timeout;
+}
+void MotorCL::setPwmAlertSeuil(MotorPWM seuil)
+{
+    pwmAlertSeuil_ = seuil;
 }
 
 /** Reset autimatiquement les hctl quand ils saturent trop longtemps */
@@ -67,9 +73,9 @@ void MotorCL::periodicTask()
 
   getPWM(left, right);
   // test la roue gauche
-  if ((lastLeft>110 && left>110) ||
-      (lastLeft<-110 && left<-110)) {
-    if (counterLeft_++ > MOTOR_PWM_TIME_ALERT) {
+  if ((lastLeft > pwmAlertSeuil_ && left > pwmAlertSeuil_) ||
+      (lastLeft < -pwmAlertSeuil_ && left < -pwmAlertSeuil_)) {
+    if (counterLeft_++ > pwmAlertTimeout_) {
 #ifndef TELECOMMAND_MAIN
       LOG_ERROR("La roue gauche est bloquée r=%d l=%d, cr=%d, cl=%d\n", 
                 right, left, counterRight_, counterLeft_);
@@ -86,9 +92,9 @@ void MotorCL::periodicTask()
     counterLeft_=0;
   }
   // test la roue droite
-  if ((lastRight>110 && right>110) ||
-      (lastRight<-110 && right<-110)) {
-    if (counterRight_++ > MOTOR_PWM_TIME_ALERT) {
+  if ((lastRight > pwmAlertSeuil_ && right > pwmAlertSeuil_) ||
+      (lastRight < -pwmAlertSeuil_ && right < -pwmAlertSeuil_)) {
+    if (counterRight_++ > pwmAlertTimeout_) {
 #ifndef TELECOMMAND_MAIN
       LOG_ERROR("La roue droite est bloquée r=%d l=%d, cr=%d, cl=%d\n",
                 right, left, counterRight_, counterLeft_);
@@ -120,7 +126,9 @@ MotorCL::MotorCL(bool   automaticReset,
                  MotorAlertFunction fn) : 
   RobotDeviceCL("Motor", CLASS_MOTOR), 
   alertFunction_(fn), enableAutomaticReset_(automaticReset), 
-  counterLeft_(0), counterRight_(0), resetCallBack_(NULL)
+  counterLeft_(0), counterRight_(0), resetCallBack_(NULL), 
+  pwmAlertTimeout_(MOTOR_PWM_ALERT_TIMEOUT), 
+  pwmAlertSeuil_(MOTOR_PWM_ALERT_SEUIL)
 {
 }
 

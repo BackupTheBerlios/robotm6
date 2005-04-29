@@ -55,7 +55,7 @@ static const MotorSpeed MOVE_MIN_SPEED                = 8;
 static const MotorSpeed MOVE_MAX_DELTA_SPEED          = 1;
 
 /** En mode forward ou backward, distance a partir de laquelle on ralenti */
-static const Millimeter MOVE_LINEAR_REDUCE_SPEED_DIST = 50; 
+static const Millimeter MOVE_LINEAR_REDUCE_SPEED_SQUARE_DIST = 250; 
 
 /** En rotation, gain I du PID */
 static const MoveGain   MOVE_ROTATION_INTEGRAL_GAIN  = 0.001;
@@ -68,12 +68,12 @@ static const Radian     MOVE_ROTATION_EPSILON        = 0.05;
 static const Millimeter MOVE_ATTRACTIVE_DIST         = 50;
 /** Distance en dessous de laquelle on augmente le gain en mode 
     Go2 ou trajectory */
-static const Millimeter MOVE_NEAR_TARGET_DIST        = MOVE_ATTRACTIVE_DIST*5;
+static const Millimeter MOVE_NEAR_TARGET_SQUARE_DIST        = MOVE_ATTRACTIVE_DIST*MOVE_ATTRACTIVE_DIST*25;
 /** Distance en dessous de laquelle on considere etre arrive a 
     destination en mode Go2 ou trajectory*/
-static const Millimeter MOVE_XY_EPSILON              = 10; 
+static const Millimeter MOVE_XY_SQUARE_EPSILON       = 100; 
 
-static const Millimeter MOVE_REALIGN_DIST_DEFAULT    = 30;
+static const Millimeter MOVE_REALIGN_SQUARE_DIST_DEFAULT = 900;
 
 static const MoveGain   MOVE_USE_DEFAULT_GAIN  =-1;
 static const MotorSpeed MOVE_USE_DEFAULT_SPEED =-1;

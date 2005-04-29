@@ -73,7 +73,7 @@ RobotConfigDefence2005CL::RobotConfigDefence2005CL(bool simulated)
 
     automaticMotorReset=(true);
     motorK=(0.00430613851);
-    motorD=(342);
+    motorD=(280);
     motorEd=(1);
     motorCr=(1);
     motorCl=(1);

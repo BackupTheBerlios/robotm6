@@ -203,59 +203,48 @@ bool evtEndMoveAvoidObstacle(bool evt[])
     || (Timer->time() > avoidObstacleTimeout);
 }
 
-Point StrategyAttackCL::getPwmObstaclePos() 
+bool StrategyAttackCL::getPwmObstaclePos(PwmAlertObstacle &pwmObstacle) 
 {
-  Point ptWheelBlocked;
-  bool rightWheelBlocked=false;
-  bool leftWheelBlocked=false;
   MotorDirection dirMotor = MvtMgr->getMotorDirection();
   if (Events->isInWaitResult(EVENTS_PWM_ALERT_LEFT)) {
     LOG_WARNING("Left wheel is blocked\n");
-    bool forward=true;
-    if (dirMotor == MOTOR_DIRECTION_LEFT || dirMotor == MOTOR_DIRECTION_BACKWARD) forward = false;
-    return getAttackWheelPos(WHEEL_LEFT, forward);
+    pwmObstacle.leftWheelBlocked = true;
+    pwmObstacle.colliDetected=true;
+    pwmObstacle.forward = (dirMotor == MOTOR_DIRECTION_RIGHT || dirMotor == MOTOR_DIRECTION_FORWARD);
+    pwmObstacle.ptObstacle=getAttackWheelPos(WHEEL_LEFT, pwmObstacle.forward);
   }
   if (Events->isInWaitResult(EVENTS_PWM_ALERT_RIGHT)) {
     LOG_WARNING("Right wheel is blocked\n");
-    bool forward=true;
-    if (dirMotor == MOTOR_DIRECTION_RIGHT || dirMotor == MOTOR_DIRECTION_BACKWARD) forward = false;
-    return getAttackWheelPos(WHEEL_RIGHT, forward);
+    pwmObstacle.rightWheelBlocked = true;
+    pwmObstacle.colliDetected=true;
+    pwmObstacle.forward = (dirMotor == MOTOR_DIRECTION_LEFT || dirMotor == MOTOR_DIRECTION_FORWARD);
+    pwmObstacle.ptObstacle=getAttackWheelPos(WHEEL_RIGHT, pwmObstacle.forward);
   } 
-  return Point(-100, -100);
+  return pwmObstacle.colliDetected;
 }
 
 bool StrategyAttackCL::goOverSupport()
 {
   LOG_COMMAND("goOverSupport\n");
-  bool rightWheelBlocked=false;
-  bool leftWheelBlocked=false;
-  bool skittleDetected=false;
-  Point ptSupport;
-  Point ptWheelBlocked;
-  MotorDirection dirMotor = MvtMgr->getMotorDirection();
- 
-  if (Events->isInWaitResult(EVENTS_PWM_ALERT_LEFT)) {
-    LOG_WARNING("Left wheel is blocked\n");
-    leftWheelBlocked=true;
-    bool forward=true;
-    if (dirMotor == MOTOR_DIRECTION_LEFT || dirMotor == MOTOR_DIRECTION_BACKWARD) forward = false;
-    ptWheelBlocked=getAttackWheelPos(WHEEL_LEFT, forward);
+  PwmAlertObstacle pwmObstacle;
+  getPwmObstaclePos(pwmObstacle);
+  if (pwmObstacle.colliDetected) {
+    pwmObstacle.colliDetected = calcSupportCenterCollision(pwmObstacle.ptObstacle, pwmObstacle.ptObstacle);
   }
-  if (Events->isInWaitResult(EVENTS_PWM_ALERT_RIGHT)) {
-    LOG_WARNING("Right wheel is blocked\n");
-    rightWheelBlocked=true;
-    bool forward=true;
-    if (dirMotor == MOTOR_DIRECTION_RIGHT || dirMotor == MOTOR_DIRECTION_BACKWARD) forward = false;
-    ptWheelBlocked=getAttackWheelPos(WHEEL_RIGHT, forward);
-  } 
-  skittleDetected = calcSupportCenterCollision(ptWheelBlocked, ptSupport);
- 
-  if (skittleDetected) {
+  grid_->setObstacleTime(Timer->time(), pwmObstacle.ptObstacle);
+  
+  if (pwmObstacle.colliDetected) {
     LOG_INFO("Skittle support detected!\n");
-    Log->support(ptSupport, ptSupport);
-    Move->setSpeedOnDist(200, 
-			leftWheelBlocked?10:30,
-			rightWheelBlocked?10:30);
+    Log->support(pwmObstacle.ptObstacle, pwmObstacle.ptObstacle);
+    if (pwmObstacle.forward) {
+      Move->setSpeedOnDist(200, 
+			   pwmObstacle.leftWheelBlocked?10:30,
+			   pwmObstacle.rightWheelBlocked?10:30);
+    } else {
+      Move->setSpeedOnDist(200, 
+			   pwmObstacle.leftWheelBlocked?-10:-30,
+			   pwmObstacle.rightWheelBlocked?-10:-30);
+    }
     Events->wait(evtEndMove);
   }
   if (checkEndEvents()) return false;

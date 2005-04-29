@@ -52,13 +52,13 @@ all: lib bin validate
 ## ===========================================================================
 clean:	default_clean
 	${RM} -f  ${STATIC_LIB_DIR}/${LIB_NAME}.a        \
-                  ${DYNAMIC_LIB_DIR}/${LIB_NAME}.so  
+                  ${DYNAMIC_LIB_DIR}/${LIB_NAME}.so
 
 
 ## ===========================================================================
 ## Main rules : ----- LIB -----
 ## ===========================================================================
-lib: $(STATIC_LIB_DIR)/${LIB_NAME}.a ${DYNAMIC_LIB_DIR}/${LIB_NAME}.so 
+lib: $(STATIC_LIB_DIR)/${LIB_NAME}.a ${DYNAMIC_LIB_DIR}/${LIB_NAME}.so motorTestMain.o
 
 ## ===========================================================================
 ## Main rules : ----- BIN -----
@@ -73,7 +73,8 @@ validate:
 ## ===========================================================================
 ## Specific rules
 ## ===========================================================================
-
+motorTestMain.o: motor.cpp
+	${CC} -o $@ -c $^ $(DEFAULT_CFLAGS) ${INC_DIR} ${DEFAULT_INC_DIR} -DTELECOMMAND_MAIN
 ## ===========================================================================
 ## DO NOT ADD ANYTHING BELOW THIS LINE -- IT WILL BE ERASED BY MAKE DEPEND
 ## ===========================================================================

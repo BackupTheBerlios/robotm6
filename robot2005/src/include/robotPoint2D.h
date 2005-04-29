@@ -30,6 +30,7 @@ class RobotPoint2D {
  public:
     // functions
     T         dist(RobotPoint2D<T, TypeAngle> const& pt) const;
+    T         squareDist(RobotPoint2D<T, TypeAngle> const& pt) const;
     T         norme() const;
     TypeAngle dir(RobotPoint2D<T, TypeAngle> const& pt) const;
     TypeAngle angle() const; 
@@ -81,6 +82,22 @@ dist(RobotPoint2D<T, TypeAngle> const& pt1,
     return pt1.dist(pt2);
 }
 // ------------------------------------------------------------------------
+// RobotPoint2D::squareDist
+// ------------------------------------------------------------------------
+template <typename T, typename TypeAngle>
+inline T 
+RobotPoint2D<T, TypeAngle>::squareDist(RobotPoint2D<T, TypeAngle> const& pt) const
+{
+    return (T)((x-pt.x)*(x-pt.x)+(y-pt.y)*(y-pt.y));
+}
+
+template <typename T, typename TypeAngle>
+inline T 
+squareDist(RobotPoint2D<T, TypeAngle> const& pt1,
+     RobotPoint2D<T, TypeAngle> const& pt2)
+{
+    return pt1.squareDist(pt2);
+}// ------------------------------------------------------------------------
 // RobotPoint2D::norme
 // ------------------------------------------------------------------------
 template <typename T, typename TypeAngle>

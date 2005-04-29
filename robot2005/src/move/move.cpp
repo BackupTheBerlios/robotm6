@@ -40,7 +40,7 @@ MoveCL::MoveCL() :
     defaultMaxRotationSpeed_(MOVE_MAX_ROTATION_SPEED),
     defaultMaxLinearSpeed_(MOVE_SPEED_DEFAULT),
     defaultBasicSpeed_(MOVE_SPEED_DEFAULT),
-    defaultRealignDist_(MOVE_REALIGN_DIST_DEFAULT),
+    defaultRealignDist_(sqrt(MOVE_REALIGN_SQUARE_DIST_DEFAULT)),
     trajectoryIndexOffset_(0)
 {
     pthread_mutex_init(&repositoryLock, NULL);
@@ -575,7 +575,7 @@ void MoveCL::followTrajectory(Trajectory const&   trajectory2,
 	      Geometry2D::rectilinear(t2, rotationIndex, 
 				      rotationTargetPoint);
 	  }
-	  length = Geometry2D::getSquareDistance(RobotPos->pt(), rotationTargetPoint);
+	  length = squareDist(RobotPos->pt(), rotationTargetPoint);
       }while ((length < MVT_TRAJECTORY_MIN_SQUARE_LENGTH)
 	      && (rotationIndex < t2.size()-1));
       finalDir = dir(RobotPos->pt(), rotationTargetPoint);

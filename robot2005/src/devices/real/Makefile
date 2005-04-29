@@ -133,7 +133,7 @@ ${BIN_DIR}/testSkittle: skittleDetector_05.cpp
 	${CC} -o $@ $^ ../base/skittleDetector.o $(DEFAULT_CFLAGS) ${INC_DIR} ${DEFAULT_INC_DIR} -DTEST_MAIN $(STATIC_LIB_DIR)/libevents.a $(IO_STATIC_LIB)
 
 ${BIN_DIR}/telecommandIsa: motorIsa_05.cpp HCTLControl.o hct.o
-	${CC} -o $@ $^ ../base/motor.o $(DEFAULT_CFLAGS) ${INC_DIR} ${DEFAULT_INC_DIR} -DTEST_MAIN $(STATIC_LIB_DIR)/libevents.a $(IO_STATIC_LIB)
+	${CC} -o $@ $^ ../base/motorTestMain.o $(DEFAULT_CFLAGS) ${INC_DIR} ${DEFAULT_INC_DIR} -DTEST_MAIN $(STATIC_LIB_DIR)/libevents.a $(IO_STATIC_LIB)
 
 ${BIN_DIR}/telecommand05: motorOdom_05.cpp
 	${CC} -o $@ $^ $(DEFAULT_CFLAGS) ${INC_DIR} ${DEFAULT_INC_DIR} -DTEST_MAIN $(IO_STATIC_LIB)

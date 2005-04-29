@@ -26,6 +26,8 @@ typedef void (*MotorPwmResetFunction)(int left, int right);
 // ================================  const MOTOR_  ============================
 // ============================================================================
 
+static const int      MOTOR_PWM_ALERT_TIMEOUT = 30; // 80 = 2s
+static const MotorPWM MOTOR_PWM_ALERT_SEUIL   = 110;
 
 
 // ============================================================================
@@ -53,6 +55,8 @@ class MotorCL : public RobotDeviceCL
     
     /** reset les compteurs qui verifie que les roues ne sont pas bloquees */
     void resetPwmAlert();
+    void setPwmAlertTimeout(int timeout);
+    void setPwmAlertSeuil(MotorPWM seuil);
 
     /** Reset autimatiquement les hctl quand ils saturent trop longtemps */
     virtual void enableAutomaticReset(bool enable);
@@ -93,6 +97,8 @@ class MotorCL : public RobotDeviceCL
     bool enableAutomaticReset_;
     int counterLeft_, counterRight_;
     FunctionPtr resetCallBack_;
+    int pwmAlertTimeout_;
+    MotorPWM pwmAlertSeuil_;
 };
 
 #endif /* __MOTOR_H__ */

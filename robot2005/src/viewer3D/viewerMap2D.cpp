@@ -395,6 +395,8 @@ void Viewer3DCL::drawEstimatedBridges2D(int robotId)
 // ---------------------------------------------------------------
 void Viewer3DCL::drawEstimatedBridges2D(Millimeter y)
 {
+    drawBridge2D(y, true);
+    /*
     Millimeter largeur=TERRAIN_PONT_LARGEUR;
     
     glPushMatrix ();
@@ -414,6 +416,7 @@ void Viewer3DCL::drawEstimatedBridges2D(Millimeter y)
                  (TERRAIN_BORDURE_PONT_LARGEUR)*SCALE); 
     glEnd();
     glPopMatrix();
+    */
 }
 
 // ---------------------------------------------------------------
@@ -423,16 +426,16 @@ void Viewer3DCL::drawEstimatedBridges2D(Millimeter y)
 // ---------------------------------------------------------------
 void Viewer3DCL::drawBridges2D()
 {
+     Millimeter y=TERRAIN_Y/2 
+                 +TERRAIN_BORDURE_PONT_LARGEUR
+                 +TERRAIN_PONT_FIXE_LARGEUR/2;
+    drawBridge2D(y, false);
+    drawBridge2D(TERRAIN_Y-y, false);
     for(unsigned int i=0; i<VIEWER_MAX_ROBOT_NBR; i++) {
         drawEstimatedBridges2D((int)i);
         if (robotData_[i].estimatedBridge != BRIDGE_POS_UNKNOWN) return;
     }
     
-    Millimeter y=TERRAIN_Y/2 
-                 +TERRAIN_BORDURE_PONT_LARGEUR
-                 +TERRAIN_PONT_FIXE_LARGEUR/2;
-    drawBridge2D(y, false);
-    drawBridge2D(TERRAIN_Y-y, false);
     switch(bridge_) {
     case BRIDGE_POS_BORDURE: 
         y = TERRAIN_BORDURE_PONT_LARGEUR+TERRAIN_PONT_LARGEUR/2.;

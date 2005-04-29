@@ -102,7 +102,7 @@ void TestMoveStrategy1CL::run(int argc, char* argv[])
 	     int l;
 	     comm+=6;
 	     sscanf(comm," %d",&l);
-	     Move->forward(l);
+	     Move->forward(l, 10);
 	     
 	     Events->wait(evtEndMove);
 	     
@@ -111,7 +111,7 @@ void TestMoveStrategy1CL::run(int argc, char* argv[])
 	     int l;
 	     comm+=6;
 	     sscanf(comm," %d",&l);
-	     Move->forward(-l);
+	     Move->forward(-l, 10);
 	     
 	     Events->wait(evtEndMove);
 	   }
@@ -128,7 +128,7 @@ void TestMoveStrategy1CL::run(int argc, char* argv[])
 	     
 	     RobotPos->set(0, 0, 0);
 	     MvtMgr->setRobotDirection(MOVE_DIRECTION_FORWARD);
-    	     Move->go2Target(Point(l, 0));
+    	     Move->go2Target(Point(l, 0), -1, 10);
 
 	     Events->wait(evtEndMove);
 	   }
@@ -139,7 +139,7 @@ void TestMoveStrategy1CL::run(int argc, char* argv[])
 	     
 	     RobotPos->set(0, 0, 0);
 	     MvtMgr->setRobotDirection(MOVE_DIRECTION_BACKWARD);
-	     Move->go2Target(Point(l, 0));
+	     Move->go2Target(Point(l, 0), -1, 10);
 
 	     Events->wait(evtEndMove);
 	     
@@ -161,7 +161,7 @@ void TestMoveStrategy1CL::run(int argc, char* argv[])
 	     int angl;
 	     comm+=6;
 	     sscanf(comm," %d",&angl);
-	     Move->rotate(d2r(angl));
+	     Move->rotate(d2r(angl), -1, 10);
 
 	     Events->wait(evtEndMove);
 	   }
@@ -170,7 +170,7 @@ void TestMoveStrategy1CL::run(int argc, char* argv[])
 	     comm+=6;
 	     sscanf(comm," %d",&angl);
 	     RobotPos->set(0,0,0);
-	     Move->rotateFromAngle(d2r(angl));
+	     Move->rotateFromAngle(d2r(angl), -1, 10);
 	     
 	     Events->wait(evtEndMove);
 	   }
@@ -180,7 +180,7 @@ void TestMoveStrategy1CL::run(int argc, char* argv[])
 	     sscanf(comm," %d",&x);//abscisse(longueuer)
 	     sscanf(comm," %d",&y);//ordonnee(largeur)
 	     
-	     Move->go2Target(Point(x,y));
+	     Move->go2Target(Point(x,y), -1, 10);
 	     Events->wait(evtEndMove);
 	   }
 	   //
@@ -209,7 +209,7 @@ void TestMoveStrategy1CL::run(int argc, char* argv[])
 	       //
 	     }
 	     
-	     Move->followTrajectory(t/*, TRAJECTORY_SPLINE*/);
+	     Move->followTrajectory(t, TRAJECTORY_RECTILINEAR, -1, 10);
 	     Events->wait(evtEndMove);
 
 
@@ -349,10 +349,10 @@ void TestMoveStrategy3CL::run(int argc, char* argv[])
     Move->enableAccelerationController(false);
     MvtMgr->enableAutomaticReset(false);
 
-    RobotPos->set(400,400,M_PI/4); 
-    Move->realign(0);
+    RobotPos->set(0, 0, 0); 
+    //Move->realign(0);
     //Move->rotateOnWheel(0, false);
-    //Move->go2Target(Point(1000,0));
+    Move->go2Target(Point(1000,0));
     //Move->rotateFromAngle(4*M_PI);
     Events->wait(evtEndMovePwm);
     if (Events->isInWaitResult(EVENTS_MOVE_END)) {
@@ -421,6 +421,8 @@ LOG_INFO("MODE REAL\n");
 LOG_INFO("SIMULATED\n");
 #endif
 
+#define ROBOT_DEFENCE
+
 #ifdef ROBOT_DEFENCE
   LOG_INFO("ROBOT_DEFENCE\n");
   config = new RobotConfigDefence2005CL(SIMULATED);
@@ -439,8 +441,8 @@ LOG_INFO("SIMULATED\n");
   //// ICI ICI ICI => strategy2 = traverse le pont
   //robotMain->run(strategy2, argc, argv); // traverse le pont
   //robotMain->run(strategyAttack, argc, argv); // traverse le pont
-  robotMain->run(strategy3, argc, argv); // blocage des roues
-  //robotMain->run(strategy1, argc, argv); //deplacement fichier  test des deplacements
+  //robotMain->run(strategy3, argc, argv); // blocage des roues
+  robotMain->run(strategy1, argc, argv); //deplacement fichier  test des deplacements
  
 
   while(1) {sleep(1);}
