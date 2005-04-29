@@ -143,14 +143,14 @@ bool StrategyLargeAttackCL::calcSupportCenterCollision(Point pos, Point* support
 bool StrategyLargeAttackCL::centerOnSupport(Point supportCenter) {
     const int XY_SQUARE_SAFETY = 100;
     const int MOVE_XY_SQUARE_EPSILON = 100;
+    const Radian THETA_DELTA = M_PI_4/3;
     unsigned int retries = 0;
-    Radian THETA_DELTA = M_PI_4/3;
     // TODO: get MOVE_XY_SQUARE_EPSILON from move.h
     bool centered;
     while (centered = (Geometry2D::getSquareDistance(RobotPos->pt(),
 						     supportCenter)
 		       > (MOVE_XY_SQUARE_EPSILON + XY_SQUARE_SAFETY))
-	   && retries < 3) {
+	   && retries < 2) {
 	retries++;
 	Point currentPos = RobotPos->pt();
 	// try to go there directly
@@ -177,6 +177,8 @@ bool StrategyLargeAttackCL::centerOnSupport(Point supportCenter) {
 		if (!Events->isInWaitResult(EVENTS_MOVE_END))
 		    if (checkEndEvents()) return false; // end of match.
 		// just try again (don't treat other events)
+	    } else if (collision == COLLISION_BOTH) {
+		// just try again
 	    } else if (collision == COLLISION_NONE) {
 		// no idea what happened -> return false
 		return false;
@@ -194,7 +196,7 @@ bool StrategyLargeAttackCL::rotateOnSupport(Point supportCenter,
     bool rotated;
     while (rotated = (fabs(RobotPos->thetaAbsolute() - targetTheta)
 		      > MOVE_ROTATION_EPSILON)
-	   && retries < 3) {
+	   && retries < 2) {
 	retries++;
 	if (Geometry2D::getSquareDistance(supportCenter, currentPos)
 	    > MAX_ROTATE_DELTA_SQUARE) {
@@ -250,12 +252,32 @@ bool StrategyLargeAttackCL::rotateOnSupport(Point supportCenter,
     return rotated;
 }
 
+// should be easy...
 bool StrategyLargeAttackCL::leaveSupport(Point supportCenter, Point target) {
+    const Radian THETA_DELTA = M_PI_4/3;
+    MvtMgr->setRobotDirection(MOVE_DIRECTION_FORWARD);
     Move->go2Target(target);
     Events->wait(evtEndMove);
-    if (!Events->isInWaitResult(EVENTS_MOVE_END))
+    if (Events->isInWaitResult(EVENTS_MOVE_END)) {
+	return true;
+    } else {
 	if (checkEndEvents()) return false; // end of match
-    return true;
+	CollisionEnum collision = checkCollisionEvents();
+	if (collision == COLLISION_LEFT ||
+	    collision == COLLISION_RIGHT)
+	{
+	    // turn on wheel
+	    bool collisionLeft = (collision == COLLISION_LEFT);
+	    bool stopLeft = collisionLeft;
+	    Radian deltaTheta = THETA_DELTA* (collisionLeft? 1: -1);
+	    Move->rotateOnWheel(RobotPos->thetaAbsolute() + deltaTheta, stopLeft);
+	    Events->wait(evtEndMove);
+	}
+	// try again
+	Move->go2Target(target);
+	Events->wait(evtEndMove);
+	return (Events->isInWaitResult(EVENTS_MOVE_END));
+    }
 }
 
 // ---------------------------------------------------------------
