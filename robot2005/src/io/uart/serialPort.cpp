@@ -194,13 +194,15 @@ bool SerialDevice::read(IoByte* buf, unsigned int& length) { //, unsigned int re
 bool SerialDevice::write(IoByte* buf, unsigned int& length) {
     //printf("length=%d\n", length);
     int length2 = 0;
+    unsigned int N=length;
+    length=0;
     do {
-        length2 = ::write(fd_, buf, length);
+        length2 = ::write(fd_, buf+length, N-length);
 	//printf("written %d bytes\n", length2);
 	if (length2 <= 0) return false;
-	length -= length2;
+	length+=length2;
 	//printf("length: %d\n", length);
-    } while (length > 0);
+    } while (length < N);
     return true;
 }
 

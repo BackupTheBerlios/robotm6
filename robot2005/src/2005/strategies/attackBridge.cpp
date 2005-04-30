@@ -450,11 +450,15 @@ bool StrategyAttackCL::getBridgePosByBumper(bool& bridgeInFront)
 
 // --------------------------------------------------------------------------
 // return true if there is no bridge here
+// dummyBumperEvt return false if it must continue the movement
 // --------------------------------------------------------------------------
-bool StrategyAttackCL::checkBridgeBumperEvent() 
+bool StrategyAttackCL::checkBridgeBumperEvent(bool& dummyBumperEvt) 
 {
+    dummyBumperEvt = false;
     if (Events->isInWaitResult(EVENTS_NO_BRIDGE_BUMP_LEFT) ||
 	Events->isInWaitResult(EVENTS_NO_BRIDGE_BUMP_RIGHT)) {
+        dummyBumperEvt = true;
+	if (RobotPos->x() < 1200 || RobotPos->x()> 1700) return false;
         // le pont n'est pas la! Faut vite s'arreter!
         Move->emergencyStop();
         usleep(500000); // attend 0.5s et regarde a nouveau les bumpers pour voir 
@@ -465,6 +469,7 @@ bool StrategyAttackCL::checkBridgeBumperEvent()
             // il n'y a pas de pont ici, c'etait vrai!
             LOG_WARNING("No bridge here! %s\n", RobotPos->txt());
             noBridgeHere();
+	    dummyBumperEvt=false;
             return true;
         }
     } 
@@ -534,14 +539,18 @@ bool StrategyAttackCL::gotoBridgeEntry(Millimeter y)
             if (!gotoBridgeEntryNear(y)) return false;
 	}
     }
-    // utiliser les bumpers events pour savoir si on tombe dans un trou...
-    Events->wait(evtEndMoveBridge);
-    Move->enableAccelerationController(false);
-    if (checkBridgeBumperEvent()) {
+    // utiliser les bumpers events pour savoir si on tombe dans un
+    // trou...
+    bool bumperDummyEvt=true;
+    while(bumperDummyEvt) {
+      Events->wait(evtEndMoveBridge);
+      Move->enableAccelerationController(false);
+      if (checkBridgeBumperEvent(bumperDummyEvt)) {
         Move->backward(100);
         Events->wait(evtEndMoveNoCollision);
         return false;
-    } 
+      } 
+    }
     if (Events->isInWaitResult(EVENTS_MOVE_END)) 
         return gotoBridgeEntryRotateToSeeBridge();
     if (checkEndEvents()) 
@@ -656,16 +665,21 @@ bool StrategyAttackCL::gotoBridgeEntryRotateToSeeBridge()
 	enableBridgeCaptors();
         MvtMgr->setRobotDirection(MOVE_DIRECTION_FORWARD); 
         Move->enableAccelerationController(true);
-        Move->rotateOnWheel(-M_PI_4/1.8 , false, -1, 10);
-        Events->wait(evtEndMoveBridge);
-        Move->enableAccelerationController(false);
-        if (checkBridgeBumperEvent()) {
+        Move->rotateOnWheel(-M_PI_4/1.8 , false, -1, 15);
+	bool dummyBumperEvt=true;
+	while(dummyBumperEvt) {
+	  Events->wait(evtEndMoveBridge);
+	  Move->enableAccelerationController(false);
+	  if (checkBridgeBumperEvent(dummyBumperEvt)) {
             result = false;
-        } 
+	    break;
+	  } 
+	}
+	useBridgeBumpers_=false; // on sait que le pont est la
         if (checkEndEvents()) 
             return false;
 	disableBridgeCaptors();
-	Move->rotateOnWheel(0 , false);
+	Move->rotateOnWheel(0 , false, -1, 30);
         Events->wait(evtEndMove);
         if (checkEndEvents()) 
             return false;
@@ -749,24 +763,27 @@ bool StrategyAttackCL::crossBridge()
         MvtMgr->setRobotDirection(MOVE_DIRECTION_FORWARD);
         Move->go2Target(tgt);
 	enableBridgeCaptors();
-    crossBridgeWaitEnd:
-        Events->wait(evtEndMoveBridge);
-        Move->enableAccelerationController(false);
-        if ((Events->isInWaitResult(EVENTS_NO_BRIDGE_BUMP_LEFT) ||
-             Events->isInWaitResult(EVENTS_NO_BRIDGE_BUMP_RIGHT))) {
-            
-            if (RobotPos->x()>1600 || RobotPos->x()<1200) {
-                goto crossBridgeWaitEnd; // fausse alerte!
-            } else if (checkBridgeBumperEvent()) {
-                Move->backward(100);
-                Events->wait(evtEndMoveNoCollision);
-                return false;
-            } else {
-                // on redemarre le mouvement, c'etait une fausse alerte
-                continue;
-            }
-        }
-        
+	bool dummyBumperEvt=true;
+	while(dummyBumperEvt) {
+	  Events->wait(evtEndMoveBridge);
+	  Move->enableAccelerationController(false);
+	  if (checkBridgeBumperEvent(dummyBumperEvt)) {
+	    if (RobotPos->x()> 1600) {
+	      useBridgeBumpers_=false;
+	      disableBridgeCaptors();
+	      dummyBumperEvt = true;
+	      continue;
+	    } else {
+	      Move->backward(100);
+	      Events->wait(evtEndMoveNoCollision);
+	      return false;
+	    }
+	  }
+	}
+	if (RobotPos->x()> 1600) {
+	  useBridgeBumpers_=false;
+	  disableBridgeCaptors();
+	}
         // on a reussi a traverser?
         if (Events->isInWaitResult(EVENTS_MOVE_END)) return true;
         // c'est la fin du match?

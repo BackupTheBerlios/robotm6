@@ -57,6 +57,8 @@ class MotorCL : public RobotDeviceCL
     void resetPwmAlert();
     void setPwmAlertTimeout(int timeout);
     void setPwmAlertSeuil(MotorPWM seuil);
+    int  getPwmAlertCounterLeft();
+    int  getPwmAlertCounterRight();
 
     /** Reset autimatiquement les hctl quand ils saturent trop longtemps */
     virtual void enableAutomaticReset(bool enable);
@@ -78,13 +80,13 @@ class MotorCL : public RobotDeviceCL
     /** Retourne la consigne reellement envoyee au moteurs */
     virtual void getPWM(MotorPWM &left,
                         MotorPWM &right){}
- 
+   
     /** Desasservit les moteurs */
-    virtual void idle(){reset();}
-    virtual void idleLeft(){reset();}
-    virtual void idleRight(){ reset();}
+    virtual void idle(){}
+    virtual void idleLeft(){}
+    virtual void idleRight(){}
     // asservi les moteurs
-    virtual void unidle(){ setSpeed(0,0);} 
+    virtual void unidle(){}
 
     /** enregistre un callback execute quand les moteurs sont resete */
     void registerResetCallback(FunctionPtr cb);
@@ -100,5 +102,15 @@ class MotorCL : public RobotDeviceCL
     int pwmAlertTimeout_;
     MotorPWM pwmAlertSeuil_;
 };
+
+
+inline int MotorCL::getPwmAlertCounterLeft() 
+{
+  return counterLeft_;
+}
+inline int MotorCL::getPwmAlertCounterRight() 
+{
+  return counterRight_;
+}
 
 #endif /* __MOTOR_H__ */

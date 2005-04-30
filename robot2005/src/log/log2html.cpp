@@ -535,6 +535,7 @@ void packetToHtml(FILE* htmlFile,
                          txt);
             }
         }
+	break;
     case LOG_TYPE_JACKIN:
         {
             LogPacketBoolean* jackin= ((LogPacketBoolean*)data);
@@ -547,6 +548,7 @@ void packetToHtml(FILE* htmlFile,
                      0, 
                      (jackin->value) ? "START JACK INSERTED": "START JACK EJECTED" );
         }
+	break;
      case LOG_TYPE_EMERGENCY_STOP:
         {
             LogPacketBoolean* esp= ((LogPacketBoolean*)data);
@@ -559,6 +561,7 @@ void packetToHtml(FILE* htmlFile,
                      0, 
                      (esp->value) ? "EMERGENCY STOP PRESSED": "EMERGENCY STOP RELEASED" );
         }
+	break;
     case LOG_TYPE_LCD:
         {
             LogPacketLcd* lcd= ((LogPacketLcd*)data);
@@ -571,6 +574,7 @@ void packetToHtml(FILE* htmlFile,
                      0, 
                      strlen(lcd->txt)>0?lcd->txt:"<i>lcdClear()</i>");
         }
+	break;
     default:
         break;		
     }

@@ -1,10 +1,11 @@
- #include <unistd.h>
+#include <unistd.h>
 
- #include "movementManager.h"
- #include "mthread.h"
- #include "log.h"
- #include "robotTimer.h"
- #include "robotConfig2005.h"
+#include "movementManager.h"
+#include "mthread.h"
+#include "log.h"
+#include "robotTimer.h"
+#include "robotConfig2005.h"
+#include "events.h"
 
 
  MovementManagerCL* MovementManagerCL::mvtMgr_=NULL;
@@ -55,6 +56,27 @@ MovementManagerCL::MovementManagerCL(MotorCL* motor, OdometerCL* odom) :
      if (threadStarted_) while(motorCom_.reset && ++counter<100) usleep(1000);
      if (counter >= 100) LOG_ERROR("Cannot reset the motors\n");
  }
+
+void MovementManagerCL::motorIdle()
+{
+  motorCom_.idle=true;
+}
+
+void MovementManagerCL::motorIdleLeft()
+{
+  motorCom_.idleLeft=true;
+}
+
+void MovementManagerCL::motorIdleRight()
+{
+  motorCom_.idleRight=true;
+}
+
+void MovementManagerCL::motorUnidle()
+{
+  motorCom_.unidle=true;
+}
+
 
  // ----------------------------------------------------------------------------
  // MovementManagerCL::resetPwmAlert
@@ -140,6 +162,22 @@ MovementManagerCL::MovementManagerCL(MotorCL* motor, OdometerCL* odom) :
              motorCom_.reset = false;
              if (position_) { position_->resetHctlCoders(); }
          }
+         if (motorCom_.idleLeft) {
+             motor_->idleLeft();
+             motorCom_.idleLeft = false;
+         }
+         if (motorCom_.idleRight) {
+             motor_->idleRight();
+             motorCom_.idleRight = false;
+         }
+         if (motorCom_.idle) {
+             motor_->idle();
+             motorCom_.idle = false;
+         }
+         if (motorCom_.unidle) {
+             motor_->unidle();
+             motorCom_.unidle = false;
+         }
          if (motorCom_.setAcc > 0 && motor_) {
              motor_->setAcceleration(motorCom_.setAcc);
              motorCom_.setAcc =-1;
@@ -157,6 +195,26 @@ MovementManagerCL::MovementManagerCL(MotorCL* motor, OdometerCL* odom) :
          motor_->getPosition(motorCom_.posLeft, motorCom_.posRight);
          motor_->getPWM(motorCom_.pwmLeft, motorCom_.pwmRight);
          motor_->periodicTask();
+#if LSM_TODO
+	 // compare motor and odometer pos
+	 LOG_INFO("left: p=%d o=%d;  right: p=%d o=%d\n", 
+		  motorCom_.pwmLeft, odometer_->getNotMovingCounterLeft(),
+		  motorCom_.pwmRight, odometer_->getNotMovingCounterRight());
+	 if (abs(motorCom_.pwmLeft) > 30
+	     && odometer_->getNotMovingCounterLeft()>10) {
+	   Events->raise(EVENTS_PWM_ALERT_LEFT);
+	   move_->idleMotorLeft();
+	   motorCom_.idleLeft = true;
+	   odometer_->resetNotMovingCounters();
+	 }
+	 if (abs(motorCom_.pwmRight) > 30
+	     && odometer_->getNotMovingCounterRight()>10) {
+	   Events->raise(EVENTS_PWM_ALERT_RIGHT);
+	   move_->idleMotorRight();
+	   motorCom_.idleRight = true;
+	   odometer_->resetNotMovingCounters();
+	 }
+#endif
     }
     if (periodicCallback_) {
         periodicCallback_();

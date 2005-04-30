@@ -31,16 +31,20 @@
 
 typedef struct MotorCom {
     bool reset;
+    bool idle;
+    bool unidle;
+    bool idleLeft;
+    bool idleRight;
     bool resetPwmAlert;
     MotorAcceleration setAcc;
     MotorSpeed    speedLeft, speedRight;
     MotorPosition posLeft, posRight;
     MotorPWM      pwmLeft, pwmRight;
-    MotorCom():reset(false), resetPwmAlert(false),
-               setAcc(-1),
-	       speedLeft(0), speedRight(0), 
-	       posLeft(0), posRight(0),
-	       pwmLeft(0), pwmRight(0){}
+  MotorCom():reset(false), idle(false), unidle(false), idleLeft(false), idleRight(false), 
+	     resetPwmAlert(false), setAcc(-1),
+	     speedLeft(0), speedRight(0), 
+	     posLeft(0), posRight(0),
+	     pwmLeft(0), pwmRight(0){}
 } MotorCom;
 
 typedef enum MoveDirection {
@@ -120,9 +124,11 @@ class MovementManagerCL : public RobotComponent
     MotorDirection getMotorDirection();
     void setSpeed(MotorSpeed  speedLeft,
 		  MotorSpeed  speedRight);
-    void motorAsservi();
+    /* asservissement des roues */
+    void motorIdle();
     void motorIdleLeft();
     void motorIdleRight();
+    void motorUnidle();
  protected:
     void startThread();
     void getCoderPosition(CoderPosition& left, 

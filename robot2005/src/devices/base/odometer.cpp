@@ -12,7 +12,8 @@ OdometerCL* OdometerCL::odometer_=NULL;
 // OdometerCL::OdometerCL
 // -------------------------------------------------------------------------
 OdometerCL::OdometerCL() : 
-  RobotDeviceCL("Odometer", CLASS_ODOMETER)
+  RobotDeviceCL("Odometer", CLASS_ODOMETER),
+  notMovingCounterLeft_(0), notMovingCounterRight_(0), notMovingSeuil_(ODOMETER_NOT_MOVING_SEUIL)
 {
   assert(!odometer_);
   odometer_=this;

@@ -54,7 +54,10 @@ class MotorIsa : public MotorCL
               MotorPWM &right);
   /** Desasservit les moteurs */
   void idle();
-
+  void idleLeft(){reset();}
+  void idleRight(){ reset();}
+    // asservi les moteurs
+  void unidle(){ setSpeed(0,0);} 
  protected:
   bool isStarted_;
 };

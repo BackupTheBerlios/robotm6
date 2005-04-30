@@ -144,7 +144,7 @@ bool Movement::moveToPoint(Point      target,
                                                   + (forward?0:M_PI));
     attractivePoint.y += MOVE_ATTRACTIVE_DIST*sin(RobotPos->theta()
                                                   + (forward?0:M_PI));
-    attractivePoint.print();
+    //attractivePoint.print();
     
     // end ?= current point=target point 
     // or length from starting point > distance to final point 

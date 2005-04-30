@@ -44,6 +44,8 @@ class Odometer05 : public OdometerCL
  private:
   MotorOdom05* motorOdomImpl_;
   bool useCache_;
+  CoderPosition oldLeft_;
+  CoderPosition oldRight_;
 };
 
 #endif

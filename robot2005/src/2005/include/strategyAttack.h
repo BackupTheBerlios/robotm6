@@ -106,7 +106,7 @@ class StrategyAttackCL : public Strategy2005CL
 
     void enableBridgeCaptors();
     void disableBridgeCaptors();
-    bool checkBridgeBumperEvent(); 
+    bool checkBridgeBumperEvent(bool &dummyBumperEvt); //  
     bool getBridgePosBySharp();
     bool getBridgePosByBumper(bool& bridgeInFront);
     bool getBridgePosBySharpFromLeft(BridgeCaptorStatus captors[BRIDGE_CAPTORS_NBR]);

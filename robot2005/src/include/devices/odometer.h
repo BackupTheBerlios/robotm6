@@ -23,6 +23,7 @@
 // class Odometer
 // ===========================================================================
 
+static const CoderPosition ODOMETER_NOT_MOVING_SEUIL = 10;
 /**
  * @class Odometer
  * Interface avec la carte qui controle les servo moteurs
@@ -46,10 +47,36 @@ class OdometerCL : public RobotDeviceCL
                                   CoderPosition &right){ return false;}
 
     static OdometerCL* instance() { return odometer_;}
-    
- private:
+
+    void setNotMovingSeuil(CoderPosition seuil);
+    int  getNotMovingCounterLeft();
+    int  getNotMovingCounterRight();
+    void resetNotMovingCounters();
+ protected:
     OdometerCL(OdometerCL const& odom); // disabled
     static OdometerCL* odometer_;
-};
+
+    int notMovingCounterLeft_;
+    int notMovingCounterRight_;
+    CoderPosition notMovingSeuil_;
+}; 
+
+inline int OdometerCL::getNotMovingCounterLeft()
+{
+  return notMovingCounterLeft_;
+}
+inline int OdometerCL::getNotMovingCounterRight()
+{
+  return notMovingCounterRight_;
+}
+inline void OdometerCL::setNotMovingSeuil(CoderPosition seuil)
+{
+  notMovingSeuil_ = seuil;
+}
+inline void OdometerCL::resetNotMovingCounters()
+{
+  notMovingCounterLeft_=0;
+  notMovingCounterRight_=0;
+}
 
 #endif // __ODOMETER_H__

@@ -142,11 +142,11 @@ cleanRobot2:
 ## ===========================================================================
 getData2:
 # reccupere les donnees de match sur le gros PC
-	scp root@gumb2:'robot/*.log.gz' ../log
+	scp root@gumb2:'robot/log/*.log.gz' ../log
 
 getData1:
 # reccupere les donnees de match sur le gros PC
-	scp root@gumb:'robot/*.log.gz' ../log
+	scp root@gumb:'robot/log/*.log.gz' ../log
 
 
 

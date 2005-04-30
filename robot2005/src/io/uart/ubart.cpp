@@ -122,17 +122,18 @@ bool Ubart::write(IoByte* buf, unsigned int& length)
 bool Ubart::writeRead(IoByte* sendBuffer, unsigned int& sendLength,
 		      IoByte* receiveBuffer, unsigned int& receiveLength)
 {
-    LOG_DEBUG("writeRead of Ubart %d\n", ubartId_);
+  /*    LOG_DEBUG("writeRead of Ubart %d\n", ubartId_);
     // DEBUG:
     IoByte buffer[16];
     unsigned int maxLength = 16;
     read(buffer, maxLength);
-    if (maxLength != 16) {
-	LOG_ERROR("writeRead has input before send request (received %d bytes).\n", 16 - maxLength);
+    if (maxLength != 0) {
+	LOG_ERROR("writeRead has input before send request (received %d bytes).\n", maxLength);
 	for (unsigned int i = 0; i < 16 - maxLength; ++i) {
 	    printf("0x%2.2x ", buffer[i]);
 	}
     }
+  */
     UbartLock(this);
     return write(sendBuffer, sendLength)
 	&& read(receiveBuffer, receiveLength);
@@ -235,30 +236,30 @@ bool UbartMultiplexer::write(IoByte* buf, unsigned int& length) {
     //   resting 4 bits are length of request.
     bool result = true;
     unsigned int sent = 0;
-    unsigned int stillToSendThisTurn=0;
+    unsigned int sentThisTurn=0;
     while (result && (sent < length)) {
 	unsigned int toSendThisTurn = (length - sent);
 	// we can only send 4 bits of length to the Ubart
 	// 4 bits -> 15 chars
 	if (toSendThisTurn > 15) toSendThisTurn = 15;
-	stillToSendThisTurn = toSendThisTurn;
+	sentThisTurn = toSendThisTurn;
 	IoByte address = ((static_cast<unsigned char>(targetId_) << 4)
-			   | ((static_cast<unsigned char>(stillToSendThisTurn)) & 0x0F)) ;
+			   | ((static_cast<unsigned char>(sentThisTurn)) & 0x0F)) ;
 	result = 
 	  device_->write(address)
-	  && device_->write(buf + sent, stillToSendThisTurn);
+	  && device_->write(buf + sent, sentThisTurn);
 #ifdef LOG_DEBUG_ON
-	  printf("address=0x%2.2x\n",address);
+        printf("address=0x%2.2x\n",address);
 	for(unsigned int i=0;i<toSendThisTurn; i++) {
 	  char* buf2=(char*)buf+sent;
 	  printf("Ox%2.2x(%c)", buf2[i], buf2[i]);
 	}
 	printf("\n");
-	printf("write result=%s, toSend=%d, stillToSend=%d\n", 
-	       b2s(result), toSendThisTurn, stillToSendThisTurn);
+	printf("write result=%s, toSend=%d, sentThisTurn=%d\n", 
+	       b2s(result), toSendThisTurn, sentThisTurn);
 #endif
 	// update var, even if it didn't work.
-	sent += toSendThisTurn - stillToSendThisTurn;
+	sent += sentThisTurn;
     }
     length = sent;
     return result;
