@@ -586,7 +586,7 @@ bool StrategyAttackCL::gotoBridgeEntryFar(Millimeter y)
     // on va loin: on recule bettement puit on prend un point cible
     // on s'eloigne un peu du bord, pour aller en x qui nous permet
     //de nous promener tranquillement le long de la riviere
-    Move->go2Target(BRIDGE_ENTRY_NAVIGATE_X, y2);
+    Move->go2Target(BRIDGE_ENTRY_NAVIGATE_X, y2, 2, 40);
     Events->wait(evtEndMove);
     if (checkEndEvents() || 
         !Events->isInWaitResult(EVENTS_MOVE_END)) {
@@ -604,7 +604,7 @@ bool StrategyAttackCL::gotoBridgeEntryFar(Millimeter y)
       t.push_back(Point(BRIDGE_ENTRY_NAVIGATE_X, y+75));
     t.push_back(Point(BRIDGE_DETECT_BUMP_X, y));
     MvtMgr->setRobotDirection(MOVE_DIRECTION_FORWARD);
-    Move->followTrajectory(t, TRAJECTORY_RECTILINEAR); 
+    Move->followTrajectory(t, TRAJECTORY_RECTILINEAR, 1, 30); 
     // dont wait events, it is done by the upper function
     return true;
 }

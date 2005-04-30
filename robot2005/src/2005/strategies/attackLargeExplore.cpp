@@ -33,6 +33,7 @@ static CollisionEnum checkCollisionEvents()
 // ---------------------------------------------------------------
 bool StrategyLargeAttackCL::preDefinedSkittleExploration1()
 {
+    return preDefinedSkittleExploration1();
     LOG_COMMAND("preDefinedLargeSkittleExploration1\n");
     Trajectory t;
     t.push_back(Point(2640, 1650)); 
