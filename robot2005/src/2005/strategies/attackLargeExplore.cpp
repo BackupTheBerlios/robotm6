@@ -173,6 +173,17 @@ bool StrategyLargeAttackCL::centerOnSupport(Point supportCenter) {
 		LOG_INFO("collision (%s) while centering on support\n", collisionLeft?"left":"right");
 		MotorDirection dir = MvtMgr->getMotorDirection();
 		bool forward = (dir == MOTOR_DIRECTION_FORWARD);
+		char* tmp;
+		switch (dir) {
+		case MOTOR_DIRECTION_STOP: tmp = "STOP"; break;
+		case MOTOR_DIRECTION_FORWARD: tmp = "FORWARD"; break;
+		case MOTOR_DIRECTION_BACKWARD: tmp = "BACKWARD"; break;
+		case MOTOR_DIRECTION_LEFT: tmp = "LEFT"; break;
+		case MOTOR_DIRECTION_RIGHT: tmp = "RIGHT"; break;
+		}
+		LOG_INFO("direction: %s\n", tmp);
+		forward = RobotPos->isTargetForward(supportCenter);
+
 		bool stopLeft = collisionLeft;
 		Radian deltaTheta = THETA_DELTA*(collisionLeft ^ forward? -1: 1);
 		Move->rotateOnWheel(RobotPos->thetaAbsolute() + deltaTheta, stopLeft);
