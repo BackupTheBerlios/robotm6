@@ -1,3 +1,4 @@
+#define ENV_DETECTOR_INFO
 #include "devices/implementation/env05.h"
 #include "io/ioDevice.h"
 #include "io/ioManager.h"

@@ -109,34 +109,38 @@ bool Ubart::isBlocking() const
 
 bool Ubart::read(IoByte* buf, unsigned int& length)
 {
-    UbartLock(this);
+    UbartLock lock(this);
+    LOG_DEBUG("Read %d bytes for ubart %d\n", length, ubartId_);
     return multiplexer_->read(buf, length);
 }
 
 bool Ubart::write(IoByte* buf, unsigned int& length)
 {
-    UbartLock(this);
+    UbartLock lock(this);
+    LOG_DEBUG("Write %d bytes for ubart %d\n", length, ubartId_);
     return multiplexer_->write(buf, length);
 }
 
 bool Ubart::writeRead(IoByte* sendBuffer, unsigned int& sendLength,
 		      IoByte* receiveBuffer, unsigned int& receiveLength)
 {
-  /*    LOG_DEBUG("writeRead of Ubart %d\n", ubartId_);
-    // DEBUG:
+    LOG_DEBUG("writeRead of Ubart %d\n", ubartId_);
+#ifdef LOG_DEBUG_ON
+     // DEBUG:
     IoByte buffer[16];
     unsigned int maxLength = 16;
     read(buffer, maxLength);
     if (maxLength != 0) {
 	LOG_ERROR("writeRead has input before send request (received %d bytes).\n", maxLength);
-	for (unsigned int i = 0; i < 16 - maxLength; ++i) {
+	for (unsigned int i = 0; i < maxLength; ++i) {
 	    printf("0x%2.2x ", buffer[i]);
 	}
     }
-  */
-    UbartLock(this);
-    return write(sendBuffer, sendLength)
-	&& read(receiveBuffer, receiveLength);
+#endif
+  
+    UbartLock lock(this);
+    return multiplexer_->write(sendBuffer, sendLength)
+	&& multiplexer_->read(receiveBuffer, receiveLength);
 }
 
 UbartMultiplexer* Ubart::getUbartMultiplexer()
@@ -189,14 +193,18 @@ const IoDeviceScanInfoPairVector& UbartMultiplexer::scan() {
 }
 
 void UbartMultiplexer::lock() {
+  //    LOG_DEBUG("lock: 0x%2.2x %d\n", (void*)&lock_, lockCounter_);
     pthread_mutex_lock(&lock_);
     lockCounter_++;
+    // LOG_DEBUG("locked: 0x%2.2x %d\n", (void*)&lock_, lockCounter_);
 }
 
 void UbartMultiplexer::unlock() {
+  //    LOG_DEBUG("unlock: 0x%2.2x %d\n", (void*)&lock_, lockCounter_);
     if (--lockCounter_ == 0) {
 	pthread_mutex_unlock(&lock_);
     }
+    //   LOG_DEBUG("unlocked: 0x%2.2x %d\n", (void*)&lock_, lockCounter_);
 }
 
 void UbartMultiplexer::switchToUbart(Ubart* ubart) {
@@ -248,7 +256,8 @@ bool UbartMultiplexer::write(IoByte* buf, unsigned int& length) {
 	result = 
 	  device_->write(address)
 	  && device_->write(buf + sent, sentThisTurn);
-#ifdef LOG_DEBUG_ON
+#if 0 
+ LOG_DEBUG_ON
         printf("address=0x%2.2x\n",address);
 	for(unsigned int i=0;i<toSendThisTurn; i++) {
 	  char* buf2=(char*)buf+sent;

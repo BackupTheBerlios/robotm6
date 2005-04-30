@@ -121,6 +121,18 @@ check:
 ## ===========================================================================
 ## Upload the program into the robot
 ## ===========================================================================
+so2: 
+	scp -r ../gumstix/so/ root@gumb2:robot
+
+so1:
+	scp -r ../gumstix/so/ root@gumb:robot
+
+sou2: 
+	scp -r ../gumstix/so/ root@gumu2:robot
+
+sou1:
+	scp -r ../gumstix/so/ root@gumu:robot
+
 install2: 
 	scp -r ../gumstix/bin ../gumstix/so/ root@gumb2:robot
 

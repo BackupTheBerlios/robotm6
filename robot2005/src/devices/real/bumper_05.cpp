@@ -1,3 +1,5 @@
+#define BUMPER_MAPPING_INFO
+
 #include "devices/implementation/bumper05.h"
 #include "io/ioDevice.h"
 #include "io/ioManager.h"

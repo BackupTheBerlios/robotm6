@@ -212,10 +212,13 @@ static const Millisecond CATAPULT_AWAIT_DELAY         = 500;
 static const Millisecond ATTACK_TIME_EXPLORE_ALL      = 45000;
 
 // distance de laquelle on depalce le point cible pour etre sur qu'un mouvement se terminera au centre d'une case
-static const Millimeter ATTACK_CHANGE_TARGET_POINT_DIST = 50;
+static const Millimeter ATTACK_CHANGE_TARGET_POINT_DIST = 0;
 // si y > EXPLORE_METHOD_Y on utilise la trajectoire 1, sinon on utilise la 2
 static const Millimeter ATTACK_EXPLORE_METHOD_Y = 1450;
 
+static const unsigned int ATTACK_EXPLORE_RETRY = 2;
+
+#ifdef ATTACK_CATAPULT_INFO
 struct CatapultServo {
   unsigned char id;
   unsigned char posFire;
@@ -228,5 +231,6 @@ static CatapultServo catapultServos[ATTACK_CATAPULT_SERVO_NBR] = {
   { 1, 0x48, 0x09},
   { 2, 0x48, 0x09}
 };
+#endif
  
 #endif // __STRATEGY_ATTACK_H__

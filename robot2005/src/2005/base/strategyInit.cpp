@@ -321,9 +321,9 @@ bool Strategy2005CL::autoCheck()
 // -------------------------------------------------------------------------
 bool Strategy2005CL::resetMotorForPrepareRobot()
 {
-  MvtMgr->motor()->idle();
+  MvtMgr->motorIdle();
   menu("Press any key\nTo block motors");
-  MvtMgr->motor()->unidle();
+  MvtMgr->motorUnidle();
 #ifdef STARTPOS_USER
   menu("Press any key\nWhen start pos");
   setStartingPosition();

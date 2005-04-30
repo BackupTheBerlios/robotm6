@@ -36,7 +36,8 @@ struct BumperMappingStruct {
     bool enableAtReset;
 };
 
-// TODO set the correct mapping for bumpers
+#ifdef BUMPER_MAPPING_INFO
+
 static BumperMappingStruct BumpersMapping[BUMPERS_NBR]= {
     {BUTTON_YES,    "Button Yes",      EVENTS_BUTTON_YES,      false, 1, 4,
     true},
@@ -73,5 +74,7 @@ static BumperMappingStruct BumpersMapping[BUMPERS_NBR]= {
      true}
    
 };
+
+#endif
 
 #endif

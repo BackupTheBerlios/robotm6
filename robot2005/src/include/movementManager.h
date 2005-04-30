@@ -32,7 +32,7 @@
 typedef struct MotorCom {
     bool reset;
     bool idle;
-    bool unidle;
+    int  unidle;
     bool idleLeft;
     bool idleRight;
     bool resetPwmAlert;
@@ -40,7 +40,7 @@ typedef struct MotorCom {
     MotorSpeed    speedLeft, speedRight;
     MotorPosition posLeft, posRight;
     MotorPWM      pwmLeft, pwmRight;
-  MotorCom():reset(false), idle(false), unidle(false), idleLeft(false), idleRight(false), 
+  MotorCom():reset(false), idle(false), unidle(0), idleLeft(false), idleRight(false), 
 	     resetPwmAlert(false), setAcc(-1),
 	     speedLeft(0), speedRight(0), 
 	     posLeft(0), posRight(0),
@@ -59,6 +59,8 @@ typedef enum MotorDirection {
     MOTOR_DIRECTION_LEFT,
     MOTOR_DIRECTION_RIGHT
 } MotorDirection;
+
+static const unsigned int PATINAGE_BUFFER_SIZE=20;
 
 /**
  * @class MovementManager
@@ -129,12 +131,17 @@ class MovementManagerCL : public RobotComponent
     void motorIdleLeft();
     void motorIdleRight();
     void motorUnidle();
+
  protected:
     void startThread();
     void getCoderPosition(CoderPosition& left, 
 			  CoderPosition& right);
     void getPWM(MotorPWM& left, 
 		MotorPWM& right);
+    void updatePatinageBuffers();
+    void resetPatinageDetection();
+    void checkPatinage();
+
     friend class MoveCL;
     friend class RobotPositionCL;
     friend class LogCL;
@@ -151,6 +158,22 @@ class MovementManagerCL : public RobotComponent
     MotorCom         motorCom_;
     MThreadId        thread_;
     MoveDirection    direction_;
+
+   
+    CoderPosition hctlLeftBuffer_[PATINAGE_BUFFER_SIZE];
+    CoderPosition hctlRightBuffer_[PATINAGE_BUFFER_SIZE];
+    CoderPosition odomLeftBuffer_[PATINAGE_BUFFER_SIZE];
+    CoderPosition odomRightBuffer_[PATINAGE_BUFFER_SIZE];
+    MotorPWM      pwmLeftBuffer_[PATINAGE_BUFFER_SIZE];
+    MotorPWM      pwmRightBuffer_[PATINAGE_BUFFER_SIZE];
+    int    hctlDeltaMoveLeft_;
+    int    hctlDeltaMoveRight_;
+    int    odomDeltaMoveLeft_;
+    int    odomDeltaMoveRight_;
+    int           pwmDeltaLeft_;
+    int           pwmDeltaRight_;
+    unsigned int  pattinageIndex_;
+    unsigned int  pattinageBufferSize_;
 };
 
 // ----------------------------------------------------------------------------

@@ -180,6 +180,7 @@ bool StrategyLargeAttackCL::centerOnSupport(Point supportCenter) {
 		case MOTOR_DIRECTION_BACKWARD: tmp = "BACKWARD"; break;
 		case MOTOR_DIRECTION_LEFT: tmp = "LEFT"; break;
 		case MOTOR_DIRECTION_RIGHT: tmp = "RIGHT"; break;
+	        default: tmp=""; break;
 		}
 		LOG_INFO("direction: %s\n", tmp);
 		forward = RobotPos->isTargetForward(supportCenter);

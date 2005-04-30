@@ -1,3 +1,5 @@
+#define ATTACK_CATAPULT_INFO
+
 #include "robotMain.h"
 #include "strategyAttack.h"
 #include "robotPosition.h"

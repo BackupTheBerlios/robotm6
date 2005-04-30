@@ -40,12 +40,14 @@ static bool evtEndMoveBridge(bool evt[])
 // Cette fonction est un EventsFn qui permet d'attendre la fin d'un 
 // mouvement en testant en plus les sharps a l'avant du robot
 // ----------------------------------------------------------------------------
+/*
 static bool evtEndMoveEnvDetector(bool evt[])
 {
     return evtEndMove(evt)
         || evt[EVENTS_ENV_TOP_RIGHT]
         || evt[EVENTS_ENV_TOP_LEFT];
 }
+*/
 
 // ----------------------------------------------------------------------------
 // First part of alignBorder. selects closest border, and starts movement
@@ -237,16 +239,16 @@ bool StrategyAttackCL::goOverSupport()
   grid_->setObstacleTime(Timer->time(), pwmObstacle.ptObstacle);
   
   if (pwmObstacle.colliDetected) {
-    LOG_INFO("Skittle support detected!\n");
+    LOG_WARNING("Skittle support detected %s!\n",  pwmObstacle.ptObstacle.txt());
     Log->support(pwmObstacle.ptObstacle, pwmObstacle.ptObstacle);
     if (pwmObstacle.forward) {
-      Move->setSpeedOnDist(200, 
-			   pwmObstacle.leftWheelBlocked?10:30,
-			   pwmObstacle.rightWheelBlocked?10:30);
+      Move->setSpeedOnDist(150, 
+			   pwmObstacle.leftWheelBlocked?0:30,
+			   pwmObstacle.rightWheelBlocked?0:30);
     } else {
-      Move->setSpeedOnDist(200, 
-			   pwmObstacle.leftWheelBlocked?-10:-30,
-			   pwmObstacle.rightWheelBlocked?-10:-30);
+      Move->setSpeedOnDist(150, 
+			   pwmObstacle.leftWheelBlocked?0:-30,
+			   pwmObstacle.rightWheelBlocked?0:-30);
     }
     Events->wait(evtEndMove);
   }
@@ -328,9 +330,6 @@ bool StrategyAttackCL::preDefinedSkittleExploration()
     }
     if (result) {
         LOG_OK("God Bless Odometry!\n");
-        // si on arrive la je me coupe une...
-        // vu qu'on a tout fait tomber sans probleme, on peut bien aller 
-        // faire tomber les quilles du milieu
         result = killCenterSkittles();
     }
     return result;
@@ -342,45 +341,51 @@ bool StrategyAttackCL::preDefinedSkittleExploration()
 bool StrategyAttackCL::preDefinedSkittleExploration1()
 {
     LOG_COMMAND("preDefinedSkittleExploration1\n");
-    Trajectory t;
-    t.push_back(Point(2640, 1650)); 
-    t.push_back(Point(3240, 1650));
+    unsigned int retry=0;
+
+    // va au bout premiere rangee 
     MvtMgr->setRobotDirection(MOVE_DIRECTION_FORWARD);
-    Move->followTrajectory(t, TRAJECTORY_BASIC, attackExploreGain, attackExploreMaxSpeed);
+    Move->go2Target(Point(2640, 1650), attackExploreGain, attackExploreMaxSpeed);
     Events->wait(evtEndMove);
     if (!Events->isInWaitResult(EVENTS_MOVE_END)) {
         // on n'a pas reussi
         // c'est la fin du match?
         if (checkEndEvents()) return false;
-        return goOverSupport();
     }
+
+    retry = 0;
+    do {
+      MvtMgr->setRobotDirection(MOVE_DIRECTION_FORWARD);
+      Move->go2Target(Point(3194, 1650), attackExploreGain, attackExploreMaxSpeed);
+      Events->wait(evtEndMove);
+      if (!Events->isInWaitResult(EVENTS_MOVE_END)) {
+        // on n'a pas reussi
+        // c'est la fin du match?
+        if (checkEndEvents()) return false;
+        goOverSupport(); 
+	if (checkEndEvents()) return false;
+      } else break;
+    } while(retry++<ATTACK_EXPLORE_RETRY);
 
     //alignBorder();
-
-    MvtMgr->setRobotDirection(MOVE_DIRECTION_FORWARD);
-    Move->rotate(-M_PI_2, attackExploreGain, attackExploreMaxSpeed);
-    Events->wait(evtEndMove);
-    if (!Events->isInWaitResult(EVENTS_MOVE_END)) {
+    
+     
+    // va contre le robot adverse
+    retry = 0;
+    do {
+      MvtMgr->setRobotDirection(MOVE_DIRECTION_FORWARD);
+      Move->go2Target(Point(3190, 650), attackExploreGain, attackExploreMaxSpeed);
+      Events->wait(evtEndMove);
+      if (!Events->isInWaitResult(EVENTS_MOVE_END)) {
         // on n'a pas reussi
         // c'est la fin du match?
         if (checkEndEvents()) return false;
-        return goOverSupport();
-    }
-    
-    //alignBorder();
-    
-    MvtMgr->setRobotDirection(MOVE_DIRECTION_FORWARD);
-    Move->go2Target(Point(3190, 650), attackExploreGain, attackExploreMaxSpeed);
-    Events->wait(evtEndMove);
-    if (!Events->isInWaitResult(EVENTS_MOVE_END)) {
-        // on n'a pas reussi
-        // c'est la fin du match?
+        goOverSupport();
         if (checkEndEvents()) return false;
-        return goOverSupport();
-        // TODO manage collisions
-        return false;
-    }
+      } else break;
+    } while(retry++<ATTACK_EXPLORE_RETRY);
 
+    // recule d'une case
     MvtMgr->setRobotDirection(MOVE_DIRECTION_BACKWARD);
     Move->go2Target(Point(3190, 1050), attackExploreGain, attackExploreMaxSpeed);
     Events->wait(evtEndMove);
@@ -388,32 +393,48 @@ bool StrategyAttackCL::preDefinedSkittleExploration1()
         // on n'a pas reussi
         // c'est la fin du match?
         if (checkEndEvents()) return false;
-        return goOverSupport();
-    }
-    
-    t.clear();
-    t.push_back(Point(2594, 1050)); 
-    t.push_back(Point(2594, 1350)); 
-    t.push_back(Point(3340, 1350)); 
-    MvtMgr->setRobotDirection(MOVE_DIRECTION_FORWARD);
-    Move->followTrajectory(t, TRAJECTORY_BASIC, attackExploreGain, attackExploreMaxSpeed);
-    Events->wait(evtEndMove);
-    if (!Events->isInWaitResult(EVENTS_MOVE_END)) {
-        // on n'a pas reussi
-        // c'est la fin du match?
+        avoidObstacle();
         if (checkEndEvents()) return false;
-        return goOverSupport();
     }
 
-    MvtMgr->setRobotDirection(MOVE_DIRECTION_BACKWARD);
-    Move->go2Target(Point(3190, 1350), attackExploreGain, attackExploreMaxSpeed);
-    Events->wait(evtEndMove);
-    if (!Events->isInWaitResult(EVENTS_MOVE_END)) {
+    // va vers le pont du milieu
+    if (!killCenterSkittles()) {
+      if (checkEndEvents()) return false;
+    } 
+
+    // va vers le debut de la 2e rangee 
+    retry=0;
+    do {
+      if (RobotPos->isTargetForward(Point(2594, 1350))) {
+	MvtMgr->setRobotDirection(MOVE_DIRECTION_FORWARD);
+      } else {
+	MvtMgr->setRobotDirection(MOVE_DIRECTION_BACKWARD);
+      }
+      Move->go2Target(Point(2594, 1350), attackExploreGain, attackExploreMaxSpeed);
+      Events->wait(evtEndMove);
+      if (!Events->isInWaitResult(EVENTS_MOVE_END)) {
         // on n'a pas reussi
         // c'est la fin du match?
         if (checkEndEvents()) return false;
-        return goOverSupport();
-    }
+        goOverSupport();
+        if (checkEndEvents()) return false;
+      } else break;
+    } while(retry++<ATTACK_EXPLORE_RETRY);
+  
+    // va vers le fond de la 2e rangee
+    retry=0;
+    do {
+      MvtMgr->setRobotDirection(MOVE_DIRECTION_FORWARD);
+      Move->go2Target(Point(3494, 1350), attackExploreGain, attackExploreMaxSpeed);
+      Events->wait(evtEndMove);
+      if (!Events->isInWaitResult(EVENTS_MOVE_END)) {
+        // on n'a pas reussi
+        // c'est la fin du match?
+        if (checkEndEvents()) return false;
+        goOverSupport();
+        if (checkEndEvents()) return false;
+      } else break;
+    } while(retry < ATTACK_EXPLORE_RETRY);
 
     return true;
 }
@@ -424,52 +445,61 @@ bool StrategyAttackCL::preDefinedSkittleExploration1()
 bool StrategyAttackCL::preDefinedSkittleExploration2()
 {
     LOG_COMMAND("preDefinedSkittleExploration2\n");
-    Trajectory t;
-    t.push_back(Point(2640, 1350)); 
-    t.push_back(Point(3240, 1350)); 
-     MvtMgr->setRobotDirection(MOVE_DIRECTION_FORWARD);
-    Move->followTrajectory(t, TRAJECTORY_BASIC, attackExploreGain, attackExploreMaxSpeed);
+    unsigned int retry=0;
+    // va au debut de la 2e rangee
+    MvtMgr->setRobotDirection(MOVE_DIRECTION_FORWARD);
+    Move->go2Target(Point(2640, 1350), attackExploreGain, attackExploreMaxSpeed);  
     Events->wait(evtEndMove);
     if (!Events->isInWaitResult(EVENTS_MOVE_END)) {
         // on n'a pas reussi
         // c'est la fin du match?
         if (checkEndEvents()) return false;
-        return goOverSupport();
-        // TODO manage collisions
-        return false;
+        goOverSupport();
     }
 
+    // va vers le fond de la 2e rangee
+    retry=0;
+    do {
+      MvtMgr->setRobotDirection(MOVE_DIRECTION_FORWARD);
+      Move->go2Target(Point(3194, 1350), attackExploreGain, attackExploreMaxSpeed); 
+      Events->wait(evtEndMove);
+      if (!Events->isInWaitResult(EVENTS_MOVE_END)) {
+        // on n'a pas reussi
+        // c'est la fin du match?
+        if (checkEndEvents()) return false;
+        goOverSupport();
+      }
+    } while(retry++<ATTACK_EXPLORE_RETRY);
+   
     //alignBorder();
     
-    // on recule un petit peu car on ne sais pas ce qu'on va se prendre en
-    // approchant du robot adverse!, mieux vaut tenir que courir
+    // on recule un petit peu sur la premiere rangee 
     MvtMgr->setRobotDirection(MOVE_DIRECTION_BACKWARD);
-    t.clear();
-    t.push_back(Point(3144, 1350)); 
-    t.push_back(Point(3190, 1650)); 
-    Move->followTrajectory(t, TRAJECTORY_BASIC, attackExploreGain, attackExploreMaxSpeed);
+    Move->go2Target(Point(3194, 1650), attackExploreGain, attackExploreMaxSpeed);
     Events->wait(evtEndMove);
     if (!Events->isInWaitResult(EVENTS_MOVE_END)) {
         // on n'a pas reussi
         // c'est la fin du match?
         if (checkEndEvents()) return false;
-        return goOverSupport();
+        avoidObstacle();
     }
 
     //alignBorder();
 
     // on va droit sur l'adversaire
-    MvtMgr->setRobotDirection(MOVE_DIRECTION_FORWARD);
-    Move->go2Target(Point(3190, 650), attackExploreGain, attackExploreMaxSpeed);
-    Events->wait(evtEndMove);
-    if (!Events->isInWaitResult(EVENTS_MOVE_END)) {
+    retry=0;
+    do {
+      MvtMgr->setRobotDirection(MOVE_DIRECTION_FORWARD);
+      Move->go2Target(Point(3194, 650), attackExploreGain, attackExploreMaxSpeed);
+      Events->wait(evtEndMove);
+      if (!Events->isInWaitResult(EVENTS_MOVE_END)) {
         // on n'a pas reussi
         // c'est la fin du match?
         if (checkEndEvents()) return false;
-        return goOverSupport();
-        // TODO manage collisions
-        return false;
-    }
+	goOverSupport();
+	if (checkEndEvents()) return false;
+      }  else break;
+    } while(retry++<ATTACK_EXPLORE_RETRY);
 
     // on recule un peu
     MvtMgr->setRobotDirection(MOVE_DIRECTION_BACKWARD);
@@ -479,36 +509,62 @@ bool StrategyAttackCL::preDefinedSkittleExploration2()
         // on n'a pas reussi
         // c'est la fin du match?
         if (checkEndEvents()) return false;
-        return goOverSupport();
-        // TODO manage collisions
-        return false;
-    }
-    
-    t.clear();
-    t.push_back(Point(2594, 1050)); 
-    t.push_back(Point(2594, 1650)); 
-    t.push_back(Point(3340, 1650)); 
-    MvtMgr->setRobotDirection(MOVE_DIRECTION_FORWARD);
-    Move->followTrajectory(t, TRAJECTORY_BASIC, attackExploreGain, attackExploreMaxSpeed);
-    Events->wait(evtEndMove);
-    if (!Events->isInWaitResult(EVENTS_MOVE_END)) {
-        // on n'a pas reussi
-        // c'est la fin du match?
-        if (checkEndEvents()) return false;
-        return goOverSupport();
+        avoidObstacle();
+	if (checkEndEvents()) return false;
     }
 
-    MvtMgr->setRobotDirection(MOVE_DIRECTION_BACKWARD);
-    Move->go2Target(Point(3190, 1650), attackExploreGain, attackExploreMaxSpeed);
-    Events->wait(evtEndMove);
-    if (!Events->isInWaitResult(EVENTS_MOVE_END)) {
+    // va vers le pont du milieu
+    if (!killCenterSkittles()) {
+      if (checkEndEvents()) return false;
+    }
+  
+    retry=0;
+    do {
+      if (RobotPos->isTargetForward(Point(2594, 1050))) {
+	MvtMgr->setRobotDirection(MOVE_DIRECTION_FORWARD);
+      } else {
+	MvtMgr->setRobotDirection(MOVE_DIRECTION_BACKWARD);
+      }
+      Move->go2Target(Point(2594, 1050), attackExploreGain, attackExploreMaxSpeed);
+      Events->wait(evtEndMove);
+      if (!Events->isInWaitResult(EVENTS_MOVE_END)) {
         // on n'a pas reussi
         // c'est la fin du match?
         if (checkEndEvents()) return false;
-        return goOverSupport();
-        // TODO manage collisions
-        return false;
-    }
+	goOverSupport();
+	if (checkEndEvents()) return false;
+      } else break;
+    }while(retry++ < ATTACK_EXPLORE_RETRY);
+
+    //  va vers la 1ere rangee
+    retry=0;
+    do {
+      MvtMgr->setRobotDirection(MOVE_DIRECTION_FORWARD);
+      Move->go2Target(Point(2594, 1650), attackExploreGain, attackExploreMaxSpeed);
+      Events->wait(evtEndMove);
+      if (!Events->isInWaitResult(EVENTS_MOVE_END)) {
+        // on n'a pas reussi
+        // c'est la fin du match?
+        if (checkEndEvents()) return false;
+        goOverSupport();
+	if (checkEndEvents()) return false;
+      } else break;
+    } while(retry++ < ATTACK_EXPLORE_RETRY);
+
+    // va au bout de la premiere rangee
+    retry=0;
+    do {
+      MvtMgr->setRobotDirection(MOVE_DIRECTION_FORWARD);
+      Move->go2Target(Point(3194, 1650), attackExploreGain, attackExploreMaxSpeed);
+      Events->wait(evtEndMove);
+      if (!Events->isInWaitResult(EVENTS_MOVE_END)) {
+        // on n'a pas reussi
+        // c'est la fin du match?
+        if (checkEndEvents()) return false;
+        goOverSupport();
+        if (checkEndEvents()) return false;
+      } else break;
+    } while(retry++ < ATTACK_EXPLORE_RETRY);
 
     return true;
 }
@@ -691,7 +747,7 @@ bool StrategyAttackCL::gotoGtps1(GridPoint gpts[3])
     // case car on s'arrete toujours trop tot
     pt1.x += ATTACK_CHANGE_TARGET_POINT_DIST * cos(dirPt1);
     pt1.y += ATTACK_CHANGE_TARGET_POINT_DIST * sin(dirPt1);
-    Move->go2Target(pt1);
+    Move->go2Target(pt1, attackExploreGain, attackExploreMaxSpeed);
     Events->wait(evtEndMove);
     // on a reussi ?
     if (Events->isInWaitResult(EVENTS_MOVE_END)) return true;
@@ -743,7 +799,7 @@ bool StrategyAttackCL::backBeforeGpts2(GridPoint gpts[3])
     }
     if (needMoveBackward) {
         MvtMgr->setRobotDirection(MOVE_DIRECTION_BACKWARD);
-        Move->go2Target(targetPoint);
+        Move->go2Target(targetPoint, attackExploreGain, attackExploreMaxSpeed);
         Events->wait(evtEndMove);
         // on a reussi ?
         if (Events->isInWaitResult(EVENTS_MOVE_END)) return true;
@@ -788,7 +844,7 @@ bool StrategyAttackCL::gotoGpts2(GridPoint gpts[3],
     }
 
     MvtMgr->setRobotDirection(MOVE_DIRECTION_FORWARD);
-    Move->go2Target(targetPoint);
+    Move->go2Target(targetPoint, attackExploreGain, attackExploreMaxSpeed);
     Events->wait(evtEndMove);
     // on a reussi ?
     if (Events->isInWaitResult(EVENTS_MOVE_END)) return true;
@@ -810,7 +866,7 @@ bool StrategyAttackCL::goBackToGpts2(GridPoint gpts[3])
     targetPoint.x += ATTACK_CHANGE_TARGET_POINT_DIST * cos(dirPt2+M_PI);
     targetPoint.y += ATTACK_CHANGE_TARGET_POINT_DIST * sin(dirPt2+M_PI);
     MvtMgr->setRobotDirection(MOVE_DIRECTION_BACKWARD);
-    Move->go2Target(targetPoint);
+    Move->go2Target(targetPoint, attackExploreGain, attackExploreMaxSpeed);
     Events->wait(evtEndMove);
     // on a reussi ?
     if (Events->isInWaitResult(EVENTS_MOVE_END)) return true;
@@ -849,7 +905,7 @@ bool StrategyAttackCL::killCenterSkittles()
     t.push_back(Point(2400, 1050));
     t.push_back(Point(2100, 1260));
     MvtMgr->setRobotDirection(MOVE_DIRECTION_FORWARD);
-    Move->followTrajectory(t, TRAJECTORY_BASIC);
+    Move->followTrajectory(t, TRAJECTORY_BASIC, attackExploreGain, attackExploreMaxSpeed);
     Events->wait(evtEndMoveBridge);
     // on a reussi ?
     if (Events->isInWaitResult(EVENTS_MOVE_END)) {

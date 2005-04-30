@@ -28,6 +28,8 @@ struct EnvDetectorMappingStruct {
  
 };
 
+#ifdef ENV_DETECTOR_INFO
+
 static EnvDetectorMappingStruct EnvDetectorMapping[ENV_DETECTOR_NBR]= {
     {ENV_DETECTOR_TOP_RIGHT, "EnvDetector TOP RIGHT",   EVENTS_ENV_TOP_RIGHT, 
      0, 0, false,  ENV_NEAR,
@@ -42,5 +44,7 @@ static EnvDetectorMappingStruct EnvDetectorMapping[ENV_DETECTOR_NBR]= {
      0, 6, false,  ENV_NEAR,
     true}
 };
+
+#endif
 
 #endif
