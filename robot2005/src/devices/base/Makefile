@@ -74,6 +74,7 @@ validate:
 ## Specific rules
 ## ===========================================================================
 motorTestMain.o: motor.cpp
+	$(if ${QUIET},,echo " [$@]")
 	${CC} -o $@ -c $^ $(DEFAULT_CFLAGS) ${INC_DIR} ${DEFAULT_INC_DIR} -DTELECOMMAND_MAIN
 ## ===========================================================================
 ## DO NOT ADD ANYTHING BELOW THIS LINE -- IT WILL BE ERASED BY MAKE DEPEND

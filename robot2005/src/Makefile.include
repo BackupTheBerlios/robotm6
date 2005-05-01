@@ -228,6 +228,7 @@ endif
 ## clean
 ## ===========================================================================
 default_clean: 
+	$(if ${QUIET},,echo "cleaning in $(CURDIR)")
 	\$(RM) -f *.o *~ *.bak .depend || exit 124
 
 ifdef COMPILE_DIR_ORDER

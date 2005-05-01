@@ -74,6 +74,7 @@ validate:
 ## ===========================================================================
 
 ${FILE}Simu.o: ${FILE}.cpp
+	$(if ${QUIET},,echo " [$@]")
 	${CC} -o $@ -c ${FILE}.cpp ${DEFAULT_INC_DIR} -DSIMULATED=true
 
 

@@ -77,21 +77,27 @@ validate:
 ## ===========================================================================
 
 mainAttackSimu.o: mainAttack.cpp
+	$(if ${QUIET},,echo " [$@]")
 	${CC} -o $@ -c mainAttack.cpp $(DEFAULT_CFLAGS) ${DEFAULT_INC_DIR} -DSIMULATED=true
 
 mainDefenceSimu.o: mainDefence.cpp
+	$(if ${QUIET},,echo " [$@]")
 	${CC} -o $@ -c mainDefence.cpp $(DEFAULT_CFLAGS) ${DEFAULT_INC_DIR} -DSIMULATED=true
 
 ${BIN_DIR}/attack: mainAttack.o
+	$(if ${QUIET},,echo " [$@]")
 	${CC} -o $@ $^ $(DEFAULT_CFLAGS) ${INC_DIR} ${DEFAULT_INC_DIR} ${BIN_LIBS_LOCATION} ${BIN_LIBS} ${BIN_FLAGS}
 
 ${BIN_DIR}/defence: mainDefence.o
+	$(if ${QUIET},,echo " [$@]")
 	${CC} -o $@ $^ $(DEFAULT_CFLAGS) ${INC_DIR} ${DEFAULT_INC_DIR} ${BIN_LIBS_LOCATION} ${BIN_LIBS} ${BIN_FLAGS}
 
 ${BIN_SIMU_DIR}/attack: mainAttackSimu.o
+	$(if ${QUIET},,echo " [$@]")
 	${CC} -o $@ $^ $(DEFAULT_CFLAGS) ${INC_DIR} ${DEFAULT_INC_DIR} ${BIN_LIBS_LOCATION} ${BIN_LIBS} ${BIN_FLAGS}
 
 ${BIN_SIMU_DIR}/defence: mainDefenceSimu.o
+	$(if ${QUIET},,echo " [$@]")
 	${CC} -o $@ $^ $(DEFAULT_CFLAGS) ${INC_DIR} ${DEFAULT_INC_DIR} ${BIN_LIBS_LOCATION} ${BIN_LIBS} ${BIN_FLAGS}
 
 ## ===========================================================================

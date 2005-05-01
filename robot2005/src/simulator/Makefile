@@ -60,9 +60,11 @@ ifdef GUMSTIX
 bin:
 else
 bin: $(OBJS_SERVER)
+	$(if ${QUIET},,echo " [$@]")
 	${CC} -o ${BIN_SIMU_DIR}/${BIN_NAME} ${DEFAULT_INC_DIR} ${DEFAULT_CFLAGS} \
            ${OBJS_SERVER} ${STATIC_LIB_DIR}/libviewer3D.a ${STATIC_LIB_DIR}/liblogBasic.a ${STATIC_LIB_DIR}/libtools.a -lglut ${STATIC_LIB_DIR}/libviewer3D.a -lGLU -lGL -lm -lpthread -l$(LIB_STDCPP) -lz
 # ${STATIC_LIB_DIR}/libfthread.a
+	$(if ${QUIET},,echo " [$@]")
 	${CC} -o ${BIN_SIMU_DIR}/testSimulatorClient ${DEFAULT_INC_DIR} ${DEFAULT_CFLAGS} \
            testClient.cpp ${STATIC_LIB_DIR}/libsimulator.a ${STATIC_LIB_DIR}/liblogBasic.a ${STATIC_LIB_DIR}/libtools.a -lm -lpthread -l$(LIB_STDCPP) -lz
 # ${STATIC_LIB_DIR}/libfthread.a

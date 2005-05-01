@@ -106,36 +106,47 @@ validate:
 ## Specific rules
 ## ===========================================================================
 ${BIN_DIR}/getButton05: bumper_05.cpp
+	$(if ${QUIET},,echo " [$@]")
 	${CC} -o $@ $^ ../base/bumper.o $(DEFAULT_CFLAGS) ${INC_DIR} ${DEFAULT_INC_DIR} -DGET_BUMPER_MAIN $(STATIC_LIB_DIR)/libevents.a $(IO_STATIC_LIB)
 
 ${BIN_DIR}/lcdPrint05: lcd_05.cpp
+	$(if ${QUIET},,echo " [$@]")
 	${CC} -o $@ $^ ../base/lcd.o $(DEFAULT_CFLAGS) ${INC_DIR} ${DEFAULT_INC_DIR} -DLCD_PRINT_MAIN $(IO_STATIC_LIB)
 
 ${BIN_DIR}/testLcd: lcd_05.cpp
+	$(if ${QUIET},,echo " [$@]")
 	${CC} -o $@ $^ ../base/lcd.o $(DEFAULT_CFLAGS) ${INC_DIR} ${DEFAULT_INC_DIR} -DTEST_MAIN $(IO_STATIC_LIB)
 
 ${BIN_DIR}/testServo: servo_05.cpp
+	$(if ${QUIET},,echo " [$@]")
 	${CC} -o $@ $^ ../base/servo.o $(DEFAULT_CFLAGS) ${INC_DIR} ${DEFAULT_INC_DIR} -DTEST_MAIN $(IO_STATIC_LIB)
 
 ${BIN_DIR}/testCrane: crane_05.cpp
+	$(if ${QUIET},,echo " [$@]")
 	${CC} -o $@ $^ ../base/crane.o $(DEFAULT_CFLAGS) ${INC_DIR} ${DEFAULT_INC_DIR} -DTEST_MAIN $(IO_STATIC_LIB)
 
 ${BIN_DIR}/testBumper: bumper_05.cpp
+	$(if ${QUIET},,echo " [$@]")
 	${CC} -o $@ $^ ../base/bumper.o $(DEFAULT_CFLAGS) ${INC_DIR} ${DEFAULT_INC_DIR} -DTEST_MAIN $(STATIC_LIB_DIR)/libevents.a $(IO_STATIC_LIB)
 
 ${BIN_DIR}/testEnv: env_05.cpp
+	$(if ${QUIET},,echo " [$@]")
 	${CC} -o $@ $^ ../base/env.o $(DEFAULT_CFLAGS) ${INC_DIR} ${DEFAULT_INC_DIR} -DTEST_MAIN $(STATIC_LIB_DIR)/libevents.a $(IO_STATIC_LIB)
 
 ${BIN_DIR}/testTesla: tesla_05.cpp
+	$(if ${QUIET},,echo " [$@]")
 	${CC} -o $@ $^ ../base/tesla.o $(DEFAULT_CFLAGS) ${INC_DIR} ${DEFAULT_INC_DIR} -DTEST_MAIN $(STATIC_LIB_DIR)/libevents.a $(IO_STATIC_LIB)
 
 ${BIN_DIR}/testSkittle: skittleDetector_05.cpp
+	$(if ${QUIET},,echo " [$@]")
 	${CC} -o $@ $^ ../base/skittleDetector.o $(DEFAULT_CFLAGS) ${INC_DIR} ${DEFAULT_INC_DIR} -DTEST_MAIN $(STATIC_LIB_DIR)/libevents.a $(IO_STATIC_LIB)
 
 ${BIN_DIR}/telecommandIsa: motorIsa_05.cpp HCTLControl.o hct.o
+	$(if ${QUIET},,echo " [$@]")
 	${CC} -o $@ $^ ../base/motorTestMain.o $(DEFAULT_CFLAGS) ${INC_DIR} ${DEFAULT_INC_DIR} -DTEST_MAIN $(STATIC_LIB_DIR)/libevents.a $(IO_STATIC_LIB)
 
 ${BIN_DIR}/telecommand05: motorOdom_05.cpp
+	$(if ${QUIET},,echo " [$@]")
 	${CC} -o $@ $^ $(DEFAULT_CFLAGS) ${INC_DIR} ${DEFAULT_INC_DIR} -DTEST_MAIN $(IO_STATIC_LIB)
 ## ===========================================================================
 ## DO NOT ADD ANYTHING BELOW THIS LINE -- IT WILL BE ERASED BY MAKE DEPEND

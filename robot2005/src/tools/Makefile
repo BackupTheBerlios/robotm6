@@ -60,6 +60,7 @@ validate: ${VALIDATE_DIR}/geometry2D
 ## ===========================================================================
 
 ${VALIDATE_DIR}/geometry2D: geometry2D.cpp geometry2D.o ${SRC_DIR}/include/geometry2D.h
+	$(if ${QUIET},,echo " [$@]")
 	${CC} -o $@  geometry2D.cpp ${DEFAULT_CFLAGS} ${DEFAULT_INC_DIR} -DTEST_MAIN -lm -l$(LIB_STDCPP)
 
 ## ===========================================================================
