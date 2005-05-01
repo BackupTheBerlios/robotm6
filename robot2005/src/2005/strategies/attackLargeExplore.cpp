@@ -11,13 +11,6 @@
 
 typedef GridAttack::GridUnit GridUnit;
 
-enum CollisionEnum {
-    COLLISION_NONE,
-    COLLISION_LEFT,
-    COLLISION_RIGHT,
-    COLLISION_BOTH
-};
-
 static CollisionEnum checkCollisionEvents()
 {
     bool leftPwm = Events->isInWaitResult(EVENTS_PWM_ALERT_LEFT);
@@ -33,7 +26,7 @@ static CollisionEnum checkCollisionEvents()
 // ---------------------------------------------------------------
 bool StrategyLargeAttackCL::preDefinedSkittleExploration1()
 {
-    return preDefinedSkittleExploration1();
+    return preDefinedSkittleExploration2();
     LOG_COMMAND("preDefinedLargeSkittleExploration1\n");
     Trajectory t;
     t.push_back(Point(2640, 1650)); 
@@ -113,32 +106,6 @@ bool StrategyLargeAttackCL::preDefinedSkittleExploration1()
     }
 
     return true;
-}
-
-// TODO: move outside of file (into move.h?)
-static Point getLeftWheelPos() {
-    Point currentPos = RobotPos->pt();
-    Point leftWheel(currentPos);
-    Radian theta = RobotPos->thetaAbsolute();
-    double c = cos(theta);
-    double s = sin(theta);
-    // TODO: get real constants
-    const Millimeter LEFT = 170;
-    const Millimeter FRONT = 110;
-    leftWheel.x += FRONT * c - LEFT * s;
-    leftWheel.y += FRONT * s + LEFT * c;
-    return leftWheel;
-}
-
-bool StrategyLargeAttackCL::calcSupportCenterCollision(Point pos, Point* supportCenter) const {
-    GridAttack::GPoint gridPoint = grid_->getGPoint(pos);
-    bool canContainSupport = grid_->element(gridPoint).skittleAtBeginning;
-    if (not canContainSupport)
-	return false;
-    else {
-	(*supportCenter) = grid_->getPoint(gridPoint);
-	return true;
-    }
 }
 
 bool StrategyLargeAttackCL::centerOnSupport(Point supportCenter) {
@@ -304,6 +271,108 @@ bool StrategyLargeAttackCL::leaveSupport(Point supportCenter, Point target) {
     }
 }
 
+bool StrategyLargeAttackCL::handleCollision(CollisionEnum collision,
+					    Point lineStart,
+					    Point lineEnd) {
+    LOG_FUNCTION();
+    PwmAlertObstacle pwmObstacle;
+    getPwmObstaclePos(pwmObstacle);
+    
+    if (pwmObstacle.colliDetected) {
+	LOG_WARNING("predefinedSkittleExploration: Collision detected\n");
+	Point supportCenter; // will be set in calcSupportCenterCollision.
+	bool potentialSupport =
+	    calcSupportCenterCollision(pwmObstacle.ptObstacle, supportCenter);
+	if (!potentialSupport) return false; // collision, but no support -> bad collision
+	// TODO: handle multiple support-centers correctly.
+	Log->support(supportCenter, supportCenter);
+
+	// some data we are going to need:
+	const bool isHorizontalLine = (lineStart.x == lineEnd.x);
+	const bool isPositifLine = (isHorizontalLine?
+				    (lineEnd.y > lineStart.y):
+				    (lineEnd.x > lineStart.x));
+
+	Radian lineDirection; // direction of line.
+	Point nextIntersectionOnLine = supportCenter; // will be adjusted.
+	Radian toLineDirection; // where's the line seen from support.
+	Point intermediatePoint = supportCenter; // will be adjusted to 10cm towards line.
+	bool doBlockLeftWheel; // used to destroy neighboring skittles.
+	if (isHorizontalLine) {
+	    if (isPositifLine) {
+		lineDirection = 0;
+		nextIntersectionOnLine.x += 150;
+	    } else {
+		lineDirection = M_PI;
+		nextIntersectionOnLine.x -= 150;
+	    }
+	    nextIntersectionOnLine.y = lineStart.y;
+	    if (supportCenter.y > lineStart.y) {
+		toLineDirection = -M_PI_2;
+		intermediatePoint.y -= 100;
+		doBlockLeftWheel = isPositifLine;
+	    } else {
+		toLineDirection = M_PI_2;
+		intermediatePoint.y += 100;
+		doBlockLeftWheel = !isPositifLine;
+	    }
+	} else {
+	    if (isPositifLine) {
+		lineDirection = M_PI_2;
+		nextIntersectionOnLine.y += 150;
+	    } else {
+		lineDirection = -M_PI_2;
+		nextIntersectionOnLine.y -= 150;
+	    }
+	    nextIntersectionOnLine.x = lineStart.x;
+	    if (supportCenter.x > lineStart.x) {
+		toLineDirection = M_PI;
+		intermediatePoint.x -= 100;
+		doBlockLeftWheel = isPositifLine;
+	    } else {
+		toLineDirection = 0;
+		intermediatePoint.x += 100;
+		doBlockLeftWheel = !isPositifLine;
+	    }
+	}
+	
+	
+	// go directly on support.
+	bool centered = centerOnSupport(supportCenter);
+	if (!centered) return false;
+	bool rotated = rotateOnSupport(supportCenter, toLineDirection);
+	if (!rotated) return false;
+
+	bool outsideSupport = leaveSupport(supportCenter, intermediatePoint);
+	if (!outsideSupport) return false;
+
+	LOG_INFO("destroying skittles on other side of support\n");
+	// destroy skittles (if there are any) on neighborcase.
+
+	Move->rotateOnWheel(-M_PI_4, doBlockLeftWheel);
+	Events->wait(evtEndMove);
+	if (!Events->isInWaitResult(EVENTS_MOVE_END))
+	    // for now just return false.
+	    return false;
+	
+	// same direction as line
+	Move->rotate(lineDirection);
+	Events->wait(evtEndMove);
+	if (!Events->isInWaitResult(EVENTS_MOVE_END))
+	    // for now just return false.
+	    return false;
+	
+	// go to next square-intersection.
+	Move->go2Target(nextIntersectionOnLine);
+	Events->wait(evtEndMove);
+	if (!Events->isInWaitResult(EVENTS_MOVE_END))
+	    // for now just return false.
+	    return false;
+    }
+    return true;
+}
+
+
 // ---------------------------------------------------------------
 // strategie exploration en passant par la rangee en y = 1350
 // ---------------------------------------------------------------
@@ -312,119 +381,69 @@ bool StrategyLargeAttackCL::preDefinedSkittleExploration2()
     LOG_COMMAND("preDefinedLargeSkittleExploration2\n");
     MvtMgr->setRobotDirection(MOVE_DIRECTION_FORWARD);
     bool noRotation = true;
-    Move->go2Target(2500, 1500, // our target-line is y=1500.
+    Point lineStart(2500, 1500);
+    Point lineEnd(3200, 1500);
+    Move->go2Target(lineStart,
 		    MOVE_USE_DEFAULT_GAIN,
 		    MOVE_USE_DEFAULT_SPEED,
 		    noRotation);
     Events->wait(evtEndMove);
     if (!Events->isInWaitResult(EVENTS_MOVE_END)) {
         // on n'a pas reussi
-        // c'est la fin du match?
-        if (checkEndEvents()) return false;
-
-	// TODO: check collision (as if on right side -> center on support ...)
-        return false;
-    }
-
-    // only if no collision had been detected:
-    Move->rotate(0); // face right border
-    Events->wait(evtEndMove);
-    if (!Events->isInWaitResult(EVENTS_MOVE_END)) {
-	if (checkEndEvents()) return false; // end of match
-	// ok. normally the collision can only be on the left side...
+        if (checkEndEvents()) return false; // c'est la fin du match?
 	CollisionEnum collision = checkCollisionEvents();
-	if (collision == COLLISION_NONE) {
-	    LOG_INFO("unhandled event. leaving function\n");
-	} else if (collision == COLLISION_LEFT) {
-	    // we probably found a support
-	    // go directly on support.
-	    Point supportCenter(2594, 1650);
-	    bool centered = centerOnSupport(supportCenter);
-	    if (!centered) return false;
-	    bool rotated = rotateOnSupport(supportCenter, -M_PI_4);
-	    if (!rotated) return false;
-
-	    // go to next square-intersection.
-	    Move->go2Target(supportCenter.x + 150, supportCenter.y + 150);
-	    Events->wait(evtEndMove);
-	    if (!Events->isInWaitResult(EVENTS_MOVE_END))
-		// for now just return false.
+	if (collision != COLLISION_NONE) {
+	    if (!handleCollision(collision, lineStart, lineEnd))
 		return false;
 	} else {
-	    // TODO...
+	    LOG_WARNING("don't know what caused abort of movement. -> abort predefined exploration\n");
 	    return false;
+	}
+    } else {
+	// go2Target succeeded its movement.
+	Move->rotate(0); // face right border
+	Events->wait(evtEndMove);
+	if (!Events->isInWaitResult(EVENTS_MOVE_END)) {
+	    if (checkEndEvents()) return false; // end of match
+	    // ok. normally the collision can only be on the left side...
+	    CollisionEnum collision = checkCollisionEvents();
+	    if (collision == COLLISION_LEFT) {
+		if (!handleCollision(collision, lineStart, lineEnd))
+		    return false;
+	    } else if (collision == COLLISION_NONE) {
+		LOG_WARNING("unhandled event. leaving function\n");
+		return false;
+	    } else {
+		LOG_WARNING("collision, but most likely not a support\n");
+		return false;
+	    }
 	}
     }
 
     bool endOfLine = false;
     while (!endOfLine) {
-	Move->go2Target(3200, 1500); // destroy line
+	Move->go2Target(lineEnd);
 	Events->wait(evtEndMove);
-	if (Events->isInWaitResult(EVENTS_MOVE_END)) {
-	    // ok. no more base detected
-	    endOfLine = true;
-	} else if (checkEndEvents()) { // end of game?
-	    return false;
-	} else {
+	if (!Events->isInWaitResult(EVENTS_MOVE_END)) {
+	    // let's hope it's a support.
+	    if (checkEndEvents()) return false; // c'est la fin du match?
 	    CollisionEnum collision = checkCollisionEvents();
-	    if (collision == COLLISION_NONE) {
-		// don't know, why we could get here...
-		return false;
-	    } else if (collision == COLLISION_LEFT) {
-		LOG_INFO("collision left\n");
-		Point leftWheel = getLeftWheelPos();
-		Point supportCenter;
-		bool doesIntersect = calcSupportCenterCollision(leftWheel, &supportCenter);
-		if (!doesIntersect ||
-		    !RobotPos->isTargetForward(supportCenter))
-		    // bad. assume another robot.
+	    if (collision != COLLISION_NONE) {
+		if (!handleCollision(collision, lineStart, lineEnd))
 		    return false;
-		else {
-		    // go directly on support.
-		    bool centered = centerOnSupport(supportCenter);
-		    if (!centered) return false;
-		    bool rotated = rotateOnSupport(supportCenter, -M_PI_2);
-		    if (!rotated) return false;
-		    // move slightly back to initial line.
-		    bool outsideSupport = leaveSupport(supportCenter,
-						       Point(supportCenter.x,
-							     supportCenter.y - 100));
-		    if (!outsideSupport) return false;
-		    if (supportCenter.x > 3000) {// last possible position
-			endOfLine = true;
-			// for now do nothing.
-		    } else {
-			// destroy skittles (if there are any) on neighborcase.
-			Move->rotateOnWheel(-M_PI_4, true);
-			Events->wait(evtEndMove);
-			if (!Events->isInWaitResult(EVENTS_MOVE_END))
-			    // for now just return false.
-			    return false;
-
-			// face right border.
-			Move->rotate(0);
-			Events->wait(evtEndMove);
-			if (!Events->isInWaitResult(EVENTS_MOVE_END))
-			    // for now just return false.
-			    return false;
-			
-			// go to next square-intersection.
-			Move->go2Target(supportCenter.x + 150, supportCenter.y + 150);
-			Events->wait(evtEndMove);
-			if (!Events->isInWaitResult(EVENTS_MOVE_END))
-			    // for now just return false.
-			    return false;
-		    }
-		}
-	    } else if (collision == COLLISION_RIGHT) {
-		// TODO: handle this case too.
-		return false;
-	    } else if (collision == COLLISION_BOTH) {
-		// bad :(   assume another robot was here...
+	    } else {
+		LOG_WARNING("don't know what caused abort of movement. -> abort predefined exploration\n");
 		return false;
 	    }
+	    if (!RobotPos->isTargetForward(lineEnd))
+		endOfLine = true;
+	} else {
+	    // ok. no more supports detected
+	    endOfLine = true;
 	}
     }
+
+    LOG_INFO("predefined-large finished.\n");
 
     //alignBorder();
     
