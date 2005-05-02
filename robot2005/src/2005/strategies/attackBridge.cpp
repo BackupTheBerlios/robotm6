@@ -252,8 +252,8 @@ bool StrategyAttackCL::gotoBridgeDetection()
 }
 
 // --------------------------------------------------------------------------
-// Recupere la valeur des cqpteurs detecteurs de pont: verifie que la valeur ne 
-// varie pas. si la vqleur vqrie la fonction retourne false
+// Recupere la valeur des capteurs detecteurs de pont: verifie que la valeur ne 
+// varie pas. si la valeur varie la fonction retourne false
 // --------------------------------------------------------------------------
 bool StrategyAttackCL::getBridgeCaptors(BridgeCaptorStatus captors[BRIDGE_CAPTORS_NBR],
                                         bool checkSharp)
@@ -348,7 +348,7 @@ bool StrategyAttackCL::testBridgeCaptors()
 
 // --------------------------------------------------------------------------
 // calcule la position du pont en fonction des sharps quand on est aligne
-// pour traverser sur lo pont du milieu
+// pour traverser sur le pont du milieu
 // --------------------------------------------------------------------------
 bool StrategyAttackCL::getBridgePosBySharpFromCenter
       (BridgeCaptorStatus captors[BRIDGE_CAPTORS_NBR])
@@ -470,6 +470,8 @@ bool StrategyAttackCL::checkBridgeBumperEvent(bool& dummyBumperEvt)
             LOG_WARNING("No bridge here! %s\n", RobotPos->txt());
             noBridgeHere(); 
 	    if (Events->isInWaitResult(EVENTS_NO_BRIDGE_BUMP_LEFT)) {
+		// mark bridges, that are unavailable (current bridge
+		// is going to get discarded elsewhere)
 	      if (bridge_ == BRIDGE_POS_MIDDLE_BORDURE) {
 		bridgeAvailibility_ &= (~(1<<BRIDGE_ENTRY_BORDURE_BIT));
 		bridgeAvailibility_ &= (~(1<<BRIDGE_ENTRY_MIDDLE_BORDURE_BIT));
@@ -832,4 +834,3 @@ bool StrategyAttackCL::crossBridge()
     Events->wait(evtEndMoveNoCollision);
     return false;
 }
-
