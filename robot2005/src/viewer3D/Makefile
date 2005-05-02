@@ -61,7 +61,9 @@ lib: $(STATIC_LIB_DIR)/${LIB_NAME}.a ${DYNAMIC_LIB_DIR}/${LIB_NAME}.so
 ## ===========================================================================
 ## Main rules : ----- BIN -----
 ## ===========================================================================
-bin: OpenGlMain.o dummyXmuColor.o $(STATIC_LIB_DIR)/${LIB_NAME}.a
+bin: $(BIN_SIMU_DIR)/ViewerTest
+
+$(BIN_SIMU_DIR)/ViewerTest: OpenGlMain.o dummyXmuColor.o $(STATIC_LIB_DIR)/${LIB_NAME}.a
 	$(if ${QUIET},,echo " [$@]")
 	${CC} -o $(BIN_SIMU_DIR)/ViewerTest ${DEFAULT_INC_DIR} ${DEFAULT_CFLAGS} OpenGlMain.o dummyXmuColor.o $(STATIC_LIB_DIR)/${LIB_NAME}.a $(STATIC_LIB_DIR)/libtools.a $(STATIC_LIB_DIR)/liblogBasic.a -lglut -lGLU -lGL -lm -lpthread -l$(LIB_STDCPP) -lz
 
