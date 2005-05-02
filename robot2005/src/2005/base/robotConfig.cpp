@@ -16,7 +16,7 @@ RobotConfigAttack2005CL::RobotConfigAttack2005CL(bool simulated)
 #else
     isMotorISA=false;
 #endif
-    startingPos=Position(72, 1725, 0);
+    startingPos=Position(72, 1735, 0);
     timeAlertBeforeEnd =(80000);
 
     odometerK=(.22983);

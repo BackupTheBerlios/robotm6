@@ -134,10 +134,12 @@ sou1:
 	scp -r ../gumstix/so/ root@gumu:robot
 
 install2: 
-	scp -r ../gumstix/bin ../gumstix/so/ root@gumb2:robot
+	rsync --progress --compress -v --rsync-path=robot/rsync --exclude=CVS --exclude=.keep -r ../gumstix/bin ../gumstix/so root@gumb2:robot
+#	scp -r ../gumstix/bin ../gumstix/so/ root@gumb2:robot
 
 install1:
-	scp -r ../gumstix/bin ../gumstix/so/ root@gumb:robot
+	rsync --progress --compress -v --rsync-path=robot/rsync --exclude=CVS --exclude=.keep -r ../gumstix/bin ../gumstix/so root@gumb:robot
+#	scp -r ../gumstix/bin ../gumstix/so/ root@gumb:robot
 
 installu2: 
 	scp -r ../gumstix/bin ../gumstix/so/ root@gumu2:robot

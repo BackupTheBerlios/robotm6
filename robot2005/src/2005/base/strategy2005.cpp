@@ -108,7 +108,7 @@ void Strategy2005CL::emergencyStop()
 	Log->closeLogFile();
 	Sound->play(SOUND_ANORMAL_EMERGENCY_STOP, SND_PRIORITY_URGENT);
 	sleep(2);
-	if (menu("End of the match\nWinner   Loser")) {
+	if (menu("SophiaTeam is\nthe best team!")) {
 	    Sound->play(soundVictory_);
 	} else {
 	    Sound->play(soundDefeat_);
@@ -149,7 +149,7 @@ void Strategy2005CL::gameOver()
 
     Sound->play(SOUND_C_FAIT);
     sleep(2);
-    if (menu("End of the match\nWinner   Loser")) {
+    if (menu("SophiaTeam is\nthe best team!")) {
         Sound->play(soundVictory_);
     } else {
         Sound->play(soundDefeat_);
@@ -307,5 +307,6 @@ bool Strategy2005CL::menu(const char*fmt, ...)
     }
     Events->waitNot(evtDialogButtonReleasedFilter);
     Events->wait(evtDialogButtonFilter);
+    Lcd->print("Please wait...");
     return (Events->isInWaitResult(EVENTS_BUTTON_YES));
 }

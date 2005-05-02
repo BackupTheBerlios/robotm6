@@ -78,6 +78,7 @@ clean:	default_clean
                    ${BIN_DIR}/testCrane       \
 		   ${BIN_DIR}/testSkittle     \
 		   ${BIN_DIR}/testTesla       \
+		   ${BIN_DIR}/testAlim        \
                    ${BIN_DIR}/telecommandIsa  \
                    ${BIN_DIR}/telecommand05
 #	${RM} -f  ${BIN_DIR}/${BIN_NAME}                 
@@ -93,7 +94,7 @@ lib: $(STATIC_LIB_DIR)/${LIB_NAME}.a ${DYNAMIC_LIB_DIR}/${LIB_NAME}.so
 ## ===========================================================================
 #bin: ${BIN_DIR}/${BIN_NAME}
 ifdef GUMSTIX
-bin: ${BIN_DIR}/testServo ${BIN_DIR}/testBumper ${BIN_DIR}/testEnv ${BIN_DIR}/telecommand05 ${BIN_DIR}/lcdPrint05 ${BIN_DIR}/testLcd ${BIN_DIR}/getButton05 ${BIN_DIR}/testCrane ${BIN_DIR}/testTesla ${BIN_DIR}/testSkittle 
+bin: ${BIN_DIR}/testServo ${BIN_DIR}/testBumper ${BIN_DIR}/testEnv ${BIN_DIR}/telecommand05 ${BIN_DIR}/lcdPrint05 ${BIN_DIR}/testLcd ${BIN_DIR}/getButton05 ${BIN_DIR}/testCrane ${BIN_DIR}/testTesla ${BIN_DIR}/testSkittle ${BIN_DIR}/testAlim
 else
 bin: ${BIN_DIR}/testServo ${BIN_DIR}/testBumper ${BIN_DIR}/testEnv ${BIN_DIR}/telecommandIsa ${BIN_DIR}/telecommand05 ${BIN_DIR}/lcdPrint05 ${BIN_DIR}/testLcd ${BIN_DIR}/getButton05 ${BIN_DIR}/testCrane ${BIN_DIR}/testTesla ${BIN_DIR}/testSkittle 
 endif
@@ -128,6 +129,10 @@ ${BIN_DIR}/testCrane: crane_05.cpp
 ${BIN_DIR}/testBumper: bumper_05.cpp
 	$(if ${QUIET},,echo " [$@]")
 	${CC} -o $@ $^ ../base/bumper.o $(DEFAULT_CFLAGS) ${INC_DIR} ${DEFAULT_INC_DIR} -DTEST_MAIN $(STATIC_LIB_DIR)/libevents.a $(IO_STATIC_LIB)
+
+${BIN_DIR}/testAlim: alim_05.cpp
+	$(if ${QUIET},,echo " [$@]")
+	${CC} -o $@ $^ ../base/alim.o $(DEFAULT_CFLAGS) ${INC_DIR} ${DEFAULT_INC_DIR} -DTEST_MAIN $(STATIC_LIB_DIR)/libevents.a $(IO_STATIC_LIB)
 
 ${BIN_DIR}/testEnv: env_05.cpp
 	$(if ${QUIET},,echo " [$@]")

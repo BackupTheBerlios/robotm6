@@ -199,7 +199,8 @@ void RobotPositionCL::getPosition(Position&      posi,
 				  Millimeter     KRight,
 				  Millimeter     D,// distance entre les 2 codeurs
 				  bool           first,
-				  int&           counter)
+				  int&           counter,
+				  bool           bits16)
 {
   //printf("c=%d lo=%d ro=%d, l=%d, r=%d kl=%lf, kr=%lf, d=%lf\n", counter, leftPosOld, rightPosOld, leftPos, rightPos, KLeft, KRight, D);
     if (counter-- == 0) {
@@ -213,16 +214,17 @@ void RobotPositionCL::getPosition(Position&      posi,
         // on a rester les codeurs, on fait comme si on n'avait pas bouger car les 
         // valeurs ***Old sont invalides
     } else if (counter<0) {
+      int pmax=(bits16?CODER_POS_MAX:MOTOR_POS_MAX);
         // verifie qu'il n'y a pas un passage de -MAX a +MAX (overflow)
-        if (leftPos - leftPosOld > SHRT_MAX) { // short max =unsigned short max /2
-            leftPosOld += USHRT_MAX;   // unsigned short max
-        } else if (leftPos - leftPosOld < SHRT_MIN) {
-            leftPosOld -= USHRT_MAX;
+      if (leftPos - leftPosOld > pmax) { // short max =unsigned short max /2
+            leftPosOld += (bits16?CODER_POS_DELTA:MOTOR_POS_DELTA);   // unsigned short max
+        } else if (leftPosOld - leftPos > pmax) {
+            leftPosOld -= (bits16?CODER_POS_DELTA:MOTOR_POS_DELTA);
         }
-        if (rightPos - rightPosOld > SHRT_MAX) {
-            rightPosOld += USHRT_MAX;
-        } else if (rightPos - rightPosOld < SHRT_MIN) {
-            rightPosOld -= USHRT_MAX;
+        if (rightPos - rightPosOld > pmax) {
+            rightPosOld += (bits16?CODER_POS_DELTA:MOTOR_POS_DELTA);
+        } else if (rightPosOld - rightPos > pmax) {
+            rightPosOld -= (bits16?CODER_POS_DELTA:MOTOR_POS_DELTA);
         }
 
     Millimeter deltaKRight = KRight * (rightPos - rightPosOld);
@@ -279,7 +281,8 @@ void RobotPositionCL::updateHctlPosition()
                     RobotConfig->getMotorKRight(),
                     RobotConfig->getMotorD(),
                     firstHctl_,
-		    counterHctl);
+		    counterHctl,
+		    CODER_24_BITS);
         firstHctl_    = false;
     }
 }
@@ -337,7 +340,8 @@ void RobotPositionCL::updateOdometerPosition()
                     RobotConfig->getOdometerKRight(),
                     RobotConfig->getOdometerD(),
                     firstOdom_,
-		    counterOdom);
+		    counterOdom,
+		    CODER_16_BITS);
         /*printf("posOdom_After=%d %d %d, %d %d %d %d, %s\n", 
 	       (int)posOdom_.center.x, (int)posOdom_.center.y, r2d(posOdom_.direction), 
 	       left, right, leftOdomOld_, rightOdomOld_, b2s(firstOdom_));

@@ -154,7 +154,8 @@ class SimulatorClient : public RobotBase {
  private:
     static SimulatorClient* simulatorClient_;
     Socket* socket_;
-    unsigned char buffer_[SIMU_BUFFER_LENGTH];
+    unsigned char buffer_[SIMU_BUFFER_LENGTH]; 
+    pthread_mutex_t lock_;
 };
 
 #endif // __SIMULATOR_CLIENT_H__

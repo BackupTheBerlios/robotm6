@@ -55,7 +55,14 @@ inline bool operator != (Position const& pos1, Position const& pos2) {
 }
 // ============================================================================
 // ==========================   Constantes de base   ==========================
+//
 // ============================================================================
+static const MotorPosition MOTOR_POS_MAX   = 0x7FFFFF;
+static const MotorPosition MOTOR_POS_DELTA = 0xFFFFFF;
+
+static const CoderPosition CODER_POS_MAX   = 0x7FFF;
+static const CoderPosition CODER_POS_DELTA = 0xFFFF;
+
 // ROBOT_A == robot attack
 // ROBOT_D == robot defence
 static const Millimeter INFINITE_DIST = -1;

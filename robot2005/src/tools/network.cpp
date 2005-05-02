@@ -21,7 +21,7 @@
 #include <stdio.h>
 #include <unistd.h> // usleep
 #include <assert.h>
-
+//#define LOG_DEBUG_ON
 #include "log.h"
 
 #include "network.h"

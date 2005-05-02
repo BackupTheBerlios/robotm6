@@ -57,17 +57,20 @@ bool BumperSimu::getRebootSwitch(bool& reboot)
 /** @brief function that read all captors and run the corresponding events */
 void BumperSimu::periodicTask()
 {
-   // return;
     bool jack=false;
     bool emergency=false;
     bool btnYes=false;
     bool btnNo=false; 
     BridgeCaptorStatus captors[BRIDGE_CAPTORS_NBR] = {BRIDGE_DETECTED, BRIDGE_DETECTED};
+    //usleep(100000);
     getBridgeCaptors(captors);
+    //usleep(10000);
     getJackin(jack);
+    //usleep(10000);
     getEmergencyStop(emergency);
+    //usleep(10000);
     Simulator->getLcdButtonsState(btnYes, btnNo);
-
+     
     if (!first_) {
         if (captors[BRIDGE_BUMPER_LEFT] == BRIDGE_NO && 
             oldBridge_[0] == BRIDGE_DETECTED) {
@@ -106,7 +109,7 @@ void BumperSimu::periodicTask()
         } 
     }
 
-  oldBridge_[0] = captors[BRIDGE_BUMPER_LEFT];
+    oldBridge_[0] = captors[BRIDGE_BUMPER_LEFT];
     oldBridge_[1] = captors[BRIDGE_BUMPER_RIGHT];
     oldJack_      = jack;
     oldEmergency_ = emergency;

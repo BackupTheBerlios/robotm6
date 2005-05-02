@@ -94,3 +94,41 @@ bool Alim05::disable12V_2()
 {
     return false;
 } 
+
+
+#ifdef TEST_MAIN
+
+
+#include "io/serialPort.h"
+int main(int argc, char* argv[]) 
+{
+    IoManager->submitIoHost(new SerialPort(0, SERIAL_SPEED_38400));
+#ifndef GUMSTIX
+    IoManager->submitIoHost(new SerialPort(1, SERIAL_SPEED_38400));
+#endif
+    IoManager->submitIoHost(new SerialPort(2, SERIAL_SPEED_38400));
+    IoManager->submitIoHost(new SerialPort(3, SERIAL_SPEED_38400));
+    
+    Alim05 alim;
+    Millivolt tension[4];
+    bool loop=true;
+    int choice=0;
+    while(loop) {
+      printf("Menu: 0=getTension, 2=exit\n>");
+      scanf("%d", &choice);
+      switch(choice) {
+      case 0:
+	alim.getAllTension(tension);
+	break;
+      case 2:
+	loop=false;
+	break;
+      default:
+	break;
+      }
+    }
+    printf("Bye\n");
+    return 0;
+}
+
+#endif

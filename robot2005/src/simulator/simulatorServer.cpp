@@ -5,6 +5,8 @@
 #include "simulatorServer.h"
 #include "simulatorRobot.h"
 
+//#define LOG_DEBUG_ON
+
 #define LOG_CLASSID CLASS_SIMULATOR
 #include "log.h"
 #ifdef USE_FTHREAD
@@ -248,10 +250,12 @@ unsigned char* SimulatorConnection::setBufferHeader(SimuRequestType type,
 // ----------------------------------------------------------------------------
 void SimulatorConnection::sendBuffer()
 {
+    LOG_DEBUG("socket_.write, type=%d length=%d\n", buffer_[0], buffer_[1]);
 #ifdef USE_FTHREAD
     ft_thread_unlink();
 #endif
-    socket_.write(buffer_, buffer_[1] + 2);
+    socket_.write(buffer_, buffer_[1] + 2); 
+    LOG_DEBUG("socket_.writen, %d bytes\n", buffer_[1]);
 #ifdef USE_FTHREAD
     ft_thread_link(ftThread::getScheduler());
 #endif
@@ -262,7 +266,8 @@ void SimulatorConnection::sendBuffer()
 // ----------------------------------------------------------------------------
 unsigned char* SimulatorConnection::recvBuffer(SimuRequestType& type)
 {
-    unsigned char* result=NULL;
+    unsigned char* result=NULL; 
+    LOG_DEBUG("recvBuffer\n");
 #ifdef USE_FTHREAD
     ft_thread_unlink();
 #endif
@@ -270,7 +275,10 @@ unsigned char* SimulatorConnection::recvBuffer(SimuRequestType& type)
         && (socket_.read(buffer_+2, buffer_[1]) == buffer_[1])) {
         type = (SimuRequestType)buffer_[0];
         result = &(buffer_[2]);
+    } else {
+      LOG_ERROR("WriteError\n");
     }
+    LOG_DEBUG("recvedBuffer type=%d, length=%d\n", (int)buffer_[0], (int)buffer_[1]);
 #ifdef USE_FTHREAD
     ft_thread_link(ftThread::getScheduler());
 #endif
@@ -336,13 +344,15 @@ void SimulatorConnection::parseReceivedData(SimuRequestType type,
         {
             buf = setBufferHeader(SIMU_REQ_SET_JACKIN, 1);
             buf[0] = robot_->isJackin()?1:0;
+	    //printf("jack=%d\n", buf[0]);
             sendBuffer();
         }
         break;
     case SIMU_REQ_GET_EMERGENCY:
         {
             buf = setBufferHeader(SIMU_REQ_SET_EMERGENCY, 1);
-            buf[0] = robot_->isEmergencyStop()?1:0;
+            buf[0] = robot_->isEmergencyStop()?1:0; 
+	    //printf("au=%d\n", buf[0]);
             sendBuffer();
         }
         break;
@@ -351,6 +361,7 @@ void SimulatorConnection::parseReceivedData(SimuRequestType type,
             buf = setBufferHeader(SIMU_REQ_SET_LCD_BUTTONS, 1);
             bool yes=false, no=false;
             robot_->getLcdButtonsState(yes, no);
+	    //printf("lcd=%s %s\n", b2s(yes), b2s(no));
             buf[0] = (yes?1:0)+(no?2:0);
             sendBuffer();
         }

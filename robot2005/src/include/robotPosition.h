@@ -79,6 +79,8 @@ typedef enum OdometerType {
 
 void robotPositionMotorHasBeenReset();
 
+static const bool CODER_16_BITS=true;
+static const bool CODER_24_BITS=false;
 /**
  * @class RobotPosition
  * Calcul de la position du robot en temps réel.
@@ -221,7 +223,8 @@ class RobotPositionCL : public RobotComponent
                      Millimeter     KRight,
                      Millimeter     D,
                      bool           first,
-		     int &          counter);
+		     int &          counter,
+		     bool           bits16);
   public:
     Position getHctlPosition() const;
     Position getOdometerPosition() const; 

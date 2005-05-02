@@ -287,7 +287,7 @@ Point getAttackWheelPos(bool left, bool forward)
     double s = sin(theta);
     // TODO: get real constants
     const Millimeter LEFT = left?170:-170;
-    const Millimeter FRONT = forward?210:150;
+    const Millimeter FRONT = forward?150:100;
     leftWheel.x += FRONT * c - LEFT * s;
     leftWheel.y += FRONT * s + LEFT * c;
     return leftWheel;

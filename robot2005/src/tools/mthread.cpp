@@ -9,6 +9,7 @@
 
 #define LOG_CLASSID CLASS_MTHREAD
 
+//#define LOG_DEBUG_ON
 #include "mthread.h"
 #include "log.h"
 #include "classConfig.h"

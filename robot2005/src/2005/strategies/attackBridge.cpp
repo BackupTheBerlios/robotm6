@@ -468,7 +468,29 @@ bool StrategyAttackCL::checkBridgeBumperEvent(bool& dummyBumperEvt)
             && !bridgeDetected) {
             // il n'y a pas de pont ici, c'etait vrai!
             LOG_WARNING("No bridge here! %s\n", RobotPos->txt());
-            noBridgeHere();
+            noBridgeHere(); 
+	    if (Events->isInWaitResult(EVENTS_NO_BRIDGE_BUMP_LEFT)) {
+	      if (bridge_ == BRIDGE_POS_MIDDLE_BORDURE) {
+		bridgeAvailibility_ &= (~(1<<BRIDGE_ENTRY_BORDURE_BIT));
+		bridgeAvailibility_ &= (~(1<<BRIDGE_ENTRY_MIDDLE_BORDURE_BIT));
+	      }
+	      if (bridge_ == BRIDGE_POS_MIDDLE_CENTER) {
+		bridgeAvailibility_ &= (~(1<<BRIDGE_ENTRY_BORDURE_BIT));
+		bridgeAvailibility_ &= (~(1<<BRIDGE_ENTRY_MIDDLE_BORDURE_BIT));
+	      }
+	    } else if (Events->isInWaitResult(EVENTS_NO_BRIDGE_BUMP_RIGHT)) {
+	      if (bridge_ == BRIDGE_POS_MIDDLE_BORDURE) {
+		bridgeAvailibility_ &= (~(1<<BRIDGE_ENTRY_CENTER_BIT));
+		bridgeAvailibility_ &= (~(1<<BRIDGE_ENTRY_MIDDLE_CENTER_BIT));
+		bridgeAvailibility_ &= (~(1<<BRIDGE_ENTRY_SIOUX_BIT));
+	      }
+	      if (bridge_ == BRIDGE_POS_MIDDLE_CENTER) {
+		bridgeAvailibility_ &= (~(1<<BRIDGE_ENTRY_CENTER_BIT));
+		bridgeAvailibility_ &= (~(1<<BRIDGE_ENTRY_MIDDLE_CENTER_BIT));
+		bridgeAvailibility_ &= (~(1<<BRIDGE_ENTRY_SIOUX_BIT));
+	      }
+	    }
+	    
 	    dummyBumperEvt=false;
             return true;
         }
@@ -586,7 +608,7 @@ bool StrategyAttackCL::gotoBridgeEntryFar(Millimeter y)
     // on va loin: on recule bettement puit on prend un point cible
     // on s'eloigne un peu du bord, pour aller en x qui nous permet
     //de nous promener tranquillement le long de la riviere
-    Move->go2Target(BRIDGE_ENTRY_NAVIGATE_X, y2, 2, 40);
+    Move->go2Target(BRIDGE_ENTRY_NAVIGATE_X, y2, 2, 40); // norotation
     Events->wait(evtEndMove);
     if (checkEndEvents() || 
         !Events->isInWaitResult(EVENTS_MOVE_END)) {
@@ -604,7 +626,7 @@ bool StrategyAttackCL::gotoBridgeEntryFar(Millimeter y)
       t.push_back(Point(BRIDGE_ENTRY_NAVIGATE_X, y+75));
     t.push_back(Point(BRIDGE_DETECT_BUMP_X, y));
     MvtMgr->setRobotDirection(MOVE_DIRECTION_FORWARD);
-    Move->followTrajectory(t, TRAJECTORY_RECTILINEAR, 1, 30); 
+    Move->followTrajectory(t, TRAJECTORY_RECTILINEAR, 2, 30, true); // norotation
     // dont wait events, it is done by the upper function
     return true;
 }
@@ -661,7 +683,7 @@ bool StrategyAttackCL::gotoBridgeEntryRotateToSeeBridge()
             && bridge_ == BRIDGE_ENTRY_CENTER_Y)) {
         // il faut faire une rotation sur une roue pour voir si le pont 
         // et la et eviter de tomber comme une merde
-        LOG_INFO("Rotate to detect Bridge\n");
+        LOG_COMMAND("Rotate to detect Bridge\n");
 	enableBridgeCaptors();
         MvtMgr->setRobotDirection(MOVE_DIRECTION_FORWARD); 
         Move->enableAccelerationController(true);
@@ -675,11 +697,11 @@ bool StrategyAttackCL::gotoBridgeEntryRotateToSeeBridge()
 	    break;
 	  } 
 	}
-	useBridgeBumpers_=false; // on sait que le pont est la
+	if (result && bridge_ == BRIDGE_POS_BORDURE) useBridgeBumpers_=false; // on sait que le pont est la
         if (checkEndEvents()) 
             return false;
 	disableBridgeCaptors();
-	Move->rotateOnWheel(0 , false, -1, 30);
+	Move->rotateOnWheel(0 , false, 2, 30);
         Events->wait(evtEndMove);
         if (checkEndEvents()) 
             return false;
@@ -703,6 +725,7 @@ bool StrategyAttackCL::crossBridgeDemo()
 }
 
 void StrategyAttackCL::enableBridgeCaptors() {
+  LOG_WARNING("enableBridgeCaptors %s\n", b2s(useBridgeBumpers_));
   if (useBridgeBumpers_) {
     Events->enable(EVENTS_NO_BRIDGE_BUMP_LEFT);
     if (bridgeDetectionByCenter_ && (bridge_ == BRIDGE_POS_MIDDLE_CENTER || bridge_ == BRIDGE_POS_CENTER)) {
@@ -714,6 +737,7 @@ void StrategyAttackCL::enableBridgeCaptors() {
 }
 
 void StrategyAttackCL::disableBridgeCaptors() {
+  LOG_WARNING("enableBridgeCaptors %s\n", b2s(useBridgeBumpers_));
   Events->disable(EVENTS_NO_BRIDGE_BUMP_LEFT);
   Events->disable(EVENTS_NO_BRIDGE_BUMP_RIGHT);
 }

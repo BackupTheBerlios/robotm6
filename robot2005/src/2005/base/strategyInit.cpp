@@ -309,9 +309,8 @@ bool Strategy2005CL::autoCheck()
 {
     LOG_COMMAND("== Auto check begin ==\n");
     testDevicesConnection();
-    sleep(1);
     checkVoltage();
-    checkRebootSwitch();
+    //checkRebootSwitch();
     unlockEmergencyStop();
     return true;
 }
@@ -322,8 +321,8 @@ bool Strategy2005CL::autoCheck()
 bool Strategy2005CL::resetMotorForPrepareRobot()
 {
   MvtMgr->motorIdle();
-  menu("Press any key\nTo block motors");
-  MvtMgr->motorUnidle();
+  // menu("Press any key\nTo block motors");
+  //MvtMgr->motorUnidle();
 #ifdef STARTPOS_USER
   menu("Press any key\nWhen start pos");
   setStartingPosition();
@@ -384,7 +383,7 @@ bool Strategy2005CL::waitJackout()
     // on attends un peu car en general on a du mal a enfoncer
     // la jack et ca fait des faux contacts
     sleep(3);
-#ifdef STARTPOS_USER
+#ifndef STARTPOS_USER
     setStartingPosition();
 #endif
 

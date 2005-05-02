@@ -1,5 +1,6 @@
 #include <unistd.h>
 
+//#define LOG_DEBUG_ON
 #include "movementManager.h"
 #include "mthread.h"
 #include "log.h"
@@ -23,10 +24,14 @@ MovementManagerCL::MovementManagerCL(MotorCL* motor, OdometerCL* odom) :
      odomDeltaMoveLeft_(0),
      odomDeltaMoveRight_(0),
      pwmDeltaLeft_(0),
-     pwmDeltaRight_(0),
+     pwmDeltaRight_(0), 
+     oldHctlLeftDelta_(0),
+     oldHctlRightDelta_(0),
+     oldOdomLeftDelta_(0),
+     oldOdomRightDelta_(0),
      pattinageIndex_(0),
      pattinageBufferSize_(0)
- {
+{
      LOG_FUNCTION();
      mvtMgr_   = this;
      position_ = new RobotPositionCL();
@@ -184,14 +189,14 @@ void MovementManagerCL::motorUnidle()
              motor_->idle();
              motorCom_.idle = false;
          }
-         if (motorCom_.unidle==2) {
+         if (motorCom_.unidle==20) {
 	   motorCom_.speedLeft = 0;
 	   motorCom_.speedRight = 0;
 	   motorCom_.unidle = 0;
 	 } else if (motorCom_.unidle == 1) {
-	     motorCom_.speedLeft=1;
-	     motorCom_.speedRight=1;
-	     motorCom_.unidle=2;
+	     motorCom_.speedLeft=8;
+	     motorCom_.speedRight=8;
+	     motorCom_.unidle++;
 	 }
          if (motorCom_.setAcc > 0 && motor_) {
              motor_->setAcceleration(motorCom_.setAcc);
@@ -227,6 +232,16 @@ void MovementManagerCL::motorUnidle()
     }
 }
 
+template <typename T>
+void resetPatinageBuffer(T buf[])
+{
+  for(unsigned int i=0; i< PATINAGE_BUFFER_SIZE; i++) {
+    buf[i]=0;
+    buf[i]=0;
+  }
+}
+
+static const MotorPWM PATINAGE_PWM_LIMIT = 60;
 // --------------------------------------------------------------------------------
 // detection du patinage des roues
 // -------------------------------------------------------------------------------- 
@@ -246,48 +261,104 @@ void MovementManagerCL::updatePatinageBuffers()
     pattinageBufferSize_ = 2*PATINAGE_BUFFER_SIZE;
     // compare la position des hctl et des odometre entre la position
     // courante et la position il y a PATINAGE_BUFFER_SIZE cycles
-    CoderPosition delta = abs((hctlLeftBuffer_[pattinageIndex_] 
-			       - hctlLeftBuffer_[pattinageIndexLast]));
-    LOG_DEBUG("I=%d %d H=%d %d  M=%d %d\n",
-	     pattinageIndex_, pattinageIndexLast, 
-	     hctlLeftBuffer_[pattinageIndex_] , hctlLeftBuffer_[pattinageIndexLast], 
-	     SHRT_MAX, USHRT_MAX);
-    if (delta > SHRT_MAX) delta -= USHRT_MAX;
+    LOG_DEBUG("IL=%d %d H=%d %d \n",
+	      pattinageIndex_, pattinageIndexLast, 
+	      hctlLeftBuffer_[pattinageIndex_] , hctlLeftBuffer_[pattinageIndexLast]);
+    LOG_DEBUG("IR=%d %d H=%d %d\n",
+	      pattinageIndex_, pattinageIndexLast, 
+	      hctlRightBuffer_[pattinageIndex_] , hctlRightBuffer_[pattinageIndexLast]);
+
+    // ODOMETERS
+    CoderPosition delta = abs((odomLeftBuffer_[pattinageIndex_] 
+			       - odomLeftBuffer_[pattinageIndexLast]));
+    if (delta > CODER_POS_MAX) delta -= CODER_POS_DELTA;
+    if (oldOdomLeftDelta_ * motorCom_.speedLeft < -1) {
+      // on a change de sens de mouvement, on reset les buffer
+      resetPatinageBuffer(odomLeftBuffer_);
+      resetPatinageBuffer(hctlLeftBuffer_);
+      resetPatinageBuffer(pwmLeftBuffer_);
+      odomDeltaMoveLeft_ = 0; 
+      resetPatinageBuffer(odomRightBuffer_);
+      resetPatinageBuffer(hctlRightBuffer_);
+      resetPatinageBuffer(pwmRightBuffer_);
+      odomDeltaMoveRight_ = 0;
+      LOG_DEBUG("%d\n", oldOdomLeftDelta_);
+
+    } else {
+      odomDeltaMoveLeft_  = (int)(RobotConfig->getOdometerKLeft() * delta);
+    }
+    oldOdomLeftDelta_ = motorCom_.speedLeft;
+   
+
+    delta = abs((odomRightBuffer_[pattinageIndex_] 
+		 - odomRightBuffer_[pattinageIndexLast]));
+    if (delta > CODER_POS_MAX) delta -= CODER_POS_DELTA;
+    if (oldOdomRightDelta_ * motorCom_.speedRight < -1) {
+      // on a change de sens de mouvement, on reset les buffer
+      resetPatinageBuffer(odomLeftBuffer_);
+      resetPatinageBuffer(hctlLeftBuffer_);
+      resetPatinageBuffer(pwmLeftBuffer_);
+      odomDeltaMoveLeft_ = 0; 
+      resetPatinageBuffer(odomRightBuffer_);
+      resetPatinageBuffer(hctlRightBuffer_);
+      resetPatinageBuffer(pwmRightBuffer_);
+      odomDeltaMoveRight_ = 0;
+      LOG_DEBUG("%d\n", oldOdomRightDelta_);
+
+    } else {
+      odomDeltaMoveRight_ = (int)(RobotConfig->getOdometerKRight() * delta);
+    }
+    oldOdomRightDelta_ = motorCom_.speedRight;
+
+
+    // HCTLS
+    delta = abs((hctlLeftBuffer_[pattinageIndex_] 
+		 - hctlLeftBuffer_[pattinageIndexLast]));
+    if (delta > MOTOR_POS_MAX) delta -= MOTOR_POS_DELTA;
     hctlDeltaMoveLeft_  = (int)(RobotConfig->getMotorKLeft() * delta);
+
+
 
     delta = abs((hctlRightBuffer_[pattinageIndex_] 
 		 - hctlRightBuffer_[pattinageIndexLast]));
-    if (delta > SHRT_MAX) delta -= USHRT_MAX;
+    if (delta > MOTOR_POS_MAX) delta -= MOTOR_POS_DELTA;
     hctlDeltaMoveRight_ = (int)(RobotConfig->getMotorKRight() * delta);
+    
 
-    delta = abs((odomLeftBuffer_[pattinageIndex_] 
-		 - odomLeftBuffer_[pattinageIndexLast]));
-    if (delta > SHRT_MAX) delta -= USHRT_MAX;
-    odomDeltaMoveLeft_  = (int)(RobotConfig->getOdometerKLeft() * delta);
-
-    delta = abs((odomLeftBuffer_[pattinageIndex_] 
-		 - odomLeftBuffer_[pattinageIndexLast]));
-    if (delta > SHRT_MAX) delta -= USHRT_MAX;
-    odomDeltaMoveRight_ = (int)(RobotConfig->getOdometerKRight() * delta);
-   
-
-    pwmDeltaLeft_ += pwmLeftBuffer_[pattinageIndexLast] - pwmLeftBuffer_[pattinageIndex_];
-    pwmDeltaRight_ += pwmRightBuffer_[pattinageIndexLast] - pwmRightBuffer_[pattinageIndex_];
+    pwmDeltaLeft_ =0;	
+    pwmDeltaRight_ =0;
+    for(unsigned int i=0; i< PATINAGE_BUFFER_SIZE; i++) {
+      pwmDeltaLeft_ +=pwmLeftBuffer_[i];
+      pwmDeltaRight_ +=pwmRightBuffer_[i];
+    } 
+    if (pwmLeftBuffer_[pattinageIndex_] < PATINAGE_PWM_LIMIT) {
+      resetPatinageBuffer(pwmLeftBuffer_);
+    } else {
+      for(unsigned int i=0; i< PATINAGE_BUFFER_SIZE; i++) {
+	pwmDeltaLeft_ +=pwmLeftBuffer_[i];
+      } 
+    }
+    if (pwmRightBuffer_[pattinageIndex_] < PATINAGE_PWM_LIMIT) {
+        resetPatinageBuffer(pwmRightBuffer_);
+    } else {
+      for(unsigned int i=0; i< PATINAGE_BUFFER_SIZE; i++) {
+	pwmDeltaRight_ +=pwmRightBuffer_[i];
+      } 
+    }
     LOG_DEBUG("left: o=%d h=%d p=%d;  right: o=%d h=%d p=%d\n", 
-	     (int)odomDeltaMoveLeft_, (int)hctlDeltaMoveLeft_, (int)pwmDeltaLeft_,
-	     (int)(odomDeltaMoveRight_), (int)hctlDeltaMoveRight_, (int)pwmDeltaRight_);
+	      (int)odomDeltaMoveLeft_, (int)hctlDeltaMoveLeft_, (int)floor(pwmDeltaLeft_/PATINAGE_BUFFER_SIZE),
+	      (int)(odomDeltaMoveRight_), (int)hctlDeltaMoveRight_, (int)floor(pwmDeltaRight_/PATINAGE_BUFFER_SIZE));
   }
 }
+
 
 void MovementManagerCL::resetPatinageDetection()
 {
   pattinageBufferSize_ = 0;
   pwmDeltaLeft_=0;
   pwmDeltaRight_=0;
-  for(unsigned int i=0; i< PATINAGE_BUFFER_SIZE; i++) {
-    pwmLeftBuffer_[i]=0;
-    pwmRightBuffer_[i]=0;
-  }
+  resetPatinageBuffer(pwmLeftBuffer_);
+  resetPatinageBuffer(pwmRightBuffer_);
 }
 
 void MovementManagerCL::checkPatinage() 
@@ -295,12 +366,12 @@ void MovementManagerCL::checkPatinage()
   // compare motor and odometer pos
 
   updatePatinageBuffers();
-  if (pattinageBufferSize_ <= PATINAGE_BUFFER_SIZE) return; // pas
+  if (pattinageBufferSize_ <= PATINAGE_BUFFER_SIZE+2) return; // pas
 							   // 
 							   // assez de donnees !
   // odometre bouge de moins de 2cm
   // hctl bougent de plus de 10 cm
-  if ((abs(odomDeltaMoveLeft_) < 20) 
+  if ((abs(odomDeltaMoveLeft_) < 10) 
       && (abs(hctlDeltaMoveLeft_) > 60)) { 
     LOG_WARNING("Patinage roue gauche! odom=%d hctl=%d\n", 
 		(int)odomDeltaMoveLeft_, (int)hctlDeltaMoveLeft_ );
@@ -308,7 +379,8 @@ void MovementManagerCL::checkPatinage()
     Move->idleMotorLeft();
     resetPatinageDetection();
   }
-  if ((abs(odomDeltaMoveRight_) < 20) && (abs(hctlDeltaMoveRight_) > 60)) { 
+  if ((abs(odomDeltaMoveRight_) < 10) 
+      && (abs(hctlDeltaMoveRight_) > 60)) { 
     LOG_WARNING("Patinage roue droite! odom=%d hctl=%d\n",
 		(int)(odomDeltaMoveRight_), (int)hctlDeltaMoveRight_ );
     Events->raise(EVENTS_PWM_ALERT_RIGHT);
@@ -316,18 +388,18 @@ void MovementManagerCL::checkPatinage()
     resetPatinageDetection();
   }
 
-  if ((abs(odomDeltaMoveLeft_) < 20) 
-      && (abs(pwmDeltaLeft_) > 60*PATINAGE_BUFFER_SIZE)) { 
+  if ((abs(odomDeltaMoveLeft_) < 10) 
+      && (abs(pwmDeltaLeft_) > PATINAGE_PWM_LIMIT*PATINAGE_BUFFER_SIZE)) { 
     LOG_WARNING("Forcage roue gauche! odom=%d pwm=%d\n", 
-		(int)pwmDeltaLeft_, (int)pwmDeltaLeft_ );
+		(int)odomDeltaMoveLeft_, (int)floor(pwmDeltaLeft_ /PATINAGE_BUFFER_SIZE));
     Events->raise(EVENTS_PWM_ALERT_LEFT);
     Move->idleMotorLeft();
     resetPatinageDetection();
   }
-  if ((abs(odomDeltaMoveRight_) < 20) 
-      && (abs(pwmDeltaRight_) > 60*PATINAGE_BUFFER_SIZE)) { 
+  if ((abs(odomDeltaMoveRight_) < 10) 
+      && (abs(pwmDeltaRight_) > PATINAGE_PWM_LIMIT*PATINAGE_BUFFER_SIZE)) { 
     LOG_WARNING("Forcage roue droite! odom=%d pwm=%d\n",
-		(int)(pwmDeltaRight_), (int)pwmDeltaRight_ );
+		(int)(odomDeltaMoveRight_), (int)floor(pwmDeltaRight_/PATINAGE_BUFFER_SIZE));
     Events->raise(EVENTS_PWM_ALERT_RIGHT);
     Move->idleMotorRight();
     resetPatinageDetection();

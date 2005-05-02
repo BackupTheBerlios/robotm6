@@ -172,6 +172,10 @@ class MovementManagerCL : public RobotComponent
     int    odomDeltaMoveRight_;
     int           pwmDeltaLeft_;
     int           pwmDeltaRight_;
+    int           oldHctlLeftDelta_;
+    int           oldHctlRightDelta_;
+    int           oldOdomLeftDelta_;
+    int           oldOdomRightDelta_;
     unsigned int  pattinageIndex_;
     unsigned int  pattinageBufferSize_;
 };
