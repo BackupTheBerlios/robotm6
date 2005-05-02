@@ -53,30 +53,30 @@ void StrategyAttackCL::getNearestBridgeEntry()
 {
     unsigned char currentBit = getPosBit();
 
-    // si on a deja tout teste, on reteste a nouveau sauf l'endrit ou on est...
+    // si on a deja tout teste on passe en mode sioux, on reteste a nouveau sauf l'endroit ou on est...
     if (!(bridgeAvailibility_ & 0x0F)) {
         if (bridgeBySharps_ != BRIDGE_POS_UNKNOWN) {
-	  // utilise la position des capteurs sharps et desactive les
-	  // capteurs de pont
-	  disableBridgeCaptors();  
-	  useBridgeBumpers_ = false;
-	  bridge_ = bridgeBySharps_;
-	  LOG_WARNING("Nearest bridge - Stop using bumpers, use sharps! goto: %s\n", 
-		    BridgePosTxt(bridge_));
-	  Log->bridge(bridge_);
-	  return;
+	    // utilise la position des capteurs sharps et desactive les
+	    // capteurs de pont
+	    disableBridgeCaptors();  
+	    useBridgeBumpers_ = false;
+	    bridge_ = bridgeBySharps_;
+	    LOG_WARNING("Nearest bridge - Stop using bumpers, use sharps! goto: %s\n", 
+			BridgePosTxt(bridge_));
+	    Log->bridge(bridge_);
+	    return;
 	} else {
-	  // sioux
-	  disableBridgeCaptors();  
-	  bridge_ = BRIDGE_POS_CENTER;
-	  bridgeDetectionByCenter_ = true;
-	   LOG_WARNING("Nearest bridge - Stop using bumpers, use sioux, I AM A KAMIKAZE! goto: %s\n", 
-		    BridgePosTxt(bridge_));
-	  Log->bridge(bridge_);
-	  return;
-	  // on continue de tout essayer
-	  bridgeAvailibility_ = 0x1F;
-	  noBridgeHere();
+	    // sioux
+	    disableBridgeCaptors();  
+	    bridge_ = BRIDGE_POS_CENTER;
+	    bridgeDetectionByCenter_ = true;
+	    LOG_WARNING("Nearest bridge - Stop using bumpers, use sioux, I AM A KAMIKAZE! goto: %s\n", 
+			BridgePosTxt(bridge_));
+	    Log->bridge(bridge_);
+	    return;
+	    // on continue de tout essayer
+	    bridgeAvailibility_ = 0x1F;
+	    noBridgeHere();
 	}
     }
     // trouve le pont non explore le plus proche
@@ -103,7 +103,7 @@ void StrategyAttackCL::getNearestBridgeEntry()
             currentBit=(currentBit+1)%4;
         }
     }
-    // verifie aue la nouvelle position a essayer n'a pas encore
+    // verifie que la nouvelle position a essayer n'a pas encore
     // ete essayee, si c'est le cas, on essaye le pont d'a cote
     printf("A: Ox%2.2x 0X%2.2x\n", bridgeAvailibility_, currentBit);
     if (!(bridgeAvailibility_ & (1<<currentBit))) {
