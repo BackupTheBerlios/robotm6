@@ -165,6 +165,9 @@ bool StrategyLargeAttackCL::centerOnSupport(Point supportCenter) {
 		// no idea what happened -> return false
 		return false;
 	    }
+	} else {
+	    LOG_INFO("leaving centerSupport after succesful gotoTarget\n");
+	    return true;
 	}
     }
     LOG_INFO("leaving centerSupport (%s)\n", centered?"success":"failed");
@@ -180,7 +183,7 @@ bool StrategyLargeAttackCL::rotateOnSupport(Point supportCenter,
     bool rotated;
     while (!(rotated = (fabs(RobotPos->thetaAbsolute() - targetTheta)
 			< MOVE_ROTATION_EPSILON))
-	   && retries < 2) {
+	   && retries < 3) {
 	retries++;
 	if (Geometry2D::getSquareDistance(supportCenter, currentPos)
 	    > MAX_ROTATE_DELTA_SQUARE) {
