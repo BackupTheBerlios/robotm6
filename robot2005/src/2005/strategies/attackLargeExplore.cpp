@@ -291,10 +291,10 @@ bool StrategyLargeAttackCL::handleCollision(CollisionEnum collision,
 	Log->support(supportCenter, supportCenter);
 
 	// some data we are going to need:
-	const bool isHorizontalLine = (lineStart.x == lineEnd.x);
+	const bool isHorizontalLine = (lineStart.y == lineEnd.y);
 	const bool isPositifLine = (isHorizontalLine?
-				    (lineEnd.y > lineStart.y):
-				    (lineEnd.x > lineStart.x));
+				    (lineEnd.x > lineStart.x):
+				    (lineEnd.y > lineStart.y));
 
 	Radian lineDirection; // direction of line.
 	Point nextIntersectionOnLine = supportCenter; // will be adjusted.
