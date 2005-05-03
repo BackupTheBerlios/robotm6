@@ -661,21 +661,24 @@ void StrategyAttackCL::basicSkittleExplorationRow(GridPoint gpts[3])
         }
         
     }
+    static int lastBestLine_=2;
     if (bestLine == 0) {
         // il n'y a pas de bonne ligne...
         // TODO: ne pas prendre la meme que la derniere fois
         if (RobotPos->x() < 2900) {
-            bestLine = 4;
+	  bestLine = 4+(lastBestLine_+1)%3;
         } else {
-            bestLine = -4;
+	  bestLine = -(4+(lastBestLine_+1)%3);
         }
+	
     }
-    
+    lastBestLine_ = abs(bestLine);
+
     // point de depart de la colonne choisie
     gpts[1]=GridPoint(gpts[0].x, abs(bestLine));
     if (gpts[1].x <= 0) gpts[1].x = 1;
     if (gpts[1].x >= 4) gpts[1].x = 3;
-    if (gpts[1].y <= 0) gpts[1].y = 1;
+    if (gpts[1].y <= 0) gpts[1].y = 5-gpts[1].x;
     if (gpts[1].y >= 6) gpts[1].y = 6;
     
     // point d'arrivee de la colonne. bestLine >0 => on va vers 
@@ -714,26 +717,29 @@ void StrategyAttackCL::basicSkittleExplorationCol(GridPoint gpts[3])
             bestLine = -i;
         }
     }
+    static int lastBestCol_=2;
     if (bestLine == 0) {
-        // il n'y a pas de bonne colonne, on prend celle du milieu
-        // TODO il ne faudrait pas prendre la meme que la derniere fois
-        if (RobotPos->y() < 1050) {
-            bestLine = 2;
+        // il n'y a pas de bonne ligne...
+        // TODO: ne pas prendre la meme que la derniere fois
+        if (RobotPos->x() < 1500) {
+	  bestLine = 1+(lastBestCol_)%3;
         } else {
-            bestLine = -2;
+	  bestLine = -(1+(lastBestCol_)%3);
         }
-    } 
+	
+    }
+    lastBestCol_ = abs(bestLine);
 
     // point de depart de la colonne choisie
     gpts[1]=GridPoint(abs(bestLine), gpts[0].y);
     if (gpts[1].x <= 0) gpts[1].x = 1;
     if (gpts[1].x >= 4) gpts[1].x = 3;
-    if (gpts[1].y <= 0) gpts[1].y = 1;
+    if (gpts[1].y <= 0) gpts[1].y = 5-gpts[1].x;
     if (gpts[1].y >= 6) gpts[1].y = 6;
     
     // point d'arrivee de la colonne. bestLine >0 => on va vers 
     // les y croissants, <0: on va vers les y decroissant
-    gpts[2]=GridPoint(gpts[1].x, bestLine>0? 5 : 1);
+    gpts[2]=GridPoint(gpts[1].x, bestLine>0? 6:5-gpts[1].x);
 }
 
 // ------------------------------------------------------------------------
@@ -747,14 +753,14 @@ bool StrategyAttackCL::exploreGrid(GridPoint gpts[3])
         return false;
     if (!rotateOnGtps1(gpts)) 
         return false;
-    if (!backBeforeGpts2(gpts)) 
-        return false;
+    //   if (!backBeforeGpts2(gpts)) 
+    //    return false;
     if (!gotoGpts2(gpts, needMoveBackward)) 
         return false;
-    if (needMoveBackward) {
-        if (!goBackToGpts2(gpts)) 
-            return false;
-    }
+    //if (needMoveBackward) {
+    //    if (!goBackToGpts2(gpts)) 
+    //        return false;
+    //}
     return true;
 }
 
@@ -782,13 +788,17 @@ bool StrategyAttackCL::gotoGtps1(GridPoint gpts[3])
     // case car on s'arrete toujours trop tot
     pt1.x += ATTACK_CHANGE_TARGET_POINT_DIST * cos(dirPt1);
     pt1.y += ATTACK_CHANGE_TARGET_POINT_DIST * sin(dirPt1);
-    Move->go2Target(pt1, attackExploreGain, attackExploreMaxSpeed);
-    Events->wait(evtEndMove);
-    // on a reussi ?
-    if (Events->isInWaitResult(EVENTS_MOVE_END)) return true;
-    // c'est la fin du match?
-    if (checkEndEvents()) return false;
-    return goOverSupport();
+    unsigned int retry=0;
+    do {
+      Move->go2Target(pt1, attackExploreGain, attackExploreMaxSpeed);
+      Events->wait(evtEndMove);
+      // on a reussi ?
+      if (Events->isInWaitResult(EVENTS_MOVE_END)) return true;
+      // c'est la fin du match?
+      if (checkEndEvents()) return false;
+      goOverSupport();
+    } while(retry++ < ATTACK_EXPLORE_RETRY);
+    return true;
 }
 
 // ---------------------------------------------------------------------
@@ -807,7 +817,8 @@ bool StrategyAttackCL::rotateOnGtps1(GridPoint gpts[3])
     if (Events->isInWaitResult(EVENTS_MOVE_END)) return true;
     // c'est la fin du match?
     if (checkEndEvents()) return false;
-    return goOverSupport();
+    goOverSupport();
+    return true;
 }
 
 // ---------------------------------------------------------------------
@@ -857,6 +868,7 @@ bool StrategyAttackCL::gotoGpts2(GridPoint gpts[3],
     // on regard si on ne peut pas aller une plus loin que le point d'arrivee
     Point targetPoint=GridAttack::getPoint(gpts[2]);
     needMoveBackward = false;
+    /*
     if (gpts[1].x < gpts[2].x) {
         targetPoint.x += TERRAIN_CASE_LARGEUR;
         needMoveBackward = true;
@@ -869,6 +881,7 @@ bool StrategyAttackCL::gotoGpts2(GridPoint gpts[3],
             needMoveBackward = true;
         }
     } 
+    */
     if (!needMoveBackward) {
         // si on n'aura pas a reculer a la fin du mouvement
         // decaller le point d'arrivee pour etre sur d'etre au centre du 
@@ -878,14 +891,18 @@ bool StrategyAttackCL::gotoGpts2(GridPoint gpts[3],
         targetPoint.y += ATTACK_CHANGE_TARGET_POINT_DIST * sin(dirPt2);
     }
 
-    MvtMgr->setRobotDirection(MOVE_DIRECTION_FORWARD);
-    Move->go2Target(targetPoint, attackExploreGain, attackExploreMaxSpeed);
-    Events->wait(evtEndMove);
-    // on a reussi ?
-    if (Events->isInWaitResult(EVENTS_MOVE_END)) return true;
-    // c'est la fin du match?
-    if (checkEndEvents()) return false;
-    return goOverSupport();
+    unsigned int retry=0;
+    do {
+      MvtMgr->setRobotDirection(MOVE_DIRECTION_FORWARD);
+      Move->go2Target(targetPoint, attackExploreGain, attackExploreMaxSpeed);
+      Events->wait(evtEndMove);
+      // on a reussi ?
+      if (Events->isInWaitResult(EVENTS_MOVE_END)) return true;
+      // c'est la fin du match?
+      if (checkEndEvents()) return false;
+      goOverSupport();
+    } while(retry++ < ATTACK_EXPLORE_RETRY);
+    return true;
 }
 // ---------------------------------------------------------------------
 // On a depasse Gpts2, on recule pour aller sur gpts2

@@ -345,15 +345,20 @@ void TestMoveStrategy3CL::run(int argc, char* argv[])
     //RobotPos->setOdometerType(ODOMETER_MOTOR);
     RobotPos->setOdometerType(ODOMETER_UART_MANUAL);
     setStartingPosition();
-    waitStart(INIT_FAST);
+    waitStart(INIT_NONE);
     Move->enableAccelerationController(false);
     MvtMgr->enableAutomaticReset(false);
 
     RobotPos->set(0, 0, 0); 
     //Move->realign(0);
     //Move->rotateOnWheel(0, false);
-    Move->go2Target(Point(1000,0));
-    //Move->rotateFromAngle(4*M_PI);
+    //Move->go2Target(Point(900,0));
+    Move->rotateFromAngle(-2*M_PI);
+    Events->wait(evtEndMovePwm);
+    if (Events->isInWaitResult(EVENTS_MOVE_END)) {
+      LOG_OK("Move end correct\n");
+    }
+    Move->rotateFromAngle(-2*M_PI);
     Events->wait(evtEndMovePwm);
     if (Events->isInWaitResult(EVENTS_MOVE_END)) {
       LOG_OK("Move end correct\n");
@@ -362,6 +367,7 @@ void TestMoveStrategy3CL::run(int argc, char* argv[])
     RobotPos->print();
     sleep(5);
     RobotPos->print();
+    while(1){sleep(1);}
     return; 
 
     Move->go2Target(Point(1000,0));
@@ -421,7 +427,7 @@ LOG_INFO("MODE REAL\n");
 LOG_INFO("SIMULATED\n");
 #endif
 
-#define ROBOT_DEFENCE
+//#define ROBOT_DEFENCE
 
 #ifdef ROBOT_DEFENCE
   LOG_INFO("ROBOT_DEFENCE\n");

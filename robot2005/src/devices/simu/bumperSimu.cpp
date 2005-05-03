@@ -62,7 +62,7 @@ void BumperSimu::periodicTask()
     bool btnYes=false;
     bool btnNo=false; 
     BridgeCaptorStatus captors[BRIDGE_CAPTORS_NBR] = {BRIDGE_DETECTED, BRIDGE_DETECTED};
-    //usleep(100000);
+    usleep(50000);
     getBridgeCaptors(captors);
     //usleep(10000);
     getJackin(jack);

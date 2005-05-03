@@ -294,7 +294,7 @@ SimuMatchStatus SimulatorClient::getMatchStatus()
 
     unsigned char* buf=recvBuffer(SIMU_REQ_SET_STATUS);
     if (!buf) return SIMU_STATUS_NEED_RESET;
-    printf("yes=0x%2.2x\n", buf[0]);
+    //printf("match=0x%2.2x\n", buf[0]);
     return (SimuMatchStatus)buf[0];
 }
 
@@ -312,7 +312,7 @@ bool SimulatorClient::isJackin()
 
     unsigned char* buf=recvBuffer(SIMU_REQ_SET_JACKIN);
     if (!buf) return false;
-    printf("yes=0x%2.2x\n", buf[0]);
+    //printf("jack=0x%2.2x\n", buf[0]);
     return (bool)buf[0];
 }
 
@@ -330,7 +330,7 @@ bool SimulatorClient::isEmergencyStop()
 
     unsigned char* buf=recvBuffer(SIMU_REQ_SET_EMERGENCY);
     if (!buf) return false;
-    printf("yes=0x%2.2x\n", buf[0]);
+    //printf("au=0x%2.2x\n", buf[0]);
     return (bool)buf[0];
    
 }
@@ -349,12 +349,12 @@ void SimulatorClient::getLcdButtonsState(bool& btnYes, bool& btnNo)
 
     unsigned char* buf=recvBuffer(SIMU_REQ_SET_LCD_BUTTONS);
     if (!buf) {
-      printf("Err\n");
+      //printf("Err\n");
       return;
     }
     btnYes = buf[0] & 0x01;
     btnNo  = buf[0] & 0x02;
-    printf("yes=0x%2.2x\n", buf[0]);
+    //printf("lcd=0x%2.2x\n", buf[0]);
 }
 
 // ----------------------------------------------------------------------------
@@ -439,7 +439,6 @@ void SimulatorClient::getOdomPosition(CoderPosition& left,
 void SimulatorClient::getRobotEstimatedPosition(Point& pt, Radian& dir)
 {
     if (!socket_) return;
-    printf("getRobotEstimatedPosition\n");
     Lock localLock(&lock_);
     setBufferHeader(SIMU_REQ_GET_ESTIMATE_POS, 0);
     sendBuffer();
@@ -449,7 +448,6 @@ void SimulatorClient::getRobotEstimatedPosition(Point& pt, Radian& dir)
       memcpy(&pt, buf, sizeof(Point)); buf += sizeof(Point);
       memcpy(&dir, buf, sizeof(Radian)); 
     }
-    printf("getRobotEstimatedPosition end\n");    
 }
 
 // ----------------------------------------------------------------------------
@@ -471,7 +469,6 @@ void SimulatorClient::resetRobotEstimatedPosition()
 void SimulatorClient::getRobotRealPosition(Point& pt, Radian& dir)
 {
     if (!socket_) return;
-    printf("getRobotRealPosition\n");
     Lock localLock(&lock_);
     setBufferHeader(SIMU_REQ_GET_REAL_POS, 0);
     sendBuffer();
@@ -481,7 +478,6 @@ void SimulatorClient::getRobotRealPosition(Point& pt, Radian& dir)
       memcpy(&pt, buf, sizeof(Point)); buf += sizeof(Point);
       memcpy(&dir, buf, sizeof(Radian));
     }
-    printf("getRobotRealPosition end\n");
     
 }
 

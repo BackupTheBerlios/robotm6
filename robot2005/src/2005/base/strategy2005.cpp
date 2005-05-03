@@ -305,7 +305,7 @@ bool Strategy2005CL::menu(const char*fmt, ...)
     if (strlen(text)>0 && fmt != NULL) {
         Lcd->print(text);
     }
-    Events->waitNot(evtDialogButtonReleasedFilter);
+    Events->waitNot(evtDialogButtonFilter);
     Events->wait(evtDialogButtonFilter);
     Lcd->print("Please wait...");
     return (Events->isInWaitResult(EVENTS_BUTTON_YES));

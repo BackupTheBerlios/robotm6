@@ -34,7 +34,7 @@ void StrategyAttackEnvDetectorCallBack(void* userData,
 StrategyAttackCL::StrategyAttackCL(RobotMainCL* main, const char* menuName): 
     Strategy2005CL("StrategyAttack", menuName, CLASS_STRATEGY, main),
     bridgeAvailibility_(0xFF), bridge_(BRIDGE_POS_UNKNOWN), 
-    useLeftBridge_(true), bridgeDetectionByCenter_(true), 
+    useLeftBridge_(true), bridgeDetectionByCenter_(true), gotoSiouxFirst_(false),
     useSharpToDetectBridge_(true),
     grid_(NULL), lastExplorationDir_(ATTACK_EXPLORE_COL),
     attackPhase_(ATTACK_WAIT_START), skittleMiddleProcessed_(false),
@@ -61,14 +61,14 @@ bool StrategyAttackCL::autoCheck()
 {
     Strategy2005CL::autoCheck();
     // est ce qu'on essaye de passer par le pont du milieu ?
-    demoMode_ = menu("Bridge mid cent\nDemo    Normal")?1:0;
-    bridgeDetectionByCenter_ = !menu("Strategy\nGauche    Sioux");
+    //demoMode_ = menu("Bridge mid cent\nDemo    Normal")?1:0;
+    gotoSiouxFirst_ = !menu("Strategy\nLeft    Sioux");
     Lcd->print("Catapult armed\n++ Test Move ++"); 
     // met les servos en position
-    sleep(1);
-    prepareCatapults();
+    //sleep(1);
+    //prepareCatapults();
     // verifier les capteurs sharps et bumpers detecteurs de pont
-    sleep(1);
+    //sleep(1);
     testBridgeCaptors();
     // verifier les sharps detecteurs d'environnement
     // TODO
@@ -101,7 +101,7 @@ void StrategyAttackCL::run(int argc, char* argv[])
                                      StrategyAttackEnvDetectorCallBack,
                                      "StrategyAttackEnvDetectorCallBack");
     setStartingPosition();
-    bridgeDetectionByCenter_=true;
+    bridgeDetectionByCenter_= (gotoSiouxFirst_ || true); // utilise le passage ne mode sioux
     waitStart(INIT_COMPLETE);
 
     Move->enableAccelerationController(false);
@@ -118,7 +118,7 @@ void StrategyAttackCL::run(int argc, char* argv[])
     if (demoMode_==1) {
       crossBridgeDemo();
     } else {
-      gotoBridgeDetection();
+      gotoBridgeDetection(gotoSiouxFirst_);
       Move->stop();
       // sleep(5);
       if (checkEndEvents()) return; // fin du match

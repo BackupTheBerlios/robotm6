@@ -9,6 +9,10 @@
 #include "geometry2D.h"
 #include "bumperMapping.h"
 
+// #define USE_SHARPS_FIRST  // ancien mode ou on utilise les
+// sharpspour savoir ou est le pont. si cette ligne est commentee, on
+// fait juste loguer l'info des sharps
+
 // ----------------------------------------------------------------------------
 // Cette fonction est un EventsFn qui permet d'attendre la fin d'un 
 // mouvement en testant en plus si il y a un fosse devant
@@ -210,17 +214,17 @@ void StrategyAttackCL::noBridgeHere()
 // --------------------------------------------------------------------------
 // va a l'endroit ou on detecte les pont par capteurs sharps 
 // --------------------------------------------------------------------------
-bool StrategyAttackCL::gotoBridgeDetection()
+bool StrategyAttackCL::gotoBridgeDetection(bool gotoSiouxFirst)
 {
   Events->disable(EVENTS_NO_BRIDGE_BUMP_LEFT);
   Events->disable(EVENTS_NO_BRIDGE_BUMP_RIGHT);
   while(true) {
       LOG_INFO("gotoBridgeDetection(%s)\n",
-               bridgeDetectionByCenter_?"Passe par le milieu":"Passe par un pont normal");
+               gotoSiouxFirst?"Passe par le milieu":"Passe par un pont normal");
       Trajectory t;
       t.push_back(Point(RobotPos->x(), RobotPos->y()));
       t.push_back(Point(RobotPos->x()+250, RobotPos->y()));
-      if (bridgeDetectionByCenter_) {
+      if (gotoSiouxFirst) {
           // va vers le pont du milieu
           t.push_back(Point(BRIDGE_DETECT_SHARP_X-250, BRIDGE_ENTRY_SIOUX_Y));
           t.push_back(Point(BRIDGE_DETECT_SHARP_X,     BRIDGE_ENTRY_SIOUX_Y));
@@ -243,10 +247,12 @@ bool StrategyAttackCL::gotoBridgeDetection()
 	 }
 	 return true;
       }
-      // collision: on recule et on essaye de repartir par un autre endroit...
-      Move->backward(300);
-      Events->wait(evtEndMoveNoCollision);
-      bridgeDetectionByCenter_ = !bridgeDetectionByCenter_;
+      if (RobotPos->x()>600) {
+	// collision: on recule et on essaye de repartir par un autre endroit...
+	Move->backward(100);
+	Events->wait(evtEndMoveNoCollision);
+	gotoSiouxFirst = !gotoSiouxFirst;
+      }
   }
   return false;
 }
@@ -303,6 +309,7 @@ bool StrategyAttackCL::getBridgeCaptors(BridgeCaptorStatus captors[BRIDGE_CAPTOR
 // --------------------------------------------------------------------------
 bool StrategyAttackCL::testBridgeCaptors()
 {
+    char txt[64];
     LOG_COMMAND("== testBridgeCaptors ==\n");
     BridgeCaptorStatus captors[BRIDGE_CAPTORS_NBR];
     while(true) {
@@ -312,6 +319,10 @@ bool StrategyAttackCL::testBridgeCaptors()
             LOG_ERROR("Cannot get bridge informations from bumpers\n");
             if (!menu("getBridge error\nRetry      Skip")) break;
         }
+	for(int i=0;i<BRIDGE_CAPTORS_NBR;i++) {
+	  sprintf(txt, "%s[%d.1]=%s, ", txt,
+		  i, captors[i]==BRIDGE_NO?"trou":"pont");
+	}
         // teste les sharps
         if (useSharpToDetectBridge_) {
             if (bridgeDetectionByCenter_) {
@@ -419,18 +430,31 @@ bool StrategyAttackCL::getBridgePosBySharp()
     LOG_FUNCTION();
     // on reccupere la valeur des capteurs 2 fois pour voir si on n'a 
     // pas un soucis de bruit
+    bridgeBySharps_ =BRIDGE_POS_UNKNOWN;
     BridgeCaptorStatus captors[BRIDGE_CAPTORS_NBR];
-    if (!getBridgeCaptors(captors, true)) return false;
+    if (!getBridgeCaptors(captors, true)) goto endGetBridgePosBySharp;
 
     if (bridgeDetectionByCenter_) {
-        if (!getBridgePosBySharpFromCenter(captors)) return false;
+        if (!getBridgePosBySharpFromCenter(captors)) goto endGetBridgePosBySharp;
     } else {
-        if (!getBridgePosBySharpFromLeft(captors)) return false;
+        if (!getBridgePosBySharpFromLeft(captors)) goto endGetBridgePosBySharp;
     }
     LOG_INFO("Bridge by Sharp=%s\n", BridgePosTxt(bridge_));
     Log->bridge(bridge_);
     bridgeBySharps_ = bridge_;
+#ifdef USE_SHARPS_FIRST
     return true;
+#endif
+
+ endGetBridgePosBySharp:
+#ifdef USE_SHARPS_FIRST
+    return false;
+#else
+    LOG_INFO("Do not use sharps!\n");
+    // pour aller tout droit!, on update bridge_
+    getNearestBridgeEntry();
+    return true;
+#endif
 }
 
 // --------------------------------------------------------------------------
@@ -455,8 +479,9 @@ bool StrategyAttackCL::getBridgePosByBumper(bool& bridgeInFront)
 bool StrategyAttackCL::checkBridgeBumperEvent(bool& dummyBumperEvt) 
 {
     dummyBumperEvt = false;
-    if (Events->isInWaitResult(EVENTS_NO_BRIDGE_BUMP_LEFT) ||
-	Events->isInWaitResult(EVENTS_NO_BRIDGE_BUMP_RIGHT)) {
+    bool holeLeft=Events->isInWaitResult(EVENTS_NO_BRIDGE_BUMP_LEFT);
+    bool holeRight=Events->isInWaitResult(EVENTS_NO_BRIDGE_BUMP_RIGHT);
+    if (holeLeft || holeRight) {
         dummyBumperEvt = true;
 	if (RobotPos->x() < 1200 || RobotPos->x()> 1700) return false;
         // le pont n'est pas la! Faut vite s'arreter!
@@ -464,39 +489,43 @@ bool StrategyAttackCL::checkBridgeBumperEvent(bool& dummyBumperEvt)
         usleep(500000); // attend 0.5s et regarde a nouveau les bumpers pour voir 
                         // si c'etait une fausse alerte
 	bool bridgeDetected=false;
+	BridgePosition oldBridgePos=bridge_;
         if (getBridgePosByBumper(bridgeDetected)
             && !bridgeDetected) {
             // il n'y a pas de pont ici, c'etait vrai!
-            LOG_WARNING("No bridge here! %s\n", RobotPos->txt());
+	    LOG_WARNING("No bridge here! %s, current bridge=%s, holeLeft=%s holeRight=%s\n", 
+			RobotPos->txt(),  BridgePosTxt(bridge_), b2s(holeLeft), b2s(holeRight));
             noBridgeHere(); 
-	    if (Events->isInWaitResult(EVENTS_NO_BRIDGE_BUMP_LEFT)) {
+	    if (holeLeft) {
 		// mark bridges, that are unavailable (current bridge
 		// is going to get discarded elsewhere)
-	      if (bridge_ == BRIDGE_POS_MIDDLE_BORDURE) {
+	      if (oldBridgePos == BRIDGE_POS_MIDDLE_BORDURE) {
 		bridgeAvailibility_ &= (~(1<<BRIDGE_ENTRY_BORDURE_BIT));
 		bridgeAvailibility_ &= (~(1<<BRIDGE_ENTRY_MIDDLE_BORDURE_BIT));
 	      }
-	      if (bridge_ == BRIDGE_POS_MIDDLE_CENTER) {
+	      if (oldBridgePos == BRIDGE_POS_MIDDLE_CENTER) {
 		bridgeAvailibility_ &= (~(1<<BRIDGE_ENTRY_BORDURE_BIT));
 		bridgeAvailibility_ &= (~(1<<BRIDGE_ENTRY_MIDDLE_BORDURE_BIT));
 	      }
-	    } else if (Events->isInWaitResult(EVENTS_NO_BRIDGE_BUMP_RIGHT)) {
-	      if (bridge_ == BRIDGE_POS_MIDDLE_BORDURE) {
+	    } else if (holeRight) {
+	      if (oldBridgePos == BRIDGE_POS_MIDDLE_BORDURE) {
 		bridgeAvailibility_ &= (~(1<<BRIDGE_ENTRY_CENTER_BIT));
 		bridgeAvailibility_ &= (~(1<<BRIDGE_ENTRY_MIDDLE_CENTER_BIT));
 		bridgeAvailibility_ &= (~(1<<BRIDGE_ENTRY_SIOUX_BIT));
 	      }
-	      if (bridge_ == BRIDGE_POS_MIDDLE_CENTER) {
+	      if (oldBridgePos == BRIDGE_POS_MIDDLE_CENTER) {
 		bridgeAvailibility_ &= (~(1<<BRIDGE_ENTRY_CENTER_BIT));
 		bridgeAvailibility_ &= (~(1<<BRIDGE_ENTRY_MIDDLE_CENTER_BIT));
 		bridgeAvailibility_ &= (~(1<<BRIDGE_ENTRY_SIOUX_BIT));
 	      }
 	    }
-	    
+	    LOG_INFO("Availibility: 0x%2.2x\n", bridgeAvailibility_);
 	    dummyBumperEvt=false;
             return true;
         }
     } 
+    LOG_INFO("checkBridgeBumperEvent: dummy=%s\n", b2s(dummyBumperEvt));
+	    
     return false;
 }
 
@@ -785,7 +814,7 @@ bool StrategyAttackCL::crossBridge()
     int retry=0;
     LOG_COMMAND("crossBridge: %s\n", tgt.txt());
     do {
-        Move->enableAccelerationController(true);
+      Move->enableAccelerationController(false);
         MvtMgr->setRobotDirection(MOVE_DIRECTION_FORWARD);
         Move->go2Target(tgt);
 	enableBridgeCaptors();
@@ -804,6 +833,9 @@ bool StrategyAttackCL::crossBridge()
 	      Events->wait(evtEndMoveNoCollision);
 	      return false;
 	    }
+	  } else if (dummyBumperEvt) {
+	    Move->go2Target(tgt);
+	    enableBridgeCaptors();
 	  }
 	}
 	if (RobotPos->x()> 1600) {

@@ -74,7 +74,7 @@ bool Strategy2005CL::testMove()
         Lcd->print("Test move");
         RobotPos->set(0,0,0);
         // on avance de 10cm
-        Move->forward(100);
+        Move->forward(120);
         Events->wait(evtEndMove);
         if (Events->isInWaitResult(EVENTS_PWM_ALERT_LEFT)) {
             LOG_ERROR("TestMove:EVENTS_PWM_ALERT_LEFT\n");
@@ -84,7 +84,7 @@ bool Strategy2005CL::testMove()
             LOG_ERROR("TestMove:EVENTS_PWM_ALERT_RIGHT\n");
             retry = menu("PWM Alert right\nRetry     Skip");
             continue;
-        } else if (dist(RobotPos->pt(), Point(100,0)) > 30) {
+        } else if (dist(RobotPos->pt(), Point(120,0)) > 30) {
             LOG_ERROR("TestMove: endPos error: real %s - expected (100, 0, 0)\n",
                       RobotPos->txt());
             retry = menu("RobotPos alert\nRetry     Skip");
@@ -92,7 +92,7 @@ bool Strategy2005CL::testMove()
         } 
 
         // on recule de 10cm
-        Move->backward(100);
+        Move->backward(80);
         Events->wait(evtEndMove);
         if (Events->isInWaitResult(EVENTS_PWM_ALERT_LEFT)) {
             LOG_ERROR("TestMove:EVENTS_PWM_ALERT_LEFT\n");
@@ -102,12 +102,7 @@ bool Strategy2005CL::testMove()
             LOG_ERROR("TestMove:EVENTS_PWM_ALERT_RIGHT\n");
             retry = menu("PWM Alert right\nRetry     Skip");
             continue;
-        } else if (dist(RobotPos->pt(), Point(0,0)) > 30) {
-            LOG_ERROR("TestMove: endPos error: real %s - expected (0, 0, 0)\n",
-                      RobotPos->txt());
-            retry = menu("RobotPos alert\nRetry     Skip");
-            continue;
-        }
+        } 
 
         retry = false;
     }

@@ -437,6 +437,9 @@ void MoveCL::go2Target(Point       pt,
     }if (maxSpeed == MOVE_USE_DEFAULT_SPEED) {
 	newMaxSpeed = defaultMaxRotationSpeed_;
     }
+    if (isZeroAngle(dir(RobotPos->pt(), pt) - RobotPos->theta(), M_PI/10)) {
+      noRotation=true;
+    }
     Movement * mvtRotation =NULL;
     if (!noRotation) {
         mvtRotation = new MovementRotate(finalDir, 
@@ -582,6 +585,9 @@ void MoveCL::followTrajectory(Trajectory const&   trajectory2,
       /*printf("rotation index=%lf %s %d\n", 
 	rotationIndex, rotationTargetPoint.txt(), r2d(finalDir));*/
       Movement * mvtRotation=NULL;
+      if (isZeroAngle(finalDir - RobotPos->theta(), M_PI/10)) {
+	noRotation=true;
+      }
       if (!noRotation) {
 
 	  MoveGain newGain=gain;

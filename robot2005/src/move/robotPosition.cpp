@@ -509,16 +509,16 @@ void RobotPositionCL::periodicTask(Millisecond time)
     static Millisecond oldTime=0;
     if (oldTime+300<time) { 
         LOG_INFO("Time=%ds, "
-		 "%sOdometer: x=%d y=%d t=%d %s "
-		 "-- %sHctl: x=%d y=%d t=%d %s\n",
+		 "%sOdometer: x=%d y=%d t=%d =%3.4lfrad %s "
+		 "-- %sHctl: x=%d y=%d t=%d =%3.4lfrad %s\n",
                  time/1000,
                  (odometerType_!=ODOMETER_MOTOR)?KB_CYAN:KB_RESTORE,
                  (int)posOdom_.center.x, (int)posOdom_.center.y, 
-                 r2d(posOdom_.direction),
+                 r2d(posOdom_.direction), posOdom_.direction,
                  KB_RESTORE,
                  (odometerType_==ODOMETER_MOTOR)?KB_CYAN:KB_RESTORE,
                  (int)posHctl_.center.x, (int)posHctl_.center.y, 
-                 r2d(posHctl_.direction),
+                 r2d(posHctl_.direction), posHctl_.direction,
                  KB_RESTORE);
         if (MvtMgr->motor()) MvtMgr->motor()->dumpMotorStats();
         oldTime=time;

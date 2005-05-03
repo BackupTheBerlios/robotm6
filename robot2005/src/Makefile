@@ -133,13 +133,19 @@ sou2:
 sou1:
 	scp -r ../gumstix/so/ root@gumu:robot
 
-install2: 
+install2: cleanRobot2
 	rsync --progress --compress -v --rsync-path=robot/rsync --exclude=CVS --exclude=.keep -r ../gumstix/bin ../gumstix/so root@gumb2:robot
+	echo "Wait sync..."
+	ssh root@gumb2 'sync'
+	echo "Install gumb2 done"
 #	scp -r ../gumstix/bin ../gumstix/so/ root@gumb2:robot
 
-install1:
+install1: cleanRobot1
 	rsync --progress --compress -v --rsync-path=robot/rsync --exclude=CVS --exclude=.keep -r ../gumstix/bin ../gumstix/so root@gumb:robot
-#	scp -r ../gumstix/bin ../gumstix/so/ root@gumb:robot
+	echo "Wait sync..."
+	ssh root@gumb 'sync'
+	echo "Install gumb1 done"
+#	
 
 installu2: 
 	scp -r ../gumstix/bin ../gumstix/so/ root@gumu2:robot
@@ -148,8 +154,12 @@ installu1:
 	scp -r ../gumstix/bin ../gumstix/so/ root@gumu:robot
 
 cleanRobot2:
-#efface les anciens logs et photos
-	ssh root@gumb2 'rm -f robot/*.log.gz' 
+	ssh root@gumb2 'rm -f robot/log/*.log.gz' 
+	echo "Clean logs of gumb2 done"
+
+cleanRobot1:
+	ssh root@gumb 'rm -f robot/log/*.log.gz' 
+	echo "Clean logs of gumb1 done"
 
 ## ===========================================================================
 ## Download the robot match data on the PC

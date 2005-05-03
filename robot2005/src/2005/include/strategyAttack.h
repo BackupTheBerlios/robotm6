@@ -71,7 +71,7 @@ class StrategyAttackCL : public Strategy2005CL
 
     // ================ Detection et traversee du pont ==================
     /** @brief va a l'endroit ou on detecte les pont par capteurs sharps */
-    bool gotoBridgeDetection();
+    bool gotoBridgeDetection(bool gotoSiouxFirst);
     /** @brief cherche le pont et le traverse. quitte la fonction que si on 
         a reussi a traverser ou que c'est la fn du match */
     bool findAndCrossBridge();
@@ -152,6 +152,8 @@ protected:
     bool           useLeftBridge_; 
     /** utilise le pont du mileu pour essayer de traverser */
     bool           bridgeDetectionByCenter_;
+    /** va devant le pont du milieu pour utiliser les sharps */
+    bool           gotoSiouxFirst_;
     bool           useSharpToDetectBridge_;
     
     /** grille qui permet de savoir ou on est deja passe et ou il faut aller */
@@ -196,10 +198,10 @@ static const Millimeter BRIDGE_CROSS_BRIDGE_X_MARGIN  = 50;
 static const Millimeter BRIDGE_ENTRY_MARGIN  = 50;
 
 static const Millimeter BRIDGE_ENTRY_SIOUX_Y          = 1300; // passe par le pont du milieu
-static const Millimeter BRIDGE_ENTRY_CENTER_Y         = 1435; // centre du pont
-static const Millimeter BRIDGE_ENTRY_MIDDLE_CENTER_Y  = 1585; // centre du pont
-static const Millimeter BRIDGE_ENTRY_MIDDLE_BORDURE_Y = 1735; // centre du pont
-static const Millimeter BRIDGE_ENTRY_BORDURE_Y        = 1885; // centre du pont
+static const Millimeter BRIDGE_ENTRY_CENTER_Y         = 1425; // centre du pont
+static const Millimeter BRIDGE_ENTRY_MIDDLE_CENTER_Y  = 1575; // centre du pont
+static const Millimeter BRIDGE_ENTRY_MIDDLE_BORDURE_Y = 1725; // centre du pont
+static const Millimeter BRIDGE_ENTRY_BORDURE_Y        = 1875; // centre du pont
 // si on est a plus que ca du centre du point on recule pour se realignerstatic const Millimeter BRIDGE_ENTRY_MARGIN           = 50;   
 
 static const double ATTACK_BRIDGE_GAIN=0.2;
