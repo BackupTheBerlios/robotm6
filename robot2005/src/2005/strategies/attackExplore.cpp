@@ -36,6 +36,16 @@ static bool evtEndMoveBridge(bool evt[])
         || evt[EVENTS_GROUP_BRIDGE];
 }
 
+/**
+ * end of movement, or side-sharps.
+ */
+static bool evtEndMoveSharps(bool evt[])
+{
+    return evtEndMove(evt)
+	|| evt[EVENTS_ENV_SIDE_LEFT]
+	|| evt[EVENTS_ENV_SIDE_RIGHT];
+}
+
 // ----------------------------------------------------------------------------
 // Cette fonction est un EventsFn qui permet d'attendre la fin d'un 
 // mouvement en testant en plus les sharps a l'avant du robot
@@ -790,6 +800,58 @@ bool StrategyAttackCL::exploreGrid(GridPoint gpts[3])
     return true;
 }
 
+bool StrategyAttackCL::analyzeSharps(Point& supportCenter) {
+    Point pt;
+    const Millimeter SHARP_DETECT_DISTANCE = 300.;
+    if (Events->isInWaitResult(EVENTS_ENV_SIDE_LEFT)) {
+        pt = RobotPos->pt() +
+	    SHARP_DETECT_DISTANCE * Point(cos(RobotPos->thetaAbsolute()+M_PI/2),
+					  sin(RobotPos->thetaAbsolute()+M_PI/2));
+        if (pt.x < 2500) return false; // on ne detecte pas les quilles chez nous!
+        Log->skittle(pt);
+	return calcSupportCenterCollision(pt, supportCenter);
+    } else if (Events->isInWaitResult(EVENTS_ENV_SIDE_RIGHT)) {
+        pt = RobotPos->pt() +
+	    SHARP_DETECT_DISTANCE * Point(cos(RobotPos->thetaAbsolute()-M_PI/2),
+					  sin(RobotPos->thetaAbsolute()-M_PI/2));
+        if (pt.x < 2500) return false; // on ne detecte pas les quilles chez nous!
+        Log->skittle(pt);
+	return calcSupportCenterCollision(pt, supportCenter);
+    }
+    return true; // never going to reach this line (return in both if-branches).
+}
+
+/**
+ * goes to the specified point. If however a sharp detects the presence
+ * of skittles at the side, it automatically goes to the potential
+ * skittles.
+ */
+bool StrategyAttackCL::go2TargetWatching(Point p) {
+    // TODO: enable sharp-events
+    Move->go2Target(p, attackExploreGain, attackExploreMaxSpeed);
+    bool skittlesDetected = false;
+    while (true) {
+	// TODO: watch sharps
+	Events->wait(evtEndMoveSharps);
+	if (Events->isInWaitResult(EVENTS_MOVE_END)) return true;
+	// c'est la fin du match?
+	if (checkEndEvents()) return false;
+	Point supportCenter; // will be potentially updated in analyzeSharps)
+	if (Events->isInWaitResult(EVENTS_ENV_SIDE_LEFT) ||
+	    Events->isInWaitResult(EVENTS_ENV_SIDE_RIGHT))
+	{
+	    if (!skittlesDetected && analyzeSharps(supportCenter)) {
+		LOG_INFO("Detected skittles at %s.\n", supportCenter.txt());
+		Move->go2Target(supportCenter, attackExploreGain, attackExploreMaxSpeed);
+		skittlesDetected = true;
+	    }
+	    // else ignore this event.
+	} else {
+	    return goOverSupport();
+	}
+    }
+}
+    
 // ------------------------------------------------------------------------
 // On va jusqu'au point gpts[1]
 // ------------------------------------------------------------------------
@@ -816,13 +878,15 @@ bool StrategyAttackCL::gotoGtps1(GridPoint gpts[3])
     pt1.y += ATTACK_CHANGE_TARGET_POINT_DIST * sin(dirPt1);
     unsigned int retry=0;
     do {
-      Move->go2Target(pt1, attackExploreGain, attackExploreMaxSpeed);
-      Events->wait(evtEndMove);
-      // on a reussi ?
-      if (Events->isInWaitResult(EVENTS_MOVE_END)) return true;
-      // c'est la fin du match?
-      if (checkEndEvents()) return false;
-      goOverSupport();
+	// TODO: HERE
+	//go2TargetWatching(pt1);
+	Move->go2Target(pt1, attackExploreGain, attackExploreMaxSpeed);
+	Events->wait(evtEndMove);
+	// on a reussi ?
+	if (Events->isInWaitResult(EVENTS_MOVE_END)) return true;
+	// c'est la fin du match?
+	if (checkEndEvents()) return false;
+	goOverSupport();
     } while(retry++ < ATTACK_EXPLORE_RETRY);
     return true;
 }
@@ -871,6 +935,8 @@ bool StrategyAttackCL::backBeforeGpts2(GridPoint gpts[3])
     }
     if (needMoveBackward) {
         MvtMgr->setRobotDirection(MOVE_DIRECTION_BACKWARD);
+	// TODO: HERE
+	//go2TargetWatching(targetPoint);
         Move->go2Target(targetPoint, attackExploreGain, attackExploreMaxSpeed);
         Events->wait(evtEndMove);
         // on a reussi ?
@@ -920,6 +986,8 @@ bool StrategyAttackCL::gotoGpts2(GridPoint gpts[3],
     unsigned int retry=0;
     do {
       MvtMgr->setRobotDirection(MOVE_DIRECTION_FORWARD);
+      // TODO: HERE
+      //go2TargetWatching(targetPoint);
       Move->go2Target(targetPoint, attackExploreGain, attackExploreMaxSpeed);
       Events->wait(evtEndMove);
       // on a reussi ?
@@ -944,6 +1012,8 @@ bool StrategyAttackCL::goBackToGpts2(GridPoint gpts[3])
     targetPoint.x += ATTACK_CHANGE_TARGET_POINT_DIST * cos(dirPt2+M_PI);
     targetPoint.y += ATTACK_CHANGE_TARGET_POINT_DIST * sin(dirPt2+M_PI);
     MvtMgr->setRobotDirection(MOVE_DIRECTION_BACKWARD);
+    // TODO: HERE
+    // go2TargetWatching(targetPoint);
     Move->go2Target(targetPoint, attackExploreGain, attackExploreMaxSpeed);
     Events->wait(evtEndMove);
     // on a reussi ?

@@ -9,10 +9,6 @@
 #include "geometry2D.h"
 #include "bumperMapping.h"
 
-// TODO flo: changer le code du halt du gumstix
-
-typedef GridAttack::GridUnit GridUnit;
-
 static CollisionEnum checkCollisionEvents()
 {
     bool leftPwm = Events->isInWaitResult(EVENTS_PWM_ALERT_LEFT);

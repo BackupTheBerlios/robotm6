@@ -126,6 +126,8 @@ class StrategyAttackCL : public Strategy2005CL
     virtual bool preDefinedSkittleExploration1();
     virtual bool preDefinedSkittleExploration2();
 
+    bool analyzeSharps(Point& supportCenter);
+    bool go2TargetWatching(Point target);
     void basicSkittleExplorationCol(GridPoint gpts[3]);
     void basicSkittleExplorationRow(GridPoint gpts[3]);
     bool exploreGrid(GridPoint gpts[3]); 

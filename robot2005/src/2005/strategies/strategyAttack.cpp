@@ -293,6 +293,7 @@ Point getAttackWheelPos(bool left, bool forward)
     return leftWheel;
 }
 
+// TODO: rename (not only used for collisions).
 bool StrategyAttackCL::calcSupportCenterCollision(Point pos, Point& supportCenter) const 
 {
     GridAttack::GPoint gridPoint = grid_->getGPoint(pos);

@@ -62,7 +62,7 @@ void EnvDetector05::periodicTask()
             if (skipCaptor_[i]) continue;
             EnvDetectorDist oldVal, newVal;
             oldVal = (EnvDetectorDist)((data_>>EnvDetectorMapping[i].bit) & 0x03);
-            newVal = (EnvDetectorDist)((data_>>EnvDetectorMapping[i].bit) & 0x03);	
+            newVal = (EnvDetectorDist)((data_>>EnvDetectorMapping[i].bit) & 0x03);
             if (firstRead_) {
                 // initialisation
                 if (!EnvDetectorMapping[i].reversed) {

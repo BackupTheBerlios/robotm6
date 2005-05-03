@@ -36,7 +36,7 @@ RobotConfigAttack2005CL::RobotConfigAttack2005CL(bool simulated)
     motorSignLeft=(1);
     motorSignRight=(-1); 
 
-    hasEnv=false;
+    hasEnv=true;
     hasServo=true;
     hasCrane=false;
     hasSkittleDetector=false;

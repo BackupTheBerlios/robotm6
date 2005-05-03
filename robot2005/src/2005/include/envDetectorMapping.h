@@ -31,18 +31,18 @@ struct EnvDetectorMappingStruct {
 #ifdef ENV_DETECTOR_INFO
 
 static EnvDetectorMappingStruct EnvDetectorMapping[ENV_DETECTOR_NBR]= {
-    {ENV_DETECTOR_TOP_RIGHT, "EnvDetector TOP RIGHT",   EVENTS_ENV_TOP_RIGHT, 
+    {ENV_DETECTOR_SIDE_LEFT, "EnvDetector SIDE LEFT",   EVENTS_ENV_SIDE_LEFT,
      0, 0, false,  ENV_NEAR,
-    true },
+     true},
     {ENV_DETECTOR_TOP_LEFT, "EnvDetector TOP LEFT",   EVENTS_ENV_TOP_LEFT,  
      0, 2, false,  ENV_NEAR,
      true},
-    {ENV_DETECTOR_SIDE_RIGHT, "EnvDetector SIDE RIGHT", EVENTS_ENV_SIDE_RIGHT,
+    {ENV_DETECTOR_TOP_RIGHT, "EnvDetector TOP RIGHT",   EVENTS_ENV_TOP_RIGHT, 
      0, 4, false,  ENV_NEAR,
-    true},
-    {ENV_DETECTOR_SIDE_LEFT, "EnvDetector SIDE LEFT",   EVENTS_ENV_SIDE_LEFT,
+     true },
+    {ENV_DETECTOR_SIDE_RIGHT, "EnvDetector SIDE RIGHT", EVENTS_ENV_SIDE_RIGHT,
      0, 6, false,  ENV_NEAR,
-    true}
+     true}
 };
 
 #endif
