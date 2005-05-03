@@ -416,7 +416,8 @@ bool StrategyAttackCL::preDefinedSkittleExploration1()
         // on n'a pas reussi
         // c'est la fin du match?
         if (checkEndEvents()) return false;
-        goOverSupport();
+        if (retry==0) goOverSupport();
+	else avoidObstacle();
         if (checkEndEvents()) return false;
       } else break;
     } while(retry++<ATTACK_EXPLORE_RETRY);
@@ -440,10 +441,16 @@ bool StrategyAttackCL::preDefinedSkittleExploration1()
         // on n'a pas reussi
         // c'est la fin du match?
         if (checkEndEvents()) return false;
-        goOverSupport();
+        if (retry==0) goOverSupport();
+	else avoidObstacle();
         if (checkEndEvents()) return false;
       } else break;
     } while(retry++<ATTACK_EXPLORE_RETRY);
+
+    // va vers le pont du milieu
+    if (!killCenterSkittles()) {
+      if (checkEndEvents()) return false;
+    } 
   
     // va vers le fond de la 2e rangee
     retry=0;
@@ -455,10 +462,15 @@ bool StrategyAttackCL::preDefinedSkittleExploration1()
         // on n'a pas reussi
         // c'est la fin du match?
         if (checkEndEvents()) return false;
-        goOverSupport();
+        if (retry==0) goOverSupport();
+	else avoidObstacle();
         if (checkEndEvents()) return false;
       } else break;
     } while(retry < ATTACK_EXPLORE_RETRY);
+    // va vers le pont du milieu
+    if (!killCenterSkittles()) {
+      if (checkEndEvents()) return false;
+    } 
 
     return true;
 }
@@ -547,7 +559,8 @@ bool StrategyAttackCL::preDefinedSkittleExploration2()
         // on n'a pas reussi
         // c'est la fin du match?
         if (checkEndEvents()) return false;
-        goOverSupport();
+        if (retry==0) goOverSupport();
+	else avoidObstacle();
         if (checkEndEvents()) return false;
       } else break;
     } while(retry++<ATTACK_EXPLORE_RETRY);
@@ -566,10 +579,16 @@ bool StrategyAttackCL::preDefinedSkittleExploration2()
         // on n'a pas reussi
         // c'est la fin du match?
         if (checkEndEvents()) return false;
-	goOverSupport();
+	if (retry==0) goOverSupport();
+	else avoidObstacle();
 	if (checkEndEvents()) return false;
       } else break;
     }while(retry++ < ATTACK_EXPLORE_RETRY);
+
+      // va vers le pont du milieu
+    if (!killCenterSkittles()) {
+      if (checkEndEvents()) return false;
+    }
 
     //  va vers la 1ere rangee
     retry=0;
@@ -581,10 +600,16 @@ bool StrategyAttackCL::preDefinedSkittleExploration2()
         // on n'a pas reussi
         // c'est la fin du match?
         if (checkEndEvents()) return false;
-        goOverSupport();
+        if (retry==0) goOverSupport();
+	else avoidObstacle();
 	if (checkEndEvents()) return false;
       } else break;
     } while(retry++ < ATTACK_EXPLORE_RETRY);
+
+      // va vers le pont du milieu
+    if (!killCenterSkittles()) {
+      if (checkEndEvents()) return false;
+    }
 
     // va au bout de la premiere rangee
     retry=0;
@@ -596,7 +621,8 @@ bool StrategyAttackCL::preDefinedSkittleExploration2()
         // on n'a pas reussi
         // c'est la fin du match?
         if (checkEndEvents()) return false;
-        goOverSupport();
+        if (retry==0) goOverSupport();
+	else avoidObstacle();
         if (checkEndEvents()) return false;
       } else break;
     } while(retry++ < ATTACK_EXPLORE_RETRY);
@@ -954,9 +980,11 @@ bool StrategyAttackCL::killCenterSkittles()
     if (RobotPos->x()>2400) {
         t.push_back(Point(RobotPos->x(), 1050));
     }
-    t.push_back(Point(2400, 1050));
-    t.push_back(Point(2100, 1260));
+    t.push_back(Point(2400, 1150));
+    t.push_back(Point(2150, 1260)); // TODO check this limit
     MvtMgr->setRobotDirection(MOVE_DIRECTION_FORWARD);
+    Events->enable(EVENTS_NO_BRIDGE_BUMP_LEFT);
+    Events->enable(EVENTS_NO_BRIDGE_BUMP_RIGHT);
     Move->followTrajectory(t, TRAJECTORY_BASIC, attackExploreGain, attackExploreMaxSpeed);
     Events->wait(evtEndMoveBridge);
     // on a reussi ?
@@ -985,6 +1013,8 @@ bool StrategyAttackCL::killCenterSkittles()
         // en cas de probleme, on ne fait rien, la suite de la procedure 
         // consiste a s'eloigner du fosse
     }
+    Events->disable(EVENTS_NO_BRIDGE_BUMP_LEFT);
+    Events->disable(EVENTS_NO_BRIDGE_BUMP_RIGHT);
     
     // on s'eloigne du fosse
     while(RobotPos->x()<2300) {

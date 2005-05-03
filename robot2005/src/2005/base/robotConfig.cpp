@@ -21,7 +21,7 @@ RobotConfigAttack2005CL::RobotConfigAttack2005CL(bool simulated)
 
     odometerK=(.23197);
     odometerD=(310); //311.90); // augmenter pour tourner plus
-    odometerEd=(0.997264);
+    odometerEd=(0.994464); //(0.997264);
     odometerCr=2./((1./odometerEd)+1);
     odometerCl=2./(odometerEd+1);
     odometerSignLeft=(-1);

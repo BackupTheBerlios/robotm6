@@ -496,27 +496,30 @@ bool StrategyAttackCL::checkBridgeBumperEvent(bool& dummyBumperEvt)
 	    LOG_WARNING("No bridge here! %s, current bridge=%s, holeLeft=%s holeRight=%s\n", 
 			RobotPos->txt(),  BridgePosTxt(bridge_), b2s(holeLeft), b2s(holeRight));
             noBridgeHere(); 
-	    if (holeLeft) {
+	    BridgeCaptorStatus captors[BRIDGE_CAPTORS_NBR];
+	    if (getBridgeCaptors(captors, false)) { // on n'est pas dans la merde les bumpers ne marchent pas
+	      if (captors[BRIDGE_BUMPER_LEFT] != BRIDGE_DETECTED) {
 		// mark bridges, that are unavailable (current bridge
 		// is going to get discarded elsewhere)
-	      if (oldBridgePos == BRIDGE_POS_MIDDLE_BORDURE) {
-		bridgeAvailibility_ &= (~(1<<BRIDGE_ENTRY_BORDURE_BIT));
-		bridgeAvailibility_ &= (~(1<<BRIDGE_ENTRY_MIDDLE_BORDURE_BIT));
-	      }
-	      if (oldBridgePos == BRIDGE_POS_MIDDLE_CENTER) {
-		bridgeAvailibility_ &= (~(1<<BRIDGE_ENTRY_BORDURE_BIT));
-		bridgeAvailibility_ &= (~(1<<BRIDGE_ENTRY_MIDDLE_BORDURE_BIT));
-	      }
-	    } else if (holeRight) {
-	      if (oldBridgePos == BRIDGE_POS_MIDDLE_BORDURE) {
-		bridgeAvailibility_ &= (~(1<<BRIDGE_ENTRY_CENTER_BIT));
-		bridgeAvailibility_ &= (~(1<<BRIDGE_ENTRY_MIDDLE_CENTER_BIT));
-		bridgeAvailibility_ &= (~(1<<BRIDGE_ENTRY_SIOUX_BIT));
-	      }
-	      if (oldBridgePos == BRIDGE_POS_MIDDLE_CENTER) {
-		bridgeAvailibility_ &= (~(1<<BRIDGE_ENTRY_CENTER_BIT));
-		bridgeAvailibility_ &= (~(1<<BRIDGE_ENTRY_MIDDLE_CENTER_BIT));
-		bridgeAvailibility_ &= (~(1<<BRIDGE_ENTRY_SIOUX_BIT));
+		if (oldBridgePos == BRIDGE_POS_MIDDLE_BORDURE) {
+		  bridgeAvailibility_ &= (~(1<<BRIDGE_ENTRY_BORDURE_BIT));
+		  bridgeAvailibility_ &= (~(1<<BRIDGE_ENTRY_MIDDLE_BORDURE_BIT));
+		}
+		if (oldBridgePos == BRIDGE_POS_MIDDLE_CENTER) {
+		  bridgeAvailibility_ &= (~(1<<BRIDGE_ENTRY_BORDURE_BIT));
+		  bridgeAvailibility_ &= (~(1<<BRIDGE_ENTRY_MIDDLE_BORDURE_BIT));
+		}
+	      } else if (captors[BRIDGE_BUMPER_RIGHT] != BRIDGE_DETECTED) {
+		if (oldBridgePos == BRIDGE_POS_MIDDLE_BORDURE) {
+		  bridgeAvailibility_ &= (~(1<<BRIDGE_ENTRY_CENTER_BIT));
+		  bridgeAvailibility_ &= (~(1<<BRIDGE_ENTRY_MIDDLE_CENTER_BIT));
+		  bridgeAvailibility_ &= (~(1<<BRIDGE_ENTRY_SIOUX_BIT));
+		}
+		if (oldBridgePos == BRIDGE_POS_MIDDLE_CENTER) {
+		  bridgeAvailibility_ &= (~(1<<BRIDGE_ENTRY_CENTER_BIT));
+		  bridgeAvailibility_ &= (~(1<<BRIDGE_ENTRY_MIDDLE_CENTER_BIT));
+		  bridgeAvailibility_ &= (~(1<<BRIDGE_ENTRY_SIOUX_BIT));
+		}
 	      }
 	    }
 	    LOG_INFO("Availibility: 0x%2.2x\n", bridgeAvailibility_);
@@ -813,8 +816,8 @@ bool StrategyAttackCL::crossBridge()
     
     int retry=0;
     LOG_COMMAND("crossBridge: %s\n", tgt.txt());
+    Move->enableAccelerationController(true);
     do {
-      Move->enableAccelerationController(false);
         MvtMgr->setRobotDirection(MOVE_DIRECTION_FORWARD);
         Move->go2Target(tgt);
 	enableBridgeCaptors();
@@ -834,6 +837,7 @@ bool StrategyAttackCL::crossBridge()
 	      return false;
 	    }
 	  } else if (dummyBumperEvt) {
+	    Move->enableAccelerationController(true);
 	    Move->go2Target(tgt);
 	    enableBridgeCaptors();
 	  }

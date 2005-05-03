@@ -352,13 +352,20 @@ void TestMoveStrategy3CL::run(int argc, char* argv[])
     RobotPos->set(0, 0, 0); 
     //Move->realign(0);
     //Move->rotateOnWheel(0, false);
-    //Move->go2Target(Point(900,0));
-    Move->rotateFromAngle(-2*M_PI);
+    Move->go2Target(Point(3100,0));
+    ///*  Move->rotateFromAngle(-2*M_PI);
     Events->wait(evtEndMovePwm);
     if (Events->isInWaitResult(EVENTS_MOVE_END)) {
       LOG_OK("Move end correct\n");
     }
-    Move->rotateFromAngle(-2*M_PI);
+    Move->rotateFromAngle(-M_PI);
+    
+    Events->wait(evtEndMovePwm);
+    if (Events->isInWaitResult(EVENTS_MOVE_END)) {
+      LOG_OK("Move end correct\n");
+    }
+    Move->go2Target(Point(200,0));
+    ///*  Move->rotateFromAngle(-2*M_PI);
     Events->wait(evtEndMovePwm);
     if (Events->isInWaitResult(EVENTS_MOVE_END)) {
       LOG_OK("Move end correct\n");
