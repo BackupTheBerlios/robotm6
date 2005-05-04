@@ -8,7 +8,7 @@ SRC_ROOT=../..
 FILE=strategy2005
 LIB_NAME=lib${FILE}
 OBJS=strategyAttack.o attackBridge.o gridAttack.o attackExplore.o \
-     strategyDefence.o attackLargeExplore.o
+     strategyDefence.o attackLargeExplore.o attackBridgeHandicapped.o
 
 BIN_NAME=
 BIN_OBJS=
