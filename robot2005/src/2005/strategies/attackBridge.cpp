@@ -223,7 +223,9 @@ bool StrategyAttackCL::gotoBridgeDetection(bool gotoSiouxFirst)
                gotoSiouxFirst?"Passe par le milieu":"Passe par un pont normal");
       Trajectory t;
       t.push_back(Point(RobotPos->x(), RobotPos->y()));
-      t.push_back(Point(RobotPos->x()+250, RobotPos->y()));
+      // if looping (while(true)..) be careful not to go too close.
+      if (RobotPos->x() < BRIDGE_DETECT_SHARP_X - 500)
+	  t.push_back(Point(RobotPos->x()+250, RobotPos->y()));
       if (gotoSiouxFirst) {
           // va vers le pont du milieu
           t.push_back(Point(BRIDGE_DETECT_SHARP_X-250, BRIDGE_ENTRY_SIOUX_Y));
