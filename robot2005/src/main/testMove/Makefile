@@ -44,7 +44,7 @@ all: lib bin validate
 ## Main rules : ----- CLEAN -----
 ## ===========================================================================
 clean:	default_clean
-	${RM} -f  ${BIN_DIR}/${BIN_NAME}                 
+	${RM} -f  ${BIN_DIR}/${BIN_NAME}
 	-${RM} -f  ${BIN_SIMU_DIR}/${BIN_NAME} 
 
 ## ===========================================================================
