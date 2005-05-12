@@ -372,7 +372,7 @@ void MovementManagerCL::checkPatinage()
   // odometre bouge de moins de 2cm
   // hctl bougent de plus de 10 cm
   if ((abs(odomDeltaMoveLeft_) < 10) 
-      && (abs(hctlDeltaMoveLeft_) > 60)) { 
+      && (abs(hctlDeltaMoveLeft_) > 80)) { 
     LOG_WARNING("Patinage roue gauche! odom=%d hctl=%d\n", 
 		(int)odomDeltaMoveLeft_, (int)hctlDeltaMoveLeft_ );
     Events->raise(EVENTS_PWM_ALERT_LEFT);
@@ -380,7 +380,7 @@ void MovementManagerCL::checkPatinage()
     resetPatinageDetection();
   }
   if ((abs(odomDeltaMoveRight_) < 10) 
-      && (abs(hctlDeltaMoveRight_) > 60)) { 
+      && (abs(hctlDeltaMoveRight_) > 80)) { 
     LOG_WARNING("Patinage roue droite! odom=%d hctl=%d\n",
 		(int)(odomDeltaMoveRight_), (int)hctlDeltaMoveRight_ );
     Events->raise(EVENTS_PWM_ALERT_RIGHT);
