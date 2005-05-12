@@ -5,7 +5,8 @@
 #include "strategy2005.h"
 #include "robotConfig2005.h"
 #include "robotMain2005.h"
-#include "strategyDefence.h"
+//#include "strategyDefence.h"
+#include "strategyHomoDefence.h"
 
 int main(int argc, char* argv[])
 {
@@ -20,11 +21,12 @@ int main(int argc, char* argv[])
   LOG_INFO("SIMULATED\n");
 #endif
 
-  LOG_INFO("ROBOT_ATTACK\n");
+  LOG_INFO("ROBOT_DEFENCE\n");
   config = new RobotConfigDefence2005CL(SIMULATED);
 
   robotMain = new RobotMain2005CL();
-  strategyDefence = new StrategyDefenceCL(robotMain);
+  //strategyDefence = new StrategyDefenceCL(robotMain);
+  strategyDefence = new StrategyHomoDefenceCL(robotMain);
 
   //ClassConfig::find(CLASS_MOVE)->setVerboseLevel(VERBOSE_DEBUG);
 
