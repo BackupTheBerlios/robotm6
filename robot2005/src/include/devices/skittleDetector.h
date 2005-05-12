@@ -13,7 +13,7 @@
 
 #define SkittleDetector SkittleDetectorCL::instance()
 
-typedef unsigned char SkittlePosition;
+typedef unsigned int SkittlePosition;
 
 class SkittleDetectorCL : public RobotDeviceCL {
  public:

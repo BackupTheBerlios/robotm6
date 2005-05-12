@@ -81,7 +81,7 @@ int main(int argc, char* argv[])
     Servo05 servo;
     bool loop=true;
     while(loop) {
-      printf("Menu: 0=disable ALL, 1=setPosition, 2=exit\n>");
+      printf("Menu: 0=disable ALL, 1=setPosition, 2=fire-catas, 3=arm-catas, 4=release-catas 5=exit\n>");
       scanf("%d", &choice);
       switch(choice) {
       case 0:
@@ -96,6 +96,19 @@ int main(int argc, char* argv[])
 	servo.setServoPosition(servoId, pos);
 	break;
       case 2:
+	  servo.setServoPosition(0, 0x09);
+	  servo.setServoPosition(1, 0x48);
+	  servo.setServoPosition(1, 0x48);
+	  break;
+      case 3:
+	  servo.setServoPosition(0, 0x48);
+	  servo.setServoPosition(1, 0x09);
+	  servo.setServoPosition(1, 0x09);
+	  break;
+      case 4:
+	  servo.disableAll();
+	  break;
+      case 5:
 	loop=false;
 	break;
       }

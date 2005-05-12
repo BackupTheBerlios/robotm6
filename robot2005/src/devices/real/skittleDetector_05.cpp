@@ -30,7 +30,6 @@ SkittleDetector05::~SkittleDetector05()
 {
     if (device_) device_->close();  
 }
-/** @brief Retourne l'instance unique*/
 bool SkittleDetector05::reset()
 {
     return true;
@@ -68,12 +67,33 @@ void SkittleDetector05::periodicTask()
 
 bool SkittleDetector05::getBasicValue(SkittlePosition& pos)
 {
+    /*
     if (!device_) return false;
     unsigned char buf[2];
     if (device_->writeRead(SKITTLE_DETECTOR_REQ_GET_BASIC_POSITION, buf)) {
         if (buf[0] != 0) lastPos_ = buf[0];
         pos = buf[0];
         return true;
+    } else {
+        LOG_DEBUG("SkittleDetector05 COM error\n");
+        return false;
+    }
+    */
+    if (!device_) return false;
+    unsigned char buf[3];
+    unsigned int length = 3;
+    if (device_->writeRead(SKITTLE_DETECTOR_REQ_GET_ALL_POSITIONS, buf, length)) {
+	if (buf[0] ^ buf[1] != buf[2])
+	{
+	    LOG_ERROR("checksum-error: 0x%2.2x 0x%2.2x 0x%2.2x\n", buf[0], buf[1], buf[2]);
+	    return false;
+	}
+	pos = buf[1] << 8 + buf[0];
+        if (buf[0] != 0 || buf[1] != 0) {
+	    LOG_DEBUG("byte1: 0x%2.2x  byte2: 0x%2.2x\n", buf[0], buf[1]);
+	    lastPos_ = pos;
+	}
+	return true;
     } else {
         LOG_DEBUG("SkittleDetector05 COM error\n");
         return false;

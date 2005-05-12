@@ -9,7 +9,8 @@
 #define Tesla    BigTeslaCL::instance()
 
 enum TeslaMode {
-    TESLA_MODE_5V, // envoie du petit sur l'electro aimant
+    TESLA_MODE_0V = 0,
+//    TESLA_MODE_5V, // envoie du petit sur l'electro aimant
     TESLA_MODE_12V,
     TESLA_MODE_28V,
     TESLA_MODE_42V // envoie du tres gros! : la on doit attirer toutes les quilles a 3 m a la ronde !

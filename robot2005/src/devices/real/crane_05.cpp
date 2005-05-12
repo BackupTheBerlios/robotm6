@@ -36,12 +36,12 @@ bool Crane05::setPosition(CranePositionX x,
 {
     if (!device_) return false;
     return false;
-    unsigned char buf[3];
-    buf[0] = CRANE_REQ_SET_POSITION;
-    buf[1] = x;
-    buf[2] = z;
-    unsigned int l=3;
-    return device_->write(buf, l);
+    if (x > 0x0F || z > 0x0F) {
+	LOG_ERROR("position must be between 0 and 15 (given: %d, %d)\n", x, z);
+	return false;
+    }
+    return device_->write(CRANE_REQ_SET_HORIZONTAL_POSITION + x)
+	&& device_->write(CRANE_REQ_SET_VERTICAL_POSITION + z);
 }
 // arrete les moteurs
 bool Crane05::disableMotors() 

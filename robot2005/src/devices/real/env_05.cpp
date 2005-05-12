@@ -34,7 +34,7 @@ bool EnvDetector05::reset()
 {
     for(unsigned int i=0; i< ENV_DETECTOR_NBR; i++) {
         assert(EnvDetectorMapping[i].id == (EnvDetectorId)i);
-        skipCaptor_[i] = EnvDetectorMapping[i].enableAtReset;
+        skipCaptor_[i] = !EnvDetectorMapping[i].enableAtReset;
     }
     firstRead_ = true;
     return EnvDetectorCL::reset();
@@ -121,7 +121,8 @@ bool EnvDetector05::getAllCaptors(unsigned char& data)
     }
     firstError = status;
     if (status) {
-        LOG_DEBUG("EnvDetector05::getAllCaptors : 0x%2.2x\n", data);
+        //LOG_DEBUG("EnvDetector05::getAllCaptors : 0x%2.2x\n", data);
+	LOG_DEBUG("%d  %d  %d  %d\n", (data >> 6) & 3, (data >> 4) & 3, (data >> 2) & 3, data & 3);
     }
     return false;
 }
