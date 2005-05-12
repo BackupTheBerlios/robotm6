@@ -131,6 +131,7 @@ class MovementManagerCL : public RobotComponent
     void motorIdleLeft();
     void motorIdleRight();
     void motorUnidle();
+    void resetPatinageDetection();
 
  protected:
     void startThread();
@@ -139,7 +140,6 @@ class MovementManagerCL : public RobotComponent
     void getPWM(MotorPWM& left, 
 		MotorPWM& right);
     void updatePatinageBuffers();
-    void resetPatinageDetection();
     void checkPatinage();
 
     friend class MoveCL;
