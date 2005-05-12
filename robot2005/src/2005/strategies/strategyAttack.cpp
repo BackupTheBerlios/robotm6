@@ -35,7 +35,7 @@ StrategyAttackCL::StrategyAttackCL(RobotMainCL* main, const char* menuName):
     Strategy2005CL("StrategyAttack", menuName, CLASS_STRATEGY, main),
     bridgeAvailibility_(0xFF), bridge_(BRIDGE_POS_UNKNOWN), 
     useLeftBridge_(true), bridgeDetectionByCenter_(true), gotoSiouxFirst_(false),
-    useSharpToDetectBridge_(true),
+    useSharpToDetectBridge_(true), useEnvDetectorsForBridge_(true),
     grid_(NULL), lastExplorationDir_(ATTACK_EXPLORE_COL),
     attackPhase_(ATTACK_WAIT_START), skittleMiddleProcessed_(false),
     isProcessingMiddleSkittles_(false), bridgeBySharps_(BRIDGE_POS_UNKNOWN), 

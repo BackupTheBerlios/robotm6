@@ -394,6 +394,7 @@ bool StrategyAttackCL::preDefinedSkittleExploration1()
         // on n'a pas reussi
         // c'est la fin du match?
         if (checkEndEvents()) return false;
+	if (RobotPos->y()>1000) break;
         avoidObstacle();
         if (checkEndEvents()) return false;
 	if (RobotPos->y()>1000) break;
@@ -402,14 +403,18 @@ bool StrategyAttackCL::preDefinedSkittleExploration1()
 
     // recule d'une case
     MvtMgr->setRobotDirection(MOVE_DIRECTION_BACKWARD);
+    MvtMgr->resetPatinageDetection();
     Move->go2Target(Point(3190, 1000), attackExploreGain, attackExploreMaxSpeed);
+    MvtMgr->resetPatinageDetection();
     Events->wait(evtEndMove);
     if (!Events->isInWaitResult(EVENTS_MOVE_END)) {
         // on n'a pas reussi
         // c'est la fin du match?
         if (checkEndEvents()) return false;
-        avoidObstacle();
-        if (checkEndEvents()) return false;
+        if (RobotPos->y() > 1000) {
+	    avoidObstacle();
+	    if (checkEndEvents()) return false;
+	}
     }
 
     // va vers le debut de la 3e rangee 
@@ -539,24 +544,29 @@ bool StrategyAttackCL::preDefinedSkittleExploration2()
       Move->go2Target(Point(3194, 800), attackExploreGain, attackExploreMaxSpeed);
       Events->wait(evtEndMove);
       if (!Events->isInWaitResult(EVENTS_MOVE_END)) {
-        // on n'a pas reussi
-        // c'est la fin du match?
-        if (checkEndEvents()) return false;
-	avoidObstacle();
-	if (checkEndEvents()) return false;
+	  // on n'a pas reussi
+	  // c'est la fin du match?
+	  if (checkEndEvents()) return false;
+	  if (RobotPos->y() < 1000) break;
+	  avoidObstacle();
+	  if (checkEndEvents()) return false;
       }  else break;
     } while(retry++<ATTACK_EXPLORE_RETRY);
 
     // on recule un peu
     MvtMgr->setRobotDirection(MOVE_DIRECTION_BACKWARD);
+    MvtMgr->resetPatinageDetection();
     Move->go2Target(Point(3190, 1000), attackExploreGain, attackExploreMaxSpeed);
+    MvtMgr->resetPatinageDetection();
     Events->wait(evtEndMove);
     if (!Events->isInWaitResult(EVENTS_MOVE_END)) {
         // on n'a pas reussi
         // c'est la fin du match?
         if (checkEndEvents()) return false;
-        avoidObstacle();
-	if (checkEndEvents()) return false;
+	if (RobotPos->y() > 1000) {
+	    avoidObstacle();
+	    if (checkEndEvents()) return false;
+	}
     }
     
     // va vers le debut de la 3e rangee 
@@ -827,11 +837,9 @@ bool StrategyAttackCL::analyzeSharps(Point& supportCenter) {
  * skittles.
  */
 bool StrategyAttackCL::go2TargetWatching(Point p) {
-    // TODO: enable sharp-events
     Move->go2Target(p, attackExploreGain, attackExploreMaxSpeed);
     bool skittlesDetected = false;
     while (true) {
-	// TODO: watch sharps
 	Events->wait(evtEndMoveSharps);
 	if (Events->isInWaitResult(EVENTS_MOVE_END)) return true;
 	// c'est la fin du match?

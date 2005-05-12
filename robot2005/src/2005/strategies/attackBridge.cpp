@@ -8,6 +8,8 @@
 #include "log.h"
 #include "geometry2D.h"
 #include "bumperMapping.h"
+#include "env.h"
+#include "envDetectorMapping.h"
 
 // #define USE_SHARPS_FIRST  // ancien mode ou on utilise les
 // sharpspour savoir ou est le pont. si cette ligne est commentee, on
@@ -249,9 +251,16 @@ bool StrategyAttackCL::gotoBridgeDetection(bool gotoSiouxFirst)
 	 }
 	 return true;
       }
-      if (RobotPos->x()>600) {
+      if (RobotPos->x()>600 || Timer->time() > 6000) {
 	// collision: on recule et on essaye de repartir par un autre endroit...
-	Move->backward(100);
+	Move->backward(150);
+	Events->wait(evtEndMoveNoCollision);
+	gotoSiouxFirst = !gotoSiouxFirst;
+      }
+      if (isZeroAngle(RobotPos->thetaAbsolute() - M_PI, M_PI_2) &&
+	  RobotPos->x() < 600)
+      {
+	Move->backward(700);
 	Events->wait(evtEndMoveNoCollision);
 	gotoSiouxFirst = !gotoSiouxFirst;
       }
@@ -500,7 +509,23 @@ bool StrategyAttackCL::checkBridgeBumperEvent(bool& dummyBumperEvt)
             noBridgeHere(); 
 	    BridgeCaptorStatus captors[BRIDGE_CAPTORS_NBR];
 	    if (getBridgeCaptors(captors, false)) { // on n'est pas dans la merde les bumpers ne marchent pas
-	      if (captors[BRIDGE_BUMPER_LEFT] != BRIDGE_DETECTED) {
+		EnvDetectorDist leftSharpBridge = ENV_NO;
+		EnvDetectorDist rightSharpBridge = ENV_NO;
+		if (useEnvDetectorsForBridge_) {
+		    if (!EnvDetector->getEnvDetector(ENV_DETECTOR_TOP_LEFT, leftSharpBridge)) {
+			LOG_ERROR("Can't get left sharp-bridge detector.\n");
+			leftSharpBridge = ENV_NO;
+		    } else {
+			LOG_INFO("left-sharp-bridge: %d\n", leftSharpBridge);
+		    }
+		    if (!EnvDetector->getEnvDetector(ENV_DETECTOR_TOP_RIGHT, rightSharpBridge)) {
+			LOG_ERROR("Can't get right sharp-bridge detector.\n");
+			rightSharpBridge = ENV_NO;
+		    } else {
+			LOG_INFO("right-sharp-bridge: %d\n", leftSharpBridge);
+		    }
+		}
+	      if (captors[BRIDGE_BUMPER_LEFT] != BRIDGE_DETECTED && leftSharpBridge <= ENV_FAR) {
 		// mark bridges, that are unavailable (current bridge
 		// is going to get discarded elsewhere)
 		if (oldBridgePos == BRIDGE_POS_MIDDLE_BORDURE) {
@@ -511,7 +536,7 @@ bool StrategyAttackCL::checkBridgeBumperEvent(bool& dummyBumperEvt)
 		  bridgeAvailibility_ &= (~(1<<BRIDGE_ENTRY_BORDURE_BIT));
 		  bridgeAvailibility_ &= (~(1<<BRIDGE_ENTRY_MIDDLE_BORDURE_BIT));
 		}
-	      } else if (captors[BRIDGE_BUMPER_RIGHT] != BRIDGE_DETECTED) {
+	      } else if (captors[BRIDGE_BUMPER_RIGHT] != BRIDGE_DETECTED && rightSharpBridge <= ENV_FAR) {
 		if (oldBridgePos == BRIDGE_POS_MIDDLE_BORDURE) {
 		  bridgeAvailibility_ &= (~(1<<BRIDGE_ENTRY_CENTER_BIT));
 		  bridgeAvailibility_ &= (~(1<<BRIDGE_ENTRY_MIDDLE_CENTER_BIT));
@@ -522,6 +547,10 @@ bool StrategyAttackCL::checkBridgeBumperEvent(bool& dummyBumperEvt)
 		  bridgeAvailibility_ &= (~(1<<BRIDGE_ENTRY_MIDDLE_CENTER_BIT));
 		  bridgeAvailibility_ &= (~(1<<BRIDGE_ENTRY_SIOUX_BIT));
 		}
+	      } else {
+		  LOG_INFO("bridge seems to be here");
+		  dummyBumperEvt=true;
+		  return false;
 	      }
 	    }
 	    LOG_INFO("Availibility: 0x%2.2x\n", bridgeAvailibility_);

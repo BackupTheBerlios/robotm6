@@ -157,7 +157,8 @@ protected:
     /** va devant le pont du milieu pour utiliser les sharps */
     bool           gotoSiouxFirst_;
     bool           useSharpToDetectBridge_;
-    
+    /** use enviroment-detectors for bridge-detection */
+    bool           useEnvDetectorsForBridge_;
     /** grille qui permet de savoir ou on est deja passe et ou il faut aller */
     GridAttack*    grid_;
     /** derniere direction d'exploration utilisee, la prochaine fois 
