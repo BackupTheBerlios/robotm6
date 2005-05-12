@@ -92,8 +92,8 @@ static const IoInfo ioInfos_[IO_ID_NBR] = {
     {IO_ID_ENV_05,             0xCF,    "IO_ENV_DECTECTOR_05"},
     {IO_ID_SERVO_05,           0xCB,    "IO_SERVO_05"},
     {IO_ID_ALIM_05,            0xCD,    "IO_ALIM_05"},
-    {IO_ID_TESLA_05,           0xC4,    "IO_TESLA_05"},
-    {IO_ID_SKITTLE_DETECTOR_05,0xC5,    "IO_SKITTLE_DETECTOR_05"},
-    {IO_ID_CRANE_05,           0xC6,    "IO_CRANE_05"},
+    {IO_ID_TESLA_05,           0xCE,    "IO_TESLA_05"},
+    {IO_ID_SKITTLE_DETECTOR_05,0xCC,    "IO_SKITTLE_DETECTOR_05"},
+    {IO_ID_CRANE_05,           0xC4,    "IO_CRANE_05"},
     {IO_ID_UBART_05,           0xCA,    "IO_UBART_05"}
 };
