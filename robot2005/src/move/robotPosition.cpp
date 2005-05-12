@@ -229,6 +229,13 @@ void RobotPositionCL::getPosition(Position&      posi,
 
     Millimeter deltaKRight = KRight * (rightPos - rightPosOld);
     Millimeter deltaKLeft  = KLeft  * (leftPos  - leftPosOld);
+    if (deltaKRight > M_PI_2 * D ||
+	deltaKLeft > M_PI_2 * D)
+    {
+	LOG_ERROR("ignoring unbelievable deltas: leftPos: %d leftPosOld: %d rightPos: %d rightPosOld: %d\n", leftPos, leftPosOld, rightPos, rightPosOld);
+	return;
+    }
+    // else
     rightPosOld = rightPos;
     leftPosOld  = leftPos;
 
