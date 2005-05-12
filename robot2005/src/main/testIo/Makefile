@@ -5,10 +5,11 @@ SRC_ROOT=../..
 ## ===========================================================================
 ## For standard directory you only need to set these values
 ## ===========================================================================
-FILE=testIo
+FILE=testIo #and also terminal
 
-BIN_NAME=${FILE}
-BIN_OBJS=${FILE}.o
+BIN_NAME=
+#BIN_NAME=${FILE}
+BIN_OBJS=${FILE}.o terminal.o
 BIN_LIBS=${ALL_DYNAMIC_LIB}
 BIN_LIBS_LOCATION=-L${DYNAMIC_LIB_DIR}
 BIN_FLAGS=
@@ -45,6 +46,7 @@ all: lib bin validate
 ## ===========================================================================
 clean:	default_clean
 	${RM} -f  ${BIN_DIR}/${BIN_NAME}                 
+	${RM} -f  ${BIN_DIR}/terminal                 
 	-${RM} -f  ${BIN_SIMU_DIR}/${BIN_NAME} 
 
 ## ===========================================================================
@@ -56,10 +58,18 @@ lib:
 ## ===========================================================================
 ## Main rules : ----- BIN -----
 ## ===========================================================================
-bin: ${BIN_DIR}/${BIN_NAME}
+bin: ${BIN_DIR}/testIo ${BIN_DIR}/terminal
 ifndef GUMSTIX
 bin: ${BIN_SIMU_DIR}/${BIN_NAME}
 endif
+
+${BIN_DIR}/testIo: testIo.o
+	$(if ${QUIET},,echo " [$@]")
+	${CC} -o $@ $^ $(DEFAULT_CFLAGS) ${INC_DIR} ${DEFAULT_INC_DIR} $(IO_STATIC_LIB)
+
+${BIN_DIR}/terminal: terminal.o
+	$(if ${QUIET},,echo " [$@]")
+	${CC} -o $@ $^ $(DEFAULT_CFLAGS) ${INC_DIR} ${DEFAULT_INC_DIR} $(IO_STATIC_LIB)
 
 ## ===========================================================================
 ## Main rules : ----- VALIDATE -----
