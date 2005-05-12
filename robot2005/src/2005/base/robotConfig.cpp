@@ -64,7 +64,7 @@ RobotConfigDefence2005CL::RobotConfigDefence2005CL(bool simulated)
     timeAlertBeforeEnd =(75000);
 
     odometerK=(.23197);
-    odometerD=(313.53);
+    odometerD=(254.);
     odometerEd=(0.997264);
     odometerCr=2./((1./odometerEd)+1);
     odometerCl=2./(odometerEd+1);
