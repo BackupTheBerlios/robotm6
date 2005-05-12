@@ -418,6 +418,70 @@ void TestMoveStrategy3CL::run(int argc, char* argv[])
     sleep(5);
     return;
 }
+
+class Strategy1M : public Strategy2005CL
+{
+ public :
+    Strategy1M(RobotMainCL* main): 
+	Strategy2005CL("TestMove", "1Meter", CLASS_STRATEGY, main){}
+    virtual void run(int argc, char*argv[]);
+};
+
+void Strategy1M::run(int argc, char* argv[])
+{
+    Lcd->print("1 Meter");
+    //RobotPos->setOdometerType(ODOMETER_MOTOR);
+    RobotPos->setOdometerType(ODOMETER_UART_MANUAL);
+    setStartingPosition();
+    waitStart(INIT_NONE);
+    Move->enableAccelerationController(false);
+    MvtMgr->enableAutomaticReset(false);
+
+    RobotPos->set(0, 0, 0); 
+    Move->go2Target(Point(1000,0));
+    Events->wait(evtEndMovePwm);
+    if (Events->isInWaitResult(EVENTS_MOVE_END)) {
+      LOG_OK("Move end correct\n");
+    }
+    RobotPos->print();
+    sleep(5);
+    RobotPos->print();
+}
+
+
+class Strategy2Turns : public Strategy2005CL
+{
+ public :
+    Strategy2Turns(RobotMainCL* main, bool clockwise): 
+	Strategy2005CL("TestMove", "2Turns", CLASS_STRATEGY, main),
+	clockwise_(clockwise)
+	{}
+    virtual void run(int argc, char*argv[]);
+    bool clockwise_;
+};
+
+void Strategy2Turns::run(int argc, char* argv[])
+{
+    Lcd->print("1 Meter");
+    //RobotPos->setOdometerType(ODOMETER_MOTOR);
+    RobotPos->setOdometerType(ODOMETER_UART_MANUAL);
+    setStartingPosition();
+    waitStart(INIT_NONE);
+    Move->enableAccelerationController(false);
+    MvtMgr->enableAutomaticReset(false);
+
+    RobotPos->set(0, 0, 0); 
+    Move->rotateFromAngle(clockwise_?2*M_PI:-2*M_PI);
+    Events->wait(evtEndMovePwm);
+    if (Events->isInWaitResult(EVENTS_MOVE_END)) {
+      LOG_OK("Move end correct\n");
+    }
+    RobotPos->print();
+    sleep(5);
+    RobotPos->print();
+}
+
+
 int main(int argc, char* argv[])
 {
   RobotConfigCL*  config;
@@ -434,7 +498,7 @@ LOG_INFO("MODE REAL\n");
 LOG_INFO("SIMULATED\n");
 #endif
 
-//#define ROBOT_DEFENCE
+#define ROBOT_DEFENCE
 
 #ifdef ROBOT_DEFENCE
   LOG_INFO("ROBOT_DEFENCE\n");
