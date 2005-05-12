@@ -14,7 +14,7 @@
 
 namespace {
     const unsigned int MOVE_INTEGRAL_MEMORY_SIZE = 10;
-    static const Millisecond MVT_TIMEOUT = 32000;
+    static const Millisecond MVT_TIMEOUT = 10000;
     double sigmaError_=0;
     double integralMemory_[MOVE_INTEGRAL_MEMORY_SIZE];
     int integralMemoryIndex_=0;
