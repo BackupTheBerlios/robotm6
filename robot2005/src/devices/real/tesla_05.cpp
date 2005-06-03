@@ -42,6 +42,8 @@ void BigTesla05::emergencyStop()
     a faire avait le debut du match */
 bool BigTesla05::testDetector(bool& result)
 {
+    return (device_ != NULL);
+    /*
     if (!device_) return false;
     // for now just return true;
     return true;
@@ -58,6 +60,8 @@ bool BigTesla05::testDetector(bool& result)
 /** ne demarrer le capteur qu'apres avoir demarre l'aimant */
 bool BigTesla05::enableDetector()
 {
+    return false;
+    /*
     if (!device_) return false;
     /*
     unsigned char buf[2];
@@ -66,13 +70,14 @@ bool BigTesla05::enableDetector()
         return detectorEnabled_;
     } else {
         return false;
-    }
+    } 
     */
-    return false;
 }
 /** arreter le detecteur avant d'arreter l'aimant */
 bool BigTesla05::disableDetector()
 {
+    return false;
+    /*
     detectorEnabled_ = true;
     if (!device_) return false;
     /*
@@ -83,20 +88,11 @@ bool BigTesla05::disableDetector()
         return false;
     }
     */
-    return false;
 }
 /** arrete l'electro aimant */
 bool BigTesla05::stopTesla() 
 {
     if (!device_) return false;
-/*
-    unsigned char buf[2];
-    if (device_->writeRead(TESLA_REQ_STOP_ELECTRO, buf)) {
-        return (buf[0] == TESLA_OK);
-    } else {
-        return false;
-    }
-*/
     return device_->write(TESLA_REQ_STOP_ELECTRO);
 }
 
@@ -105,16 +101,8 @@ bool BigTesla05::stopTesla()
 bool BigTesla05::startTesla(TeslaMode mode)
 {
     if (!device_) return false;
-    /*
-    unsigned char buf[2];
-    if (device_->writeRead((unsigned char)(TESLA_REQ_START_ELECTRO+mode), 
-                           buf)) {
-        return (buf[0] == TESLA_OK);
-    } else {
-        return false;
-    }
-    */
-    return device_->write(TESLA_REQ_START_ELECTRO + mode);
+    return device_->write(TESLA_REQ_TENSION) &&
+	device_->write((unsigned char)mode);
 }
 /** tache peridoci qui verifie si on a accroche */
 void BigTesla05::periodicTask()
