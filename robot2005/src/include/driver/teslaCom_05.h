@@ -16,9 +16,7 @@ static const unsigned char TESLA_REQ_DETECT_VALUE      = 0x00;
 static const unsigned char TESLA_REQ_ENABLE_DETECTOR   = 0x00;
 static const unsigned char TESLA_REQ_DISABLE_DETECTOR  = 0x00;
 
-static const unsigned char TESLA_REQ_STOP_ELECTRO      = 0x01;
-// 0x01 = 0V, 0x02 = 14V, 0x03=28V
-static const unsigned char TESLA_REQ_START_ELECTRO     = 0x01; // 0x02 .. 0x03
-
+static const unsigned char TESLA_REQ_STOP_ELECTRO = 0x01;
+static const unsigned char TESLA_REQ_TENSION = 0x04;
 
 #endif 
