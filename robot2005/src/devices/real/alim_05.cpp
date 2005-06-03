@@ -61,18 +61,39 @@ bool Alim05::getAllTension(Millivolt tension[4])
 }
 /** @brief passe en mode 12V */
 bool Alim05::mode12V()
-{
+{ 
+  unsigned int l=5;
+  unsigned char comData[5];
+  bool status = device_->writeRead(ALIM_REQ_MODE_12V, comData, l);
+  if (!status) {
+    // affiche le mesage d'erreur une seule fois
+    LOG_ERROR("Alim05::mode12V read error\n");
+    return false;
+  }
     return false;
 }
+
 /** @brief passe en mode 28V */
 bool Alim05::mode28V()
 {
-    return false;
+    bool status = device_->write(ALIM_REQ_MODE_28V);
+    if (!status) {
+      // affiche le mesage d'erreur une seule fois
+      LOG_ERROR("Alim05::mode28V write error\n");
+      return false;
+    }
+    return status;
 }
 /** @brief passe en mode 42V */
 bool Alim05::mode42V()
-{
-    return false;
+{ 
+    bool status = device_->write(ALIM_REQ_MODE_42V);
+    if (!status) {
+      // affiche le mesage d'erreur une seule fois
+      LOG_ERROR("Alim05::mode42V write error\n");
+      return false;
+    }
+    return status;
 }
 /** @brief active le 12V 1*/
 bool Alim05::enable12V_1()
@@ -114,13 +135,19 @@ int main(int argc, char* argv[])
     bool loop=true;
     int choice=0;
     while(loop) {
-      printf("Menu: 0=getTension, 2=exit\n>");
+      printf("Menu: 0=getTension, 1=12V, 2=28V, 3=exit\n>");
       scanf("%d", &choice);
       switch(choice) {
       case 0:
 	alim.getAllTension(tension);
 	break;
+      case 1:
+	alim.mode12V();
+	break;
       case 2:
+	alim.mode28V();
+	break;
+      case 3:
 	loop=false;
 	break;
       default:
