@@ -52,7 +52,7 @@ public:
    * @brief This function prints a message on the lcd (2x16). Use it like 
    * printf.
    */
-  virtual void print(const char* fmt, ...){}
+  virtual void print(const char* fmt, ...);
   /**
    * @brief This function erase the lcd screen
    */
