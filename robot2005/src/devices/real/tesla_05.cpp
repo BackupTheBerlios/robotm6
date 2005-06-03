@@ -47,7 +47,6 @@ bool BigTesla05::testDetector(bool& result)
     if (!device_) return false;
     // for now just return true;
     return true;
-    /*
     unsigned char buf[2];
     if (device_->writeRead(TESLA_REQ_AUTOTEST, buf)) {
         result = (buf[0] == TESLA_OK);
@@ -63,7 +62,6 @@ bool BigTesla05::enableDetector()
     return false;
     /*
     if (!device_) return false;
-    /*
     unsigned char buf[2];
     if (device_->writeRead(TESLA_REQ_ENABLE_DETECTOR, buf)) {
         detectorEnabled_ = (buf[0] == TESLA_OK);
@@ -80,7 +78,6 @@ bool BigTesla05::disableDetector()
     /*
     detectorEnabled_ = true;
     if (!device_) return false;
-    /*
     unsigned char buf[2];
     if (device_->writeRead(TESLA_REQ_DISABLE_DETECTOR, buf)) {
         return (buf[0] == TESLA_OK);
